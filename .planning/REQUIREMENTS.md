@@ -133,10 +133,12 @@ Deferred to future release. Tracked but not in current roadmap.
 | I18N-02 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 32 total
-- Mapped to phases: 32
+- v1 requirements: 34 total
+- Mapped to phases: 34
 - Unmapped: 0 ✓
+
+*Note: corrected from an earlier preliminary count of 32 during roadmap finalization — the traceability table above always listed all 34 v1 requirement IDs; only the summary count was off.*
 
 ---
 *Requirements defined: 2026-07-26*
-*Last updated: 2026-07-26 after initial definition*
+*Last updated: 2026-07-26 after roadmap finalization*
