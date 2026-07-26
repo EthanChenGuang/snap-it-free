@@ -21,7 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: Scraper Foundation & Listing Data Model
-**Goal**: The system continuously ingests, cleans, and stores real free listings from Subito.it in a schema ready to power the map/list UI
+**Goal**: As a solo operator, I want to continuously ingest and normalize Subito.it free listings into a zone-tagged Supabase store, so that Phase 2 launches with real map pins instead of an empty feed.
 **Mode**: mvp
 **Depends on**: Nothing (first phase)
 **Requirements**: SCRP-01, SCRP-02, SCRP-03, SCRP-05, SCRP-06
@@ -30,7 +30,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Every stored listing carries a normalized source badge (`subito` / `facebook` / `ugc`) and a zone tag (Centro Storico / Mestre-Marghera / Lido-Murano) assigned automatically at ingestion
   3. Listings containing price or negotiation language are filtered out before reaching the listing store, instead of surfacing as false "free" items
   4. An operator is alerted when the scraper returns an empty, malformed, or suspiciously small feed (soft-block detection), instead of the failure going unnoticed
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Supabase schema, Wave 0 tests, legal note, package scaffold
+- [ ] 01-02-PLAN.md — Subito spike + end-to-end tracer (one listing → Supabase)
+- [ ] 01-03-PLAN.md — Free filter, zone tagging, normalize pipeline integration
+- [ ] 01-04-PLAN.md — Batch validation, operator alerts, cron + Docker deploy
 **UI hint**: yes
 
 ### Phase 2: Map + List Core Browsing
@@ -89,7 +95,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scraper Foundation & Listing Data Model | 0/TBD | Not started | - |
+| 1. Scraper Foundation & Listing Data Model | 0/4 | Not started | - |
 | 2. Map + List Core Browsing | 0/TBD | Not started | - |
 | 3. UGC Posting & Community Marketplace | 0/TBD | Not started | - |
 | 4. Auth, Alerts & Push Notifications | 0/TBD | Not started | - |

@@ -584,27 +584,15 @@ export const supabaseAdmin = createClient(
 | A6 | Venice zone GeoJSON polygons can be hand-drawn from OpenStreetMap boundaries | Zone Tagging | Incorrect zone boundaries → wrong filter results; needs manual QA |
 | A7 | `node-cron` or OS cron adequate without pgmq for Phase 1 | Architecture | Acceptable at Phase 1 scale; revisit if multi-source scraping added |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Exact Subito DOM selectors for listing cards and detail pages**
-   - What we know: Category list pages exist at confirmed URLs; spike required before locking selectors (D-23)
-   - What's unclear: Current class names, map embed structure, anti-bot challenge pages
-   - Recommendation: First plan task = live spike against 2-3 category pages; document selectors in `scraper/subito/extract.ts` only after spike
+1. **Exact Subito DOM selectors for listing cards and detail pages** — RESOLVED by Plan 02 spike task (D-23); selectors documented in `scraper/subito/extract.ts` and `SPIKE-NOTES.md` after live verification.
 
-2. **Pagination strategy without `?o=` query params**
-   - What we know: robots.txt disallows `*/?o=*` pagination URLs
-   - What's unclear: Whether Subito uses infinite scroll, "load more" buttons, or category-only breadth
-   - Recommendation: Spike discovers pagination mechanism; fallback = crawl multiple category slugs without deep pagination
+2. **Pagination strategy without `?o=` query params** — RESOLVED by Plan 02 spike; fallback is multiple category slugs without deep pagination (robots.txt forbids `?o=` URLs).
 
-3. **Venice zone polygon source of truth**
-   - What we know: Three zones defined in D-14; must be static GeoJSON
-   - What's unclear: Exact boundary coordinates (hand-drawn vs OSM export)
-   - Recommendation: Export from OpenStreetMap relation boundaries for Venezia/Mestre/Lido; manual simplification; store in `scraper/src/geo/`
+3. **Venice zone polygon source of truth** — RESOLVED in Plan 03: export simplified boundaries from OpenStreetMap relations into `scraper/src/geo/venice-zones.geojson`.
 
-4. **Proxy provider selection**
-   - What we know: Pay-as-you-go residential within $10-30/mo (D-04); Claude's discretion
-   - What's unclear: Which provider works best against Subito specifically
-   - Recommendation: Start with Webshare or DataImpulse trial; measure block rate over 3-day spike
+4. **Proxy provider selection** — RESOLVED as Claude discretion in Plan 04 (D-04): start with Webshare or DataImpulse trial; measure block rate during production crawl task.
 
 ## Environment Availability
 
@@ -645,13 +633,13 @@ export const supabaseAdmin = createClient(
 
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| SCRP-01 | Category URL config includes Veneto regalo paths | unit | `cd scraper && npx vitest run src/subito/categories.test.ts -x` | ❌ Wave 0 |
-| SCRP-02 | Zod schema accepts valid listing, rejects invalid | unit | `cd scraper && npx vitest run src/shared/schema.test.ts -x` | ❌ Wave 0 |
-| SCRP-02 | Dedup skips unchanged hash, upserts changed | unit | `cd scraper && npx vitest run src/shared/dedupe.test.ts -x` | ❌ Wave 0 |
-| SCRP-03 | Point-in-polygon assigns correct Venice zone | unit | `cd scraper && npx vitest run src/shared/zone-tag.test.ts -x` | ❌ Wave 0 |
-| SCRP-05 | Italian price keywords rejected; clean titles pass | unit | `cd scraper && npx vitest run src/shared/normalize.test.ts -x` | ❌ Wave 0 |
-| SCRP-06 | Batch gate rejects low count / low selector rate | unit | `cd scraper && npx vitest run src/shared/validate-run.test.ts -x` | ❌ Wave 0 |
-| SCRP-06 | Failed batch does not call persist | unit | `cd scraper && npx vitest run src/shared/validate-run.test.ts -x` | ❌ Wave 0 |
+| SCRP-01 | Category URL config includes Veneto regalo paths | unit | `cd scraper && npx vitest run src/subito/categories.test.ts` | ❌ Wave 0 |
+| SCRP-02 | Zod schema accepts valid listing, rejects invalid | unit | `cd scraper && npx vitest run src/shared/schema.test.ts` | ❌ Wave 0 |
+| SCRP-02 | Dedup skips unchanged hash, upserts changed | unit | `cd scraper && npx vitest run src/shared/dedupe.test.ts` | ❌ Wave 0 |
+| SCRP-03 | Point-in-polygon assigns correct Venice zone | unit | `cd scraper && npx vitest run src/shared/zone-tag.test.ts` | ❌ Wave 0 |
+| SCRP-05 | Italian price keywords rejected; clean titles pass | unit | `cd scraper && npx vitest run src/shared/normalize.test.ts` | ❌ Wave 0 |
+| SCRP-06 | Batch gate rejects low count / low selector rate | unit | `cd scraper && npx vitest run src/shared/validate-run.test.ts` | ❌ Wave 0 |
+| SCRP-06 | Failed batch does not call persist | unit | `cd scraper && npx vitest run src/shared/validate-run.test.ts` | ❌ Wave 0 |
 | SCRP-01 | End-to-end scrape against Subito (live) | integration/manual | Spike task only — not in CI | ❌ Wave 0 (spike) |
 
 ### Sampling Rate

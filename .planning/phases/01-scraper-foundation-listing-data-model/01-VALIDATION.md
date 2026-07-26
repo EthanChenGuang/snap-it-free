@@ -38,12 +38,12 @@ created: 2026-07-26
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 01-01-01 | 01 | 0 | SCRP-02 | T-01-01 | Service role key not in client bundle | unit | `cd scraper && npx vitest run src/shared/schema.test.ts -x` | ❌ W0 | ⬜ pending |
-| 01-01-02 | 01 | 0 | SCRP-03 | — | Zone polygon assigns correct enum | unit | `cd scraper && npx vitest run src/shared/zone-tag.test.ts -x` | ❌ W0 | ⬜ pending |
-| 01-01-03 | 01 | 0 | SCRP-05 | T-01-02 | Price keywords rejected at normalize | unit | `cd scraper && npx vitest run src/shared/normalize.test.ts -x` | ❌ W0 | ⬜ pending |
-| 01-01-04 | 01 | 0 | SCRP-06 | T-01-03 | Failed batch does not persist | unit | `cd scraper && npx vitest run src/shared/validate-run.test.ts -x` | ❌ W0 | ⬜ pending |
-| 01-02-01 | 01 | 1 | SCRP-02 | — | Dedup skips unchanged hash | unit | `cd scraper && npx vitest run src/shared/dedupe.test.ts -x` | ❌ W0 | ⬜ pending |
-| 01-03-01 | 01 | 2 | SCRP-01 | — | Category URLs include Veneto regalo | unit | `cd scraper && npx vitest run src/subito/categories.test.ts -x` | ❌ W0 | ⬜ pending |
+| 01-01-01 | 01 | 0 | SCRP-02 | T-01-01 | Service role key not in client bundle | unit | `cd scraper && npx vitest run src/shared/schema.test.ts` | ❌ W0 | ⬜ pending |
+| 01-01-02 | 01 | 0 | SCRP-03 | — | Zone polygon assigns correct enum | unit | `cd scraper && npx vitest run src/shared/zone-tag.test.ts` | ❌ W0 | ⬜ pending |
+| 01-01-03 | 01 | 0 | SCRP-05 | T-01-02 | Price keywords rejected at normalize | unit | `cd scraper && npx vitest run src/shared/normalize.test.ts` | ❌ W0 | ⬜ pending |
+| 01-01-04 | 01 | 0 | SCRP-06 | T-01-03 | Failed batch does not persist | unit | `cd scraper && npx vitest run src/shared/validate-run.test.ts` | ❌ W0 | ⬜ pending |
+| 01-02-01 | 01 | 1 | SCRP-02 | — | Dedup skips unchanged hash | unit | `cd scraper && npx vitest run src/shared/dedupe.test.ts` | ❌ W0 | ⬜ pending |
+| 01-03-01 | 01 | 2 | SCRP-01 | — | Category URLs include Veneto regalo | unit | `cd scraper && npx vitest run src/subito/categories.test.ts` | ❌ W0 | ⬜ pending |
 | 01-spike | 01 | 1 | SCRP-01 | — | Live Subito DOM verified | integration/manual | Spike task — not in CI | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
