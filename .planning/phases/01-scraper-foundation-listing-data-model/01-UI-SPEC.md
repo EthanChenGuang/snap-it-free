@@ -1,16 +1,16 @@
 ---
 phase: 1
 slug: scraper-foundation-listing-data-model
-status: approved
-reviewed_at: 2026-07-26
+status: draft
 shadcn_initialized: false
-preset: none
+preset: google-stitch-structured-minimalist
 created: 2026-07-26
+updated: 2026-07-27
 ---
 
 # Phase 1 — UI Design Contract
 
-> **Scope:** No user-facing web UI in Phase 1. This contract covers operator-only notification surfaces (email/Telegram soft-block alerts) and records deferred design-system decisions for Phase 2 continuity.
+> **Scope:** No user-facing web UI in Phase 1. This contract covers operator-only notification surfaces (email/Telegram soft-block alerts) and locks the **Google Stitch Structured Minimalist** design system as the project-wide visual authority for Phase 2+ frontend work.
 
 ---
 
@@ -46,12 +46,29 @@ Single-message format. Visual hierarchy: emoji severity prefix → one-line summ
 | Property | Value |
 |----------|-------|
 | Tool | none (Phase 1 — no web UI) |
-| Preset | not applicable |
-| Component library | none |
-| Icon library | none |
-| Font | channel-native (email client default; Telegram system font) |
+| Preset | `google-stitch-structured-minimalist` |
+| Design authority | `.planning/google-stitch-ui-design/DESIGN.md` |
+| Component library | none in Phase 1; Tailwind v4 + Stitch tokens in Phase 2+ |
+| Icon library | Material Symbols Outlined (Phase 2+ only) |
+| Font | Phase 1: channel-native (email client default; Telegram system font). Phase 2+: Inter |
 
-**Phase 2 forward reference (not implemented in Phase 1):** Tailwind CSS 4 + shadcn/ui + lucide-react per `.planning/research/STACK.md`. Planner should not create shadcn init tasks in Phase 1.
+**Phase 1:** No web UI — operator messages use channel-native rendering only.
+
+**Phase 2+:** All frontend work MUST follow Google Stitch Structured Minimalist per `.planning/google-stitch-ui-design/`. Copy token values from `DESIGN.md`, not generic shadcn presets. Do NOT use shadcn defaults. Existing React implementations in `src/components/` and tokens in `src/index.css` map from Stitch prototypes — preserve their patterns when extending.
+
+---
+
+## Screen Reference Map
+
+| Screen | Stitch prototype | React component |
+|--------|------------------|-----------------|
+| Listing feed | `listing_feed_notion_style/code.html` | `src/components/ListView.tsx` |
+| Map explorer | `map_explorer_notion_style/code.html` | `src/components/MapView.tsx` |
+| Item details | `item_details_notion_style/code.html` | `src/components/ItemDetailView.tsx` |
+| Post free item | `post_free_item_notion_style/code.html` | `src/components/PostItemView.tsx` |
+| Settings | `setting_notion_style/code.html` | `src/components/SettingsView.tsx` |
+
+For **new** screens: match the closest Stitch screen's layout density, border treatment, and interaction patterns. If no Stitch screen exists, extend from `DESIGN.md` — do not invent a new visual language.
 
 ---
 
@@ -62,8 +79,6 @@ Single-message format. Visual hierarchy: emoji severity prefix → one-line summ
 | Token | Value | Usage (notifications) |
 |-------|-------|-------------------------|
 | section-break | blank line | Between subject/summary, metrics block, and action block |
-
-**Phase 2 deferred scale (for planner reference):** 4, 8, 16, 24, 32, 48, 64 px on 8-point grid.
 
 Exceptions: none in Phase 1.
 
@@ -93,8 +108,6 @@ Exceptions: none in Phase 1.
 
 Accent reserved for: **none in Phase 1** (no branded web chrome).
 
-**Phase 2 deferred (60/30/10):** To be locked in Phase 2 UI-SPEC when map/list screens are designed.
-
 ---
 
 ## Copywriting Contract
@@ -116,18 +129,113 @@ Accent reserved for: **none in Phase 1** (no branded web chrome).
 
 ---
 
+## Phase 2+ Forward Reference — Google Stitch Structured Minimalist
+
+> Locked design contract for all frontend phases. Source: `.planning/google-stitch-ui-design/DESIGN.md`. Planners and executors MUST read the relevant `code.html` prototype before implementing any screen.
+
+### Aesthetic Principles
+
+- Document-first minimalism — clarity over decoration
+- Monochrome-first — content is the focus
+- Thin borders and whitespace over heavy dividers or shadows
+- Calm, ordered workspace feel — no playful or organic styling
+- Left-align text-heavy content; max content width 1200px centered
+
+### Spacing Scale (4px grid)
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| space-xs | 4px | Icon gaps, inline padding |
+| space-sm | 8px | Compact element spacing |
+| space-md | 16px | Default element spacing |
+| space-lg | 24px | Section padding, gutter |
+| space-xl | 48px | Major section breaks |
+| container-max | 1200px | Max content width (`max-w-container-max mx-auto`) |
+| gutter | 24px | Horizontal page padding (`px-gutter`) |
+
+Exceptions: icon-only touch targets may use 44px minimum per accessibility guidelines.
+
+### Typography (Inter only)
+
+| Role | Size | Weight | Line Height | Letter Spacing |
+|------|------|--------|-------------|----------------|
+| h1 | 40px (32px mobile) | 700 | 1.2 | -0.02em |
+| h2 | 30px | 600 | 1.3 | -0.01em |
+| h3 | 24px | 600 | 1.4 | -0.01em |
+| body-lg | 17px | 400 | 1.6 | — |
+| body-md | 15px | 400 | 1.6 | — |
+| label-md | 14px | 500 | 1.4 | — |
+| label-sm | 12px | 500 | 1.2 | 0.01em |
+
+Use weight 600/700 to differentiate headers from body. Body line-height 1.6; headings 1.2–1.4.
+
+### Color (60/30/10)
+
+| Role | Hex | Usage |
+|------|-----|-------|
+| Dominant (60%) — surface | `#f9f9f8` | Background, primary canvas |
+| Secondary (30%) — containers | `#eeeeed` / `#f4f4f3` / `#f1f1f0` | Cards, sidebars, secondary panels, hover states |
+| On-surface | `#1a1c1c` | Primary text, critical iconography |
+| On-surface-variant | `#444748` | Secondary text, metadata |
+| Border | `#e5e5e5` | All structural divisions (`.notion-border`, `border-outline-variant`) |
+| Accent (10%) | blue (sparingly) | Links, specific interactive highlights only |
+| Primary CTA | `#000000` bg / `#ffffff` text | Primary buttons |
+| Destructive | `#ba1a1a` | Destructive actions only |
+
+Accent reserved for: **links**, **specific interactive highlights**, **checked checkbox accent** (primary black or accent blue). NOT for general buttons, cards, or decorative elements.
+
+Full token palette (from DESIGN.md): surface `#f9f9f8`, surface-container-low `#f4f4f3`, surface-container `#eeeeed`, surface-container-high `#e8e8e7`, surface-container-highest `#e2e2e1`, surface-container-lowest `#ffffff`, outline `#747878`, outline-variant `#c4c7c7`, secondary `#615e57`, secondary-container `#e7e2d9`, error `#ba1a1a`, error-container `#ffdad6`.
+
+### Shapes & Elevation
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| rounded-sm | 0.125rem (2px) | — |
+| rounded DEFAULT | 0.25rem (4px) | Inputs, buttons, checkboxes, chips |
+| rounded-md | 0.375rem (6px) | — |
+| rounded-lg | 0.5rem (8px) | Cards, modals |
+| rounded-full | 9999px | Tags, category pills only |
+
+- **Level 0 (Surface):** primary white/off-white background — no shadow
+- **Level 1 (Sub-surface):** sidebars/panels use `#f1f1f0` tonal layer
+- **Level 2 (Overlays):** modals/menus use 1px `#e5e5e5` border; subtle shadow `0px 4px 12px rgba(0,0,0,0.05)` only when necessary
+- **Hover:** background tint to neutral gray — no lift effect (except subtle card image zoom per Stitch HTML)
+
+### Components (Phase 2+)
+
+| Component | Specification |
+|-----------|---------------|
+| Primary button | Black background (`#000000`), white text, 4px radius |
+| Secondary button | White background, 1px `#e5e5e5` border, `#1a1c1c` text |
+| Ghost button | No border/background; hover → `#f1f1f0` |
+| Input fields | 1px `#e5e5e5` border, 4px radius; focus: 1px `#1a1a1a` border or soft blue halo |
+| Cards | White background, 1px `#e5e5e5` border, no shadow; generous internal padding (`space-lg`) |
+| Lists | Clean lines, no bullets by default; 1px bottom borders between items only for high-density data |
+| Chips/tags | label-sm, light gray background (`#f1f1f0`), 4px radius; pill (`rounded-full`) for category filters |
+| Checkboxes | Square, 2px radius; checked: primary black or accent blue |
+| Category pills | `rounded-full`; active: black fill; inactive: white + `.notion-border` |
+| Icons | Material Symbols Outlined, weight 400, opsz 24 |
+
+Implement using `src/index.css` `@theme` tokens and semantic Tailwind classes. Do not hardcode ad-hoc hex unless matching a Stitch token.
+
+---
+
+## Anti-Patterns (BLOCKING — Phase 2+)
+
+- Default Tailwind/shadcn theme or accent-heavy UI
+- Large border-radius on cards unless present in Stitch HTML prototype
+- Box shadows on static cards
+- Center-aligned body copy in list/detail views
+- Ignoring `.planning/google-stitch-ui-design/` because React components already exist
+- Gradients, glassmorphism, neon, or saturated palette drift
+- Non-Inter fonts for UI text
+- New button styles outside primary/secondary/ghost trio
+
+---
+
 ## UI Considerations
 
-> Populated by ui-phase UI-consideration probe (Step 9.5). Empty/loading/error/populated states for web UI are N/A — Phase 1 has no screens. Only overflow and long-text apply to operator notification copy.
-
-Applicable state considerations resolved: 4 covered, 0 backstop, 0 unresolved
-
-| Category | Element(s) | Status | Resolution / Reason |
-|----------|------------|--------|---------------------|
-| overflow | E1 (soft-block email) | ✅ covered | Plain-text email uses natural word-wrap across paragraphs; metrics block is one field per line so long run IDs and ISO timestamps do not clip. |
-| long-text | E1 (soft-block email) | ✅ covered | `failure_detail` and `failure_code` are never ellipsized in email; full text spans multiple lines. See Copywriting Contract metrics block. |
-| overflow | E2 (Telegram alert) | ✅ covered | Single Telegram message stays under 4096-char limit; if composed body would exceed limit, truncate `failure_detail` to 500 chars with `…(truncated)` suffix; full detail remains in `scrape_runs`. |
-| long-text | E2 (Telegram alert) | ✅ covered | Run ID wrapped in backticks for monospace emphasis; `failure_detail` subject to 500-char truncation rule above; metrics line uses bold counts only. |
+> Populated by ui-phase UI-consideration probe (Step 9.5). Empty/loading/error/populated states for web UI are N/A — Phase 1 has no screens.
 
 ---
 
@@ -135,18 +243,18 @@ Applicable state considerations resolved: 4 covered, 0 backstop, 0 unresolved
 
 | Registry | Blocks Used | Safety Gate |
 |----------|-------------|-------------|
-| shadcn official | none | not required — no web UI in Phase 1 |
+| shadcn official | none | not required — no web UI in Phase 1; Stitch is manual design authority |
 | third-party | none | not required |
 
 ---
 
 ## Checker Sign-Off
 
-- [x] Dimension 1 Copywriting: PASS
-- [x] Dimension 2 Visuals: PASS
-- [x] Dimension 3 Color: PASS
-- [x] Dimension 4 Typography: PASS
-- [x] Dimension 5 Spacing: PASS
-- [x] Dimension 6 Registry Safety: PASS
+- [ ] Dimension 1 Copywriting: PASS
+- [ ] Dimension 2 Visuals: PASS
+- [ ] Dimension 3 Color: PASS
+- [ ] Dimension 4 Typography: PASS
+- [ ] Dimension 5 Spacing: PASS
+- [ ] Dimension 6 Registry Safety: PASS
 
-**Approval:** approved 2026-07-26
+**Approval:** pending
