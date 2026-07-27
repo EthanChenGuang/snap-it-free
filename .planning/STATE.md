@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 1
-current_phase_name: Scraper Foundation & Listing Data Model
+current_phase: 01
+current_phase_name: scraper-foundation-listing-data-model
 status: executing
-stopped_at: Phase 1 UI-SPEC approved
-last_updated: "2026-07-27T13:31:29.398Z"
-last_activity: 2026-07-26
-last_activity_desc: Roadmap created, 34/34 v1 requirements mapped across 5 phases
+stopped_at: "01-01-PLAN Task 2 — npm package verify checkpoint"
+last_updated: "2026-07-27T15:27:00.000Z"
+last_activity: 2026-07-27
+last_activity_desc: "01-01 Task 1 complete — D-06 locked to Supabase Pro + PostGIS (option-a)"
 progress:
   total_phases: 1
   completed_phases: 0
@@ -23,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-24)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
-**Current focus:** Phase 1 — Scraper Foundation & Listing Data Model
+**Current focus:** Phase 01 — scraper-foundation-listing-data-model
 
 ## Current Position
 
-Phase: 1 of 5 (Scraper Foundation & Listing Data Model)
-Plan: 0 of TBD in current phase
-Status: Ready to execute
-Last activity: 2026-07-26 — Roadmap created, 34/34 v1 requirements mapped across 5 phases
+Phase: 01 (scraper-foundation-listing-data-model) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 01 — paused at Task 2 package verify
+Last activity: 2026-07-27 — D-06 confirmed Supabase Pro + PostGIS (option-a)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -66,6 +66,7 @@ Recent decisions affecting current work:
 - [Roadmap]: UGC posting (Phase 3) sequenced after core scraped browsing so the shared `listings` schema and zone taxonomy are proven against real data first
 - [Roadmap]: Auth/alerts (Phase 4) sequenced after both supply sources exist so alert-matching has a stable, populated schema to test against
 - [Roadmap]: i18n (Phase 5) placed last as additive/non-blocking, but can be pulled earlier if translation work happens in parallel
+- [01-01 Task 1]: D-06/D-08/D-09 locked — Supabase Pro + PostGIS geography column, single listings table (option-a)
 
 ### Pending Todos
 
@@ -89,6 +90,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T13:22:43.371Z
-Stopped at: Phase 1 UI-SPEC approved
-Resume file: .planning/phases/01-scraper-foundation-listing-data-model/01-UI-SPEC.md
+Last session: 2026-07-27T15:27:00.000Z
+Stopped at: 01-01-PLAN Task 2 — npm package verify checkpoint
+Resume file: .planning/phases/01-scraper-foundation-listing-data-model/01-01-PLAN.md
