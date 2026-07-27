@@ -1,7 +1,7 @@
 ---
 phase: 1
 slug: scraper-foundation-listing-data-model
-status: draft
+status: approved
 shadcn_initialized: false
 preset: google-stitch-structured-minimalist
 created: 2026-07-26
@@ -235,7 +235,20 @@ Implement using `src/index.css` `@theme` tokens and semantic Tailwind classes. D
 
 ## UI Considerations
 
-> Populated by ui-phase UI-consideration probe (Step 9.5). Empty/loading/error/populated states for web UI are N/A — Phase 1 has no screens.
+> Populated by ui-phase UI-consideration probe (Step 9.5). Empty/loading/error/populated states for web UI are N/A — Phase 1 has no screens. Only overflow and long-text apply to operator notification copy.
+
+Applicable state considerations resolved: 4 covered, 0 backstop, 0 unresolved
+
+| Category | Element(s) | Status | Resolution / Reason |
+|----------|------------|--------|---------------------|
+| overflow | E1 (soft-block email) | ✅ covered | Plain-text email uses natural word-wrap across paragraphs; metrics block is one field per line so long run IDs and ISO timestamps do not clip. |
+| long-text | E1 (soft-block email) | ✅ covered | `failure_detail` and `failure_code` are never ellipsized in email; full text spans multiple lines. See Copywriting Contract metrics block. |
+| overflow | E2 (Telegram alert) | ✅ covered | Single Telegram message stays under 4096-char limit; if composed body would exceed limit, truncate `failure_detail` to 500 chars with `…(truncated)` suffix; full detail remains in `scrape_runs`. |
+| long-text | E2 (Telegram alert) | ✅ covered | Run ID wrapped in backticks for monospace emphasis; `failure_detail` subject to 500-char truncation rule above; metrics line uses bold counts only. |
+| empty | E1, E2 | — | N/A — alerts fire only on soft-block with complete run metadata; no zero-data notification surface. |
+| loading | E1, E2 | — | N/A — no async UI; delivery is fire-and-forget from worker. |
+| error | E1, E2 | ✅ covered | Delivery failure logged to stderr per Copywriting Contract; no retry storm; next cron re-evaluates. |
+| partial | E1, E2 | — | N/A — validation gate ensures complete metrics before alert is composed. |
 
 ---
 
@@ -250,11 +263,11 @@ Implement using `src/index.css` `@theme` tokens and semantic Tailwind classes. D
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-07-27
