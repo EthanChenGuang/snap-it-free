@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: scraper-foundation-listing-data-model
 status: executing
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-07-28T07:20:02.015Z"
+stopped_at: Completed 01-scraper-foundation-listing-data-model-03-PLAN.md
+last_updated: "2026-07-28T07:22:56.847Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 01 execution resumed (wave continue)
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 ## Current Position
 
 Phase: 01 (scraper-foundation-listing-data-model) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 01 execution resumed (wave continue)
 
-Progress: [█████░░░░░] 50%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Progress: [█████░░░░░] 50%
 |------|----------|-------|-------|
 | Phase 01-scraper-foundation-listing-data-model P01 | 45 | 3 tasks | 22 files |
 | Phase 01-scraper-foundation-listing-data-model P02 | 12 | 3 tasks | 14 files |
+| Phase 01-scraper-foundation-listing-data-model P03 | 8 | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,9 @@ Recent decisions affecting current work:
 - [Phase ?]: npm package legitimacy verified for crawlee, playwright, @supabase/supabase-js, zod, @turf/boolean-point-in-polygon, vitest
 - [Phase ?]: Detail-page extraction for tracer — category cards lack reliable posted_at/photo
 - [Phase ?]: Null lat/lng when map embed absent on sampled Subito listing (D-16)
+- [Phase ?]: GeoJSON loaded via readFileSync for vitest compatibility
+- [Phase ?]: Municipality centroid fallback in extract resolveCoords before normalize (D-16)
+- [Phase ?]: scrape_run_id null until Plan 04 run tracking
 
 ### Pending Todos
 
@@ -101,6 +105,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T07:20:02.007Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-07-28T07:22:56.839Z
+Stopped at: Completed 01-scraper-foundation-listing-data-model-03-PLAN.md
 Resume file: None
