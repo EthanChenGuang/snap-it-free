@@ -1,4 +1,5 @@
-import { PlaywrightCrawler } from 'crawlee';
+import { PlaywrightCrawler, ProxyConfiguration } from 'crawlee';
+import { getProxyUrl } from '../config.js';
 import { extractListingsFromPage, type RawListing } from './extract.js';
 
 export type CrawlResult = {
@@ -11,11 +12,13 @@ export async function runSubitoCrawler(categoryUrls: readonly string[]): Promise
   let selectorHits = 0;
   let selectorTotal = 0;
 
-  // ProxyConfiguration stub for Plan 04 — tracer runs without proxy (D-04 deferred)
-  // const proxyConfiguration = new ProxyConfiguration({ proxyUrls: [process.env.PROXY_URL!] });
+  const proxyUrl = getProxyUrl();
+  const proxyConfiguration = proxyUrl
+    ? new ProxyConfiguration({ proxyUrls: [proxyUrl] })
+    : undefined;
 
   const crawler = new PlaywrightCrawler({
-    // proxyConfiguration,
+    proxyConfiguration,
     useSessionPool: true,
     persistCookiesPerSession: true,
     sessionPoolOptions: { maxPoolSize: 5 },
