@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Listings containing price or negotiation language are filtered out before reaching the listing store, instead of surfacing as false "free" items
   4. An operator is alerted when the scraper returns an empty, malformed, or suspiciously small feed (soft-block detection), instead of the failure going unnoticed
 
-**Plans**: 3/4 plans executed
+**Plans**: 4/4 plans executed
 
 Plans:
 **Wave 1**
@@ -51,7 +51,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 01-04-PLAN.md — Batch validation, operator alerts, cron + Docker deploy
+- [x] 01-04-PLAN.md — Batch validation, operator alerts, cron + Docker deploy
 
 **UI hint**: yes
 
@@ -123,7 +123,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scraper Foundation & Listing Data Model | 3/4 | In Progress|  |
+| 1. Scraper Foundation & Listing Data Model | 4/4 | In Progress|  |
 | 2. Map + List Core Browsing | 0/TBD | Not started | - |
 | 3. UGC Posting & Community Marketplace | 0/TBD | Not started | - |
 | 4. Auth, Alerts & Push Notifications | 0/TBD | Not started | - |
