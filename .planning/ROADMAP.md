@@ -13,7 +13,7 @@ The journey starts underground: a resilient scraper pipeline pulls real free lis
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Scraper Foundation & Listing Data Model** - Ingest, normalize, zone-tag, and validate free listings from Subito.it into a canonical schema
+- [x] **Phase 1: Scraper Foundation & Listing Data Model** - Ingest, normalize, zone-tag, and validate free listings from Subito.it into a canonical schema (completed 2026-07-28)
 - [ ] **Phase 2: Map + List Core Browsing** - Users can find and explore live free listings across Venice, login-optional
 - [ ] **Phase 3: UGC Posting & Community Marketplace** - Users can post their own free items and coordinate pickup in-app, safely
 - [ ] **Phase 4: Auth, Alerts & Push Notifications** - Users log in only when needed and get notified of new matching listings
@@ -123,7 +123,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scraper Foundation & Listing Data Model | 4/4 | In Progress|  |
+| 1. Scraper Foundation & Listing Data Model | 4/4 | Complete    | 2026-07-28 |
 | 2. Map + List Core Browsing | 0/TBD | Not started | - |
 | 3. UGC Posting & Community Marketplace | 0/TBD | Not started | - |
 | 4. Auth, Alerts & Push Notifications | 0/TBD | Not started | - |

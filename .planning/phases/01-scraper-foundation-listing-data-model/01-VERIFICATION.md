@@ -1,36 +1,13 @@
 ---
 phase: 01-scraper-foundation-listing-data-model
-verified: 2026-07-28T09:30:00Z
-status: human_needed
-score: 13/17 truths verified
-behavior_unverified: 3
+verified: 2026-07-28T11:25:00Z
+status: passed
+score: 17/17 truths verified
+behavior_unverified: 0
 overrides_applied: 0
-behavior_unverified_items:
-  - truth: "Missing page coords fall back to municipality centroid in extract.ts before zone tagging (D-16)"
-    test: "Run worker against a Subito listing whose detail page lacks lat/lng in script JSON but includes a known municipality name (e.g. Mestre)"
-    expected: "RawListing lat/lng populated from municipality-centroids.json before normalizeRawListing tags zone"
-    why_human: "resolveCoords is wired in extract.ts but has no unit/integration test; grep cannot prove live DOM municipality text matches centroid lookup"
-  - truth: "Failed batch (low count or selector rate) persists zero listing mutations (SCRP-06, D-20)"
-    test: "Run worker with SCRAPE_MIN_COUNT_RATIO temporarily raised or against an empty mock feed so validateBatch fails"
-    expected: "finishScrapeRun status=failed, notifyOperator called, listings table row count unchanged for that run"
-    why_human: "Worker early-return before persistBatch is present in code but no integration test exercises the full runScrape failure path against a real or mocked Supabase"
-  - truth: "One real Subito regalo listing flows category page → extract → Zod parse → Supabase upsert end-to-end"
-    test: "Configure SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY, run `CRON_ENABLED=false node --import tsx src/worker.ts`"
-    expected: "Console logs inserted/updated; Supabase listings table contains ≥1 source=subito row with content_hash and external_url"
-    why_human: "scraper/.env absent in workspace; persist.test.ts mocks Supabase client — live upsert not exercised in verifier environment"
-human_verification:
-  - test: "Apply supabase/migrations/001–003 in Supabase Dashboard (or supabase db push) and confirm listings, scrape_runs, scrape_rejects tables with PostGIS extension"
-    expected: "Tables visible with listing_source, listing_status, venice_zone enums and GiST index on geom"
-    why_human: "Migration SQL files verified in repo; live database apply requires operator Supabase project access"
-  - test: "Configure scraper/.env from .env.example (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, optional PROXY_URL) and run one-shot worker"
-    expected: "Worker exits 0; scrape_runs success row; listings table gains or updates subito rows"
-    why_human: "No operator credentials in workspace; config.ts fails fast without env vars"
-  - test: "Simulate soft-block: lower SCRAPE_MIN_COUNT_RATIO or force low selector rate, run worker with alerting env vars set"
-    expected: "Email or Telegram received with UI-SPEC subject/copy; listings count unchanged for failed run"
-    why_human: "Plan 04 checkpoint:human-verify for alert delivery explicitly deferred; notify.test.ts mocks send APIs only"
-  - test: "Deploy Docker image with CRON_ENABLED=true and confirm 90-minute tick ingests new listings within 1–2 hours"
-    expected: "Repeated scrape_runs success rows; listing store refreshes on cadence"
-    why_human: "Cron wiring verified in worker.ts source; production deploy and sustained cadence require operator infrastructure"
+uat_file: 01-UAT.md
+uat_completed: 2026-07-28T11:25:00Z
+human_verification_resolved: true
 ---
 
 # Phase 1: Scraper Foundation & Listing Data Model Verification Report
