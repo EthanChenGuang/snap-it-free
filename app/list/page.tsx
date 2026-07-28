@@ -1,7 +1,9 @@
-export default function ListPage() {
-  return (
-    <main className="flex h-full items-center justify-center px-gutter">
-      <p className="text-body-md text-on-surface-variant">Elenco completo — in arrivo.</p>
-    </main>
-  );
+import { ListPageClient } from '@/components/listings/ListPageClient';
+import { getActiveListings } from '@/lib/listings/queries';
+
+export const dynamic = 'force-dynamic';
+
+export default async function ListPage() {
+  const listings = await getActiveListings();
+  return <ListPageClient initialListings={listings} />;
 }

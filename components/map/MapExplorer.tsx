@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { ListingFeed } from '@/components/listings/ListingFeed';
 import { filterByZone, filterMapListings } from '@/lib/listings/filters';
+import { useListingsPoll } from '@/lib/listings/useListingsPoll';
 import { messages } from '@/messages/it';
 import type { ListingRow, ZoneChip } from '@/lib/listings/types';
 import { ZoneFilterChips } from './ZoneFilterChips';
@@ -19,7 +20,7 @@ type MapExplorerProps = {
 };
 
 export function MapExplorer({ initialListings }: MapExplorerProps) {
-  const [listings] = useState(initialListings);
+  const { listings } = useListingsPoll(initialListings, 300000);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedZone, setSelectedZone] = useState<ZoneChip>('All');
   const [activeSnapPoint, setActiveSnapPoint] = useState<number | string | null>(0.25);

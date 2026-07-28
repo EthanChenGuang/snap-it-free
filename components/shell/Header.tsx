@@ -1,9 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { messages } from '@/messages/it';
+import { cn } from '@/lib/utils';
 
 export function Header() {
+  const pathname = usePathname();
+  const onFavorites = pathname.startsWith('/favorites');
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-outline-variant bg-surface">
       <div className="mx-auto flex max-w-container-max items-center justify-between px-gutter py-space-md">
@@ -23,13 +28,26 @@ export function Header() {
           </div>
           <span className="text-h3 font-bold text-on-surface">{messages.app.title}</span>
         </Link>
-        <button
-          type="button"
-          className="flex cursor-pointer items-center gap-space-sm transition-opacity active:opacity-80"
-          aria-label={messages.header.search}
+        <Link
+          href="/favorites"
+          className={cn(
+            'flex cursor-pointer items-center gap-space-sm transition-opacity active:opacity-80',
+            onFavorites ? 'text-accent-orange' : 'text-primary hover:opacity-80',
+          )}
+          aria-label={messages.header.favorites}
+          aria-current={onFavorites ? 'page' : undefined}
         >
-          <span className="material-symbols-outlined text-primary">search</span>
-        </button>
+          <span
+            className="material-symbols-outlined"
+            style={{
+              fontVariationSettings: onFavorites
+                ? "'FILL' 1, 'wght' 600"
+                : "'FILL' 0, 'wght' 400",
+            }}
+          >
+            favorite
+          </span>
+        </Link>
       </div>
     </header>
   );
