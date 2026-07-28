@@ -39,8 +39,8 @@ function buildEmailBody(payload: AlertPayload): string {
 function buildTelegramMessage(payload: AlertPayload): string {
   let failureDetail = payload.failureDetail;
   const base = [
-    `⚠️ *Scraper soft-block* — run \`${payload.runId}\``,
-    `Parsed *${payload.parsedCount}* listings (need ≥${payload.minCount}). Selectors *${payload.selectorPct}%*.`,
+    `⚠️ Scraper soft-block — run ${payload.runId}`,
+    `Parsed ${payload.parsedCount} listings (need ≥${payload.minCount}). Selectors ${payload.selectorPct}%.`,
     `Reason: ${payload.failureCode}`,
     failureDetail ? `Detail: ${failureDetail}` : null,
     '→ Check logs & scrape_runs',
@@ -58,8 +58,8 @@ function buildTelegramMessage(payload: AlertPayload): string {
       : failureDetail;
 
   return [
-    `⚠️ *Scraper soft-block* — run \`${payload.runId}\``,
-    `Parsed *${payload.parsedCount}* listings (need ≥${payload.minCount}). Selectors *${payload.selectorPct}%*.`,
+    `⚠️ Scraper soft-block — run ${payload.runId}`,
+    `Parsed ${payload.parsedCount} listings (need ≥${payload.minCount}). Selectors ${payload.selectorPct}%.`,
     `Reason: ${payload.failureCode}`,
     failureDetail ? `Detail: ${failureDetail}` : null,
     '→ Check logs & scrape_runs',
@@ -95,9 +95,7 @@ async function sendResendEmail(payload: AlertPayload): Promise<void> {
 async function sendTelegramMessage(payload: AlertPayload): Promise<void> {
   const TelegramBot = (await import('node-telegram-bot-api')).default;
   const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, { polling: false });
-  await bot.sendMessage(process.env.TELEGRAM_CHAT_ID!, buildTelegramMessage(payload), {
-    parse_mode: 'Markdown',
-  });
+  await bot.sendMessage(process.env.TELEGRAM_CHAT_ID!, buildTelegramMessage(payload));
 }
 
 export async function notifyOperator(payload: AlertPayload): Promise<void> {

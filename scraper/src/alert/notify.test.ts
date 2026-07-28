@@ -95,9 +95,9 @@ describe('notifyOperator', () => {
 describe('buildTelegramMessage', () => {
   it('includes run_id and metrics per UI-SPEC', () => {
     const message = buildTelegramMessage(basePayload);
-    expect(message).toContain('run `run-abc-123`');
-    expect(message).toContain('*12* listings (need ≥50)');
-    expect(message).toContain('*85%*');
+    expect(message).toContain('run run-abc-123');
+    expect(message).toContain('12 listings (need ≥50)');
+    expect(message).toContain('Selectors 85%');
     expect(message).toContain('Reason: LOW_COUNT');
     expect(message).toContain('→ Check logs & scrape_runs');
   });
