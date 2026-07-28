@@ -29,4 +29,27 @@ describe('contentHash', () => {
     const hash2 = contentHash({ ...baseListing, title: 'regalo tavolo' });
     expect(hash1).not.toBe(hash2);
   });
+
+  it('produces different hash when photo_url changes', () => {
+    const hash1 = contentHash(baseListing);
+    const hash2 = contentHash({
+      ...baseListing,
+      photo_url: 'https://images.subito.it/other.jpg',
+    });
+    expect(hash1).not.toBe(hash2);
+  });
+
+  it('handles null lat/lng consistently', () => {
+    const withNull = { ...baseListing, lat: null, lng: null };
+    const hash1 = contentHash(withNull);
+    const hash2 = contentHash({ ...withNull });
+    expect(hash1).toBe(hash2);
+    expect(hash1).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it('produces different hash when lat changes from null to value', () => {
+    const hashNull = contentHash({ ...baseListing, lat: null, lng: null });
+    const hashCoords = contentHash(baseListing);
+    expect(hashNull).not.toBe(hashCoords);
+  });
 });
