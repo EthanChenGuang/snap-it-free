@@ -4,16 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port=3000 --host=0.0.0.0",
-    "dev:next": "next dev",
-    "build": "vite build",
-    "build:next": "next build --webpack",
+    "dev": "next dev",
+    "dev:vite": "vite --port=3000 --host=0.0.0.0",
+    "build": "next build --webpack",
+    "build:vite": "vite build",
     "preview": "vite preview",
-    "start:next": "next start",
-    "clean": "rm -rf dist server.js",
+    "start": "next start",
+    "clean": "rm -rf dist server.js .next",
     "lint": "tsc --noEmit",
     "test": "vitest run",
-    "test:lib": "vitest run lib/listings"
+    "test:lib": "vitest run lib/"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
