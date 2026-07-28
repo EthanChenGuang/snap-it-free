@@ -1,7 +1,10 @@
 'use client';
 
-import Map, { Marker } from 'react-map-gl/maplibre';
+import { useEffect, useMemo, useRef } from 'react';
+import Map, { Marker, Popup, type MapRef } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { ListingPopup } from '@/components/listings/ListingPopup';
+import { LocateMeButton } from './LocateMeButton';
 import type { ListingRow } from '@/lib/listings/types';
 
 const OPENFREEMAP_LIBERTY = 'https://tiles.openfreemap.org/styles/liberty';
@@ -10,6 +13,7 @@ type ListingMapProps = {
   listings: ListingRow[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  flyToListingId?: string | null;
 };
 
 function StitchPin({
@@ -29,7 +33,7 @@ function StitchPin({
         {listing.title.slice(0, 24)}
       </div>
       <div
-        className={`flex h-4 w-4 items-center justify-center rounded-full border-2 border-surface bg-primary transition-transform ${
+        className={`flex h-4 w-4 items-center justify-center rounded-full border-2 border-surface bg-accent-orange transition-transform ${
           isSelected ? 'scale-125' : 'group-hover:scale-125'
         }`}
       >
@@ -39,9 +43,34 @@ function StitchPin({
   );
 }
 
-export function ListingMap({ listings, selectedId, onSelect }: ListingMapProps) {
+export function ListingMap({
+  listings,
+  selectedId,
+  onSelect,
+  flyToListingId,
+}: ListingMapProps) {
+  const mapRef = useRef<MapRef>(null);
+
+  const selectedListing = useMemo(
+    () => listings.find((listing) => listing.id === selectedId) ?? null,
+    [listings, selectedId],
+  );
+
+  useEffect(() => {
+    if (!flyToListingId) return;
+    const listing = listings.find((item) => item.id === flyToListingId);
+    if (listing?.lat == null || listing?.lng == null) return;
+
+    mapRef.current?.flyTo({
+      center: [listing.lng, listing.lat],
+      zoom: 14,
+      duration: 800,
+    });
+  }, [flyToListingId, listings]);
+
   return (
     <Map
+      ref={mapRef}
       initialViewState={{
         longitude: 12.33,
         latitude: 45.44,
@@ -51,6 +80,8 @@ export function ListingMap({ listings, selectedId, onSelect }: ListingMapProps) 
       style={{ width: '100%', height: '100%' }}
       attributionControl={{ compact: true }}
     >
+      <LocateMeButton />
+
       {listings.map((listing) => {
         if (listing.lat == null || listing.lng == null) {
           return null;
@@ -71,6 +102,20 @@ export function ListingMap({ listings, selectedId, onSelect }: ListingMapProps) 
           </Marker>
         );
       })}
+
+      {selectedListing?.lat != null && selectedListing.lng != null && (
+        <Popup
+          longitude={selectedListing.lng}
+          latitude={selectedListing.lat}
+          anchor="bottom"
+          offset={24}
+          closeButton={false}
+          onClose={() => onSelect(null)}
+          className="listing-popup"
+        >
+          <ListingPopup listing={selectedListing} />
+        </Popup>
+      )}
     </Map>
   );
 }
