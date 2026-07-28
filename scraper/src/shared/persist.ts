@@ -3,6 +3,25 @@ import type { CanonicalListing } from './schema.js';
 
 export type PersistResult = 'skipped' | 'inserted' | 'updated';
 
+export async function logReject(
+  supabase: SupabaseClient,
+  scrapeRunId: string | null,
+  externalId: string | null,
+  reason: string,
+  rawSnippet: Record<string, unknown>,
+): Promise<void> {
+  const { error } = await supabase.from('scrape_rejects').insert({
+    scrape_run_id: scrapeRunId,
+    external_id: externalId,
+    reject_reason: reason,
+    raw_snippet: rawSnippet,
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function persistListing(
   supabase: SupabaseClient,
   listing: CanonicalListing,
