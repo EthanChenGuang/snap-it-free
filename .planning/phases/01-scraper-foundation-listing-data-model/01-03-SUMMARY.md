@@ -113,7 +113,7 @@ Each task was committed atomically:
 2. **Task 2: Venice zone polygons and Turf tagging** - `ec326b5` (feat)
 3. **Task 3: Wire normalize pipeline into worker** - `723e0b5` (feat)
 
-**Plan metadata:** pending (docs commit)
+**Plan metadata:** `82b0144` (docs)
 
 ## Files Created/Modified
 
