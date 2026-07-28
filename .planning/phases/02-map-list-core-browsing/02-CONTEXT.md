@@ -147,6 +147,7 @@ Out of scope: UGC posting, in-app DM, auth/login flows, push alerts, full trilin
 - Venice geography: zone chips matter more than radius search; walking/bridge constraints make zone filter primary.
 - "Claim on Subito" is the happy path for scraped listings — user leaves app intentionally to complete pickup on source site.
 - Preserve 手慢无 branding in header; Italian-first chrome even before full i18n.
+- **STRICT UI rule:** All Phase 2 screens MUST follow `.planning/google-stitch-ui-design/DESIGN.md` and the matching `*_notion_style/code.html` prototype — side-by-side fidelity required; shadcn only when restyled to Stitch tokens (see `.planning/google-stitch-ui-design/SKILL.md`).
 
 </specifics>
 

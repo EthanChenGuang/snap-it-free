@@ -1,0 +1,31 @@
+---
+description: Strict Google Stitch Structured Minimalist UI — mandatory for all user-facing frontend work
+globs: app/**/*,components/**/*,src/components/**/*,src/index.css,**/*globals.css
+alwaysApply: true
+---
+
+# Google Stitch UI Design Authority (STRICT)
+
+All user-facing UI MUST follow `.planning/google-stitch-ui-design/` — no exceptions.
+
+## Before writing or editing UI
+
+1. Read `.planning/google-stitch-ui-design/DESIGN.md`
+2. Read the matching screen prototype `{screen}_notion_style/code.html`
+3. Read the existing React reference in `src/components/` (port, do not redesign)
+4. Use `@theme` tokens from `src/index.css` / `app/globals.css` — not default shadcn/Tailwind themes
+
+## Non-negotiable
+
+- Monochrome document-first aesthetic; thin `#e5e5e5` borders; no card drop shadows
+- Inter typography scale from DESIGN.md; Material Symbols Outlined icons
+- 4px spacing grid; primary button black on white; chips/tags light gray `#f1f1f0`
+- shadcn/Radix primitives OK only when restyled to Stitch tokens (D-53)
+
+## Blocking anti-patterns
+
+- Default shadcn theme colors, rounded-xl/2xl cards, saturated accents, glassmorphism
+- Hardcoded hex drift from Stitch tokens without DESIGN.md justification
+- New visual language when a Stitch screen exists — extend DESIGN.md instead
+
+See also: `.planning/google-stitch-ui-design/SKILL.md`
