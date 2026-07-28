@@ -4,135 +4,152 @@
 > Decisions are captured in CONTEXT.md — this log preserves the alternatives considered.
 
 **Date:** 2026-07-28
-**Phase:** 2-Map + List Core Browsing
-**Mode:** --auto (all areas auto-selected, no user prompts)
-**Areas discussed:** Frontend stack, Map & geospatial UX, Home layout, Zone filtering, Scraped detail/WebView, Favorites, Data layer & expiry, Search & empty states, Design system
+**Phase:** 02-map-list-core-browsing
+**Mode:** --auto (all areas auto-selected, recommended defaults)
+**Areas discussed:** App Shell & Stack, Map-First Home, Map Provider, Zone Filter, Data Layer, 48h Expiry, WebView Shell, Favorites Pre-Auth, Login-Optional, UI Language, Component Library
 
 ---
 
-## Frontend Stack & Migration
+## App Shell & Frontend Stack
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Migrate to Next.js App Router now | Full research-stack alignment, SSR/API routes, Serwist PWA | |
-| Evolve existing Vite/React SPA | Wire Supabase into Stitch components; defer Next.js to Phase 3–4 | ✓ |
-| Greenfield rewrite | Discard prototype, start fresh | |
+| Migrate to Next.js App Router | New `app/` tree, URL routing, Server Components, Vercel deploy path | ✓ |
+| Evolve Vite SPA in place | Keep tab-state routing, add Supabase fetch to existing `src/App.tsx` | |
+| Parallel Vite + Next.js | Maintain both during transition | |
 
-**Auto-selected:** Evolve existing Vite/React SPA (D-01) — fastest path to live map with real data; Next.js deferred until auth/API needs emerge.
-**Notes:** Add React Router for shareable listing URLs.
+**Auto choice:** Migrate to Next.js App Router (D-24, D-26) — aligns with `.planning/research/STACK.md` and fixes URL routing anti-pattern.
+**Notes:** Preserve Stitch visuals from existing prototype (D-25).
 
 ---
 
-## Map & Geospatial UX
+## Map-First Home Layout
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| MapLibre GL JS + OpenFreeMap/MapTiler | Free vector tiles, real lat/lng pins, clustering | ✓ |
-| Keep decorative SVG/image map | Faster but fails DISC-01 | |
-| Google Maps SDK | Per-load billing risk on lean budget | |
+| Map default with draggable bottom sheet (2 snap points) | ROADMAP success criterion #2; Stitch map_explorer pattern | ✓ |
+| List default with map secondary tab | Faster to ship but violates map-first product goal | |
+| Full-screen map only, list in separate tab | Loses simultaneous map+list browsing | |
 
-**Auto-selected:** MapLibre + react-map-gl (D-04, D-05), Venice bbox default (D-06), clustering enabled (D-07).
+**Auto choice:** Map default + bottom sheet with collapsed/expanded snaps (D-27, D-28, D-29).
+**Notes:** BottomNav retained; List tab = full-screen feed (D-30).
 
 ---
 
-## Home Layout & Navigation
+## Map Provider & Tiles
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Map-first with draggable bottom sheet | Matches PROJECT.md, DISC-01, Stitch prototype | ✓ |
-| List-first with map as secondary tab | Faster to wire but wrong product posture | |
-| Split-screen map + list always visible | Desktop-friendly but poor mobile UX | |
+| MapLibre GL JS + OpenFreeMap (free tiles) | Budget-safe, no per-load billing | ✓ |
+| Mapbox GL JS | Better styling tools but variable cost risk | |
+| Static/decorative map (keep prototype) | No real geo accuracy | |
 
-**Auto-selected:** Map-first default (D-09), three snap points (D-10), synchronized map/list selection (D-11).
+**Auto choice:** MapLibre + react-map-gl + OpenFreeMap (D-31, D-32, D-33).
 
 ---
 
-## Zone Filtering
+## Zone Filter UX
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| DB `zone` enum chips (3 Venice zones + All) | Aligns with Phase 1 ingestion, DISC-03 | ✓ |
-| Substring match on location text | Current prototype behavior; incorrect | |
-| Radius / "near me" filter | Wrong for Venice bridge geography | |
+| Horizontal chips matching `venice_zone` enum | Syncs map + list; matches Phase 1 schema | ✓ |
+| Dropdown filter | Less visible on mobile | |
+| Map-drawn zone boundaries only | No explicit filter control | |
 
-**Auto-selected:** Canonical zone enum filter (D-12–D-14).
+**Auto choice:** Chip row All + 3 zones (D-34, D-35); hide null-zone listings (D-36).
 
 ---
 
-## Scraped Listing Detail & WebView Shell
+## Data Fetching
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| In-app WebView shell + deep-link CTA to Subito | DISC-04/05, Snag pattern | ✓ |
-| Native detail page only (no iframe) | Loses in-app source preview | |
-| Open Subito directly in new tab (no shell) | Fails DISC-04 favorite/share/back controls | |
+| Supabase anon + RLS, Server Component initial fetch, 5-min poll | Simple, fits low listing volume at launch | ✓ |
+| Next.js API routes as BFF | Extra layer without clear Phase 2 benefit | |
+| Realtime Supabase subscription | Overkill for 1–2 hr scraper cadence | |
 
-**Auto-selected:** WebView shell with top bar (D-15), "Claim on Subito" deep-link (D-16), source badge (D-17).
+**Auto choice:** Anon RLS read + Server Component + poll refresh (D-37, D-38, D-39).
 
 ---
 
-## Favorites (Login-Optional)
+## 48-Hour Expiry (SCRP-04)
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Anonymous localStorage favorites | Phase 2 success criteria: browse + favorite without account | ✓ |
-| Auth-gated favorites (AUTH-02) | Correct for Phase 4; blocks Phase 2 criterion #4 | |
-| No favorites in Phase 2 | Fails DISC-06 | |
+| Query-time filter + pg_cron status flip | User never sees expired; DB stays clean | ✓ |
+| Query-time filter only | Expired rows stay `active` in DB indefinitely | |
+| Client-side expiry calculation | Trusts client clock; inconsistent | |
 
-**Auto-selected:** localStorage favorites (D-19–D-21); account migration deferred to Phase 4.
+**Auto choice:** Query filter + daily pg_cron (D-40, D-41).
 
 ---
 
-## Data Layer & 48h Expiry
+## Scraped Listing WebView Shell
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Query-time expiry filter + batch status cron | User never sees expired; DB stays clean | ✓ |
-| Query-time only (no cron) | Simpler but stale `status` rows accumulate | |
-| Hard-delete expired rows | Loses audit trail | |
+| In-app iframe WebView + top bar (back/favorite/share/open Subito) | DISC-04/05; Snag-style deep-link pattern | ✓ |
+| External browser only | Breaks in-app browsing flow | |
+| Native detail page scraping Subito DOM | Fragile, duplicates source content | |
 
-**Auto-selected:** Supabase anon read with `expires_at > now()` (D-22), canonical listing types (D-23), dual expiry enforcement (D-24), 10-min refetch (D-25).
+**Auto choice:** iframe shell with canonical metadata chrome (D-42–D-45).
 
 ---
 
-## Search & Empty States
+## Favorites (Pre-Auth)
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Client-side title search + zone-specific empty states | Sufficient for Phase 2 listing volume | ✓ |
-| Postgres full-text search | Over-engineered for hourly-scraped Venice feed | |
-| No search in Phase 2 | Prototype already has search; users expect it | |
+| localStorage UUID list until Phase 4 auth | DISC-06 without AUTH-01/02 in scope | ✓ |
+| Defer favorites entirely to Phase 4 | Misses Phase 2 success criterion | |
+| Anonymous Supabase favorites table | Needs auth identity eventually anyway | |
 
-**Auto-selected:** Client-side title filter (D-26), contextual empty states (D-27, D-28).
+**Auto choice:** localStorage favorites + `/favorites` route (D-46–D-48).
 
 ---
 
-## Design System
+## Login-Optional Browsing
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Google Stitch Structured Minimalist (existing tokens) | Locked in 01-UI-SPEC.md | ✓ |
-| shadcn default theme | Blocked by UI-SPEC anti-patterns | |
-| Ad-hoc hex values in components | Current drift; fix in Phase 2 | |
+| No login wall; stub Post/Settings | DISC-07; auth in Phase 4 | ✓ |
+| Soft login prompt on first visit | Violates login-optional requirement | |
 
-**Auto-selected:** Stitch design authority (D-29, D-30).
+**Auto choice:** Full anonymous browse (D-49, D-50).
+
+---
+
+## UI Language
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Italian chrome, centralized constants module | Primary audience; Phase 5 adds EN/ZH | ✓ |
+| English-only for dev speed | Misaligns with Italian-primary product | |
+| Full next-intl now | Phase 5 scope; premature | |
+
+**Auto choice:** Italian app chrome (D-51, D-52).
+
+---
+
+## Component Library
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| shadcn/ui for sheet/dialog/toast + Stitch tokens | Research stack + Phase 1 UI-SPEC | ✓ |
+| Inline Tailwind only (prototype pattern) | Bottom sheet harder to implement accessibly | |
+
+**Auto choice:** shadcn with Stitch styling (D-53).
 
 ---
 
 ## Claude's Discretion
 
-- MapLibre cluster tuning parameters
-- iframe/WebView implementation details
-- Supabase RLS policy exact wording
-- pg_cron vs app-side expiry batch
-- Standalone list tab vs bottom-sheet-only navigation
+- OpenFreeMap vs MapTiler fallback
+- iframe sandbox vs redirect if Subito blocks embed
+- Pull-to-refresh mechanism
+- Pin clustering threshold
+- Server/client component split
 
 ## Deferred Ideas
 
-- UGC posting, DM, moderation UI — Phase 3
-- Auth, account favorites, push alerts — Phase 4
-- Full i18n — Phase 5
-- Next.js + Serwist PWA — Phase 3–4 when auth/API needed
-- FB Marketplace scraper — v2
-- Community report/auto-hide — Phase 3
-- Full-text search, dark mode — future
+All captured in CONTEXT.md `<deferred>` — UGC, auth, push, i18n, moderation, FB scraper, native app.

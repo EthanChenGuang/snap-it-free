@@ -7,69 +7,76 @@
 <domain>
 ## Phase Boundary
 
-Phase 2 delivers the login-optional, map-first browsing experience for live scraped Subito listings: real geospatial pins on a Venice map, a synchronized draggable bottom-sheet list, zone filtering, scraped-listing WebView shell with favorite/share/back controls, deep-link out to Subito to claim, and 48-hour listing expiry enforcement in queries. No UGC posting, no in-app DM, no auth gates, no push alerts, no full i18n — only the consumer-facing discovery shell that reads from the Phase 1 `listings` table.
+Phase 2 delivers the map-first, login-optional browsing experience that puts Phase 1 scraped listings in front of users: live map pins, a draggable bottom-sheet list, zone filtering, scraped-listing WebView shell with favorite/share/back/deep-link-out, anonymous favorites (local until Phase 4 auth), and 48-hour expiry enforcement on what users see.
 
 Requirements in scope: DISC-01, DISC-02, DISC-03, DISC-04, DISC-05, DISC-06, DISC-07, SCRP-04.
+
+Out of scope: UGC posting, in-app DM, auth/login flows, push alerts, full trilingual UI, FB Marketplace scraper, moderation/report UI, operator dashboard.
 
 </domain>
 
 <decisions>
 ## Implementation Decisions
 
-### Frontend Stack & Migration
-- **D-01:** Evolve the **existing Vite/React SPA** (`src/`) for Phase 2 rather than migrating to Next.js now — wire live Supabase reads into the Stitch-derived components already in `src/components/` — **Reversibility:** costly — a later Next.js migration will touch routing, data fetching, and PWA setup, but deferring avoids blocking Phase 2 on a full framework replatform while auth/API routes (Phase 3–4) are still absent.
-- **D-02:** Add **React Router** (or equivalent URL-based routing) to replace tab-only `NavTab` state — routes at minimum: `/` (map home), `/listing/:id` (detail/WebView shell) — **Reversibility:** reversible.
-- **D-03:** Remove unused AI Studio scaffolding from the runtime path (`@google/genai`, `express`, mock chat/claim/post flows hidden or stubbed until Phase 3) — **Reversibility:** reversible.
+### App Shell & Frontend Stack
+- **D-24:** Migrate from the Vite tab-state SPA prototype to **Next.js App Router** (new `app/` tree) for Phase 2 — enables shareable listing URLs, Server Components for initial fetch, and the planned PWA path on Vercel — **Reversibility:** costly — undo means maintaining two frontends or a full revert of routing/data layers.
+- **D-25:** **Port and preserve** the Google Stitch Structured Minimalist look from existing `src/components/*` and `.planning/google-stitch-ui-design/DESIGN.md` — do not redesign; extend the Notion-adjacent palette and layout density — **Reversibility:** reversible.
+- **D-26:** Replace tab-state routing (`NavTab` in `src/App.tsx`) with **URL-based routes**: `/` = map home, `/listing/[id]` = detail/WebView shell — **Reversibility:** costly — deep links and share URLs depend on this shape.
 
-### Map & Geospatial UX
-- **D-04:** Integrate **MapLibre GL JS** with **react-map-gl** for real pin rendering from `lat`/`lng` — **Reversibility:** costly — map provider swap later requires marker/cluster rework.
-- **D-05:** Use **OpenFreeMap** (or MapTiler free tier as fallback) for vector tiles — zero per-load billing per research stack — **Reversibility:** reversible.
-- **D-06:** Default map viewport: **Venice metropolitan bounding box** centered on Centro Storico; no global mock cities — **Reversibility:** reversible.
-- **D-07:** Enable **pin clustering** when zoomed out (MapLibre cluster layer) for performance with 100+ active listings — **Reversibility:** reversible.
-- **D-08:** Listings with **null `lat`/`lng` or null `zone`** (per Phase 1 D-15/D-16) are **excluded from map pins and zone-filtered views** but may appear in an unfiltered "All zones" list with an "approximate location" badge if coords exist without zone — **Reversibility:** reversible.
+### Map-First Home Layout
+- **D-27:** **Map is the default home route** — opening the app lands on the map with pins, not the list grid — **Reversibility:** reversible.
+- **D-28:** Use a **draggable bottom sheet** over the map with two snap points: collapsed (~25% viewport, peek at 2–3 listing cards) and expanded (~75% viewport); map stays visible and pannable in both — **Reversibility:** reversible.
+- **D-29:** **Bidirectional map↔list sync**: tapping a pin highlights + scrolls the matching card; tapping a list card centers/focuses the pin and opens a compact popup — **Reversibility:** reversible.
+- **D-30:** Retain **BottomNav** with Map / List / Post / Settings tabs; List tab shows the full-screen feed (`ListView` pattern) while Map tab is the primary map+sheet experience — **Reversibility:** reversible.
 
-### Home Layout & Navigation
-- **D-09:** **Map-first default** — app opens on map view with bottom sheet peek visible (matches DISC-01 and Stitch `map_explorer_notion_style`) — **Reversibility:** reversible.
-- **D-10:** Bottom sheet has **three snap points**: collapsed peek (~20% height, shows 1–2 cards), half (~50%), full (~90%) — drag handle matches Stitch prototype — **Reversibility:** reversible.
-- **D-11:** Map and list show the **same filtered dataset** — selecting a list card pans/highlights the corresponding pin; tapping a pin scrolls the sheet to that card — **Reversibility:** reversible.
+### Map Provider & Viewport
+- **D-31:** **MapLibre GL JS + react-map-gl** for rendering; vector tiles from **OpenFreeMap** (free, no token) with MapTiler free tier as fallback if styling needs exceed OpenFreeMap — **Reversibility:** costly — map integration touches pins, sheet, and detail flows.
+- **D-32:** Default viewport centered on **Venice** (~45.44°N, 12.33°E, zoom ~11) showing all three zones; include optional **"Locate me"** button (browser geolocation) that re-centers but does **not** filter listings by default — **Reversibility:** reversible.
+- **D-33:** Plot pins from **`lat`/`lng`** on each listing row; listings with null coordinates are **excluded from map pins** but may appear in list with a "approximate zone" badge if `zone` is set — **Reversibility:** reversible.
 
-### Zone Filtering
-- **D-12:** Zone filter uses the **canonical DB `zone` enum** (`centro_storico`, `mestre_marghera`, `lido_murano`) with display labels **Centro Storico / Mestre-Marghera / Lido-Murano** plus an **All** option — **Reversibility:** one-way — UI must align with ingestion enum; label drift breaks filter queries.
-- **D-13:** Zone chips are **shared controls** affecting both map pins and bottom-sheet list simultaneously (single filter state) — **Reversibility:** reversible.
-- **D-14:** Remove demo zone names (`Jing'an`, substring location matching) from `MapView.tsx` — **Reversibility:** reversible.
+### Zone Filter UX
+- **D-34:** Zone filter as **horizontal chip row**: All / Centro Storico / Mestre-Marghera / Lido-Murano — maps 1:1 to Phase 1 `venice_zone` enum; remove prototype mock zones (e.g. Jing'an) — **Reversibility:** reversible.
+- **D-35:** Zone filter applies **simultaneously** to map pins and bottom-sheet/list views; default **All** shows every active, non-expired listing with a non-null zone — **Reversibility:** reversible.
+- **D-36:** Listings with **`zone = null`** (operator-review rows from Phase 1 D-15) are **hidden from all user-facing feeds** in Phase 2 — **Reversibility:** reversible.
+
+### Data Fetching & Supabase Integration
+- **D-37:** Read listings via **Supabase anon client** with RLS allowing public `SELECT` on rows where `status = 'active' AND expires_at > now()` — **Reversibility:** one-way — RLS policies are migration-sensitive.
+- **D-38:** Initial load via **Next.js Server Component** fetch; client **poll refresh every 5 minutes** plus pull-to-refresh on list — no realtime subscription (scraper cadence is 1–2 hr) — **Reversibility:** reversible.
+- **D-39:** Map bounding-box queries deferred — Phase 2 loads **all active Venice listings** (expected low volume at launch); optimize with bbox/zone-indexed queries only if perf regresses — **Reversibility:** reversible.
+
+### 48-Hour Expiry Enforcement (SCRP-04)
+- **D-40:** Enforce expiry at **query time** in every user-facing read: `expires_at > now() AND status = 'active'` — **Reversibility:** reversible.
+- **D-41:** Add **pg_cron daily job** to set `status = 'expired'` where `expires_at < now()` for housekeeping and operator visibility — **Reversibility:** reversible.
 
 ### Scraped Listing Detail & WebView Shell
-- **D-15:** Scraped listings (`source = 'subito'`) open in an **in-app WebView shell** (iframe or equivalent) loading `external_url`, with a fixed top bar: **Back to list**, **Favorite**, **Share** — **Reversibility:** costly — shell UX is the core scraped-listing pattern for all later sources.
-- **D-16:** Primary CTA on scraped detail: **"View on Subito" / "Claim on Subito"** opens `external_url` in a **new browser tab** (deep-link out) — no in-app contact — **Reversibility:** one-way — matches product decision in PROJECT.md Key Decisions.
-- **D-17:** Show **source badge** (`Subito`) on list cards and detail header — only `subito` source exists in Phase 2 — **Reversibility:** reversible.
-- **D-18:** WebView top bar **Share** copies a **deep link to `/listing/:id`** (app route), not the raw Subito URL — **Reversibility:** reversible.
+- **D-42:** Scraped listings (`source = 'subito'`) open in an **in-app WebView shell** route — embedded iframe (or equivalent) loading `external_url` — not a native detail page duplicating Subito content — **Reversibility:** costly.
+- **D-43:** WebView **top bar controls**: Back to list/map, Favorite (heart), Share (Web Share API with clipboard fallback), **"Apri su Subito"** opens `external_url` in a new browser tab — **Reversibility:** reversible.
+- **D-44:** Primary CTA on scraped detail is **"Claim on Subito"** (external deep-link) — **no in-app contact/DM** for scraped listings — **Reversibility:** one-way — core product boundary from Phase 1.
+- **D-45:** Show listing **title, source badge (`subito`), zone chip, posted time, and hero photo** above or beside the WebView frame from our canonical schema — not scraped from the iframe — **Reversibility:** reversible.
 
-### Favorites (Login-Optional for Phase 2)
-- **D-19:** Favorites in Phase 2 are **anonymous localStorage-backed** (`shoumanwu_favorites: string[]` of listing UUIDs) — no auth gate — **Reversibility:** costly — Phase 4 must migrate local favorites to account-backed storage.
-- **D-20:** Favorite toggle is available from **list cards, map sheet cards, and WebView top bar** — heart icon, filled when favorited — **Reversibility:** reversible.
-- **D-21:** Add a **Favorites filter/view** accessible from map sheet or header (shows only favorited IDs still active in DB) — **Reversibility:** reversible.
+### Favorites (Pre-Auth)
+- **D-46:** Phase 2 favorites persist in **localStorage** (`shoumanwu_favorites`, array of listing UUIDs) — no login required yet; Phase 4 migrates to Supabase-backed user favorites with AUTH-02 login gate — **Reversibility:** costly — Phase 4 needs a migration/import path.
+- **D-47:** Favorite toggle available from **list card, map popup, and WebView top bar** without leaving the current view — **Reversibility:** reversible.
+- **D-48:** Favorites tab/route (`/favorites`) shows saved listings fetched by ID from Supabase; empty state prompts browsing the map — **Reversibility:** reversible.
 
-### Data Layer & Expiry (SCRP-04)
-- **D-22:** Fetch active listings via **Supabase JS client** (anon key) with query: `status = 'active' AND expires_at > now()` — **Reversibility:** costly — RLS policies and client choice anchor downstream reads.
-- **D-23:** Replace mock `Item` type with **canonical listing shape** aligned to DB schema (`source`, `zone`, `external_url`, `photo_url`, `posted_at`, `expires_at`, etc.) — retire `Owner`, `condition`, `cost`, demo categories — **Reversibility:** costly — touches all view components.
-- **D-24:** **48h expiry enforcement:** query-time filter (D-22) is the user-facing guarantee; add a **pg_cron job or lightweight scheduled task** to batch-update `status = 'expired'` where `expires_at < now()` for DB hygiene — **Reversibility:** reversible.
-- **D-25:** Client **refetches listings on app focus and every 10 minutes** while open; show **"Updated X min ago"** in map header based on latest fetch timestamp — **Reversibility:** reversible.
+### Login-Optional Browsing
+- **D-49:** **No login wall** anywhere in Phase 2 — full map/list/detail/browse without account; auth gates deferred entirely to Phase 4 — **Reversibility:** reversible.
+- **D-50:** Post tab and Settings profile show **non-blocking stubs** ("Accedi per pubblicare" / profile placeholder) — functional UGC and auth come in Phases 3–4 — **Reversibility:** reversible.
 
-### Search & Empty States
-- **D-26:** Search is **client-side title substring** filter on the already-fetched active listings — no Postgres full-text search in Phase 2 — **Reversibility:** reversible.
-- **D-27:** Empty state when zero listings match filter: **"No free items in [zone] right now — check back soon"** with option to clear filters — **Reversibility:** reversible.
-- **D-28:** Empty state when DB returns zero active listings globally: **"Nothing free in Venice right now"** with last-updated timestamp — **Reversibility:** reversible.
+### UI Language (Pre-i18n)
+- **D-51:** Ship Phase 2 UI copy in **Italian** (primary audience) with strings centralized in a `messages/it.ts` constants module — English/Chinese toggles deferred to Phase 5 — **Reversibility:** reversible.
+- **D-52:** Listing **titles remain as scraped** (Italian from Subito); only app chrome is translated — **Reversibility:** reversible.
 
-### Design System
-- **D-29:** All new/changed UI MUST follow **Google Stitch Structured Minimalist** per `.planning/google-stitch-ui-design/DESIGN.md` and Phase 1 `01-UI-SPEC.md` forward reference — use `@theme` tokens in `src/index.css`, not ad-hoc hex — **Reversibility:** reversible.
-- **D-30:** Preserve Stitch screen mapping: `MapView.tsx` ← `map_explorer_notion_style`, `ListView.tsx` ← `listing_feed_notion_style`, detail shell ← `item_details_notion_style` layout patterns — **Reversibility:** reversible.
+### Component Library
+- **D-53:** Use **shadcn/ui** (Radix-based) for bottom sheet, dialog, and toast primitives; style with Stitch tokens from `DESIGN.md`, not default shadcn palette — **Reversibility:** reversible.
 
 ### Claude's Discretion
-- Exact MapLibre cluster radius and zoom thresholds
-- iframe vs sandboxed WebView component implementation details
-- Supabase RLS policy wording for anon read of active listings
-- pg_cron vs app-side expiry batch job scheduling
-- Whether to keep ListView as a separate tab or fold into bottom sheet only (map-first may deprecate standalone list tab)
+- Exact OpenFreeMap vs MapTiler tile style URL
+- Whether iframe sandbox attributes allow scripts (prefer restrictive sandbox; fall back to top-level redirect if Subito blocks embed)
+- Pull-to-refresh implementation (native overscroll vs button)
+- Map pin clustering threshold (enable clustering only if > ~50 visible pins)
+- Favorites empty-state illustration/copy
+- Server vs client component split per route
 
 </decisions>
 
@@ -79,32 +86,31 @@ Requirements in scope: DISC-01, DISC-02, DISC-03, DISC-04, DISC-05, DISC-06, DIS
 **Downstream agents MUST read these before planning or implementing.**
 
 ### Project & Requirements
-- `.planning/PROJECT.md` — product vision, map-first UX, login-optional browsing, scraped deep-link pattern, budget constraints
-- `.planning/REQUIREMENTS.md` — DISC-01 through DISC-07, SCRP-04 definitions and traceability
+- `.planning/PROJECT.md` — product vision, map-first UX, scraped deep-link pattern, budget constraints
+- `.planning/REQUIREMENTS.md` — DISC-01–07, SCRP-04 definitions and traceability
 - `.planning/ROADMAP.md` — Phase 2 goal, success criteria, dependency on Phase 1
 
-### Phase 1 Context & Schema
-- `.planning/phases/01-scraper-foundation-listing-data-model/01-CONTEXT.md` — locked scraper/store decisions (D-06–D-16), zone enum, listings table shape
-- `.planning/phases/01-scraper-foundation-listing-data-model/01-UI-SPEC.md` — Stitch design contract for Phase 2+ frontend (spacing, typography, color, component rules)
-- `supabase/migrations/002_listings_schema.sql` — canonical `listings` table, enums, indexes
+### Phase 1 Context & Artifacts
+- `.planning/phases/01-scraper-foundation-listing-data-model/01-CONTEXT.md` — locked schema, zone tagging, expiry field, source discriminator decisions (D-01–D-23)
+- `.planning/phases/01-scraper-foundation-listing-data-model/01-UI-SPEC.md` — Stitch design authority for Phase 2+ frontend
+- `supabase/migrations/002_listings_schema.sql` — canonical `listings` table shape and enums
+- `scraper/src/shared/schema.ts` — Zod canonical listing schema (must match UI types)
 
 ### Research & Architecture
-- `.planning/research/STACK.md` — MapLibre, Supabase client, Serwist/Next.js forward path (Phase 2 adopts MapLibre + Supabase from this doc)
-- `.planning/research/ARCHITECTURE.md` — map+list UI patterns, WebView shell, zone-at-ingestion, single listings table
+- `.planning/research/STACK.md` — Next.js + Supabase + MapLibre + shadcn recommendations
+- `.planning/research/ARCHITECTURE.md` — map+list UI, WebView shell, zone-at-ingestion pattern, project structure
+- `.planning/research/PITFALLS.md` — scraping/legal risks (context only; no scraper work in Phase 2)
 
 ### Design Reference
-- `.planning/google-stitch-ui-design/DESIGN.md` — Structured Minimalist tokens (colors, typography, spacing)
+- `.planning/google-stitch-ui-design/DESIGN.md` — color, typography, spacing tokens
 - `.planning/google-stitch-ui-design/map_explorer_notion_style/code.html` — map + bottom sheet reference
-- `.planning/google-stitch-ui-design/listing_feed_notion_style/code.html` — list card grid reference
-- `.planning/google-stitch-ui-design/item_details_notion_style/code.html` — detail layout reference
+- `.planning/google-stitch-ui-design/listing_feed_notion_style/code.html` — list feed reference
+- `.planning/google-stitch-ui-design/item_details_notion_style/code.html` — detail layout reference (adapt for WebView shell)
 
 ### Codebase Maps
-- `.planning/codebase/ARCHITECTURE.md` — current Vite SPA structure, Stitch→React mapping, anti-patterns to fix
-- `.planning/codebase/CONCERNS.md` — mock data, decorative map, type divergence — Phase 2 must address these
-- `.planning/codebase/STACK.md` — current React/Vite/Tailwind stack
-
-### State & Blockers
-- `.planning/STATE.md` — Phase 1 complete; Supabase env may need operator configuration
+- `.planning/codebase/ARCHITECTURE.md` — current Vite prototype structure, Stitch→React mapping, anti-patterns to fix
+- `.planning/codebase/STACK.md` — current vs planned stack gap
+- `.planning/codebase/STRUCTURE.md` — file locations, naming conventions
 
 </canonical_refs>
 
@@ -112,52 +118,51 @@ Requirements in scope: DISC-01, DISC-02, DISC-03, DISC-04, DISC-05, DISC-06, DIS
 ## Existing Code Insights
 
 ### Reusable Assets
-- `src/components/MapView.tsx` — bottom sheet structure, zone chips, search bar (replace decorative map with MapLibre)
-- `src/components/ListView.tsx` — bento card grid, category pills (adapt to listing cards with source badge)
-- `src/components/ItemDetailView.tsx` — two-column detail layout (adapt for WebView shell wrapper)
-- `src/components/Header.tsx`, `src/components/BottomNav.tsx` — app chrome shell
-- `src/index.css` — Tailwind v4 `@theme` tokens (align to DESIGN.md)
-- `scraper/` package — live data source already writing to Supabase `listings`
+- `src/components/MapView.tsx` — bottom sheet, zone chips, search bar layout (replace decorative map with MapLibre)
+- `src/components/ListView.tsx` — bento grid cards, category pills (adapt to listing cards with source badge)
+- `src/components/ItemDetailView.tsx` — two-column detail layout (reuse chrome around WebView iframe)
+- `src/components/Header.tsx`, `src/components/BottomNav.tsx` — app shell chrome
+- `src/index.css` — Tailwind v4 `@theme` tokens; bridge to Stitch `DESIGN.md`
+- `src/types.ts` — prototype `Item` shape (migrate to canonical listing type aligned with DB schema)
+- `scraper/src/geo/*.geojson` — Venice zone polygons (optional map overlay in Phase 2)
 
 ### Established Patterns
-- Tab-state routing in `App.tsx` — **replace** with URL routing (anti-pattern per ARCHITECTURE.md)
-- Props-down handlers from App container — keep until hooks extracted (`useListings`, `useFavorites`)
-- Stitch Notion-adjacent aesthetic with Material Symbols icons — preserve
-- Phase 1: single `listings` table, `zone` enum, `source` discriminator — frontend types must converge
+- Stitch Structured Minimalist: inline Tailwind, Material Symbols icons, Notion-adjacent neutrals + orange accent
+- Phase 1: single `listings` table, `source` enum, zone at ingestion — UI reads, never re-tags
+- Anti-patterns to **avoid**: tab-state routing without URLs, mock geo pins, monolithic `App.tsx` state — migrate away in Phase 2
 
 ### Integration Points
-- Browser SPA → Supabase Postgres (anon SELECT on active listings via RLS)
-- Map pins ← `listings.lat`, `listings.lng`, `listings.zone`
-- WebView shell ← `listings.external_url`
-- Expiry ← `listings.expires_at` (query filter + optional cron status flip)
-- Favorites ← localStorage UUID list cross-referenced with fetched listings
+- Next.js app → Supabase Postgres (anon read via `@supabase/supabase-js`)
+- Map pins ← `listings.lat/lng` where non-null
+- WebView iframe ← `listings.external_url` for `source = 'subito'`
+- Favorites ← localStorage UUID list → Supabase fetch by `id`
+- Scraper worker (Phase 1) continues writing to same `listings` table — no Phase 2 write path
 
 </code_context>
 
 <specifics>
 ## Specific Ideas
 
-- Model after Snag's map-first feed but **stay free** — no paywall on browsing.
-- Venice geography: zone polygons already tagged at ingestion; UI filter must use those tags, not radius or substring location matching.
-- Scraped listings: user claims on Subito via deep-link — app is discovery layer only for scraped content.
-- Preserve the AI Studio/Stitch visual language already implemented — don't introduce shadcn default theme.
-- Phase 2 success requires real pins from Phase 1 scraper — empty DB is a valid but must-show-clear-empty-state UX.
+- Model browsing UX on Snag's map-first feed but **stay free** — no paywall on map or list.
+- Venice geography: zone chips matter more than radius search; walking/bridge constraints make zone filter primary.
+- "Claim on Subito" is the happy path for scraped listings — user leaves app intentionally to complete pickup on source site.
+- Preserve 手慢无 branding in header; Italian-first chrome even before full i18n.
 
 </specifics>
 
 <deferred>
 ## Deferred Ideas
 
-### Out of Phase (noted, not acted on)
-- UGC post flow, Street Dump, in-app DM, reserve/mark-sent — Phase 3
-- Auth gates, account-backed favorites, push alerts — Phase 4 (localStorage favorites are Phase 2 bridge)
-- Full trilingual UI (Italian/English/Chinese) — Phase 5; Phase 2 ships English UI strings with Italian app title
-- Community report button, auto-hide after 2 reports — Phase 3 (MOD-01/02)
-- Next.js + Serwist PWA migration — deferred until auth/API routes needed (Phase 3–4)
-- FB Marketplace scraped listings — v2 (SCRP-07)
+- UGC quick-post and Street Dump — Phase 3
+- In-app DM, reserve/mark-as-sent — Phase 3
+- Login gates (Google/Apple/email) — Phase 4
+- Supabase-backed favorites sync — Phase 4 (migrate from localStorage)
+- Push alerts and keyword matching — Phase 4
+- Full trilingual UI (EN/ZH toggle) — Phase 5
+- FB Marketplace scraped listings in UI — v2 (SCRP-07)
+- Report/claim-expired moderation button — Phase 3 (MOD-01)
+- Real-time listing updates / websockets — unnecessary given 1–2 hr scraper cadence
 - Native mobile app — v2 (PLAT-01)
-- Full-text search, saved searches — future phase
-- Dark mode / appearance toggle — hide until implemented (currently non-functional in SettingsView)
 
 </deferred>
 
