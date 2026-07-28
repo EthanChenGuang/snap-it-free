@@ -1,54 +1,55 @@
 import { supabaseAdmin } from './config.js';
-import { contentHash } from './shared/dedupe.js';
-import { persistListing } from './shared/persist.js';
-import { CanonicalListingSchema } from './shared/schema.js';
+import { normalizeRawListing } from './shared/normalize.js';
+import { logReject, persistListing } from './shared/persist.js';
 import { runSubitoCrawler } from './subito/crawler.js';
 import { SUBITO_CATEGORY_URLS } from './subito/categories.js';
-import type { RawListing } from './subito/extract.js';
-
-function toCanonicalListing(raw: RawListing) {
-  const postedAt = new Date(raw.posted_at);
-  const expiresAt = new Date(postedAt.getTime() + 48 * 60 * 60 * 1000);
-
-  const candidate = {
-    source: 'subito' as const,
-    external_id: raw.external_id,
-    title: raw.title,
-    photo_url: raw.photo_url,
-    external_url: raw.external_url,
-    lat: raw.lat,
-    lng: raw.lng,
-    zone: null,
-    status: 'active' as const,
-    posted_at: postedAt,
-    expires_at: expiresAt,
-    content_hash: '',
-    raw_payload: {
-      description: raw.description,
-    },
-  };
-
-  candidate.content_hash = contentHash(candidate);
-  return CanonicalListingSchema.parse(candidate);
-}
 
 async function main() {
   const tracerUrl = SUBITO_CATEGORY_URLS[0];
-  console.log(`Starting tracer crawl: ${tracerUrl}`);
+  console.log(`Starting crawl: ${tracerUrl}`);
 
   const { rawListings, selectorHitRate } = await runSubitoCrawler([tracerUrl]);
-  console.log(`Extracted ${rawListings.length} listing(s); selector hit rate: ${selectorHitRate.toFixed(2)}`);
+  console.log(
+    `Extracted ${rawListings.length} listing(s); selector hit rate: ${selectorHitRate.toFixed(2)}`,
+  );
 
   if (rawListings.length === 0) {
     console.error('No listings extracted — check SPIKE-NOTES selectors or anti-bot block');
     process.exit(1);
   }
 
+  let inserted = 0;
+  let updated = 0;
+  let skipped = 0;
+  let rejected = 0;
+
   for (const raw of rawListings) {
-    const listing = toCanonicalListing(raw);
-    const result = await persistListing(supabaseAdmin, listing);
-    console.log(`${result}: ${listing.external_id} — ${listing.title.slice(0, 60)}`);
+    const result = normalizeRawListing(raw);
+
+    if ('reject' in result) {
+      await logReject(supabaseAdmin, null, raw.external_id, result.reject, {
+        title: raw.title,
+        description: raw.description,
+        external_url: raw.external_url,
+      });
+      rejected += 1;
+      console.log(`rejected: ${raw.external_id} — ${result.reject}`);
+      continue;
+    }
+
+    const persistResult = await persistListing(supabaseAdmin, result);
+    if (persistResult === 'inserted') inserted += 1;
+    else if (persistResult === 'updated') updated += 1;
+    else skipped += 1;
+
+    console.log(
+      `${persistResult}: ${result.external_id} — ${result.title.slice(0, 60)} (zone: ${result.zone ?? 'null'})`,
+    );
   }
+
+  console.log(
+    `Done: inserted=${inserted} updated=${updated} skipped=${skipped} rejected=${rejected}`,
+  );
 }
 
 main().catch((err) => {

@@ -120,21 +120,23 @@ async function dismissCookieBanner(page: Page): Promise<void> {
   }
 }
 
-async function resolveDetailUrl(page: Page): Promise<string | null> {
+async function resolveDetailUrls(page: Page): Promise<string[]> {
   const onCategory = page.url().includes('/annunci-veneto/regalo/');
   if (!onCategory) {
-    return page.url();
+    return [page.url()];
   }
 
   await page.waitForSelector('article a[href*=".htm"]', { timeout: 30000 }).catch(() => {});
-  const href = await page.locator('article a[href*=".htm"]').first().getAttribute('href');
-  if (!href) return null;
+  const hrefs = await page
+    .locator('article a[href*=".htm"]')
+    .evaluateAll((links) =>
+      links
+        .map((link) => link.getAttribute('href'))
+        .filter((href): href is string => Boolean(href)),
+    );
 
-  const detailUrl = href.startsWith('http') ? href : `https://www.subito.it${href}`;
-  await page.goto(detailUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-  await dismissCookieBanner(page);
-  await page.waitForTimeout(2000);
-  return detailUrl;
+  const detailUrls = [...new Set(hrefs.map((href) => (href.startsWith('http') ? href : `https://www.subito.it${href}`)))];
+  return detailUrls;
 }
 
 async function extractFromDetailPage(page: Page): Promise<{
@@ -229,14 +231,33 @@ export async function extractListingsFromPage(page: Page): Promise<{
 }> {
   await dismissCookieBanner(page);
 
-  const detailUrl = await resolveDetailUrl(page);
-  if (!detailUrl) {
+  const detailUrls = await resolveDetailUrls(page);
+  if (detailUrls.length === 0) {
     return { listings: [], hitRate: { hits: 0, total: 6 } };
   }
 
-  const { listing, hitRate } = await extractFromDetailPage(page);
+  const listings: RawListing[] = [];
+  let selectorHits = 0;
+  let selectorTotal = 0;
+
+  for (const detailUrl of detailUrls) {
+    if (page.url() !== detailUrl) {
+      await page.goto(detailUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await dismissCookieBanner(page);
+      await page.waitForTimeout(1500);
+    }
+
+    const { listing, hitRate } = await extractFromDetailPage(page);
+    selectorHits += hitRate.hits;
+    selectorTotal += hitRate.total;
+    if (listing) listings.push(listing);
+  }
+
   return {
-    listings: listing ? [listing] : [],
-    hitRate,
+    listings,
+    hitRate: {
+      hits: selectorHits,
+      total: selectorTotal > 0 ? selectorTotal : 6,
+    },
   };
 }
