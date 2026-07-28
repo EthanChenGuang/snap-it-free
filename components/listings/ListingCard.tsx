@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { forwardRef } from 'react';
 import { messages, formatRelativeTimeItalian, zoneLabel } from '@/messages/it';
 import type { ListingRow } from '@/lib/listings/types';
@@ -9,21 +10,19 @@ import { cn } from '@/lib/utils';
 type ListingCardProps = {
   listing: ListingRow;
   isSelected?: boolean;
-  onSelect: (listing: ListingRow) => void;
 };
 
-export const ListingCard = forwardRef<HTMLButtonElement, ListingCardProps>(
-  function ListingCard({ listing, isSelected, onSelect }, ref) {
+export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
+  function ListingCard({ listing, isSelected }, ref) {
     const zoneText = listing.zone ? zoneLabel(listing.zone) : messages.listing.approximateZone;
     const postedLabel = formatRelativeTimeItalian(listing.posted_at);
 
     return (
-      <button
+      <Link
         ref={ref}
-        type="button"
-        onClick={() => onSelect(listing)}
+        href={`/listing/${listing.id}`}
         className={cn(
-          'group w-full cursor-pointer rounded border border-outline-variant bg-surface p-space-sm text-left transition-colors',
+          'group block w-full cursor-pointer rounded border border-outline-variant bg-surface p-space-sm text-left transition-colors',
           isSelected
             ? 'border-primary ring-1 ring-primary'
             : 'hover:border-on-surface',
@@ -63,7 +62,7 @@ export const ListingCard = forwardRef<HTMLButtonElement, ListingCardProps>(
             {messages.listing.free}
           </span>
         </div>
-      </button>
+      </Link>
     );
   },
 );

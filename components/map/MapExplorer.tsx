@@ -42,10 +42,12 @@ export function MapExplorer({ initialListings }: MapExplorerProps) {
     };
   }, []);
 
-  const handleCardSelect = (listing: ListingRow) => {
-    setSelectedId(listing.id);
-    if (listing.lat != null && listing.lng != null) {
-      setFlyToListingId(listing.id);
+  const handlePinSelect = (id: string | null) => {
+    setSelectedId(id);
+    if (!id) return;
+    const listing = filteredListings.find((item) => item.id === id);
+    if (listing?.lat != null && listing?.lng != null) {
+      setFlyToListingId(id);
     }
   };
 
@@ -60,7 +62,7 @@ export function MapExplorer({ initialListings }: MapExplorerProps) {
       <ListingMap
         listings={mapListings}
         selectedId={selectedId}
-        onSelect={setSelectedId}
+        onSelect={handlePinSelect}
         flyToListingId={flyToListingId}
       />
 
@@ -85,11 +87,7 @@ export function MapExplorer({ initialListings }: MapExplorerProps) {
         setActiveSnapPoint={setActiveSnapPoint}
       >
         <DrawerContent className="h-full max-h-[95dvh]">
-          <ListingFeed
-            listings={filteredListings}
-            selectedId={selectedId}
-            onSelect={handleCardSelect}
-          />
+          <ListingFeed listings={filteredListings} selectedId={selectedId} />
         </DrawerContent>
       </Drawer>
     </main>

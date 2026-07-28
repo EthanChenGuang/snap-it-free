@@ -16,7 +16,7 @@ export function ListingPopup({ listing }: ListingPopupProps) {
         href={`/listing/${listing.id}`}
         className="mt-space-sm inline-flex text-label-sm font-medium text-accent-orange hover:underline"
       >
-        {messages.listing.viewOnSubito}
+        {messages.listing.viewDetail}
       </Link>
     </div>
   );

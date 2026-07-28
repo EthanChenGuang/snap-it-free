@@ -8,11 +8,10 @@ import { ListingCard } from './ListingCard';
 type ListingFeedProps = {
   listings: ListingRow[];
   selectedId: string | null;
-  onSelect: (listing: ListingRow) => void;
 };
 
-export function ListingFeed({ listings, selectedId, onSelect }: ListingFeedProps) {
-  const cardRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+export function ListingFeed({ listings, selectedId }: ListingFeedProps) {
+  const cardRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
 
   useEffect(() => {
     if (!selectedId) return;
@@ -39,7 +38,6 @@ export function ListingFeed({ listings, selectedId, onSelect }: ListingFeedProps
               }}
               listing={listing}
               isSelected={selectedId === listing.id}
-              onSelect={onSelect}
             />
           ))}
         </div>
