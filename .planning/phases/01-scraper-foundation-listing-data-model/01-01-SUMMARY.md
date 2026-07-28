@@ -141,7 +141,7 @@ Each task was committed atomically:
 2. **Task 2: npm package verify checkpoint** - user approved (no commit; checkpoint gate)
 3. **Task 3: Supabase migrations, scraper scaffold, Wave 0 tests, legal note** - `03c4b3d` (feat)
 
-**Plan metadata:** pending (docs close-out commit)
+**Plan metadata:** `34f6460` (docs: complete plan)
 
 ## Files Created/Modified
 - `supabase/migrations/001_enable_postgis.sql` - Enables PostGIS extension
