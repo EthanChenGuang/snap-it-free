@@ -74,4 +74,26 @@ describe('normalizeRawListing', () => {
     });
     expect(result).toEqual({ reject: expect.stringMatching(/price pattern/i) });
   });
+
+  it('assigns zone from coordinates during normalization', () => {
+    const result = normalizeRawListing({
+      ...baseRaw,
+      lat: 45.434,
+      lng: 12.338,
+    });
+
+    if ('reject' in result) throw new Error('expected canonical listing');
+    expect(result.zone).toBe('centro_storico');
+  });
+
+  it('sets zone null when coordinates are missing', () => {
+    const result = normalizeRawListing({
+      ...baseRaw,
+      lat: null,
+      lng: null,
+    });
+
+    if ('reject' in result) throw new Error('expected canonical listing');
+    expect(result.zone).toBeNull();
+  });
 });

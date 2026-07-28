@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "zone": "mestre_marghera",
+        "source": "Hand-drawn approximate boundary covering Mestre and Marghera mainland (OSM simplified)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [12.2, 45.46],
+            [12.28, 45.46],
+            [12.28, 45.5],
+            [12.2, 45.5],
+            [12.2, 45.46]
+          ]
+        ]
+      }
+    }
+  ]
+}

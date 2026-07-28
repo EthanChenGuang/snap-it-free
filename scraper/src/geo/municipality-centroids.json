@@ -1,0 +1,9 @@
+[
+  { "name": "Venezia", "lat": 45.434, "lng": 12.338 },
+  { "name": "Venice", "lat": 45.434, "lng": 12.338 },
+  { "name": "Mestre", "lat": 45.486, "lng": 12.245 },
+  { "name": "Marghera", "lat": 45.459, "lng": 12.214 },
+  { "name": "Lido", "lat": 45.406, "lng": 12.372 },
+  { "name": "Murano", "lat": 45.458, "lng": 12.352 },
+  { "name": "Giudecca", "lat": 45.425, "lng": 12.331 }
+]

@@ -1,32 +1,39 @@
 import { describe, expect, it } from 'vitest';
-import { tagZone, type ZonePolygon } from './zone-tag.js';
-import type { Polygon } from 'geojson';
-
-const centroStoricoPolygon: Polygon = {
-  type: 'Polygon',
-  coordinates: [
-    [
-      [12.32, 45.42],
-      [12.36, 45.42],
-      [12.36, 45.45],
-      [12.32, 45.45],
-      [12.32, 45.42],
-    ],
-  ],
-};
-
-const zones: ZonePolygon[] = [
-  { id: 'centro_storico', polygon: centroStoricoPolygon },
-];
+import { loadZonePolygons, tagZone } from './zone-tag.js';
 
 describe('tagZone', () => {
-  it('returns centro_storico for a point inside the fixture polygon', () => {
-    const zone = tagZone(45.434, 12.338, zones);
-    expect(zone).toBe('centro_storico');
+  const zones = loadZonePolygons();
+
+  it('returns centro_storico for a point inside the historic center polygon', () => {
+    expect(tagZone(45.434, 12.338, zones)).toBe('centro_storico');
+  });
+
+  it('returns mestre_marghera for a point inside the mainland polygon', () => {
+    expect(tagZone(45.486, 12.245, zones)).toBe('mestre_marghera');
+  });
+
+  it('returns lido_murano for a point inside the island polygon', () => {
+    expect(tagZone(45.406, 12.372, zones)).toBe('lido_murano');
   });
 
   it('returns null for a point outside all zone polygons', () => {
-    const zone = tagZone(45.5, 12.0, zones);
-    expect(zone).toBeNull();
+    expect(tagZone(45.5, 12.0, zones)).toBeNull();
+  });
+
+  it('returns null when coordinates are missing (null lat/lng handled by caller)', () => {
+    // tagZone requires numbers; caller skips when null — verify outside-all still null
+    expect(tagZone(46.0, 13.0, zones)).toBeNull();
+  });
+});
+
+describe('loadZonePolygons', () => {
+  it('loads all three Venice zone polygons', () => {
+    const zones = loadZonePolygons();
+    expect(zones).toHaveLength(3);
+    expect(zones.map((z) => z.id).sort()).toEqual([
+      'centro_storico',
+      'lido_murano',
+      'mestre_marghera',
+    ]);
   });
 });

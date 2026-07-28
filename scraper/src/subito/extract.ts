@@ -1,4 +1,7 @@
 import type { Page } from 'playwright';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 export type RawListing = {
   external_id: string;
@@ -12,6 +15,15 @@ export type RawListing = {
 };
 
 export type SelectorHitRate = { hits: number; total: number };
+
+type MunicipalityCentroid = { name: string; lat: number; lng: number };
+
+const MUNICIPALITY_CENTROIDS = JSON.parse(
+  readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), '../geo/municipality-centroids.json'),
+    'utf-8',
+  ),
+) as MunicipalityCentroid[];
 
 const VENICE_LAT_MIN = 45.0;
 const VENICE_LAT_MAX = 45.7;
@@ -71,6 +83,33 @@ function parseCoordsFromHtml(html: string): { lat: number | null; lng: number | 
   }
 
   return { lat, lng };
+}
+
+function lookupMunicipalityCentroid(locationText: string): { lat: number; lng: number } | null {
+  const normalized = locationText.toLowerCase();
+  for (const entry of MUNICIPALITY_CENTROIDS) {
+    if (normalized.includes(entry.name.toLowerCase())) {
+      return { lat: entry.lat, lng: entry.lng };
+    }
+  }
+  return null;
+}
+
+export function resolveCoords(
+  html: string,
+  municipalityText: string,
+): { lat: number | null; lng: number | null } {
+  const fromHtml = parseCoordsFromHtml(html);
+  if (fromHtml.lat != null && fromHtml.lng != null) {
+    return fromHtml;
+  }
+
+  const centroid = lookupMunicipalityCentroid(municipalityText);
+  if (centroid) {
+    return centroid;
+  }
+
+  return { lat: null, lng: null };
 }
 
 async function dismissCookieBanner(page: Page): Promise<void> {
@@ -143,10 +182,16 @@ async function extractFromDetailPage(page: Page): Promise<{
 
     const description = descFromSection ?? paragraphs[0] ?? '';
 
-    return { title, photo, postedText, description };
+    const locationText =
+      document.querySelector('span[class*="caption"]')?.textContent?.trim() ??
+      document.querySelector('[class*="location"]')?.textContent?.trim() ??
+      document.querySelector('[data-testid*="location"]')?.textContent?.trim() ??
+      '';
+
+    return { title, photo, postedText, description, locationText };
   });
 
-  const { lat, lng } = parseCoordsFromHtml(html);
+  const { lat, lng } = resolveCoords(html, extracted.locationText);
   const posted_at = parseItalianPostedAt(extracted.postedText).toISOString();
 
   const fields = [
