@@ -18,11 +18,11 @@
 ### Scraped Supply
 
 - [ ] **SCRP-01**: System ingests free listings from Subito.it (Veneto/Venice free-item category) on a 1–2 hour refresh cadence
-- [ ] **SCRP-02**: System normalizes scraped listings into a canonical schema with source badge (`subito`, `facebook`, `ugc`)
-- [ ] **SCRP-03**: System assigns zone tags to listings at ingestion via point-in-polygon (not live radius queries)
+- [x] **SCRP-02**: System normalizes scraped listings into a canonical schema with source badge (`subito`, `facebook`, `ugc`)
+- [x] **SCRP-03**: System assigns zone tags to listings at ingestion via point-in-polygon (not live radius queries)
 - [ ] **SCRP-04**: System auto-expires scraped listings after 48 hours
-- [ ] **SCRP-05**: System filters out mislabeled "free" listings (price/negotiation language) at ingestion
-- [ ] **SCRP-06**: System validates scraper output shape and alerts on soft-block / empty-feed failures
+- [x] **SCRP-05**: System filters out mislabeled "free" listings (price/negotiation language) at ingestion
+- [x] **SCRP-06**: System validates scraper output shape and alerts on soft-block / empty-feed failures
 
 ### UGC Posting
 
@@ -98,10 +98,10 @@ Deferred to future release. Tracked but not in current roadmap.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | SCRP-01 | Phase 1 | Pending |
-| SCRP-02 | Phase 1 | Pending |
-| SCRP-03 | Phase 1 | Pending |
-| SCRP-05 | Phase 1 | Pending |
-| SCRP-06 | Phase 1 | Pending |
+| SCRP-02 | Phase 1 | Complete |
+| SCRP-03 | Phase 1 | Complete |
+| SCRP-05 | Phase 1 | Complete |
+| SCRP-06 | Phase 1 | Complete |
 | DISC-01 | Phase 2 | Pending |
 | DISC-02 | Phase 2 | Pending |
 | DISC-03 | Phase 2 | Pending |
@@ -133,6 +133,7 @@ Deferred to future release. Tracked but not in current roadmap.
 | I18N-02 | Phase 5 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 34 total
 - Mapped to phases: 34
 - Unmapped: 0 ✓

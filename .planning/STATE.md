@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: scraper-foundation-listing-data-model
 status: executing
-stopped_at: "01-01-PLAN Task 2 — npm package verify checkpoint"
-last_updated: "2026-07-27T15:27:00.000Z"
-last_activity: 2026-07-27
-last_activity_desc: "01-01 Task 1 complete — D-06 locked to Supabase Pro + PostGIS (option-a)"
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-07-28T07:10:10.954Z"
+last_activity: 2026-07-28
+last_activity_desc: Phase 01 execution resumed (wave continue)
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 4
-  completed_plans: 0
+  completed_plans: 1
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 ## Current Position
 
 Phase: 01 (scraper-foundation-listing-data-model) — EXECUTING
-Plan: 1 of 4
-Status: Executing Phase 01 — paused at Task 2 package verify
-Last activity: 2026-07-27 — D-06 confirmed Supabase Pro + PostGIS (option-a)
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-07-28 — Phase 01 execution resumed (wave continue)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███░░░░░░░] 25%
 
 ## Performance Metrics
 
@@ -54,6 +54,11 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 01-scraper-foundation-listing-data-model P01 | 45 | 3 tasks | 22 files |
 
 ## Accumulated Context
 
@@ -67,6 +72,8 @@ Recent decisions affecting current work:
 - [Roadmap]: Auth/alerts (Phase 4) sequenced after both supply sources exist so alert-matching has a stable, populated schema to test against
 - [Roadmap]: i18n (Phase 5) placed last as additive/non-blocking, but can be pulled earlier if translation work happens in parallel
 - [01-01 Task 1]: D-06/D-08/D-09 locked — Supabase Pro + PostGIS geography column, single listings table (option-a)
+- [Phase ?]: D-06/D-08/D-09 locked — Supabase Pro + PostGIS geography column, single listings table (option-a)
+- [Phase ?]: npm package legitimacy verified for crawlee, playwright, @supabase/supabase-js, zod, @turf/boolean-point-in-polygon, vitest
 
 ### Pending Todos
 
@@ -90,6 +97,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T15:27:00.000Z
-Stopped at: 01-01-PLAN Task 2 — npm package verify checkpoint
-Resume file: .planning/phases/01-scraper-foundation-listing-data-model/01-01-PLAN.md
+Last session: 2026-07-28T07:10:10.947Z
+Stopped at: Completed 01-01-PLAN.md
+Resume file: None
