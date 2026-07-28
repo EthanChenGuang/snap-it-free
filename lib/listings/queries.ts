@@ -26,7 +26,24 @@ export async function getActiveListings(): Promise<ListingRow[]> {
   return (data ?? []) as ListingRow[];
 }
 
-/** Stub for Plan 03 detail route. */
-export async function getListingById(_id: string): Promise<ListingRow | null> {
-  return null;
+export async function getListingById(id: string): Promise<ListingRow | null> {
+  if (!getSupabaseEnv()) {
+    return null;
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('listings')
+    .select(ACTIVE_LISTING_COLUMNS)
+    .eq('id', id)
+    .eq('status', 'active')
+    .gt('expires_at', new Date().toISOString())
+    .not('zone', 'is', null)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return (data as ListingRow | null) ?? null;
 }
