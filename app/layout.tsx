@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { BottomNav } from '@/components/shell/BottomNav';
+import { Header } from '@/components/shell/Header';
 import './globals.css';
 
 const inter = Inter({
@@ -21,27 +23,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="bg-background text-on-background overflow-hidden">
-        <header className="sticky top-0 z-50 w-full border-b border-outline-variant bg-surface">
-          <div className="mx-auto flex max-w-[1200px] items-center justify-between px-gutter py-space-md">
-            <button
-              type="button"
-              className="flex cursor-pointer items-center gap-space-sm transition-opacity active:opacity-80"
-              aria-label="Menu"
-            >
-              <span className="material-symbols-outlined text-primary">menu</span>
-            </button>
-            <div className="text-h3 font-bold text-primary">手慢无</div>
-            <button
-              type="button"
-              className="flex cursor-pointer items-center gap-space-sm transition-opacity active:opacity-80"
-              aria-label="Cerca"
-            >
-              <span className="material-symbols-outlined text-primary">search</span>
-            </button>
-          </div>
-        </header>
-        {children}
+      <body className="overflow-hidden bg-background text-on-background">
+        <Header />
+        <div className="app-main">{children}</div>
+        <BottomNav />
       </body>
     </html>
   );

@@ -27,6 +27,7 @@
   --color-on-error: #ffffff;
   --color-error-container: #ffdad6;
   --color-on-error-container: #93000a;
+  --color-accent-orange: #df6b05;
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
@@ -95,10 +96,29 @@ body {
   scrollbar-width: none;
 }
 
+.app-main {
+  height: calc(100dvh - 128px);
+}
+
 .map-container {
-  height: calc(100dvh - 64px);
+  height: 100%;
 }
 
 .maplibregl-ctrl-attrib {
   font-size: 10px;
+}
+
+.maplibregl-popup-content {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.maplibregl-popup-tip {
+  display: none;
+}
+
+body[data-vaul-drawer][data-vaul-drawer-visible='true'] {
+  pointer-events: auto !important;
 }
