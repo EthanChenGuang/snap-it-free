@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: Map + List Core Browsing
 status: planning
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-07-28T14:06:20.041Z"
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-07-28T14:11:38.480Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 01 complete, transitioned to Phase 2
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -32,7 +32,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-07-28 — Phase 01 complete, transitioned to Phase 2
 
-Progress: [█████████░] 88%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -65,6 +65,7 @@ Progress: [█████████░] 88%
 | Phase 02-map-list-core-browsing P01 | 105 | 3 tasks | 22 files |
 | Phase 02 P02 | 45 | 3 tasks | 19 files |
 | Phase 02 P03 | 3min | 3 tasks | 13 files |
+| Phase 02-map-list-core-browsing P04 | 5min | 3 tasks | 22 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Italian chrome centralized in messages/it.ts; listing titles remain scraped Italian
 - [Phase ?]: Subito detail is metadata shell + external CTAs; iframe best-effort with timeout fallback
 - [Phase ?]: isAllowedExternalUrl restricts external links to https subito.it hosts only
+- [Phase ?]: Favorites key shoumanwu_favorites stable for Phase 4 migration
+- [Phase ?]: useListingsPoll 300000ms shared by map and list routes
+- [Phase ?]: npm run dev/build default to Next.js App Router
 
 ### Pending Todos
 
@@ -118,6 +122,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T14:06:20.029Z
-Stopped at: Completed 02-03-PLAN.md
+Last session: 2026-07-28T14:11:38.470Z
+Stopped at: Completed 02-04-PLAN.md
 Resume file: None
