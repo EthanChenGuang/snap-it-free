@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { BottomNav } from '@/components/shell/BottomNav';
 import { Header } from '@/components/shell/Header';
+import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 
 const inter = Inter({
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <div className="app-main">{children}</div>
         <BottomNav />
+        <Toaster />
       </body>
     </html>
   );

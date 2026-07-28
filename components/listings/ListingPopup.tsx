@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { messages } from '@/messages/it';
 import type { ListingRow } from '@/lib/listings/types';
 
@@ -11,7 +12,10 @@ type ListingPopupProps = {
 export function ListingPopup({ listing }: ListingPopupProps) {
   return (
     <div className="max-w-[200px] rounded border border-outline-variant bg-surface p-space-sm shadow-none">
-      <p className="line-clamp-2 text-label-md font-semibold text-on-surface">{listing.title}</p>
+      <div className="flex items-start justify-between gap-space-xs">
+        <p className="line-clamp-2 text-label-md font-semibold text-on-surface">{listing.title}</p>
+        <FavoriteButton listingId={listing.id} size="sm" />
+      </div>
       <Link
         href={`/listing/${listing.id}`}
         className="mt-space-sm inline-flex text-label-sm font-medium text-accent-orange hover:underline"

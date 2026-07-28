@@ -1,13 +1,13 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/toaster';
 import { isAllowedExternalUrl, openExternalListingUrl } from '@/lib/listings/external-url';
 import { shareListing } from '@/lib/listings/share';
 import type { ListingRow } from '@/lib/listings/types';
 import { messages } from '@/messages/it';
-import { cn } from '@/lib/utils';
 
 type DetailTopBarProps = {
   listing: ListingRow;
@@ -15,7 +15,6 @@ type DetailTopBarProps = {
 
 export function DetailTopBar({ listing }: DetailTopBarProps) {
   const router = useRouter();
-  const [shareNotice, setShareNotice] = useState<string | null>(null);
   const canOpenExternal = isAllowedExternalUrl(listing.external_url);
 
   const handleBack = () => {
@@ -29,13 +28,12 @@ export function DetailTopBar({ listing }: DetailTopBarProps) {
   const handleShare = async () => {
     const result = await shareListing(listing);
     if (result === 'copied') {
-      setShareNotice(messages.detail.shareCopied);
+      toast(messages.detail.shareCopied);
     } else if (result === 'shared') {
-      setShareNotice(messages.detail.shareShared);
+      toast(messages.detail.shareShared);
     } else if (result === 'failed') {
-      setShareNotice(messages.detail.shareFailed);
+      toast(messages.detail.shareFailed);
     }
-    window.setTimeout(() => setShareNotice(null), 2500);
   };
 
   return (
@@ -57,16 +55,7 @@ export function DetailTopBar({ listing }: DetailTopBarProps) {
         </div>
 
         <div className="flex shrink-0 items-center gap-space-xs">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label={messages.detail.favorite}
-            disabled
-            title={messages.detail.favoriteComingSoon}
-          >
-            <span className="material-symbols-outlined text-on-surface-variant">favorite</span>
-          </Button>
+          <FavoriteButton listingId={listing.id} />
           <Button
             type="button"
             variant="ghost"
@@ -88,16 +77,6 @@ export function DetailTopBar({ listing }: DetailTopBarProps) {
           )}
         </div>
       </div>
-      {shareNotice && (
-        <p
-          className={cn(
-            'border-t border-outline-variant bg-surface-container-low px-gutter py-space-xs text-center text-label-sm text-on-surface-variant',
-          )}
-          role="status"
-        >
-          {shareNotice}
-        </p>
-      )}
     </div>
   );
 }

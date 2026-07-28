@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { forwardRef } from 'react';
+import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { messages, formatRelativeTimeItalian, zoneLabel } from '@/messages/it';
 import type { ListingRow } from '@/lib/listings/types';
 import { cn } from '@/lib/utils';
@@ -46,6 +47,9 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
           <span className="absolute left-space-sm top-space-sm rounded-sm bg-accent-orange px-space-sm py-space-xs text-[10px] font-bold uppercase tracking-wider text-on-primary">
             {messages.listing.sourceSubito}
           </span>
+          <div className="absolute right-space-sm top-space-sm">
+            <FavoriteButton listingId={listing.id} className="bg-surface/90" />
+          </div>
         </div>
 
         <div className="flex items-start justify-between gap-space-sm">

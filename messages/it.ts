@@ -13,6 +13,36 @@ export const messages = {
   header: {
     menu: 'Menu',
     search: 'Cerca',
+    favorites: 'Preferiti',
+  },
+  favorites: {
+    added: 'Aggiunto ai preferiti',
+    removed: 'Rimosso dai preferiti',
+    pageTitle: 'Preferiti',
+    emptyTitle: 'Nessun preferito',
+    emptyDescription: 'Salva gli annunci che ti interessano toccando il cuore su mappa o elenco.',
+    browseMap: 'Esplora la mappa',
+    count: (n: number) =>
+      n === 1 ? '1 annuncio salvato' : `${n} annunci salvati`,
+  },
+  list: {
+    pageTitle: 'Elenco completo',
+    refresh: 'Aggiorna',
+    refreshing: 'Aggiornamento…',
+  },
+  post: {
+    title: 'Pubblica un annuncio',
+    stubTitle: 'Accedi per pubblicare',
+    stubDescription:
+      'La pubblicazione di annunci gratuiti sarà disponibile nella Fase 3. Per ora puoi sfogliare la mappa e salvare i preferiti.',
+    phaseNote: 'Accesso account — Fase 4',
+  },
+  settings: {
+    title: 'Impostazioni',
+    profileTitle: 'Profilo',
+    profileStub:
+      'Accedi per gestire il profilo, le notifiche e le preferenze. Funzionalità disponibile nella Fase 4.',
+    profilePlaceholder: 'Ospite — nessun account collegato',
   },
   sheet: {
     newArrivals: 'Nuovi arrivi',
@@ -29,7 +59,6 @@ export const messages = {
     pageTitle: 'Dettaglio annuncio',
     back: 'Indietro',
     favorite: 'Preferiti',
-    favoriteComingSoon: 'Preferiti disponibili a breve',
     share: 'Condividi',
     shareCopied: 'Link copiato negli appunti',
     shareShared: 'Condiviso',
