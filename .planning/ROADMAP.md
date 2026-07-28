@@ -69,12 +69,12 @@ Plans:
   4. User can do all of the above without creating an account
   5. Listings automatically disappear from the map/list 48 hours after they were posted
 
-**Plans**: 4 plans
+**Plans**: 1/4 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 02-01-PLAN.md — Next.js tracer: Supabase RLS reads → MapLibre pins on `/` (DISC-01 partial, DISC-07, SCRP-04)
+- [x] 02-01-PLAN.md — Next.js tracer: Supabase RLS reads → MapLibre pins on `/` (DISC-01 partial, DISC-07, SCRP-04)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -142,7 +142,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scraper Foundation & Listing Data Model | 4/4 | Complete    | 2026-07-28 |
-| 2. Map + List Core Browsing | 0/4 | Not started | - |
+| 2. Map + List Core Browsing | 1/4 | In Progress|  |
 | 3. UGC Posting & Community Marketplace | 0/TBD | Not started | - |
 | 4. Auth, Alerts & Push Notifications | 0/TBD | Not started | - |
 | 5. Trilingual UI (Italian / English / Chinese) | 0/TBD | Not started | - |

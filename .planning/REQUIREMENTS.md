@@ -7,20 +7,20 @@
 
 ### Discovery & Map
 
-- [ ] **DISC-01**: User can browse a map-first home screen with pins for active free listings
+- [x] **DISC-01**: User can browse a map-first home screen with pins for active free listings
 - [ ] **DISC-02**: User can view listings in a draggable bottom-sheet list alongside the map
 - [ ] **DISC-03**: User can filter listings by Venice zone (Centro Storico / Mestre-Marghera / Lido-Murano)
 - [ ] **DISC-04**: User can open a scraped listing in an in-app WebView with favorite, share, and back-to-list controls
 - [ ] **DISC-05**: User can deep-link from a scraped listing to the original source (Subito/FB) without in-app contact for scraped content
 - [ ] **DISC-06**: User can favorite a listing without leaving the browsing flow
-- [ ] **DISC-07**: User can browse listings without creating an account (login-optional browsing)
+- [x] **DISC-07**: User can browse listings without creating an account (login-optional browsing)
 
 ### Scraped Supply
 
 - [x] **SCRP-01**: System ingests free listings from Subito.it (Veneto/Venice free-item category) on a 1–2 hour refresh cadence
 - [x] **SCRP-02**: System normalizes scraped listings into a canonical schema with source badge (`subito`, `facebook`, `ugc`)
 - [x] **SCRP-03**: System assigns zone tags to listings at ingestion via point-in-polygon (not live radius queries)
-- [ ] **SCRP-04**: System auto-expires scraped listings after 48 hours
+- [x] **SCRP-04**: System auto-expires scraped listings after 48 hours
 - [x] **SCRP-05**: System filters out mislabeled "free" listings (price/negotiation language) at ingestion
 - [x] **SCRP-06**: System validates scraper output shape and alerts on soft-block / empty-feed failures
 
@@ -102,14 +102,14 @@ Deferred to future release. Tracked but not in current roadmap.
 | SCRP-03 | Phase 1 | Complete |
 | SCRP-05 | Phase 1 | Complete |
 | SCRP-06 | Phase 1 | Complete |
-| DISC-01 | Phase 2 | Pending |
+| DISC-01 | Phase 2 | Complete |
 | DISC-02 | Phase 2 | Pending |
 | DISC-03 | Phase 2 | Pending |
 | DISC-04 | Phase 2 | Pending |
 | DISC-05 | Phase 2 | Pending |
 | DISC-06 | Phase 2 | Pending |
-| DISC-07 | Phase 2 | Pending |
-| SCRP-04 | Phase 2 | Pending |
+| DISC-07 | Phase 2 | Complete |
+| SCRP-04 | Phase 2 | Complete |
 | UGC-01 | Phase 3 | Pending |
 | UGC-02 | Phase 3 | Pending |
 | UGC-03 | Phase 3 | Pending |
