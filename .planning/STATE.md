@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: scraper-foundation-listing-data-model
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-07-28T07:10:10.954Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-07-28T07:20:02.015Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 01 execution resumed (wave continue)
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 ## Current Position
 
 Phase: 01 (scraper-foundation-listing-data-model) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 01 execution resumed (wave continue)
 
-Progress: [███░░░░░░░] 25%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [███░░░░░░░] 25%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 01-scraper-foundation-listing-data-model P01 | 45 | 3 tasks | 22 files |
+| Phase 01-scraper-foundation-listing-data-model P02 | 12 | 3 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,8 @@ Recent decisions affecting current work:
 - [01-01 Task 1]: D-06/D-08/D-09 locked — Supabase Pro + PostGIS geography column, single listings table (option-a)
 - [Phase ?]: D-06/D-08/D-09 locked — Supabase Pro + PostGIS geography column, single listings table (option-a)
 - [Phase ?]: npm package legitimacy verified for crawlee, playwright, @supabase/supabase-js, zod, @turf/boolean-point-in-polygon, vitest
+- [Phase ?]: Detail-page extraction for tracer — category cards lack reliable posted_at/photo
+- [Phase ?]: Null lat/lng when map embed absent on sampled Subito listing (D-16)
 
 ### Pending Todos
 
@@ -84,6 +87,7 @@ None yet.
 - Phase 1: Subito.it's `robots.txt` explicitly forbids scraping (not a soft crawl-delay) — needs a documented ToS/legal review before pointing at production, and a non-scraping fallback supply plan
 - Phase 1: Subito's live "free/regalo" category structure and current anti-bot posture were not directly verified during research — needs a spike before committing to selector/extraction design
 - Phase 4: iOS PWA push behavior is fast-moving and regulatory-sensitive (EU DMA) — verify against WebKit's current official docs at implementation time, and test end-to-end on a real iPhone, not the Simulator
+- SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY not configured — worker persist blocked until operator sets env and applies migrations
 
 ## Deferred Items
 
@@ -97,6 +101,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T07:10:10.947Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-07-28T07:20:02.007Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None

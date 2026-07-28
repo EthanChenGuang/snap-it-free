@@ -17,7 +17,7 @@
 
 ### Scraped Supply
 
-- [ ] **SCRP-01**: System ingests free listings from Subito.it (Veneto/Venice free-item category) on a 1–2 hour refresh cadence
+- [x] **SCRP-01**: System ingests free listings from Subito.it (Veneto/Venice free-item category) on a 1–2 hour refresh cadence
 - [x] **SCRP-02**: System normalizes scraped listings into a canonical schema with source badge (`subito`, `facebook`, `ugc`)
 - [x] **SCRP-03**: System assigns zone tags to listings at ingestion via point-in-polygon (not live radius queries)
 - [ ] **SCRP-04**: System auto-expires scraped listings after 48 hours
@@ -97,7 +97,7 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCRP-01 | Phase 1 | Pending |
+| SCRP-01 | Phase 1 | Complete |
 | SCRP-02 | Phase 1 | Complete |
 | SCRP-03 | Phase 1 | Complete |
 | SCRP-05 | Phase 1 | Complete |
