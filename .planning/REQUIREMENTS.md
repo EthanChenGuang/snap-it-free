@@ -10,8 +10,8 @@
 - [x] **DISC-01**: User can browse a map-first home screen with pins for active free listings
 - [x] **DISC-02**: User can view listings in a draggable bottom-sheet list alongside the map
 - [x] **DISC-03**: User can filter listings by Venice zone (Centro Storico / Mestre-Marghera / Lido-Murano)
-- [ ] **DISC-04**: User can open a scraped listing in an in-app WebView with favorite, share, and back-to-list controls
-- [ ] **DISC-05**: User can deep-link from a scraped listing to the original source (Subito/FB) without in-app contact for scraped content
+- [x] **DISC-04**: User can open a scraped listing in an in-app WebView with favorite, share, and back-to-list controls
+- [x] **DISC-05**: User can deep-link from a scraped listing to the original source (Subito/FB) without in-app contact for scraped content
 - [ ] **DISC-06**: User can favorite a listing without leaving the browsing flow
 - [x] **DISC-07**: User can browse listings without creating an account (login-optional browsing)
 
@@ -105,8 +105,8 @@ Deferred to future release. Tracked but not in current roadmap.
 | DISC-01 | Phase 2 | Complete |
 | DISC-02 | Phase 2 | Complete |
 | DISC-03 | Phase 2 | Complete |
-| DISC-04 | Phase 2 | Pending |
-| DISC-05 | Phase 2 | Pending |
+| DISC-04 | Phase 2 | Complete |
+| DISC-05 | Phase 2 | Complete |
 | DISC-06 | Phase 2 | Pending |
 | DISC-07 | Phase 2 | Complete |
 | SCRP-04 | Phase 2 | Complete |

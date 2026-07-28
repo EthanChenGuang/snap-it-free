@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: Map + List Core Browsing
 status: planning
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-07-28T14:02:05.692Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-07-28T14:06:20.041Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 01 complete, transitioned to Phase 2
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -32,7 +32,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-07-28 — Phase 01 complete, transitioned to Phase 2
 
-Progress: [████████░░] 75%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [████████░░] 75%
 | Phase 01-scraper-foundation-listing-data-model P04 | 12 | 3 tasks | 11 files |
 | Phase 02-map-list-core-browsing P01 | 105 | 3 tasks | 22 files |
 | Phase 02 P02 | 45 | 3 tasks | 19 files |
+| Phase 02 P03 | 3min | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Stitch map explorer header and surface tokens ported to app/globals.css per DESIGN.md
 - [Phase ?]: vaul modal=false with pointer-events auto workaround for map click-through
 - [Phase ?]: Italian chrome centralized in messages/it.ts; listing titles remain scraped Italian
+- [Phase ?]: Subito detail is metadata shell + external CTAs; iframe best-effort with timeout fallback
+- [Phase ?]: isAllowedExternalUrl restricts external links to https subito.it hosts only
 
 ### Pending Todos
 
@@ -115,6 +118,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-28T14:02:05.682Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-07-28T14:06:20.029Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
