@@ -24,4 +24,12 @@ describe('validateBatch', () => {
     const result = validateBatch(Array(100).fill({}), trailingMedians, 0.95);
     expect(result).toEqual({ ok: true });
   });
+
+  it('uses bootstrap median 50 when fewer than 7 prior runs', () => {
+    const result = validateBatch(Array(20).fill({}), [], 0.95);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toMatch(/count 20 < min 25 \(50% of median 50\)/);
+    }
+  });
 });

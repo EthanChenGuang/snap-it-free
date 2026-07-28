@@ -1,7 +1,16 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import type { RawListing } from '../subito/extract.js';
+import { normalizeRawListing } from './normalize.js';
 import type { CanonicalListing } from './schema.js';
 
 export type PersistResult = 'skipped' | 'inserted' | 'updated';
+
+export type BatchPersistStats = {
+  inserted: number;
+  updated: number;
+  skipped: number;
+  rejected: number;
+};
 
 export async function logReject(
   supabase: SupabaseClient,
@@ -71,4 +80,38 @@ export async function persistListing(
   }
 
   return existing ? 'updated' : 'inserted';
+}
+
+export async function persistBatch(
+  supabase: SupabaseClient,
+  rawListings: RawListing[],
+  scrapeRunId: string,
+): Promise<BatchPersistStats> {
+  const stats: BatchPersistStats = {
+    inserted: 0,
+    updated: 0,
+    skipped: 0,
+    rejected: 0,
+  };
+
+  for (const raw of rawListings) {
+    const result = normalizeRawListing(raw);
+
+    if ('reject' in result) {
+      await logReject(supabase, scrapeRunId, raw.external_id, result.reject, {
+        title: raw.title,
+        description: raw.description,
+        external_url: raw.external_url,
+      });
+      stats.rejected += 1;
+      continue;
+    }
+
+    const persistResult = await persistListing(supabase, result);
+    if (persistResult === 'inserted') stats.inserted += 1;
+    else if (persistResult === 'updated') stats.updated += 1;
+    else stats.skipped += 1;
+  }
+
+  return stats;
 }
