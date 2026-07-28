@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 2
 current_phase_name: Map + List Core Browsing
-status: planning
-stopped_at: Completed 02-04-PLAN.md
+status: complete
+stopped_at: Completed 02-04-PLAN.md — Phase 2 complete
 last_updated: "2026-07-28T14:11:38.480Z"
 last_activity: 2026-07-28
 last_activity_desc: Phase 01 complete, transitioned to Phase 2
@@ -23,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-24)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
-**Current focus:** Phase 01 — scraper-foundation-listing-data-model
+**Current focus:** Phase 2 complete — ready for Phase 3 UGC posting
 
 ## Current Position
 
-Phase: 2 — Map + List Core Browsing
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-07-28 — Phase 01 complete, transitioned to Phase 2
+Phase: 2 — Map + List Core Browsing (complete)
+Plan: 4/4 complete
+Status: Phase 2 shippable
+Last activity: 2026-07-28 — Completed favorites, list tab, and login-optional shell
 
 Progress: [██████████] 100%
 
