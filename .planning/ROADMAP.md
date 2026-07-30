@@ -57,7 +57,7 @@ Plans:
 
 ### Phase 2: Map + List Core Browsing
 
-**Goal**: Users can find and explore live free listings across Venice without needing an account
+**Goal**: As a Venice resident or visitor, I want to find and explore live free listings across the city without needing an account, so that I can discover free items nearby and claim them on Subito.
 **Mode**: mvp
 **Depends on**: Phase 1
 **Requirements**: DISC-01, DISC-02, DISC-03, DISC-04, DISC-05, DISC-06, DISC-07, SCRP-04
@@ -102,9 +102,15 @@ Plans:
   2. Uploaded photos have EXIF metadata stripped before being stored or displayed
   3. A logged-in user can message a UGC poster in-app (scraped listings excluded), and the poster can mark their own listing as reserved or sent/gone
   4. Both parties see an in-person meetup safety notice at first contact and inside the DM thread
-  5. Any user can report a listing as claimed/expired/not-free; a UGC listing auto-hides after 2 reports (with a distinct threshold from scraped listings), and its poster can see that it's hidden pending review
+  5. Any user can report a listing as claimed/expired/not-free; scraped listings auto-hide after 2 reports while UGC listings auto-hide after 3 reports into `pending_review`, and its poster can see that it's hidden pending review
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Tracer: migration + auth cookies + Quick Post + UGC detail on map (UGC-01, UGC-03, UGC-04)
+- [ ] 03-02-PLAN.md — In-app DM + safety modal/banner (CONT-01, CONT-04, CONT-05)
+- [ ] 03-03-PLAN.md — Community reports + auto-hide + owner hidden banner (MOD-01, MOD-02, MOD-03)
+- [ ] 03-04-PLAN.md — Street Dump + poster lifecycle + rate limits (UGC-02, CONT-02, CONT-03)
 
 ### Phase 4: Auth, Alerts & Push Notifications
 
@@ -142,8 +148,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scraper Foundation & Listing Data Model | 4/4 | Complete    | 2026-07-28 |
-| 2. Map + List Core Browsing | 4/4 | In Progress|  |
-| 3. UGC Posting & Community Marketplace | 0/TBD | Not started | - |
+| 2. Map + List Core Browsing | 5/5 | Complete    | 2026-07-28 |
+| 3. UGC Posting & Community Marketplace | 0/4 | Not started | - |
 | 4. Auth, Alerts & Push Notifications | 0/TBD | Not started | - |
 | 5. Trilingual UI (Italian / English / Chinese) | 0/TBD | Not started | - |
 
