@@ -1,11 +1,12 @@
 ---
 phase: 3
 slug: ugc-posting-community-marketplace
-status: draft
+status: approved
 shadcn_initialized: false
 preset: google-stitch-structured-minimalist
 created: 2026-07-30
-updated: 2026-07-30T23:42:00+02:00
+updated: 2026-07-30T23:55:00+02:00
+reviewed_at: 2026-07-30T23:55:00+02:00
 ---
 
 # Phase 3 — UI Design Contract
@@ -119,6 +120,23 @@ updated: 2026-07-30T23:42:00+02:00
 **Secondary:** Collapsible safety banner (top of thread), item preview strip below header.
 
 **Tertiary:** Quick-reply chip row, compose input + send icon button.
+
+### Icon-only controls — aria-label fallbacks
+
+All Phase 3 icon-only buttons MUST expose accessible names via `aria-label` sourced from `messages/it.ts`. Visible text labels are omitted; aria-label is the sole name for screen readers. Extends Phase 2 pattern (`02-UI-SPEC.md`).
+
+| Control | Component | `messages/it.ts` key | Fallback string |
+|---------|-----------|----------------------|-----------------|
+| Photo remove | `PostForm` | `post.removePhoto` | `Rimuovi foto` |
+| DM drawer close | `DmDrawer` | `dm.close` | `Chiudi messaggi` |
+| DM send | `DmDrawer` | `dm.send` | `Invia messaggio` |
+| Detail overflow | `DetailOverflowMenu` | `report.menuTrigger` | `Altre opzioni` |
+| Safety banner collapse | `SafetyBanner` | `safety.collapse` | `Nascondi consigli di sicurezza` |
+| Safety banner expand | `SafetyBanner` | `safety.expand` | `Mostra consigli di sicurezza` |
+| Auth modal close | `AuthPromptModal` | `auth.close` | `Chiudi` |
+| Report dialog close | `ReportListingMenu` | `report.close` | `Chiudi` |
+
+If a key is missing at runtime, use the Fallback string column (Italian, matches `messages/it.ts` defaults).
 
 ---
 
@@ -302,7 +320,7 @@ Inherited unchanged from Phase 2 (`02-UI-SPEC.md` / DESIGN.md):
 | DM drawer height | 80dvh max | Message thread viewport |
 | Pin map min height | 240px | Quick Post mini-map; Street Dump map section |
 | Upload zone aspect | 16:9 | Photo dashed upload and preview |
-| Tab underline offset | 2px | Active tab indicator below label |
+| Tab underline offset | 2px | Active tab indicator below label — **decorative exception** (not layout grid; 2px hairline per Stitch tab pattern) |
 | Icon touch target | 36–44px | Unchanged from Phase 2 |
 | BottomNav clearance | `pb-28` | Post/manage pages content padding |
 
@@ -376,6 +394,10 @@ All chrome strings in `messages/it.ts`. Listing titles/descriptions remain user-
 | Rate limit post | `Hai raggiunto il limite di 3 annunci al giorno` |
 | Manage link | `I miei annunci` |
 | Street Dump helper | `Conferma la posizione sulla mappa — non pubblichiamo automaticamente.` |
+| Geolocation denied | `Posizione non disponibile — attiva i permessi o usa la scheda Pubblica.` |
+| Geolocation timeout | `Impossibile rilevare la posizione — riprova o seleziona manualmente sulla mappa.` |
+| Geolocation unavailable | `Geolocalizzazione non supportata — usa la scheda Pubblica per selezionare la zona.` |
+| Upload invalid file | `File non valido — max 5 MB, JPG/PNG/WebP` |
 
 ### Auth modal
 
@@ -479,7 +501,8 @@ Applicable state considerations resolved: 18 covered, 1 backstop, 0 unresolved
 | error | Pin outside Venice | ✅ covered | Inline `post.pinError` below map |
 | error | Post rate limit | ✅ covered | Toast `post.rateLimitPost` |
 | error | DM rate limit | ✅ covered | Toast `dm.rateLimit` |
-| error | Upload too large / wrong type | ✅ covered | Toast `File non valido — max 5 MB, JPG/PNG/WebP` |
+| error | Upload too large / wrong type | ✅ covered | Toast `post.uploadInvalid` — see Copywriting Contract |
+| error | Street Dump geolocation denied/timeout | ✅ covered | Inline below map: `post.geolocationDenied` / `post.geolocationTimeout` / `post.geolocationUnavailable` |
 | error | Report duplicate / failed | ✅ covered | Toasts in Copywriting Contract |
 | populated | UGC vs scraped detail branch | ✅ covered | Server branch on `source`; distinct shells |
 | populated | Reserved UGC on map/list | ✅ covered | Gray `Riservato` chip; card remains tappable |
@@ -523,11 +546,11 @@ Inherited from Phase 1–2 plus Phase 3 guardrails:
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS (aria-label table added post-review)
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS (2px tab underline documented as decorative exception)
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-07-30
