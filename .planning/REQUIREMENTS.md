@@ -54,7 +54,7 @@
 
 - [x] **NOTF-01**: User can create keyword + zone match alerts
 - [ ] **NOTF-02**: User receives push notifications when new listings match saved alerts (Web Push / VAPID)
-- [ ] **NOTF-03**: User sees an in-app "new match" badge fallback when push is unavailable (e.g. iOS Safari tab)
+- [x] **NOTF-03**: User sees an in-app "new match" badge fallback when push is unavailable (e.g. iOS Safari tab)
 - [ ] **NOTF-04**: User sees an explicit Add-to-Home-Screen onboarding flow for iOS PWA install
 - [x] **NOTF-05**: User must be logged in to create or manage alerts
 
@@ -126,7 +126,7 @@ Deferred to future release. Tracked but not in current roadmap.
 | AUTH-02 | Phase 4 | Complete |
 | NOTF-01 | Phase 4 | Complete |
 | NOTF-02 | Phase 4 | Pending |
-| NOTF-03 | Phase 4 | Pending |
+| NOTF-03 | Phase 4 | Complete |
 | NOTF-04 | Phase 4 | Pending |
 | NOTF-05 | Phase 4 | Complete |
 | I18N-01 | Phase 5 | Pending |

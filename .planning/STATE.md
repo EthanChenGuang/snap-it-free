@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 4
 current_phase_name: Auth, Alerts & Push Notifications
 status: planning
-stopped_at: Completed 04-03-PLAN.md
-last_updated: "2026-08-01T14:32:27.076Z"
+stopped_at: Completed 04-05-PLAN.md
+last_updated: "2026-08-01T14:35:08.050Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 complete, transitioned to Phase 4
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 20
-  completed_plans: 17
+  completed_plans: 18
 ---
 
 # Project State
@@ -32,7 +32,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-08-01 — Phase 03 complete, transitioned to Phase 4
 
-Progress: [█████████░] 85%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
@@ -75,6 +75,7 @@ Progress: [█████████░] 85%
 | Phase 04-auth-alerts-push-notifications P02 | 5 min | 3 tasks | 4 files |
 | Phase 04-auth-alerts-push-notifications P04 | 8 min | 2 tasks | 11 files |
 | Phase 04-auth-alerts-push-notifications P03 | 8 min | 2 tasks | 9 files |
+| Phase 04 P05 | 18 min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -123,6 +124,7 @@ Recent decisions affecting current work:
 - [Phase ?]: Alert CRUD via Route Handlers with max 5 enabled alerts and Settings Stitch UI (D-101, D-102, D-116)
 - [Phase ?]: Logged-out favorite tap opens AuthPromptModal; Supabase writes only when authed (D-97)
 - [Phase ?]: localStorage merge clears only after /api/favorites/merge 2xx (D-96)
+- [Phase ?]: Auto-selected option-a: locked outbox + Vercel Cron poller (D-106)
 
 ### Pending Todos
 
@@ -147,6 +149,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T14:32:27.063Z
-Stopped at: Completed 04-03-PLAN.md
+Last session: 2026-08-01T14:35:08.037Z
+Stopped at: Completed 04-05-PLAN.md
 Resume file: None
