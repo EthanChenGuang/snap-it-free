@@ -4,6 +4,7 @@ import { loadZonePolygons, tagZone } from '@/lib/geo/zone-tag';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
 import { CreateListingSchema } from '@/lib/ugc/schemas';
+import { assertCanPost, RateLimitError } from '@/lib/ugc/rate-limit';
 import { messages } from '@/messages/it';
 
 function contentHash(title: string, photoUrl: string, lat: number, lng: number): string {
@@ -37,12 +38,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: messages.post.pinOutsideVenice }, { status: 422 });
   }
 
+  const supabase = await createClient();
+
+  try {
+    await assertCanPost(supabase, user.id);
+  } catch (error) {
+    if (error instanceof RateLimitError) {
+      return NextResponse.json({ error: messages.post.rateLimitPost }, { status: 429 });
+    }
+    throw error;
+  }
+
   const id = randomUUID();
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   const hash = contentHash(title, photoUrl, lat, lng);
 
-  const supabase = await createClient();
   const { error } = await supabase.from('listings').insert({
     id,
     source: 'ugc',

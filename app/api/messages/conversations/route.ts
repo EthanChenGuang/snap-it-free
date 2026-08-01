@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { CreateConversationSchema } from '@/lib/messages/schemas';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
+import { assertCanStartConversation, RateLimitError } from '@/lib/ugc/rate-limit';
+import { messages } from '@/messages/it';
 
 export async function POST(request: Request) {
   const user = await requireAuth();
@@ -66,6 +68,15 @@ export async function POST(request: Request) {
 
   if (fcfsBlocked === true) {
     return NextResponse.json({ readOnly: true, reason: 'fcfs' });
+  }
+
+  try {
+    await assertCanStartConversation(supabase, user.id);
+  } catch (error) {
+    if (error instanceof RateLimitError) {
+      return NextResponse.json({ error: messages.dm.rateLimit }, { status: 429 });
+    }
+    throw error;
   }
 
   const { data: created, error: insertError } = await supabase
