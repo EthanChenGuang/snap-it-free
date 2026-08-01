@@ -1,11 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ListingFeed } from '@/components/listings/ListingFeed';
 import { ZoneFilterChips } from '@/components/map/ZoneFilterChips';
-import { filterByZone } from '@/lib/listings/filters';
+import { excludeReportedIds, filterByZone } from '@/lib/listings/filters';
 import { useListingsPoll } from '@/lib/listings/useListingsPoll';
+import { readReportedIds, REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
 import type { ListingRow, ZoneChip } from '@/lib/listings/types';
 import { messages } from '@/messages/it';
 
@@ -16,10 +17,18 @@ type ListPageClientProps = {
 export function ListPageClient({ initialListings }: ListPageClientProps) {
   const { listings, refresh, isRefreshing } = useListingsPoll(initialListings);
   const [selectedZone, setSelectedZone] = useState<ZoneChip>('All');
+  const [reportedIds, setReportedIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    setReportedIds(readReportedIds());
+    const handleReportsChange = () => setReportedIds(readReportedIds());
+    window.addEventListener(REPORTS_CHANGE_EVENT, handleReportsChange);
+    return () => window.removeEventListener(REPORTS_CHANGE_EVENT, handleReportsChange);
+  }, []);
 
   const filteredListings = useMemo(
-    () => filterByZone(listings, selectedZone),
-    [listings, selectedZone],
+    () => excludeReportedIds(filterByZone(listings, selectedZone), reportedIds),
+    [listings, selectedZone, reportedIds],
   );
 
   return (

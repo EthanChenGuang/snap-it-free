@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filterByZone, filterMapListings } from './filters';
+import { excludeReportedIds, filterByZone, filterMapListings } from './filters';
 import type { ListingRow } from './types';
 
 const baseListing: ListingRow = {
@@ -45,6 +45,24 @@ describe('filterByZone', () => {
 
     expect(filterByZone(listings, 'All')).toEqual([baseListing]);
     expect(filterByZone(listings, 'centro_storico')).toEqual([baseListing]);
+  });
+});
+
+describe('excludeReportedIds', () => {
+  it('excludes listings whose id is in reportedIds', () => {
+    const listings: ListingRow[] = [
+      baseListing,
+      { ...baseListing, id: '22222222-2222-2222-2222-222222222222' },
+    ];
+
+    expect(excludeReportedIds(listings, [baseListing.id])).toHaveLength(1);
+    expect(excludeReportedIds(listings, [baseListing.id])[0]?.id).toBe(
+      '22222222-2222-2222-2222-222222222222',
+    );
+  });
+
+  it('returns all listings when reportedIds is empty', () => {
+    expect(excludeReportedIds([baseListing], [])).toEqual([baseListing]);
   });
 });
 

@@ -4,8 +4,9 @@ import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { ListingFeed } from '@/components/listings/ListingFeed';
-import { filterByZone, filterMapListings } from '@/lib/listings/filters';
+import { excludeReportedIds, filterByZone, filterMapListings } from '@/lib/listings/filters';
 import { useListingsPoll } from '@/lib/listings/useListingsPoll';
+import { readReportedIds, REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
 import { messages } from '@/messages/it';
 import type { ListingRow, ZoneChip } from '@/lib/listings/types';
 import { ZoneFilterChips } from './ZoneFilterChips';
@@ -25,10 +26,18 @@ export function MapExplorer({ initialListings }: MapExplorerProps) {
   const [selectedZone, setSelectedZone] = useState<ZoneChip>('All');
   const [activeSnapPoint, setActiveSnapPoint] = useState<number | string | null>(0.25);
   const [flyToListingId, setFlyToListingId] = useState<string | null>(null);
+  const [reportedIds, setReportedIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    setReportedIds(readReportedIds());
+    const handleReportsChange = () => setReportedIds(readReportedIds());
+    window.addEventListener(REPORTS_CHANGE_EVENT, handleReportsChange);
+    return () => window.removeEventListener(REPORTS_CHANGE_EVENT, handleReportsChange);
+  }, []);
 
   const filteredListings = useMemo(
-    () => filterByZone(listings, selectedZone),
-    [listings, selectedZone],
+    () => excludeReportedIds(filterByZone(listings, selectedZone), reportedIds),
+    [listings, selectedZone, reportedIds],
   );
 
   const mapListings = useMemo(

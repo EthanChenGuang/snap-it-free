@@ -15,3 +15,11 @@ export function filterMapListings(listings: ListingRow[]): ListingRow[] {
 export function isVeniceZone(value: string): value is VeniceZone {
   return value === 'centro_storico' || value === 'mestre_marghera' || value === 'lido_murano';
 }
+
+export function excludeReportedIds(listings: ListingRow[], reportedIds: string[]): ListingRow[] {
+  if (reportedIds.length === 0) {
+    return listings;
+  }
+  const reported = new Set(reportedIds);
+  return listings.filter((listing) => !reported.has(listing.id));
+}

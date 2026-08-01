@@ -1,6 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { DetailOverflowMenu } from '@/components/detail/DetailOverflowMenu';
+import { ReportListingMenu } from '@/components/detail/ReportListingMenu';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toaster';
@@ -15,6 +18,7 @@ type DetailTopBarProps = {
 
 export function DetailTopBar({ listing }: DetailTopBarProps) {
   const router = useRouter();
+  const [reportOpen, setReportOpen] = useState(false);
   const canOpenExternal = isAllowedExternalUrl(listing.external_url);
 
   const handleBack = () => {
@@ -65,6 +69,7 @@ export function DetailTopBar({ listing }: DetailTopBarProps) {
           >
             <span className="material-symbols-outlined text-primary">share</span>
           </Button>
+          <DetailOverflowMenu onReport={() => setReportOpen(true)} />
           {canOpenExternal && (
             <Button
               type="button"
@@ -77,6 +82,12 @@ export function DetailTopBar({ listing }: DetailTopBarProps) {
           )}
         </div>
       </div>
+
+      <ReportListingMenu
+        listingId={listing.id}
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+      />
     </div>
   );
 }

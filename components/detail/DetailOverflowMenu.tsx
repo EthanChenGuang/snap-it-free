@@ -1,0 +1,64 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { messages } from '@/messages/it';
+
+type DetailOverflowMenuProps = {
+  onReport: () => void;
+};
+
+export function DetailOverflowMenu({ onReport }: DetailOverflowMenuProps) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, [open]);
+
+  const handleReport = () => {
+    setOpen(false);
+    onReport();
+  };
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={() => setOpen((value) => !value)}
+        aria-label={messages.report.menuTrigger}
+        aria-expanded={open}
+        aria-haspopup="menu"
+      >
+        <span className="material-symbols-outlined text-primary">more_horiz</span>
+      </Button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full z-40 mt-space-xs min-w-[200px] rounded border border-outline-variant bg-surface py-space-xs"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            className="w-full px-space-md py-space-sm text-left text-label-md text-on-surface hover:bg-surface-container-low"
+            onClick={handleReport}
+          >
+            {messages.report.menuItem}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

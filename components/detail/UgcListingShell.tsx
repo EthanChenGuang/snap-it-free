@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { DetailTopBar } from '@/components/detail/DetailTopBar';
 import { HeroMetadata } from '@/components/detail/HeroMetadata';
 import { DmDrawer } from '@/components/messages/DmDrawer';
+import { HiddenReviewBanner } from '@/components/ugc/HiddenReviewBanner';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
@@ -12,10 +13,11 @@ import type { ListingRow } from '@/lib/listings/types';
 import { messages } from '@/messages/it';
 
 type UgcListingShellProps = {
-  listing: ListingRow & { description?: string | null };
+  listing: ListingRow & { description?: string | null; hidden_reason?: string | null };
+  isOwnerView?: boolean;
 };
 
-export function UgcListingShell({ listing }: UgcListingShellProps) {
+export function UgcListingShell({ listing, isOwnerView = false }: UgcListingShellProps) {
   const searchParams = useSearchParams();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
@@ -24,6 +26,10 @@ export function UgcListingShell({ listing }: UgcListingShellProps) {
   const [readOnly, setReadOnly] = useState(false);
 
   const isReserved = listing.status === 'claimed';
+  const showHiddenBanner =
+    isOwnerView &&
+    listing.status === 'hidden' &&
+    listing.hidden_reason === 'pending_review';
   const authRedirect = `/listing/${listing.id}?openDm=1`;
 
   useEffect(() => {
@@ -72,6 +78,7 @@ export function UgcListingShell({ listing }: UgcListingShellProps) {
       <main className="mx-auto w-full max-w-container-max px-gutter py-space-lg pb-32">
         <div className="grid grid-cols-1 gap-space-xl lg:grid-cols-12">
           <div className="flex flex-col gap-space-lg lg:col-span-8">
+            {showHiddenBanner && <HiddenReviewBanner />}
             <HeroMetadata listing={listing} />
 
             {listing.description && (

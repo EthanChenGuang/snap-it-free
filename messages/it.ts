@@ -129,6 +129,27 @@ export const messages = {
     expand: 'Mostra consigli di sicurezza',
     bannerShort: 'Incontra in un luogo pubblico. Non pagare per oggetti gratuiti.',
   },
+  report: {
+    menuTrigger: 'Altre opzioni',
+    menuItem: 'Segnala annuncio',
+    dialogTitle: 'Segnala annuncio',
+    reasonAlreadyTaken: 'Già preso / non più disponibile',
+    reasonNotFree: 'Non è gratis',
+    reasonSpam: 'Spam o truffa',
+    confirm: 'Invia segnalazione',
+    close: 'Chiudi',
+    successToast: 'Segnalazione inviata — grazie',
+    duplicateToast: 'Hai già segnalato questo annuncio',
+    errorToast: 'Impossibile inviare la segnalazione — riprova',
+  },
+  manage: {
+    pageTitle: 'I miei annunci',
+    emptyTitle: 'Non hai ancora pubblicato annunci',
+    emptyCta: 'Pubblica il primo',
+    hiddenBannerTitle: 'Nascosto — in revisione',
+    hiddenBannerBody:
+      'Il tuo annuncio non è visibile agli altri utenti mentre lo verifichiamo.',
+  },
   listing: {
     sourceSubito: 'Subito',
     sourceCommunity: 'Community',

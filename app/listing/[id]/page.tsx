@@ -22,10 +22,10 @@ export default async function ListingPage({ params }: ListingPageProps) {
     notFound();
   }
 
-  const { listing } = result;
+  const { listing, isOwnerView } = result;
 
   if (listing.source === 'ugc') {
-    return <UgcListingShell listing={listing} />;
+    return <UgcListingShell listing={listing} isOwnerView={isOwnerView} />;
   }
 
   if (listing.source === 'subito') {
