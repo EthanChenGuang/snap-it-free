@@ -1,8 +1,13 @@
 'use client';
 
+import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { DetailTopBar } from '@/components/detail/DetailTopBar';
 import { HeroMetadata } from '@/components/detail/HeroMetadata';
+import { DmDrawer } from '@/components/messages/DmDrawer';
+import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
+import { createClient } from '@/lib/supabase/client';
 import type { ListingRow } from '@/lib/listings/types';
 import { messages } from '@/messages/it';
 
@@ -11,6 +16,55 @@ type UgcListingShellProps = {
 };
 
 export function UgcListingShell({ listing }: UgcListingShellProps) {
+  const searchParams = useSearchParams();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [dmOpen, setDmOpen] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [readOnly, setReadOnly] = useState(false);
+
+  const isReserved = listing.status === 'claimed';
+  const authRedirect = `/listing/${listing.id}?openDm=1`;
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(Boolean(user));
+    });
+  }, []);
+
+  useEffect(() => {
+    if (searchParams.get('openDm') === '1' && isLoggedIn) {
+      setDmOpen(true);
+    }
+  }, [searchParams, isLoggedIn]);
+
+  const handleConversationReady = useCallback((id: string, nextReadOnly: boolean) => {
+    setConversationId(id || null);
+    setReadOnly(nextReadOnly);
+  }, []);
+
+  const handleContatta = () => {
+    if (isReserved) return;
+
+    if (!isLoggedIn) {
+      setAuthOpen(true);
+      return;
+    }
+
+    setConversationId(null);
+    setReadOnly(false);
+    setDmOpen(true);
+  };
+
+  const handleDmOpenChange = (open: boolean) => {
+    setDmOpen(open);
+    if (!open) {
+      setConversationId(null);
+      setReadOnly(false);
+    }
+  };
+
   return (
     <div className="flex h-full flex-col overflow-y-auto">
       <DetailTopBar listing={listing} />
@@ -40,9 +94,7 @@ export function UgcListingShell({ listing }: UgcListingShellProps) {
                     {messages.detail.statusLabel}
                   </span>
                   <span className="flex items-center gap-space-xs text-label-md font-bold text-on-surface">
-                    {listing.status === 'claimed'
-                      ? messages.listing.reserved
-                      : messages.detail.statusAvailable}
+                    {isReserved ? messages.listing.reserved : messages.detail.statusAvailable}
                   </span>
                 </div>
                 <div className="text-right">
@@ -55,10 +107,21 @@ export function UgcListingShell({ listing }: UgcListingShellProps) {
                 </div>
               </div>
 
-              <Button type="button" className="w-full" disabled>
+              <Button
+                type="button"
+                className="w-full"
+                disabled={isReserved}
+                onClick={handleContatta}
+              >
                 <span className="material-symbols-outlined text-sm">chat_bubble</span>
-                {messages.detail.contactStub}
+                {messages.detail.contact}
               </Button>
+
+              {isReserved && (
+                <p className="mt-space-sm text-center text-label-sm text-on-surface-variant">
+                  {messages.detail.contactReserved}
+                </p>
+              )}
 
               <div className="mt-space-lg rounded border border-outline-variant bg-surface-container-low p-space-md">
                 <div className="flex items-center gap-space-md">
@@ -79,6 +142,25 @@ export function UgcListingShell({ listing }: UgcListingShellProps) {
           </aside>
         </div>
       </main>
+
+      <AuthPromptModal
+        open={authOpen}
+        onOpenChange={setAuthOpen}
+        redirectTo={authRedirect}
+      />
+
+      <DmDrawer
+        open={dmOpen}
+        onOpenChange={handleDmOpenChange}
+        listing={{
+          id: listing.id,
+          title: listing.title,
+          photo_url: listing.photo_url,
+        }}
+        conversationId={conversationId}
+        readOnly={readOnly}
+        onConversationReady={handleConversationReady}
+      />
     </div>
   );
 }

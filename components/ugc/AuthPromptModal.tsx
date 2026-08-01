@@ -15,9 +15,10 @@ import { messages } from '@/messages/it';
 type AuthPromptModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  redirectTo?: string;
 };
 
-export function AuthPromptModal({ open, onOpenChange }: AuthPromptModalProps) {
+export function AuthPromptModal({ open, onOpenChange, redirectTo = '/post' }: AuthPromptModalProps) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
@@ -27,10 +28,10 @@ export function AuthPromptModal({ open, onOpenChange }: AuthPromptModalProps) {
 
     setStatus('sending');
     const supabase = createClient();
-    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent('/post')}`;
+    const redirectToUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
-      options: { emailRedirectTo: redirectTo },
+      options: { emailRedirectTo: redirectToUrl },
     });
 
     setStatus(error ? 'error' : 'sent');
