@@ -136,16 +136,16 @@ Plans:
   3. A user without push available (e.g. an iOS Safari tab that hasn't installed the app) still sees an in-app "new match" badge for alerts that fired
   4. An iOS user is walked through an explicit Add-to-Home-Screen onboarding flow, since push requires standalone install on iOS
 
-**Plans**: 7 plans
+**Plans**: 2/7 plans executed
 
 Plans:
 **Wave 0**
 
-- [ ] 04-01-PLAN.md — Migration 016 + VAPID/cron env + Wave 0 unit test scaffolds
+- [x] 04-01-PLAN.md — Migration 016 + VAPID/cron env + Wave 0 unit test scaffolds
 
 **Wave 1** *(blocked on Wave 0 completion)*
 
-- [ ] 04-02-PLAN.md — Google/Apple OAuth in AuthPromptModal + Supabase dashboard setup (AUTH-01)
+- [x] 04-02-PLAN.md — Google/Apple OAuth in AuthPromptModal + Supabase dashboard setup (AUTH-01)
 
 **Wave 2** *(blocked on Waves 0–1 completion)*
 
@@ -190,7 +190,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Scraper Foundation & Listing Data Model | 4/4 | Complete    | 2026-07-28 |
 | 2. Map + List Core Browsing | 5/5 | Complete    | 2026-07-28 |
 | 3. UGC Posting & Community Marketplace | 4/4 | Complete    | 2026-08-01 |
-| 4. Auth, Alerts & Push Notifications | 0/7 | Not started | - |
+| 4. Auth, Alerts & Push Notifications | 2/7 | In Progress|  |
 | 5. Trilingual UI (Italian / English / Chinese) | 0/TBD | Not started | - |
 
 ---

@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 4
 current_phase_name: Auth, Alerts & Push Notifications
 status: planning
-stopped_at: Phase 4 context gathered
-last_updated: "2026-08-01T14:16:35.631Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-08-01T14:28:38.550Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 complete, transitioned to Phase 4
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 13
-  completed_plans: 13
+  total_plans: 20
+  completed_plans: 15
 ---
 
 # Project State
@@ -32,7 +32,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-08-01 — Phase 03 complete, transitioned to Phase 4
 
-Progress: [██████████] 100%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: [██████████] 100%
 | Phase 03-ugc-posting-community-marketplace P02 | 5min | 3 tasks | 12 files |
 | Phase 03-ugc-posting-community-marketplace P03 | 8min | 3 tasks | 17 files |
 | Phase 03-ugc-posting-community-marketplace P04 | 12min | 3 tasks | 18 files |
+| Phase 04-auth-alerts-push-notifications P02 | 5 min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Street Dump pin confirm separate from GPS seed — never auto-publish (Pitfall 8)
 - [Phase ?]: Owner lifecycle uses OwnerListingRow.owner_user_id not listings_public (03-REVIEWS)
 - [Phase ?]: Rate limits: 3 UGC posts/24h and 5 DM starts/hour via DB counts (D-85)
+- [Phase ?]: Apple OAuth gated by NEXT_PUBLIC_APPLE_OAUTH_ENABLED until Supabase Apple provider configured
+- [Phase ?]: modalTitle prop for action-specific auth gates (D-93)
 
 ### Pending Todos
 
@@ -139,6 +142,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T14:16:35.620Z
-Stopped at: Phase 4 context gathered
-Resume file: /home/guang/Projects/Experiments/snap-it-free/.planning/phases/04-auth-alerts-push-notifications/04-CONTEXT.md
+Last session: 2026-08-01T14:28:38.524Z
+Stopped at: Completed 04-02-PLAN.md
+Resume file: None
