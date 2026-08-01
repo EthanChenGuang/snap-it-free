@@ -136,7 +136,7 @@ Plans:
   3. A user without push available (e.g. an iOS Safari tab that hasn't installed the app) still sees an in-app "new match" badge for alerts that fired
   4. An iOS user is walked through an explicit Add-to-Home-Screen onboarding flow, since push requires standalone install on iOS
 
-**Plans**: 6/7 plans executed
+**Plans**: 7/7 plans executed
 
 Plans:
 **Wave 0**
@@ -165,7 +165,7 @@ Plans:
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 04-07-PLAN.md — iOS A2HS onboarding funnel + permission gates (NOTF-04)
+- [x] 04-07-PLAN.md — iOS A2HS onboarding funnel + permission gates (NOTF-04)
 
 ### Phase 5: Trilingual UI (Italian / English / Chinese)
 
@@ -190,7 +190,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Scraper Foundation & Listing Data Model | 4/4 | Complete    | 2026-07-28 |
 | 2. Map + List Core Browsing | 5/5 | Complete    | 2026-07-28 |
 | 3. UGC Posting & Community Marketplace | 4/4 | Complete    | 2026-08-01 |
-| 4. Auth, Alerts & Push Notifications | 6/7 | In Progress|  |
+| 4. Auth, Alerts & Push Notifications | 7/7 | In Progress|  |
 | 5. Trilingual UI (Italian / English / Chinese) | 0/TBD | Not started | - |
 
 ---

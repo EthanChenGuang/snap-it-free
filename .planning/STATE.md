@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 4
 current_phase_name: Auth, Alerts & Push Notifications
 status: planning
-stopped_at: Completed 04-06-PLAN.md
-last_updated: "2026-08-01T14:39:36.149Z"
+stopped_at: Completed 04-07-PLAN.md
+last_updated: "2026-08-01T14:42:35.564Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 complete, transitioned to Phase 4
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 20
-  completed_plans: 19
+  completed_plans: 20
 ---
 
 # Project State
@@ -32,7 +32,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-08-01 — Phase 03 complete, transitioned to Phase 4
 
-Progress: [██████████] 95%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -77,6 +77,7 @@ Progress: [██████████] 95%
 | Phase 04-auth-alerts-push-notifications P03 | 8 min | 2 tasks | 9 files |
 | Phase 04 P05 | 18 min | 3 tasks | 11 files |
 | Phase 04 P06 | 8m | 3 tasks | 17 files |
+| Phase 04-auth-alerts-push-notifications P07 | 12m | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -128,6 +129,7 @@ Recent decisions affecting current work:
 - [Phase ?]: Auto-selected option-a: locked outbox + Vercel Cron poller (D-106)
 - [Phase ?]: Delete-then-insert push_subscriptions due to RLS no UPDATE policy
 - [Phase ?]: Dedupe push fan-out to one notification per user per listing match
+- [Phase ?]: iOS guide auto-shows once per session on /settings; dismiss persists in localStorage
 
 ### Pending Todos
 
@@ -152,6 +154,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T14:39:36.134Z
-Stopped at: Completed 04-06-PLAN.md
+Last session: 2026-08-01T14:42:35.421Z
+Stopped at: Completed 04-07-PLAN.md
 Resume file: None
