@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "zone": "centro_storico",
+        "source": "Hand-drawn approximate boundary covering Venice historic center (OSM relation 44740 simplified)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [12.32, 45.42],
+            [12.36, 45.42],
+            [12.36, 45.45],
+            [12.32, 45.45],
+            [12.32, 45.42]
+          ]
+        ]
+      }
+    }
+  ]
+}

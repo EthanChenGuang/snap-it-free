@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { ReservedBadge } from '@/components/listings/ReservedBadge';
 import { formatRelativeTimeItalian, messages, zoneLabel } from '@/messages/it';
 import type { ListingRow } from '@/lib/listings/types';
 
@@ -8,9 +9,15 @@ type HeroMetadataProps = {
   listing: ListingRow;
 };
 
+function sourceBadgeLabel(source: ListingRow['source']): string {
+  if (source === 'ugc') return messages.listing.sourceCommunity;
+  return messages.listing.sourceSubito;
+}
+
 export function HeroMetadata({ listing }: HeroMetadataProps) {
   const zoneText = listing.zone ? zoneLabel(listing.zone) : messages.listing.approximateZone;
   const postedLabel = formatRelativeTimeItalian(listing.posted_at);
+  const isUgc = listing.source === 'ugc';
 
   return (
     <div className="flex flex-col gap-space-lg">
@@ -31,9 +38,16 @@ export function HeroMetadata({ listing }: HeroMetadataProps) {
           </div>
         )}
         <div className="absolute left-space-md top-space-md flex flex-wrap gap-space-sm">
-          <span className="rounded-sm bg-accent-orange px-space-sm py-space-xs text-[10px] font-bold uppercase tracking-wider text-on-primary">
-            {messages.listing.sourceSubito}
+          <span
+            className={`rounded-sm px-space-sm py-space-xs text-[10px] font-bold uppercase tracking-wider ${
+              isUgc
+                ? 'bg-surface-container-high text-on-surface-variant'
+                : 'bg-accent-orange text-on-primary'
+            }`}
+          >
+            {sourceBadgeLabel(listing.source)}
           </span>
+          {listing.status === 'claimed' && <ReservedBadge />}
           <span className="rounded-sm border border-outline-variant bg-surface/90 px-space-sm py-space-xs text-label-sm text-on-surface-variant">
             {postedLabel}
           </span>

@@ -13,6 +13,13 @@ export type ListingRow = {
   zone: VeniceZone | null;
   posted_at: string;
   expires_at: string;
+  status: ListingStatus;
+};
+
+export type OwnerListingRow = ListingRow & {
+  owner_user_id: string;
+  hidden_reason: string | null;
+  description: string | null;
 };
 
 export type ZoneChip = 'All' | VeniceZone;

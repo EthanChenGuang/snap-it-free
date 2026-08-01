@@ -14,6 +14,7 @@ export const ListingReadSchema = z.object({
   zone: VeniceZoneSchema.nullable(),
   posted_at: z.string(),
   expires_at: z.string(),
+  status: z.enum(['active', 'claimed', 'expired', 'hidden']),
 });
 
 export type ListingRead = z.infer<typeof ListingReadSchema>;

@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import { ScrapedListingShell } from '@/components/detail/ScrapedListingShell';
-import { getListingById } from '@/lib/listings/queries';
+import { UgcListingShell } from '@/components/detail/UgcListingShell';
+import { getListingForDetail } from '@/lib/listings/queries';
 
 const listingIdSchema = z.string().uuid();
 
@@ -16,10 +17,20 @@ export default async function ListingPage({ params }: ListingPageProps) {
     notFound();
   }
 
-  const listing = await getListingById(parsed.data);
-  if (!listing || listing.source !== 'subito') {
+  const result = await getListingForDetail(parsed.data);
+  if (!result) {
     notFound();
   }
 
-  return <ScrapedListingShell listing={listing} />;
+  const { listing } = result;
+
+  if (listing.source === 'ugc') {
+    return <UgcListingShell listing={listing} />;
+  }
+
+  if (listing.source === 'subito') {
+    return <ScrapedListingShell listing={listing} />;
+  }
+
+  notFound();
 }

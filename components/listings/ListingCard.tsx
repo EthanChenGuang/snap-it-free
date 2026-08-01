@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { forwardRef } from 'react';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
+import { ReservedBadge } from '@/components/listings/ReservedBadge';
 import { messages, formatRelativeTimeItalian, zoneLabel } from '@/messages/it';
 import type { ListingRow } from '@/lib/listings/types';
 import { cn } from '@/lib/utils';
@@ -13,10 +14,16 @@ type ListingCardProps = {
   isSelected?: boolean;
 };
 
+function sourceBadgeLabel(source: ListingRow['source']): string {
+  if (source === 'ugc') return messages.listing.sourceCommunity;
+  return messages.listing.sourceSubito;
+}
+
 export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
   function ListingCard({ listing, isSelected }, ref) {
     const zoneText = listing.zone ? zoneLabel(listing.zone) : messages.listing.approximateZone;
     const postedLabel = formatRelativeTimeItalian(listing.posted_at);
+    const isUgc = listing.source === 'ugc';
 
     return (
       <Link
@@ -44,9 +51,18 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
               <span className="material-symbols-outlined">image</span>
             </div>
           )}
-          <span className="absolute left-space-sm top-space-sm rounded-sm bg-accent-orange px-space-sm py-space-xs text-[10px] font-bold uppercase tracking-wider text-on-primary">
-            {messages.listing.sourceSubito}
-          </span>
+          <div className="absolute left-space-sm top-space-sm flex flex-wrap gap-space-xs">
+            <span
+              className={`rounded-sm px-space-sm py-space-xs text-[10px] font-bold uppercase tracking-wider ${
+                isUgc
+                  ? 'bg-surface-container-high text-on-surface-variant'
+                  : 'bg-accent-orange text-on-primary'
+              }`}
+            >
+              {sourceBadgeLabel(listing.source)}
+            </span>
+            {listing.status === 'claimed' && <ReservedBadge />}
+          </div>
           <div className="absolute right-space-sm top-space-sm">
             <FavoriteButton listingId={listing.id} className="bg-surface/90" />
           </div>

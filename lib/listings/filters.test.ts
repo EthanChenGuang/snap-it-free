@@ -13,6 +13,7 @@ const baseListing: ListingRow = {
   zone: 'centro_storico',
   posted_at: '2026-07-28T10:00:00.000Z',
   expires_at: '2026-07-30T10:00:00.000Z',
+  status: 'active',
 };
 
 describe('filterByZone', () => {
