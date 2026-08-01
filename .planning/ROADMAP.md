@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Scraper Foundation & Listing Data Model** - Ingest, normalize, zone-tag, and validate free listings from Subito.it into a canonical schema (completed 2026-07-28)
 - [x] **Phase 2: Map + List Core Browsing** - Users can find and explore live free listings across Venice, login-optional (completed 2026-07-28)
-- [ ] **Phase 3: UGC Posting & Community Marketplace** - Users can post their own free items and coordinate pickup in-app, safely
+- [x] **Phase 3: UGC Posting & Community Marketplace** - Users can post their own free items and coordinate pickup in-app, safely (completed 2026-08-01)
 - [ ] **Phase 4: Auth, Alerts & Push Notifications** - Users log in only when needed and get notified of new matching listings
 - [ ] **Phase 5: Trilingual UI (Italian / English / Chinese)** - Users can use the entire app in their preferred language
 
@@ -136,7 +136,36 @@ Plans:
   3. A user without push available (e.g. an iOS Safari tab that hasn't installed the app) still sees an in-app "new match" badge for alerts that fired
   4. An iOS user is walked through an explicit Add-to-Home-Screen onboarding flow, since push requires standalone install on iOS
 
-**Plans**: TBD
+**Plans**: 7 plans
+
+Plans:
+**Wave 0**
+
+- [ ] 04-01-PLAN.md — Migration 016 + VAPID/cron env + Wave 0 unit test scaffolds
+
+**Wave 1** *(blocked on Wave 0 completion)*
+
+- [ ] 04-02-PLAN.md — Google/Apple OAuth in AuthPromptModal + Supabase dashboard setup (AUTH-01)
+
+**Wave 2** *(blocked on Waves 0–1 completion)*
+
+- [ ] 04-03-PLAN.md — user_favorites API + localStorage merge + FavoriteButton auth gate (AUTH-02)
+
+**Wave 3** *(blocked on Wave 1 completion)*
+
+- [ ] 04-04-PLAN.md — Alerts CRUD + Settings expansion Profile/Alerts (NOTF-01, NOTF-05)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 04-05-PLAN.md — listing_events trigger + cron matcher → alert_matches + BottomNav badge (NOTF-03)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 04-06-PLAN.md — Serwist SW + push_subscriptions + web-push in cron (NOTF-02)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 04-07-PLAN.md — iOS A2HS onboarding funnel + permission gates (NOTF-04)
 
 ### Phase 5: Trilingual UI (Italian / English / Chinese)
 
@@ -160,8 +189,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Scraper Foundation & Listing Data Model | 4/4 | Complete    | 2026-07-28 |
 | 2. Map + List Core Browsing | 5/5 | Complete    | 2026-07-28 |
-| 3. UGC Posting & Community Marketplace | 4/4 | In Progress|  |
-| 4. Auth, Alerts & Push Notifications | 0/TBD | Not started | - |
+| 3. UGC Posting & Community Marketplace | 4/4 | Complete    | 2026-08-01 |
+| 4. Auth, Alerts & Push Notifications | 0/7 | Not started | - |
 | 5. Trilingual UI (Italian / English / Chinese) | 0/TBD | Not started | - |
 
 ---
