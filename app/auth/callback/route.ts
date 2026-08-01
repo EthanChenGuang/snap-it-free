@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
+import { safeNextPath } from '@/lib/auth/safe-next-path';
 import { createClient } from '@/lib/supabase/server';
-
-function safeNextPath(raw: string | null): string {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/post';
-  return raw;
-}
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
