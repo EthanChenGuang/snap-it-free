@@ -136,7 +136,7 @@ Plans:
   3. A user without push available (e.g. an iOS Safari tab that hasn't installed the app) still sees an in-app "new match" badge for alerts that fired
   4. An iOS user is walked through an explicit Add-to-Home-Screen onboarding flow, since push requires standalone install on iOS
 
-**Plans**: 2/7 plans executed
+**Plans**: 3/7 plans executed
 
 Plans:
 **Wave 0**
@@ -153,7 +153,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 1 completion)*
 
-- [ ] 04-04-PLAN.md — Alerts CRUD + Settings expansion Profile/Alerts (NOTF-01, NOTF-05)
+- [x] 04-04-PLAN.md — Alerts CRUD + Settings expansion Profile/Alerts (NOTF-01, NOTF-05)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -190,7 +190,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Scraper Foundation & Listing Data Model | 4/4 | Complete    | 2026-07-28 |
 | 2. Map + List Core Browsing | 5/5 | Complete    | 2026-07-28 |
 | 3. UGC Posting & Community Marketplace | 4/4 | Complete    | 2026-08-01 |
-| 4. Auth, Alerts & Push Notifications | 2/7 | In Progress|  |
+| 4. Auth, Alerts & Push Notifications | 3/7 | In Progress|  |
 | 5. Trilingual UI (Italian / English / Chinese) | 0/TBD | Not started | - |
 
 ---
