@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { loadZonePolygons, tagZone } from '@/lib/geo/zone-tag';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
-import { CreateListingSchema } from '@/lib/ugc/schemas';
+import { createListingSchemaForUser } from '@/lib/ugc/schemas';
 import { assertCanPost, RateLimitError } from '@/lib/ugc/rate-limit';
 import { messages } from '@/messages/it';
 
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const parsed = CreateListingSchema.safeParse(body);
+  const parsed = createListingSchemaForUser(user.id).safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }

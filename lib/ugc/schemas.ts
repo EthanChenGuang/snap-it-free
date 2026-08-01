@@ -8,6 +8,17 @@ export const CreateListingSchema = z.object({
   description: z.string().max(2000).optional(),
 });
 
+export function createListingSchemaForUser(userId: string) {
+  return CreateListingSchema.extend({
+    photoUrl: z
+      .string()
+      .url()
+      .refine((url) => url.includes(`/ugc-photos/${userId}/`), {
+        message: 'Photo must be uploaded via /api/ugc/upload',
+      }),
+  });
+}
+
 export type CreateListingInput = z.infer<typeof CreateListingSchema>;
 
 export const ALLOWED_UPLOAD_MIME = ['image/jpeg', 'image/png', 'image/webp'] as const;
