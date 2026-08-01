@@ -15,8 +15,17 @@ import { messages } from '@/messages/it';
 type AuthPromptModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Post-auth redirect path (same-origin). Defaults to `/post`. */
+  /**
+   * Post-auth redirect path (same-origin). Defaults to `/post`.
+   * Gate call sites should pass action-specific paths, e.g. `/favorites` or
+   * `/settings?tab=alerts` (D-93).
+   */
   redirectTo?: string;
+  /**
+   * Override default modal title for action-specific gates (D-93).
+   * e.g. `messages.auth.favoriteTitle` for favorites, `messages.auth.alertTitle` for alerts.
+   */
+  modalTitle?: string;
 };
 
 const APPLE_OAUTH_ENABLED = process.env.NEXT_PUBLIC_APPLE_OAUTH_ENABLED === 'true';
@@ -56,7 +65,12 @@ function AppleIcon() {
   );
 }
 
-export function AuthPromptModal({ open, onOpenChange, redirectTo = '/post' }: AuthPromptModalProps) {
+export function AuthPromptModal({
+  open,
+  onOpenChange,
+  redirectTo = '/post',
+  modalTitle,
+}: AuthPromptModalProps) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [oauthStatus, setOauthStatus] = useState<'idle' | 'loading' | 'error'>('idle');
@@ -94,7 +108,7 @@ export function AuthPromptModal({ open, onOpenChange, redirectTo = '/post' }: Au
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{messages.auth.modalTitle}</DialogTitle>
+          <DialogTitle>{modalTitle ?? messages.auth.modalTitle}</DialogTitle>
           <DialogDescription>{messages.auth.modalDescription}</DialogDescription>
         </DialogHeader>
 

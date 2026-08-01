@@ -74,6 +74,8 @@ export const messages = {
   },
   auth: {
     modalTitle: 'Accedi per continuare',
+    favoriteTitle: 'Accedi per salvare nei preferiti',
+    alertTitle: 'Accedi per creare avvisi',
     modalDescription: 'Scegli come accedere — nessuna password richiesta.',
     googleSignIn: 'Continua con Google',
     appleSignIn: 'Continua con Apple',
