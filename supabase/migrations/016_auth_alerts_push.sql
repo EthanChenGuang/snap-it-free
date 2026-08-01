@@ -117,3 +117,23 @@ create policy "alert_matches_update_own"
   on public.alert_matches for update to authenticated
   using (user_id = auth.uid())
   with check (user_id = auth.uid());
+
+-- D-106/D-100: INSERT-only outbox enqueue (scraper upsert UPDATE path does not fire)
+create or replace function public.enqueue_listing_event()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.status = 'active' and new.expires_at > now() then
+    insert into public.listing_events (listing_id, status)
+    values (new.id, 'pending');
+  end if;
+  return new;
+end;
+$$;
+
+create trigger listings_insert_event
+  after insert on public.listings
+  for each row execute function public.enqueue_listing_event();
