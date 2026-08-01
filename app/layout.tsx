@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { FavoritesMergeProvider } from '@/components/providers/FavoritesMergeProvider';
 import { BottomNav } from '@/components/shell/BottomNav';
 import { Header } from '@/components/shell/Header';
 import { Toaster } from '@/components/ui/toaster';
@@ -25,10 +26,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="overflow-hidden bg-background text-on-background">
-        <Header />
-        <div className="app-main">{children}</div>
-        <BottomNav />
-        <Toaster />
+        <FavoritesMergeProvider>
+          <Header />
+          <div className="app-main">{children}</div>
+          <BottomNav />
+          <Toaster />
+        </FavoritesMergeProvider>
       </body>
     </html>
   );
