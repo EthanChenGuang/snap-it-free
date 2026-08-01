@@ -26,10 +26,10 @@
 
 ### UGC Posting
 
-- [ ] **UGC-01**: User can post a free item with photo, title, and zone tag in under 30 seconds
+- [x] **UGC-01**: User can post a free item with photo, title, and zone tag in under 30 seconds
 - [ ] **UGC-02**: User can use "Street Dump" quick-pin mode to drop a listing at their GPS location with manual confirm/adjust
-- [ ] **UGC-03**: System strips EXIF metadata from uploaded UGC photos
-- [ ] **UGC-04**: User must be logged in to post a listing
+- [x] **UGC-03**: System strips EXIF metadata from uploaded UGC photos
+- [x] **UGC-04**: User must be logged in to post a listing
 
 ### UGC Contact & Claims
 
@@ -110,10 +110,10 @@ Deferred to future release. Tracked but not in current roadmap.
 | DISC-06 | Phase 2 | Complete |
 | DISC-07 | Phase 2 | Complete |
 | SCRP-04 | Phase 2 | Complete |
-| UGC-01 | Phase 3 | Pending |
+| UGC-01 | Phase 3 | Complete |
 | UGC-02 | Phase 3 | Pending |
-| UGC-03 | Phase 3 | Pending |
-| UGC-04 | Phase 3 | Pending |
+| UGC-03 | Phase 3 | Complete |
+| UGC-04 | Phase 3 | Complete |
 | CONT-01 | Phase 3 | Pending |
 | CONT-02 | Phase 3 | Pending |
 | CONT-03 | Phase 3 | Pending |
