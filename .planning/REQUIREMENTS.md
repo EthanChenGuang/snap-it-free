@@ -41,9 +41,9 @@
 
 ### Moderation & Trust
 
-- [ ] **MOD-01**: User can report a listing as claimed/expired or not actually free
-- [ ] **MOD-02**: System auto-hides a listing after 2 community reports (with UGC vs scraped threshold distinction)
-- [ ] **MOD-03**: UGC poster can see when their listing is hidden pending review
+- [x] **MOD-01**: User can report a listing as claimed/expired or not actually free
+- [x] **MOD-02**: System auto-hides a listing after 2 community reports (with UGC vs scraped threshold distinction)
+- [x] **MOD-03**: UGC poster can see when their listing is hidden pending review
 
 ### Auth
 
@@ -119,9 +119,9 @@ Deferred to future release. Tracked but not in current roadmap.
 | CONT-03 | Phase 3 | Pending |
 | CONT-04 | Phase 3 | Complete |
 | CONT-05 | Phase 3 | Complete |
-| MOD-01 | Phase 3 | Pending |
-| MOD-02 | Phase 3 | Pending |
-| MOD-03 | Phase 3 | Pending |
+| MOD-01 | Phase 3 | Complete |
+| MOD-02 | Phase 3 | Complete |
+| MOD-03 | Phase 3 | Complete |
 | AUTH-01 | Phase 4 | Pending |
 | AUTH-02 | Phase 4 | Pending |
 | NOTF-01 | Phase 4 | Pending |
