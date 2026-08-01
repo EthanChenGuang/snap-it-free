@@ -27,15 +27,15 @@
 ### UGC Posting
 
 - [x] **UGC-01**: User can post a free item with photo, title, and zone tag in under 30 seconds
-- [ ] **UGC-02**: User can use "Street Dump" quick-pin mode to drop a listing at their GPS location with manual confirm/adjust
+- [x] **UGC-02**: User can use "Street Dump" quick-pin mode to drop a listing at their GPS location with manual confirm/adjust
 - [x] **UGC-03**: System strips EXIF metadata from uploaded UGC photos
 - [x] **UGC-04**: User must be logged in to post a listing
 
 ### UGC Contact & Claims
 
 - [x] **CONT-01**: User can contact a UGC poster via in-app DM (UGC listings only)
-- [ ] **CONT-02**: UGC poster can mark a listing as reserved
-- [ ] **CONT-03**: UGC poster can mark a listing as sent/gone
+- [x] **CONT-02**: UGC poster can mark a listing as reserved
+- [x] **CONT-03**: UGC poster can mark a listing as sent/gone
 - [x] **CONT-04**: User must be logged in to initiate contact on a UGC listing
 - [x] **CONT-05**: System shows in-person meetup safety messaging at first contact and in DM threads
 
@@ -111,12 +111,12 @@ Deferred to future release. Tracked but not in current roadmap.
 | DISC-07 | Phase 2 | Complete |
 | SCRP-04 | Phase 2 | Complete |
 | UGC-01 | Phase 3 | Complete |
-| UGC-02 | Phase 3 | Pending |
+| UGC-02 | Phase 3 | Complete |
 | UGC-03 | Phase 3 | Complete |
 | UGC-04 | Phase 3 | Complete |
 | CONT-01 | Phase 3 | Complete |
-| CONT-02 | Phase 3 | Pending |
-| CONT-03 | Phase 3 | Pending |
+| CONT-02 | Phase 3 | Complete |
+| CONT-03 | Phase 3 | Complete |
 | CONT-04 | Phase 3 | Complete |
 | CONT-05 | Phase 3 | Complete |
 | MOD-01 | Phase 3 | Complete |
