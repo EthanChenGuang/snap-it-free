@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
-import { mapDeliveredTransition, mapReservedTransition } from '@/lib/ugc/status';
+import { mapDeliveredTransition, mapReservedTransition, canDeliver, canReserve, type ListingStatus } from '@/lib/ugc/status';
 import { messages } from '@/messages/it';
 
 const patchSchema = z.object({
@@ -37,12 +37,37 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  const supabase = await createClient();
+
+  const { data: current, error: fetchError } = await supabase
+    .from('listings')
+    .select('status')
+    .eq('id', parsedId.data)
+    .eq('owner_user_id', user.id)
+    .eq('source', 'ugc')
+    .maybeSingle();
+
+  if (fetchError) {
+    return NextResponse.json({ error: fetchError.message }, { status: 500 });
+  }
+
+  if (!current) {
+    return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
+  }
+
+  const currentStatus = current.status as ListingStatus;
+  if (parsed.data.action === 'reserved' && !canReserve(currentStatus)) {
+    return NextResponse.json({ error: 'Listing cannot be reserved in its current state' }, { status: 422 });
+  }
+  if (parsed.data.action === 'delivered' && !canDeliver(currentStatus)) {
+    return NextResponse.json({ error: 'Listing cannot be marked delivered in its current state' }, { status: 422 });
+  }
+
   const update =
     parsed.data.action === 'reserved'
       ? mapReservedTransition()
       : mapDeliveredTransition();
 
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from('listings')
     .update(update)
