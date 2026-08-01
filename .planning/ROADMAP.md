@@ -104,7 +104,7 @@ Plans:
   4. Both parties see an in-person meetup safety notice at first contact and inside the DM thread
   5. Any user can report a listing as claimed/expired/not-free; scraped listings auto-hide after 2 reports while UGC listings auto-hide after 3 reports into `pending_review`, and its poster can see that it's hidden pending review
 
-**Plans**: 1/4 plans executed
+**Plans**: 2/4 plans executed
 
 Plans:
 **Wave 1**
@@ -113,7 +113,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 03-02-PLAN.md — In-app DM + safety modal/banner (CONT-01, CONT-04, CONT-05)
+- [x] 03-02-PLAN.md — In-app DM + safety modal/banner (CONT-01, CONT-04, CONT-05)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -160,7 +160,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Scraper Foundation & Listing Data Model | 4/4 | Complete    | 2026-07-28 |
 | 2. Map + List Core Browsing | 5/5 | Complete    | 2026-07-28 |
-| 3. UGC Posting & Community Marketplace | 1/4 | In Progress|  |
+| 3. UGC Posting & Community Marketplace | 2/4 | In Progress|  |
 | 4. Auth, Alerts & Push Notifications | 0/TBD | Not started | - |
 | 5. Trilingual UI (Italian / English / Chinese) | 0/TBD | Not started | - |
 

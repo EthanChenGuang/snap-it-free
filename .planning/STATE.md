@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: UGC Posting & Community Marketplace
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-08-01T09:03:11.931Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-08-01T09:07:24.424Z"
 last_activity: 2026-08-01
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 ## Current Position
 
 Phase: 03 (UGC Posting & Community Marketplace) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-08-01 — Phase 03 execution started
 
-Progress: [████████░░] 77%
+Progress: [█████████░] 85%
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [████████░░] 77%
 | Phase 02 P03 | 3min | 3 tasks | 13 files |
 | Phase 02-map-list-core-browsing P04 | 5min | 3 tasks | 22 files |
 | Phase 03-ugc-posting-community-marketplace P01 | 6 | 3 tasks | 37 files |
+| Phase 03-ugc-posting-community-marketplace P02 | 5min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Option-a locked: magic link + migration 007 + RLS (D-54, D-66, D-87)
 - [Phase ?]: listing_reports uses reporter_user_id only — no fingerprint (03-REVIEWS)
 - [Phase ?]: CreateListingSchema uses scraper Venice bounds 45.0-45.7 / 12.1-12.6
+- [Phase ?]: FCFS via security-definer RPC listing_has_other_buyer_conversation (migration 008)
+- [Phase ?]: Duplicate conversation POST returns existing id for DM reopen (03-REVIEWS)
 
 ### Pending Todos
 
@@ -127,6 +130,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T09:03:11.923Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-08-01T09:07:24.416Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None

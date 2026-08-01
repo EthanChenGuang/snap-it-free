@@ -33,11 +33,11 @@
 
 ### UGC Contact & Claims
 
-- [ ] **CONT-01**: User can contact a UGC poster via in-app DM (UGC listings only)
+- [x] **CONT-01**: User can contact a UGC poster via in-app DM (UGC listings only)
 - [ ] **CONT-02**: UGC poster can mark a listing as reserved
 - [ ] **CONT-03**: UGC poster can mark a listing as sent/gone
-- [ ] **CONT-04**: User must be logged in to initiate contact on a UGC listing
-- [ ] **CONT-05**: System shows in-person meetup safety messaging at first contact and in DM threads
+- [x] **CONT-04**: User must be logged in to initiate contact on a UGC listing
+- [x] **CONT-05**: System shows in-person meetup safety messaging at first contact and in DM threads
 
 ### Moderation & Trust
 
@@ -114,11 +114,11 @@ Deferred to future release. Tracked but not in current roadmap.
 | UGC-02 | Phase 3 | Pending |
 | UGC-03 | Phase 3 | Complete |
 | UGC-04 | Phase 3 | Complete |
-| CONT-01 | Phase 3 | Pending |
+| CONT-01 | Phase 3 | Complete |
 | CONT-02 | Phase 3 | Pending |
 | CONT-03 | Phase 3 | Pending |
-| CONT-04 | Phase 3 | Pending |
-| CONT-05 | Phase 3 | Pending |
+| CONT-04 | Phase 3 | Complete |
+| CONT-05 | Phase 3 | Complete |
 | MOD-01 | Phase 3 | Pending |
 | MOD-02 | Phase 3 | Pending |
 | MOD-03 | Phase 3 | Pending |
