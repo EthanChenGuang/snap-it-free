@@ -26,7 +26,12 @@ export async function POST(request: Request) {
   }
 
   const inputBuffer = Buffer.from(await file.arrayBuffer());
-  const clean = await stripExif(inputBuffer);
+  let clean: Buffer;
+  try {
+    clean = await stripExif(inputBuffer);
+  } catch {
+    return NextResponse.json({ error: 'Invalid image' }, { status: 400 });
+  }
 
   const supabase = await createClient();
   const path = `${user.id}/${randomUUID()}.jpg`;
