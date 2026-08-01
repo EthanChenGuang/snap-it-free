@@ -64,8 +64,12 @@ export function UgcListingShell({ listing, isOwnerView = false }: UgcListingShel
   useEffect(() => {
     if (searchParams.get('openDm') === '1' && isLoggedIn) {
       setDmOpen(true);
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('openDm');
+      const qs = params.toString();
+      router.replace(`/listing/${listing.id}${qs ? `?${qs}` : ''}`, { scroll: false });
     }
-  }, [searchParams, isLoggedIn]);
+  }, [searchParams, isLoggedIn, listing.id, router]);
 
   const handleConversationReady = useCallback((id: string, nextReadOnly: boolean) => {
     setConversationId(id || null);
