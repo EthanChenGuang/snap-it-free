@@ -97,6 +97,34 @@ export async function getOwnerListingById(id: string): Promise<OwnerListingRow |
   return (data as OwnerListingRow | null) ?? null;
 }
 
+export async function getOwnerListings(): Promise<OwnerListingRow[]> {
+  if (!getSupabaseEnv()) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from(BASE_LISTINGS)
+    .select(OWNER_LISTING_COLUMNS)
+    .eq('owner_user_id', user.id)
+    .eq('source', 'ugc')
+    .order('posted_at', { ascending: false });
+
+  if (error) {
+    return [];
+  }
+
+  return (data ?? []) as OwnerListingRow[];
+}
+
 export async function getListingForDetail(
   id: string,
 ): Promise<{ listing: ListingRow | OwnerListingRow; isOwnerView: boolean } | null> {

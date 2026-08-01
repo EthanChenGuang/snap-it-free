@@ -1,41 +1,63 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { DetailTopBar } from '@/components/detail/DetailTopBar';
 import { HeroMetadata } from '@/components/detail/HeroMetadata';
 import { DmDrawer } from '@/components/messages/DmDrawer';
 import { HiddenReviewBanner } from '@/components/ugc/HiddenReviewBanner';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { toast } from '@/components/ui/toaster';
 import { createClient } from '@/lib/supabase/client';
-import type { ListingRow } from '@/lib/listings/types';
+import type { ListingRow, OwnerListingRow } from '@/lib/listings/types';
 import { messages } from '@/messages/it';
 
 type UgcListingShellProps = {
-  listing: ListingRow & { description?: string | null; hidden_reason?: string | null };
+  listing: (ListingRow | OwnerListingRow) & {
+    description?: string | null;
+    hidden_reason?: string | null;
+    owner_user_id?: string;
+  };
   isOwnerView?: boolean;
 };
 
 export function UgcListingShell({ listing, isOwnerView = false }: UgcListingShellProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [dmOpen, setDmOpen] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [readOnly, setReadOnly] = useState(false);
+  const [lifecyclePending, setLifecyclePending] = useState(false);
+  const [deliverConfirmOpen, setDeliverConfirmOpen] = useState(false);
 
   const isReserved = listing.status === 'claimed';
-  const showHiddenBanner =
+  const isHiddenPending =
+    listing.status === 'hidden' && listing.hidden_reason === 'pending_review';
+  const isOwner =
     isOwnerView &&
-    listing.status === 'hidden' &&
-    listing.hidden_reason === 'pending_review';
+    Boolean(listing.owner_user_id) &&
+    listing.owner_user_id === sessionUserId;
+  const showHiddenBanner = isOwner && isHiddenPending;
+  const showOwnerLifecycle = isOwner && !isHiddenPending && listing.status !== 'expired';
   const authRedirect = `/listing/${listing.id}?openDm=1`;
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       setIsLoggedIn(Boolean(user));
+      setSessionUserId(user?.id ?? null);
     });
   }, []);
 
@@ -68,6 +90,31 @@ export function UgcListingShell({ listing, isOwnerView = false }: UgcListingShel
     if (!open) {
       setConversationId(null);
       setReadOnly(false);
+    }
+  };
+
+  const patchStatus = async (action: 'reserved' | 'delivered') => {
+    setLifecyclePending(true);
+    try {
+      const response = await fetch(`/api/ugc/listings/${listing.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+
+      if (!response.ok) {
+        toast(messages.manage.actionError);
+        return;
+      }
+
+      if (action === 'reserved') {
+        toast(messages.detail.reservedToast);
+      }
+
+      setDeliverConfirmOpen(false);
+      router.refresh();
+    } finally {
+      setLifecyclePending(false);
     }
   };
 
@@ -114,20 +161,52 @@ export function UgcListingShell({ listing, isOwnerView = false }: UgcListingShel
                 </div>
               </div>
 
-              <Button
-                type="button"
-                className="w-full"
-                disabled={isReserved}
-                onClick={handleContatta}
-              >
-                <span className="material-symbols-outlined text-sm">chat_bubble</span>
-                {messages.detail.contact}
-              </Button>
+              {showOwnerLifecycle ? (
+                <div className="flex flex-col gap-space-sm">
+                  {!isReserved && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="w-full"
+                      disabled={lifecyclePending}
+                      onClick={() => patchStatus('reserved')}
+                    >
+                      {messages.detail.markReserved}
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    className="w-full"
+                    disabled={lifecyclePending}
+                    onClick={() => setDeliverConfirmOpen(true)}
+                  >
+                    {messages.detail.markDelivered}
+                  </Button>
+                  <Link
+                    href="/post/manage"
+                    className="text-center text-label-sm text-on-surface-variant underline-offset-2 hover:underline"
+                  >
+                    {messages.post.manageLink}
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    className="w-full"
+                    disabled={isReserved}
+                    onClick={handleContatta}
+                  >
+                    <span className="material-symbols-outlined text-sm">chat_bubble</span>
+                    {messages.detail.contact}
+                  </Button>
 
-              {isReserved && (
-                <p className="mt-space-sm text-center text-label-sm text-on-surface-variant">
-                  {messages.detail.contactReserved}
-                </p>
+                  {isReserved && (
+                    <p className="mt-space-sm text-center text-label-sm text-on-surface-variant">
+                      {messages.detail.contactReserved}
+                    </p>
+                  )}
+                </>
               )}
 
               <div className="mt-space-lg rounded border border-outline-variant bg-surface-container-low p-space-md">
@@ -168,6 +247,33 @@ export function UgcListingShell({ listing, isOwnerView = false }: UgcListingShel
         readOnly={readOnly}
         onConversationReady={handleConversationReady}
       />
+
+      <Dialog open={deliverConfirmOpen} onOpenChange={setDeliverConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{messages.detail.deliveredConfirmTitle}</DialogTitle>
+            <DialogDescription>{messages.detail.deliveredConfirmBody}</DialogDescription>
+          </DialogHeader>
+          <div className="mt-space-md flex flex-col gap-space-sm sm:flex-row">
+            <Button
+              type="button"
+              variant="secondary"
+              className="flex-1"
+              onClick={() => setDeliverConfirmOpen(false)}
+            >
+              {messages.detail.cancel}
+            </Button>
+            <Button
+              type="button"
+              className="flex-1"
+              disabled={lifecyclePending}
+              onClick={() => patchStatus('delivered')}
+            >
+              {messages.detail.deliveredConfirmAction}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
