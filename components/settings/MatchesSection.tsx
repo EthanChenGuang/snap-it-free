@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import type { MatchListItem } from '@/app/api/alerts/matches/route';
+import { isIOS, isIosPushDismissed, isStandalonePwa } from '@/lib/pwa/ios-detect';
 import { createClient } from '@/lib/supabase/client';
 import { messages, zoneLabel } from '@/messages/it';
 
@@ -65,12 +66,19 @@ export function MatchesSection() {
     return null;
   }
 
+  const showBadgeFallbackNote = isIOS() && !isStandalonePwa() && isIosPushDismissed();
+
   return (
     <section id="matches" className="mb-space-xl scroll-mt-space-lg">
       <div className="mb-space-md">
         <h2 className="ml-space-xs text-label-md uppercase tracking-wider text-on-secondary-container">
           {messages.settings.matches.sectionTitle}
         </h2>
+        {showBadgeFallbackNote && (
+          <p className="mt-space-xs text-label-sm text-secondary">
+            {messages.settings.matches.badgeFallbackNote}
+          </p>
+        )}
       </div>
 
       <div className="overflow-hidden rounded border border-outline-variant bg-surface-container-lowest">
