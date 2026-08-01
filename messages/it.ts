@@ -54,6 +54,23 @@ export const messages = {
     createError: 'Pubblicazione non riuscita. Riprova.',
     pinOutsideVenice: 'Sposta il pin dentro Venezia',
     mapLoading: 'Caricamento mappa…',
+    rateLimitPost: 'Hai raggiunto il limite di 3 annunci al giorno',
+    manageLink: 'I miei annunci',
+    tabs: {
+      publish: 'Pubblica',
+      streetDump: 'Street Dump',
+    },
+    streetDump: {
+      pinLabel: 'Posizione sulla mappa',
+      helper: 'Conferma la posizione sulla mappa — non pubblichiamo automaticamente.',
+      confirmPin: 'Conferma posizione',
+    },
+    geolocationDenied:
+      'Posizione non disponibile — attiva i permessi o usa la scheda Pubblica.',
+    geolocationTimeout:
+      'Impossibile rilevare la posizione — riprova o seleziona manualmente sulla mappa.',
+    geolocationUnavailable:
+      'Geolocalizzazione non supportata — usa la scheda Pubblica per selezionare la zona.',
   },
   auth: {
     modalTitle: 'Accedi per pubblicare',
@@ -103,6 +120,13 @@ export const messages = {
     descriptionLabel: 'Descrizione',
     contact: 'Contatta',
     contactReserved: 'Questo annuncio è riservato',
+    markReserved: 'Segna riservato',
+    markDelivered: 'Segna consegnato',
+    reservedToast: 'Segnato come riservato',
+    deliveredConfirmTitle: 'Segna come consegnato?',
+    deliveredConfirmBody: "L'annuncio non sarà più visibile.",
+    deliveredConfirmAction: 'Segna consegnato',
+    cancel: 'Annulla',
   },
   dm: {
     drawerTitle: 'Messaggi',
@@ -149,6 +173,15 @@ export const messages = {
     hiddenBannerTitle: 'Nascosto — in revisione',
     hiddenBannerBody:
       'Il tuo annuncio non è visibile agli altri utenti mentre lo verifichiamo.',
+    markReserved: 'Segna riservato',
+    markDelivered: 'Segna consegnato',
+    reservedToast: 'Segnato come riservato',
+    deliveredConfirmTitle: 'Segna come consegnato?',
+    deliveredConfirmBody: "L'annuncio non sarà più visibile.",
+    deliveredConfirmAction: 'Segna consegnato',
+    cancel: 'Annulla',
+    viewDetail: 'Vedi dettaglio',
+    actionError: 'Impossibile aggiornare lo stato — riprova',
   },
   listing: {
     sourceSubito: 'Subito',

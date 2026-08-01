@@ -23,16 +23,27 @@ const PinMap = dynamic(() => import('@/components/ugc/PinMap').then((mod) => mod
 
 const ZONES: VeniceZone[] = ['centro_storico', 'mestre_marghera', 'lido_murano'];
 
-export function PostForm() {
+type PostFormProps = {
+  title: string;
+  onTitleChange: (value: string) => void;
+  photoFile: File | null;
+  photoPreview: string | null;
+  onPhotoChange: (file: File | null, preview: string | null) => void;
+};
+
+export function PostForm({
+  title,
+  onTitleChange,
+  photoFile,
+  photoPreview,
+  onPhotoChange,
+}: PostFormProps) {
   const router = useRouter();
-  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [showDetails, setShowDetails] = useState(false);
   const [zone, setZone] = useState<VeniceZone>('centro_storico');
   const [lat, setLat] = useState(ZONE_CENTERS.centro_storico.lat);
   const [lng, setLng] = useState(ZONE_CENTERS.centro_storico.lng);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -53,8 +64,7 @@ export function PostForm() {
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    setPhotoFile(file);
-    setPhotoPreview(URL.createObjectURL(file));
+    onPhotoChange(file, URL.createObjectURL(file));
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -111,6 +121,11 @@ export function PostForm() {
 
       if (createRes.status === 422) {
         setError(messages.post.pinOutsideVenice);
+        return;
+      }
+
+      if (createRes.status === 429) {
+        toast(messages.post.rateLimitPost);
         return;
       }
 
@@ -177,7 +192,7 @@ export function PostForm() {
             <input
               type="text"
               value={title}
-              onChange={(event) => setTitle(event.target.value)}
+              onChange={(event) => onTitleChange(event.target.value)}
               placeholder={messages.post.titlePlaceholder}
               className="w-full border-0 border-b border-transparent bg-transparent px-0 py-space-xs text-h3 font-semibold text-on-surface outline-none transition-colors placeholder:text-outline-variant focus:border-outline-variant"
             />
