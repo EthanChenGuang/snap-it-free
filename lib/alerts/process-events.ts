@@ -1,6 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { alertMatchesListing } from './matcher';
 import type { VeniceZone } from '@/lib/listings/types';
+import { fanOutMatchPush } from '@/lib/notifications/web-push';
+import { messages, zoneLabel } from '@/messages/it';
 
 const BATCH_LIMIT = 50;
 
@@ -76,6 +78,24 @@ async function processOneEvent(
       await markEvent(supabase, event.id, 'failed');
       return false;
     }
+
+    const notifiedUsers = new Set<string>();
+    const zoneText = listingRow.zone
+      ? zoneLabel(listingRow.zone)
+      : messages.settings.matches.zoneUnknown;
+    const pushBody = `${zoneText} · ${messages.settings.push.matchBodySuffix}`;
+
+    await Promise.allSettled(
+      matches.map(async (alert) => {
+        if (notifiedUsers.has(alert.user_id)) return;
+        notifiedUsers.add(alert.user_id);
+        await fanOutMatchPush(supabase, alert.user_id, {
+          title: listingRow.title,
+          body: pushBody,
+          url: `/listing/${listingRow.id}`,
+        });
+      }),
+    );
   }
 
   await markEvent(supabase, event.id, 'processed');

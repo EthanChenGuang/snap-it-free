@@ -131,6 +131,18 @@ export const messages = {
       disabled: 'In pausa',
       mapCta: 'Crea avviso',
     },
+    push: {
+      title: 'Notifiche push',
+      description: 'Ricevi avvisi in tempo reale per i nuovi match',
+      enabledLabel: 'Notifiche push attive',
+      disabledLabel: 'Notifiche push disattivate',
+      iosDisabled: 'Su iPhone, aggiungi l\'app alla Home per attivare le notifiche push',
+      unsupported: 'Le notifiche push non sono supportate in questo browser',
+      vapidMissing: 'Notifiche push non configurate sul server',
+      permissionDenied: 'Permesso notifiche negato — abilitalo nelle impostazioni del browser',
+      subscribeError: 'Impossibile attivare le notifiche push — riprova',
+      matchBodySuffix: 'Nuovo oggetto gratis',
+    },
     matches: {
       sectionTitle: 'Nuovi match',
       emptyTitle: 'Nessun nuovo match',
