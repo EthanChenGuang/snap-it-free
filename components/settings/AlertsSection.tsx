@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { AlertCreateSheet } from '@/components/settings/AlertCreateSheet';
+import { PushToggleSection } from '@/components/settings/PushToggleSection';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
 import type { AlertRow } from '@/lib/alerts/schemas';
@@ -209,6 +210,8 @@ export function AlertsSection({ autoOpenCreate = false }: AlertsSectionProps) {
               <p className="text-label-sm text-error">{error}</p>
             </div>
           )}
+
+          {isLoggedIn && <PushToggleSection isLoggedIn={isLoggedIn} />}
         </div>
       </section>
 
