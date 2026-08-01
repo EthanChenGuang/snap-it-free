@@ -131,6 +131,15 @@ export const messages = {
       disabled: 'In pausa',
       mapCta: 'Crea avviso',
     },
+    matches: {
+      sectionTitle: 'Nuovi match',
+      emptyTitle: 'Nessun nuovo match',
+      emptyDescription: 'Quando un annuncio corrisponde ai tuoi avvisi, lo vedrai qui.',
+      loadError: 'Impossibile caricare i match — riprova',
+      zoneUnknown: 'Zona sconosciuta',
+      badgeLabel: (n: number) =>
+        n === 1 ? '1 nuovo match' : `${n > 9 ? '9+' : n} nuovi match`,
+    },
   },
   sheet: {
     newArrivals: 'Nuovi arrivi',

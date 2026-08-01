@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { AlertsSection } from '@/components/settings/AlertsSection';
+import { MatchesSection } from '@/components/settings/MatchesSection';
 import { ProfileSection } from '@/components/settings/ProfileSection';
 import { messages } from '@/messages/it';
 
@@ -20,6 +21,7 @@ export function SettingsPageClient() {
 
       <ProfileSection />
       <AlertsSection autoOpenCreate={autoOpenCreate} />
+      <MatchesSection />
     </main>
   );
 }
