@@ -93,13 +93,16 @@ export async function POST(request: Request) {
     if (insertError.code === '23505') {
       const { data: raced } = await supabase
         .from('conversations')
-        .select('id')
+        .select('id, buyer_user_id')
         .eq('listing_id', listingId)
-        .eq('buyer_user_id', user.id)
         .maybeSingle();
 
-      if (raced) {
+      if (raced?.buyer_user_id === user.id) {
         return NextResponse.json({ id: raced.id, existing: true });
+      }
+
+      if (raced) {
+        return NextResponse.json({ readOnly: true, reason: 'fcfs' });
       }
     }
     return NextResponse.json({ error: insertError.message }, { status: 500 });
