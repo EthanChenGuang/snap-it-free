@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { AppSerwistProvider } from '@/components/providers/SerwistProvider';
 import { FavoritesMergeProvider } from '@/components/providers/FavoritesMergeProvider';
+import { PwaOnboardingProvider } from '@/components/providers/PwaOnboardingProvider';
 import { BottomNav } from '@/components/shell/BottomNav';
 import { Header } from '@/components/shell/Header';
 import { Toaster } from '@/components/ui/toaster';
@@ -29,10 +30,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="overflow-hidden bg-background text-on-background">
         <AppSerwistProvider>
           <FavoritesMergeProvider>
-            <Header />
-            <div className="app-main">{children}</div>
-            <BottomNav />
-            <Toaster />
+            <PwaOnboardingProvider>
+              <Header />
+              <div className="app-main">{children}</div>
+              <BottomNav />
+              <Toaster />
+            </PwaOnboardingProvider>
           </FavoritesMergeProvider>
         </AppSerwistProvider>
       </body>

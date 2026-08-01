@@ -1,8 +1,20 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { canOfferPush, isIOS } from '@/lib/pwa/ios-detect';
-import { urlBase64ToUint8Array } from '@/lib/pwa/vapid';
+import { usePwaOnboarding } from '@/components/providers/PwaOnboardingProvider';
+import { Button } from '@/components/ui/button';
+import {
+  canOfferPush,
+  canRequestPushPermission,
+  isIOS,
+  isIosPushDismissed,
+  isStandalonePwa,
+} from '@/lib/pwa/ios-detect';
+import {
+  getPushSubscriptionActive,
+  requestPushPermissionAndSubscribe,
+  unsubscribePush,
+} from '@/lib/pwa/usePushSubscribe';
 import { messages } from '@/messages/it';
 import { cn } from '@/lib/utils';
 
@@ -37,38 +49,45 @@ function PushToggle({
 }
 
 export function PushToggleSection({ isLoggedIn }: PushToggleSectionProps) {
+  const { openInstallGuide } = usePwaOnboarding();
   const [enabled, setEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim();
-  const iosBlocked = isIOS();
+  const iosNonStandalone = isIOS() && !isStandalonePwa();
+  const iosDismissed = isIosPushDismissed();
   const pushSupported = canOfferPush();
-  const disabledReason = iosBlocked
-    ? messages.settings.push.iosDisabled
-    : !pushSupported
-      ? messages.settings.push.unsupported
-      : !vapidPublicKey
-        ? messages.settings.push.vapidMissing
+  const canSubscribe =
+    isLoggedIn &&
+    pushSupported &&
+    Boolean(vapidPublicKey) &&
+    canRequestPushPermission(isLoggedIn);
+
+  const disabledReason = !pushSupported
+    ? messages.settings.push.unsupported
+    : !vapidPublicKey
+      ? messages.settings.push.vapidMissing
+      : iosNonStandalone && iosDismissed
+        ? messages.settings.push.iosInstallRequired
         : null;
 
   const refreshSubscription = useCallback(async () => {
-    if (!pushSupported || iosBlocked) {
+    if (!canSubscribe) {
       setLoading(false);
       return;
     }
 
     try {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
-      setEnabled(Boolean(subscription));
+      const active = await getPushSubscriptionActive();
+      setEnabled(active);
     } catch {
       setEnabled(false);
     } finally {
       setLoading(false);
     }
-  }, [pushSupported, iosBlocked]);
+  }, [canSubscribe]);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -80,54 +99,39 @@ export function PushToggleSection({ isLoggedIn }: PushToggleSectionProps) {
   }, [isLoggedIn, refreshSubscription]);
 
   const handleToggle = async (nextEnabled: boolean) => {
-    if (!isLoggedIn || disabledReason || busy) return;
+    if (!isLoggedIn || busy) return;
+
+    if (iosNonStandalone && !iosDismissed) {
+      openInstallGuide();
+      return;
+    }
+
+    if (!canSubscribe || disabledReason) return;
 
     setBusy(true);
     setError(null);
 
     try {
-      const registration = await navigator.serviceWorker.ready;
-
       if (nextEnabled) {
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-          setError(messages.settings.push.permissionDenied);
+        const result = await requestPushPermissionAndSubscribe();
+        if (!result.ok) {
+          if (result.reason === 'ios_not_ready') {
+            openInstallGuide();
+          } else if (result.reason === 'permission_denied') {
+            setError(messages.settings.push.permissionDenied);
+          } else if (result.reason === 'vapid_missing') {
+            setError(messages.settings.push.vapidMissing);
+          } else {
+            setError(messages.settings.push.subscribeError);
+          }
           return;
         }
-
-        if (!vapidPublicKey) {
-          setError(messages.settings.push.vapidMissing);
-          return;
-        }
-
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-        });
-
-        const response = await fetch('/api/push/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(subscription.toJSON()),
-        });
-
-        if (!response.ok) {
-          await subscription.unsubscribe();
-          setError(messages.settings.push.subscribeError);
-          return;
-        }
-
         setEnabled(true);
       } else {
-        const subscription = await registration.pushManager.getSubscription();
-        if (subscription) {
-          const endpoint = subscription.endpoint;
-          await subscription.unsubscribe();
-          await fetch('/api/push/subscribe', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ endpoint }),
-          });
+        const ok = await unsubscribePush();
+        if (!ok) {
+          setError(messages.settings.push.subscribeError);
+          return;
         }
         setEnabled(false);
       }
@@ -138,18 +142,42 @@ export function PushToggleSection({ isLoggedIn }: PushToggleSectionProps) {
     }
   };
 
-  const toggleDisabled = !isLoggedIn || Boolean(disabledReason) || loading || busy;
+  const showInstallCta = iosNonStandalone && !iosDismissed;
+  const toggleDisabled = !isLoggedIn || Boolean(disabledReason) || loading || busy || showInstallCta;
 
   return (
-    <div className="flex items-center justify-between gap-space-md border-t border-outline-variant p-space-md">
-      <div className="min-w-0 flex-1">
-        <p className="text-body-md font-medium text-on-surface">{messages.settings.push.title}</p>
-        <p className="text-label-sm text-secondary">
-          {disabledReason ?? messages.settings.push.description}
-        </p>
-        {error && <p className="mt-space-xs text-label-sm text-error">{error}</p>}
+    <div className="border-t border-outline-variant p-space-md">
+      <div className="flex items-center justify-between gap-space-md">
+        <div className="min-w-0 flex-1">
+          <p className="text-body-md font-medium text-on-surface">{messages.settings.push.title}</p>
+          <p className="text-label-sm text-secondary">
+            {showInstallCta
+              ? messages.settings.push.iosDisabled
+              : (disabledReason ?? messages.settings.push.description)}
+          </p>
+          {error && <p className="mt-space-xs text-label-sm text-error">{error}</p>}
+        </div>
+        {showInstallCta ? (
+          <Button type="button" size="sm" variant="secondary" onClick={openInstallGuide}>
+            {messages.settings.push.installApp}
+          </Button>
+        ) : (
+          <PushToggle enabled={enabled} disabled={toggleDisabled} onChange={handleToggle} />
+        )}
       </div>
-      <PushToggle enabled={enabled} disabled={toggleDisabled} onChange={handleToggle} />
+
+      {iosNonStandalone && iosDismissed && (
+        <p className="mt-space-sm text-label-sm text-secondary">
+          {messages.settings.push.badgeFallbackNote}{' '}
+          <button
+            type="button"
+            className="text-on-surface underline underline-offset-2 hover:text-primary"
+            onClick={openInstallGuide}
+          >
+            {messages.settings.push.howToInstall}
+          </button>
+        </p>
+      )}
     </div>
   );
 }

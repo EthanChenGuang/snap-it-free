@@ -137,6 +137,11 @@ export const messages = {
       enabledLabel: 'Notifiche push attive',
       disabledLabel: 'Notifiche push disattivate',
       iosDisabled: 'Su iPhone, aggiungi l\'app alla Home per attivare le notifiche push',
+      iosInstallRequired: 'Le notifiche push richiedono l\'installazione dalla Home Screen',
+      installApp: 'Installa l\'app',
+      howToInstall: 'Come installare',
+      badgeFallbackNote:
+        'Senza push, i nuovi match restano visibili nel badge e nella sezione Nuovi match.',
       unsupported: 'Le notifiche push non sono supportate in questo browser',
       vapidMissing: 'Notifiche push non configurate sul server',
       permissionDenied: 'Permesso notifiche negato — abilitalo nelle impostazioni del browser',
@@ -145,12 +150,26 @@ export const messages = {
     },
     matches: {
       sectionTitle: 'Nuovi match',
+      badgeFallbackNote:
+        'I nuovi match compaiono qui e nel badge di navigazione, anche senza notifiche push.',
       emptyTitle: 'Nessun nuovo match',
       emptyDescription: 'Quando un annuncio corrisponde ai tuoi avvisi, lo vedrai qui.',
       loadError: 'Impossibile caricare i match — riprova',
       zoneUnknown: 'Zona sconosciuta',
       badgeLabel: (n: number) =>
         n === 1 ? '1 nuovo match' : `${n > 9 ? '9+' : n} nuovi match`,
+    },
+  },
+  pwa: {
+    install: {
+      title: 'Aggiungi alla Home Screen',
+      description:
+        'Su iPhone le notifiche push funzionano solo se apri l\'app dall\'icona sulla Home Screen.',
+      step1: 'Tocca il pulsante Condividi in Safari (icona in basso).',
+      step2: 'Scorri e seleziona «Aggiungi a Home».',
+      step3: 'Apri l\'app dall\'icona sulla Home Screen, poi attiva le notifiche push.',
+      confirmInstalled: 'Ho aggiunto alla Home',
+      continueWithoutPush: 'Continua senza push',
     },
   },
   sheet: {
