@@ -48,7 +48,7 @@
 ### Auth
 
 - [x] **AUTH-01**: User can sign in with Google, Apple, or email when an action requires login
-- [ ] **AUTH-02**: User is prompted to log in only at contact-seller, enable-alerts, favorite, or post actions
+- [x] **AUTH-02**: User is prompted to log in only at contact-seller, enable-alerts, favorite, or post actions
 
 ### Notifications
 
@@ -123,7 +123,7 @@ Deferred to future release. Tracked but not in current roadmap.
 | MOD-02 | Phase 3 | Complete |
 | MOD-03 | Phase 3 | Complete |
 | AUTH-01 | Phase 4 | Complete |
-| AUTH-02 | Phase 4 | Pending |
+| AUTH-02 | Phase 4 | Complete |
 | NOTF-01 | Phase 4 | Complete |
 | NOTF-02 | Phase 4 | Pending |
 | NOTF-03 | Phase 4 | Pending |
