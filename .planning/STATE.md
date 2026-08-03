@@ -4,11 +4,11 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 4
 current_phase_name: Auth, Alerts & Push Notifications
-status: planning
-stopped_at: Completed 04-07-PLAN.md
-last_updated: "2026-08-01T14:42:35.564Z"
-last_activity: 2026-08-01
-last_activity_desc: Phase 03 complete, transitioned to Phase 4
+status: executed
+stopped_at: Completed 04-07-PLAN.md — Phase 4 code complete, pending verify/UAT
+last_updated: "2026-08-01T16:00:00.000Z"
+last_activity: 2026-08-03
+last_activity_desc: Completed quick task 260803-ci2: map never loads on mobile — investigation & comparison
 progress:
   total_phases: 4
   completed_phases: 4
@@ -23,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-24)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
-**Current focus:** Phase 03 — UGC Posting & Community Marketplace
+**Current focus:** Phase 04 — verify work + operator setup (migration 016, VAPID, OAuth providers)
 
 ## Current Position
 
 Phase: 4 — Auth, Alerts & Push Notifications
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-01 — Phase 03 complete, transitioned to Phase 4
+Plan: 7/7 executed
+Status: Code complete — pending `/gsd-verify-work 4` and iPhone NOTF-04 QA
+Last activity: 2026-08-03 - Completed quick task 260803-us0: map zoom throws center TypeError
 
 Progress: [██████████] 100%
 
@@ -134,6 +134,15 @@ Recent decisions affecting current work:
 ### Pending Todos
 
 None yet.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260803-ci1 | add a ngrok link so that I can access the page on mobile phone | 2026-08-03 | — | [260803-ci1-add-a-ngrok-link-so-that-i-can-access-th](./quick/260803-ci1-add-a-ngrok-link-so-that-i-can-access-th/) |
+| 260803-ci2 | map never loads on mobile — investigation & comparison | 2026-08-03 | — | [260803-ci2-map-never-loads-mobile-investigation](./quick/260803-ci2-map-never-loads-mobile-investigation/) |
+| 260803-us0 | map zoom throws center TypeError | 2026-08-03 | — | [260803-us0-map-zoom-throws-center-typeerror](./quick/260803-us0-map-zoom-throws-center-typeerror/) |
+| 260803-us1 | Elenco list scroll region too small; Pubblica did not scroll | 2026-08-03 | c7023f6, 2524d90 | [260803-us1-list-post-scroll-regions](./quick/260803-us1-list-post-scroll-regions/) |
 
 ### Blockers/Concerns
 
