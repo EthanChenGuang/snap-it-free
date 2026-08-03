@@ -73,3 +73,39 @@ Visited: `…/accessori-camera-da-letto-venezia-655558887.htm`
 ## Seller PII (V8 minimization)
 
 Do **not** extract: seller name, phone, email, chat handles. Title + photo + coords + external_url only.
+
+## 2026-08-03 geo recon (quick task 260803-whr)
+
+**Script:** `scraper/scripts/spike-subito-geo.mjs`  
+**Goal:** pick a Venice-scoped URL form and discover where location/coords live on live detail pages.
+
+### Part A — URL forms (3 categories each)
+
+| Form | Cards | min/cat | in-VE share | Notes |
+|------|------:|--------:|------------:|-------|
+| A `/annunci-veneto/regalo/{cat}/` (current) | 90 | 30 | 13% | Veneto-wide; most PD/TV/VR/VI |
+| B `.../regalo/{cat}/venezia/` (province) | 83 | 23 | 100% | Includes Jesolo/Chioggia/Mira/Spinea outside our zones |
+| **C `.../regalo/{cat}/venezia/venezia/` (comune)** | **42** | **3** | **100%** | **Winner — narrowest usable form** |
+| D `/annunci-venezia/regalo/{cat}/` | 0 | 0 | — | 404 |
+| E Veneto + `?rs=Venezia` | 90 | 30 | 13% | Query param ignored |
+
+**Winning URLs (observed card counts):**
+- `/annunci-veneto/regalo/arredamento-casalinghi/venezia/venezia/` — 30
+- `/annunci-veneto/regalo/elettrodomestici/venezia/venezia/` — 3
+- `/annunci-veneto/regalo/bambini-giocattoli/venezia/venezia/` — 9
+
+### Part B — coordinate / location sources (6 detail pages from form C)
+
+| Source | Hits |
+|--------|-----:|
+| `__NEXT_DATA__` lat/lng | 0 |
+| `application/ld+json` geo | 0 |
+| raw-HTML `"latitude"` / `"lat"` | 0 |
+| Google maps URL coords | 0 |
+| **municipality centroid from location text** | **6/6** |
+
+- **Location selector that works:** `[class*="location"]` → `"Venezia (VE)"` (6/6).
+- **Broken current selector:** `span[class*="caption"]` matches the **insertion date** (`Oggi alle 15:32`), not the town — this is why the centroid fallback never fired in production.
+- **Zone result:** 6/6 → `centro_storico` via Venezia centroid `(45.434, 12.338)`.
+- **Locality caveat:** Marghera listings still surface as location text `"Venezia (VE)"` (comune-wide). The detail URL slug can carry the locality (`…-marghera-venezia-….htm`) — parse the slug before falling back to the comune name.
+- **Supersedes tracer D-16:** centroid fallback is now a first-class path for Venice-scoped crawls; leaving coords null is no longer acceptable when a municipality string is present.
