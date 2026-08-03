@@ -8,7 +8,7 @@ status: executed
 stopped_at: Completed 04-07-PLAN.md — Phase 4 code complete, pending verify/UAT
 last_updated: "2026-08-01T16:00:00.000Z"
 last_activity: 2026-08-03
-last_activity_desc: Completed quick task 260803-ci2: map never loads on mobile — investigation & comparison
+last_activity_desc: Completed quick task 260803-whr: fix Subito geo/zone pipeline so scraped free items surface in Elenco
 progress:
   total_phases: 4
   completed_phases: 4
@@ -143,7 +143,8 @@ None yet.
 | 260803-ci2 | map never loads on mobile — investigation & comparison | 2026-08-03 | — | [260803-ci2-map-never-loads-mobile-investigation](./quick/260803-ci2-map-never-loads-mobile-investigation/) |
 | 260803-us0 | map zoom throws center TypeError | 2026-08-03 | — | [260803-us0-map-zoom-throws-center-typeerror](./quick/260803-us0-map-zoom-throws-center-typeerror/) |
 | 260803-us1 | Elenco list scroll region too small; Pubblica did not scroll | 2026-08-03 | c7023f6, 2524d90 | [260803-us1-list-post-scroll-regions](./quick/260803-us1-list-post-scroll-regions/) |
-| 260803-wi0 | Research Italian and European free-item source candidates beyond Subito | 2026-08-03 | — | [260803-wi0-free-item-source-candidates](./quick/260803-wi0-free-item-source-candidates/) |
+| 260803-whr | fix Subito geo/zone pipeline so scraped free items surface in Elenco | 2026-08-03 | 8c6f24e, ca573b6, 9956629 | [260803-whr-fix-subito-geo-zone-pipeline-so-scraped-](./quick/260803-whr-fix-subito-geo-zone-pipeline-so-scraped-/) |
+| 260803-wi0 | Research Italian and European free-item source candidates beyond Subito | 2026-08-03 | 893d917 | [260803-wi0-free-item-source-candidates](./quick/260803-wi0-free-item-source-candidates/) |
 
 ### Blockers/Concerns
 

@@ -29,4 +29,4 @@ Deliverable: `.planning/quick/260803-wi0-free-item-source-candidates/260803-wi0-
 
 ## Commits
 
-(filled by orchestrator docs commit)
+- `893d917` docs(260803-wi0): research free-item sources beyond Subito
