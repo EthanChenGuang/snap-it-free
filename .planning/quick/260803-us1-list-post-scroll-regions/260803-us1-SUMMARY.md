@@ -128,6 +128,8 @@ nav `772.9→844` — no overlap and no gap at either end.
 
 - `c7023f6` fix(260803-us1): make app shell a flex column that owns the scroll
 - `2524d90` fix(260803-us1): stop page roots double-reserving the bottom nav
+- `bbb7461` docs(260803-us1): record list/post scroll region quick task
+- `8fd5516` fix(260803-us1): track NavMenuDrawer so the header compiles
 
 ## Notes and follow-ups
 
@@ -135,7 +137,9 @@ nav `772.9→844` — no overlap and no gap at either end.
   substantial uncommitted edits from earlier sessions, and `app/globals.css`, `app/layout.tsx`
   and `components/shell/Header.tsx` each carried some (the vaul pointer-events rule,
   `suppressHydrationWarning`, the `NavMenuDrawer` menu button). Git stages whole files, so those
-  hunks are included in that commit. `2524d90` contains only this task's changes.
+  hunks are included in that commit. `2524d90` contains only this task's changes. One knock-on:
+  the `Header.tsx` hunks import `components/shell/NavMenuDrawer.tsx`, which was still untracked,
+  so `c7023f6` briefly left HEAD unbuildable from a clean checkout; `8fd5516` adds that file.
 - **`/post/manage` could not be verified directly** — it redirects to `/post` when logged out, and
   the probe runs unauthenticated. Its root element received the same one-line fix as `/post`.
 - **`/settings` and `/favorites` fit within the viewport** in the logged-out state, so their
