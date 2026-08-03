@@ -32,7 +32,7 @@ export function ListPageClient({ initialListings }: ListPageClientProps) {
   );
 
   return (
-    <main className="flex h-full flex-col overflow-hidden pb-24">
+    <main className="flex h-full flex-col overflow-hidden">
       <div className="shrink-0 border-b border-outline-variant px-gutter py-space-md">
         <div className="flex items-start justify-between gap-space-md">
           <div>

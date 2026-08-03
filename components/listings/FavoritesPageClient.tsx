@@ -124,7 +124,7 @@ export function FavoritesPageClient() {
   if (fetchFailed && (isAuthed || readFavoriteIds().length > 0)) {
     return (
       <>
-        <main className="flex h-full flex-col items-center justify-center gap-space-md px-gutter pb-24 text-center">
+        <main className="flex h-full flex-col items-center justify-center gap-space-md px-gutter text-center">
           <span className="material-symbols-outlined text-4xl text-on-surface-variant">cloud_off</span>
           <div>
             <h1 className="text-h3 font-bold text-on-surface">{messages.favorites.pageTitle}</h1>
@@ -149,7 +149,7 @@ export function FavoritesPageClient() {
   if (listings.length === 0) {
     return (
       <>
-        <main className="flex h-full flex-col items-center justify-center gap-space-md px-gutter pb-24 text-center">
+        <main className="flex h-full flex-col items-center justify-center gap-space-md px-gutter text-center">
           <span className="material-symbols-outlined text-4xl text-on-surface-variant">favorite</span>
           <div>
             <h1 className="text-h3 font-bold text-on-surface">{messages.favorites.emptyTitle}</h1>
@@ -176,7 +176,7 @@ export function FavoritesPageClient() {
 
   return (
     <>
-      <main className="flex h-full flex-col overflow-hidden pb-24">
+      <main className="flex h-full flex-col overflow-hidden">
         <div className="shrink-0 border-b border-outline-variant px-gutter py-space-md">
           <h1 className="text-h3 font-bold text-on-surface">{messages.favorites.pageTitle}</h1>
           <p className="text-label-sm text-on-surface-variant">

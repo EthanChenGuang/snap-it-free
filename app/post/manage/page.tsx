@@ -17,7 +17,7 @@ export default async function ManageListingsPage() {
   const listings = await getOwnerListings();
 
   return (
-    <main className="mx-auto flex h-full max-w-[800px] flex-col px-gutter py-space-xl pb-28">
+    <main className="mx-auto flex min-h-full max-w-[800px] flex-col px-gutter py-space-xl">
       <div className="mb-space-lg border-b border-outline-variant pb-space-md">
         <p className="text-label-sm text-on-surface-variant">{messages.nav.post}</p>
         <h1 className="text-h2 font-bold text-on-surface">{messages.manage.pageTitle}</h1>

@@ -29,7 +29,7 @@ export function PostPageClient() {
   };
 
   return (
-    <main className="mx-auto flex h-full max-w-[800px] flex-col px-gutter py-space-xl pb-28">
+    <main className="mx-auto flex min-h-full max-w-[800px] flex-col px-gutter py-space-xl">
       <div className="mb-space-lg border-b border-outline-variant pb-space-md">
         <div className="flex items-start justify-between gap-space-md">
           <div>
