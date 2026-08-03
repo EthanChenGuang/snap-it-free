@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 4 — Auth, Alerts & Push Notifications
 Plan: 7/7 executed
 Status: Code complete — pending `/gsd-verify-work 4` and iPhone NOTF-04 QA
-Last activity: 2026-08-03 - Completed quick task 260803-us0: map zoom throws center TypeError
+Last activity: 2026-08-03 - Completed quick task 260803-wi0: Research Italian and European free-item source candidates beyond Subito
 
 Progress: [██████████] 100%
 
@@ -143,11 +143,12 @@ None yet.
 | 260803-ci2 | map never loads on mobile — investigation & comparison | 2026-08-03 | — | [260803-ci2-map-never-loads-mobile-investigation](./quick/260803-ci2-map-never-loads-mobile-investigation/) |
 | 260803-us0 | map zoom throws center TypeError | 2026-08-03 | — | [260803-us0-map-zoom-throws-center-typeerror](./quick/260803-us0-map-zoom-throws-center-typeerror/) |
 | 260803-us1 | Elenco list scroll region too small; Pubblica did not scroll | 2026-08-03 | c7023f6, 2524d90 | [260803-us1-list-post-scroll-regions](./quick/260803-us1-list-post-scroll-regions/) |
+| 260803-wi0 | Research Italian and European free-item source candidates beyond Subito | 2026-08-03 | — | [260803-wi0-free-item-source-candidates](./quick/260803-wi0-free-item-source-candidates/) |
 
 ### Blockers/Concerns
 
-- Phase 1: Subito.it's `robots.txt` explicitly forbids scraping (not a soft crawl-delay) — needs a documented ToS/legal review before pointing at production, and a non-scraping fallback supply plan
-- Phase 1: Subito's live "free/regalo" category structure and current anti-bot posture were not directly verified during research — needs a spike before committing to selector/extraction design
+- Phase 1: Subito legal/production posture — `robots.txt` machine rules allow `/` but disallow `?o=` pagination; a prose `#` comment forbids automated access; commercial bot management 403s non-browser clients. Needs Italian IP/privacy counsel before production crawl, plus a supply hedge (UGC + partnerships). See quick task [260803-wi0](./quick/260803-wi0-free-item-source-candidates/260803-wi0-RESEARCH.md): no high-volume non-scraping Italian free feed exists; best next supply move is national Subito seeds after lifting Venice geo hardcoding.
+- Phase 1: Subito national free category structure verified live (~39.5k `regalo` results) — remaining risk is anti-bot durability and sui generis / GDPR exposure, not category existence
 - Phase 4: iOS PWA push behavior is fast-moving and regulatory-sensitive (EU DMA) — verify against WebKit's current official docs at implementation time, and test end-to-end on a real iPhone, not the Simulator
 - SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY not configured — worker persist blocked until operator sets env and applies migrations
 
