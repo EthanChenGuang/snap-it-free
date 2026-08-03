@@ -16,8 +16,26 @@ export type RawListing = {
 
 export type SelectorHitRate = { hits: number; total: number };
 
+export type CoordSource =
+  | 'next-data'
+  | 'ld-json'
+  | 'raw-html'
+  | 'map-url'
+  | 'centroid'
+  | 'none'
+  | 'out-of-bbox';
+
+export type ResolveCoordsResult = {
+  lat: number | null;
+  lng: number | null;
+  source: CoordSource;
+  matchedName?: string;
+};
+
 type MunicipalityCentroid = { name: string; lat: number; lng: number };
 
+// File order is significant: localities first, comune-wide aliases (Venezia/Venice) last.
+// First match wins so "Mestre | Venezia (VE)" resolves to Mestre, not the comune centroid.
 const MUNICIPALITY_CENTROIDS = JSON.parse(
   readFileSync(
     join(dirname(fileURLToPath(import.meta.url)), '../geo/municipality-centroids.json'),
@@ -29,6 +47,23 @@ const VENICE_LAT_MIN = 45.0;
 const VENICE_LAT_MAX = 45.7;
 const VENICE_LNG_MIN = 12.1;
 const VENICE_LNG_MAX = 12.6;
+
+const VENETO_PROVINCE_CODES = ['VE', 'PD', 'TV', 'VR', 'VI', 'RO', 'BL'] as const;
+const PROVINCE_RE = new RegExp(
+  `([A-ZÀ-Ý][\\p{L}'’.\\- ]{1,40}?)\\s*\\((${VENETO_PROVINCE_CODES.join('|')})\\)`,
+  'u',
+);
+
+/** True for any Subito regalo category listing URL, regardless of location segment. */
+export function isRegaloCategoryUrl(url: string): boolean {
+  try {
+    const { pathname } = new URL(url);
+    // /annunci-{region}/regalo/{category}/[…] — not a detail .htm page
+    return /\/annunci-[^/]+\/regalo\/[^/]+\/?/i.test(pathname) && !pathname.includes('.htm');
+  } catch {
+    return false;
+  }
+}
 
 function parseExternalId(url: string): string | null {
   const match = url.match(/-(\d+)\.htm(?:\?|$)/);
@@ -60,56 +95,157 @@ export function parseItalianPostedAt(text: string, now = new Date()): Date {
   return now;
 }
 
-function parseCoordsFromHtml(html: string): { lat: number | null; lng: number | null } {
-  const latMatch = html.match(/"latitude"\s*:\s*([\d.]+)/) ?? html.match(/"lat"\s*:\s*([\d.]+)/);
-  const lngMatch = html.match(/"longitude"\s*:\s*([\d.]+)/) ?? html.match(/"lng"\s*:\s*([\d.]+)/);
-
-  if (!latMatch || !lngMatch) {
-    return { lat: null, lng: null };
-  }
-
-  const lat = Number.parseFloat(latMatch[1]);
-  const lng = Number.parseFloat(lngMatch[1]);
-
-  if (
-    Number.isNaN(lat) ||
-    Number.isNaN(lng) ||
-    lat < VENICE_LAT_MIN ||
-    lat > VENICE_LAT_MAX ||
-    lng < VENICE_LNG_MIN ||
-    lng > VENICE_LNG_MAX
-  ) {
-    return { lat: null, lng: null };
-  }
-
-  return { lat, lng };
+function inVeniceBbox(lat: number, lng: number): boolean {
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= VENICE_LAT_MIN &&
+    lat <= VENICE_LAT_MAX &&
+    lng >= VENICE_LNG_MIN &&
+    lng <= VENICE_LNG_MAX
+  );
 }
 
-function lookupMunicipalityCentroid(locationText: string): { lat: number; lng: number } | null {
-  const normalized = locationText.toLowerCase();
-  for (const entry of MUNICIPALITY_CENTROIDS) {
-    if (normalized.includes(entry.name.toLowerCase())) {
-      return { lat: entry.lat, lng: entry.lng };
+function walkForCoords(node: unknown, depth = 0): { lat: number; lng: number } | null {
+  if (node == null || depth > 12) return null;
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      const hit = walkForCoords(item, depth + 1);
+      if (hit) return hit;
+    }
+    return null;
+  }
+  if (typeof node !== 'object') return null;
+
+  const record = node as Record<string, unknown>;
+  const keys = Object.keys(record);
+  const latKey = keys.find((k) => /^(lat|latitude|latitudine)$/i.test(k));
+  const lngKey = keys.find((k) => /^(lng|lon|long|longitude|longitudine)$/i.test(k));
+  if (latKey && lngKey) {
+    const lat = Number.parseFloat(String(record[latKey]));
+    const lng = Number.parseFloat(String(record[lngKey]));
+    if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
+  }
+  for (const k of keys) {
+    const hit = walkForCoords(record[k], depth + 1);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+function fromNextData(html: string): { lat: number; lng: number } | null {
+  const m = html.match(/<script[^>]+id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);
+  if (!m) return null;
+  try {
+    return walkForCoords(JSON.parse(m[1]));
+  } catch {
+    return null;
+  }
+}
+
+function fromLdJson(html: string): { lat: number; lng: number } | null {
+  const blocks = [...html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)];
+  for (const b of blocks) {
+    try {
+      const hit = walkForCoords(JSON.parse(b[1]));
+      if (hit) return hit;
+    } catch {
+      /* ignore malformed block */
     }
   }
   return null;
 }
 
+function fromRawHtml(html: string): { lat: number; lng: number } | null {
+  const latM =
+    html.match(/"?(?:latitude|latitudine)"?\s*[:=]\s*"?(-?\d+(?:\.\d+)?)"?/i) ??
+    html.match(/"?lat"?\s*[:=]\s*"?(-?\d+(?:\.\d+)?)"?/i);
+  const lngM =
+    html.match(/"?(?:longitude|longitudine)"?\s*[:=]\s*"?(-?\d+(?:\.\d+)?)"?/i) ??
+    html.match(/"?(?:lng|lon|long)"?\s*[:=]\s*"?(-?\d+(?:\.\d+)?)"?/i);
+  if (!latM || !lngM) return null;
+  const lat = Number.parseFloat(latM[1]);
+  const lng = Number.parseFloat(lngM[1]);
+  return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+}
+
+function fromMapUrl(html: string): { lat: number; lng: number } | null {
+  const m =
+    html.match(/maps\.google[^"'\s]*?[?&](?:q|center|ll)=(-?\d+\.\d+)(?:,|%2C)(-?\d+\.\d+)/i) ??
+    html.match(/(?:staticmap|maps\/api)[^"'\s]*?[?&](?:center|markers)=(-?\d+\.\d+)(?:,|%2C)(-?\d+\.\d+)/i);
+  if (!m) return null;
+  const lat = Number.parseFloat(m[1]);
+  const lng = Number.parseFloat(m[2]);
+  return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+}
+
+/**
+ * Longest-name-first substring match so a locality beats the comune-wide name
+ * (e.g. "Mestre" before "Venezia", "Lido di Venezia" before a short "Lido").
+ */
+export function lookupMunicipalityCentroid(
+  locationText: string,
+): { lat: number; lng: number; matchedName: string } | null {
+  if (!locationText) return null;
+  const normalized = locationText.toLowerCase();
+  for (const entry of MUNICIPALITY_CENTROIDS) {
+    if (normalized.includes(entry.name.toLowerCase())) {
+      return { lat: entry.lat, lng: entry.lng, matchedName: entry.name };
+    }
+  }
+  return null;
+}
+
+/**
+ * Prefer locality tokens from the detail URL slug (e.g. `…-marghera-venezia-….htm`)
+ * over the comune-wide location label Subito shows as "Venezia (VE)".
+ */
+export function locationHintsFromUrl(externalUrl: string): string {
+  try {
+    const path = new URL(externalUrl).pathname;
+    const slug = path.split('/').pop() ?? '';
+    return slug.replace(/-\d+\.htm$/i, '').replace(/-/g, ' ');
+  } catch {
+    return '';
+  }
+}
+
 export function resolveCoords(
   html: string,
   municipalityText: string,
-): { lat: number | null; lng: number | null } {
-  const fromHtml = parseCoordsFromHtml(html);
-  if (fromHtml.lat != null && fromHtml.lng != null) {
-    return fromHtml;
+  externalUrl = '',
+): ResolveCoordsResult {
+  const embedded: Array<{ source: CoordSource; hit: { lat: number; lng: number } | null }> = [
+    { source: 'next-data', hit: fromNextData(html) },
+    { source: 'ld-json', hit: fromLdJson(html) },
+    { source: 'raw-html', hit: fromRawHtml(html) },
+    { source: 'map-url', hit: fromMapUrl(html) },
+  ];
+
+  for (const { source, hit } of embedded) {
+    if (!hit) continue;
+    if (!inVeniceBbox(hit.lat, hit.lng)) {
+      return { lat: null, lng: null, source: 'out-of-bbox' };
+    }
+    return { lat: hit.lat, lng: hit.lng, source };
   }
 
-  const centroid = lookupMunicipalityCentroid(municipalityText);
+  // Slug locality first (Marghera/Mestre/…), then the visible location string.
+  const hintText = [locationHintsFromUrl(externalUrl), municipalityText].filter(Boolean).join(' | ');
+  const centroid = lookupMunicipalityCentroid(hintText);
   if (centroid) {
-    return centroid;
+    if (!inVeniceBbox(centroid.lat, centroid.lng)) {
+      return { lat: null, lng: null, source: 'out-of-bbox', matchedName: centroid.matchedName };
+    }
+    return {
+      lat: centroid.lat,
+      lng: centroid.lng,
+      source: 'centroid',
+      matchedName: centroid.matchedName,
+    };
   }
 
-  return { lat: null, lng: null };
+  return { lat: null, lng: null, source: 'none' };
 }
 
 async function dismissCookieBanner(page: Page): Promise<void> {
@@ -121,8 +257,7 @@ async function dismissCookieBanner(page: Page): Promise<void> {
 }
 
 async function resolveDetailUrls(page: Page): Promise<string[]> {
-  const onCategory = page.url().includes('/annunci-veneto/regalo/');
-  if (!onCategory) {
+  if (!isRegaloCategoryUrl(page.url())) {
     return [page.url()];
   }
 
@@ -135,7 +270,9 @@ async function resolveDetailUrls(page: Page): Promise<string[]> {
         .filter((href): href is string => Boolean(href)),
     );
 
-  const detailUrls = [...new Set(hrefs.map((href) => (href.startsWith('http') ? href : `https://www.subito.it${href}`)))];
+  const detailUrls = [
+    ...new Set(hrefs.map((href) => (href.startsWith('http') ? href : `https://www.subito.it${href}`))),
+  ];
   return detailUrls;
 }
 
@@ -147,7 +284,7 @@ async function extractFromDetailPage(page: Page): Promise<{
   const external_url = page.url();
   const external_id = parseExternalId(external_url);
 
-  const extracted = await page.evaluate(() => {
+  const extracted = await page.evaluate((provincePatternSource: string) => {
     const title = document.querySelector('h1')?.textContent?.trim() ?? '';
     const photo =
       document.querySelector('img[src*="sbt-ads-images-pro"]')?.getAttribute('src') ??
@@ -184,16 +321,29 @@ async function extractFromDetailPage(page: Page): Promise<{
 
     const description = descFromSection ?? paragraphs[0] ?? '';
 
-    const locationText =
-      document.querySelector('span[class*="caption"]')?.textContent?.trim() ??
-      document.querySelector('[class*="location"]')?.textContent?.trim() ??
-      document.querySelector('[data-testid*="location"]')?.textContent?.trim() ??
-      '';
+    // Prefer real location nodes. span[class*="caption"] is the insertion date on current Subito.
+    const locationCandidates = [
+      document.querySelector('[class*="location"]')?.textContent?.trim() ?? '',
+      document.querySelector('[data-testid*="location"]')?.textContent?.trim() ?? '',
+      document.querySelector('[class*="AdInfo"]')?.textContent?.trim() ?? '',
+      document.querySelector('[class*="city"]')?.textContent?.trim() ?? '',
+    ];
+
+    const provinceRe = new RegExp(provincePatternSource, 'u');
+    let locationText = locationCandidates.find((t) => t && provinceRe.test(t)) ?? '';
+
+    if (!locationText) {
+      const body = (document.body.innerText ?? '').replace(/\s+/g, ' ').slice(0, 6000);
+      const bodyMatch = body.match(provinceRe);
+      if (bodyMatch) {
+        locationText = `${bodyMatch[1].trim()} (${bodyMatch[2]})`;
+      }
+    }
 
     return { title, photo, postedText, description, locationText };
-  });
+  }, PROVINCE_RE.source);
 
-  const { lat, lng } = resolveCoords(html, extracted.locationText);
+  const { lat, lng } = resolveCoords(html, extracted.locationText, external_url);
   const posted_at = parseItalianPostedAt(extracted.postedText).toISOString();
 
   const fields = [

@@ -5,7 +5,7 @@
       "type": "Feature",
       "properties": {
         "zone": "lido_murano",
-        "source": "Hand-drawn approximate boundary covering Lido and Murano islands (OSM simplified)"
+        "source": "Hand-drawn approximate boundary covering Lido and Murano islands (OSM simplified); north edge extended to include Murano centroid 45.458"
       },
       "geometry": {
         "type": "Polygon",
@@ -13,8 +13,8 @@
           [
             [12.35, 45.39],
             [12.42, 45.39],
-            [12.42, 45.44],
-            [12.35, 45.44],
+            [12.42, 45.465],
+            [12.35, 45.465],
             [12.35, 45.39]
           ]
         ]

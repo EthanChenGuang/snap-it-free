@@ -1,9 +1,17 @@
 [
-  { "name": "Venezia", "lat": 45.434, "lng": 12.338 },
-  { "name": "Venice", "lat": 45.434, "lng": 12.338 },
-  { "name": "Mestre", "lat": 45.486, "lng": 12.245 },
-  { "name": "Marghera", "lat": 45.459, "lng": 12.214 },
-  { "name": "Lido", "lat": 45.406, "lng": 12.372 },
+  { "name": "Lido di Venezia", "lat": 45.406, "lng": 12.372 },
+  { "name": "Giudecca", "lat": 45.425, "lng": 12.331 },
+  { "name": "Cannaregio", "lat": 45.443, "lng": 12.329 },
+  { "name": "Castello", "lat": 45.435, "lng": 12.350 },
+  { "name": "Dorsoduro", "lat": 45.431, "lng": 12.326 },
+  { "name": "San Marco", "lat": 45.434, "lng": 12.339 },
+  { "name": "San Polo", "lat": 45.438, "lng": 12.330 },
+  { "name": "Santa Croce", "lat": 45.439, "lng": 12.325 },
   { "name": "Murano", "lat": 45.458, "lng": 12.352 },
-  { "name": "Giudecca", "lat": 45.425, "lng": 12.331 }
+  { "name": "Marghera", "lat": 45.459, "lng": 12.214 },
+  { "name": "Mestre", "lat": 45.486, "lng": 12.245 },
+  { "name": "Favaro Veneto", "lat": 45.498, "lng": 12.278 },
+  { "name": "Carpenedo", "lat": 45.495, "lng": 12.255 },
+  { "name": "Venezia", "lat": 45.434, "lng": 12.338 },
+  { "name": "Venice", "lat": 45.434, "lng": 12.338 }
 ]

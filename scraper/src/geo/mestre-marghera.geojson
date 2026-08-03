@@ -5,17 +5,17 @@
       "type": "Feature",
       "properties": {
         "zone": "mestre_marghera",
-        "source": "Hand-drawn approximate boundary covering Mestre and Marghera mainland (OSM simplified)"
+        "source": "Hand-drawn approximate boundary covering Mestre and Marghera mainland (OSM simplified); south edge extended to include Marghera centroid 45.459"
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [12.2, 45.46],
-            [12.28, 45.46],
+            [12.2, 45.455],
+            [12.28, 45.455],
             [12.28, 45.5],
             [12.2, 45.5],
-            [12.2, 45.46]
+            [12.2, 45.455]
           ]
         ]
       }
