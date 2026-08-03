@@ -2,23 +2,30 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+import { NavMenuDrawer } from '@/components/shell/NavMenuDrawer';
 import { messages } from '@/messages/it';
 import { cn } from '@/lib/utils';
 
 export function Header() {
   const pathname = usePathname();
   const onFavorites = pathname.startsWith('/favorites');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-outline-variant bg-surface">
-      <div className="mx-auto flex max-w-container-max items-center justify-between px-gutter py-space-md">
-        <button
-          type="button"
-          className="flex cursor-pointer items-center gap-space-sm transition-opacity active:opacity-80"
-          aria-label={messages.header.menu}
-        >
-          <span className="material-symbols-outlined text-primary">menu</span>
-        </button>
+    <>
+      <header className="relative z-[100] isolate w-full shrink-0 border-b border-outline-variant bg-surface">
+        <div className="mx-auto flex max-w-container-max items-center justify-between px-gutter py-space-md">
+          <button
+            type="button"
+            className="relative z-[101] flex min-h-11 min-w-11 touch-manipulation cursor-pointer items-center justify-center gap-space-sm transition-opacity active:opacity-80"
+            aria-label={messages.header.menu}
+            aria-expanded={menuOpen}
+            aria-haspopup="dialog"
+            onClick={() => setMenuOpen(true)}
+          >
+            <span className="material-symbols-outlined text-primary">menu</span>
+          </button>
         <Link
           href="/"
           className="flex items-center gap-space-sm transition-opacity hover:opacity-80"
@@ -50,5 +57,7 @@ export function Header() {
         </Link>
       </div>
     </header>
+    <NavMenuDrawer open={menuOpen} onOpenChange={setMenuOpen} />
+    </>
   );
 }

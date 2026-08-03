@@ -22,7 +22,7 @@ export function BottomNav() {
   const { count: unreadMatchCount } = useUnreadMatchCount();
 
   return (
-    <nav className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around border-t border-outline-variant bg-surface px-gutter py-space-sm">
+    <nav className="relative z-[100] flex w-full shrink-0 items-center justify-around border-t border-outline-variant bg-surface px-gutter py-space-sm">
       {navItems.map((item) => {
         const isActive =
           item.href === '/'

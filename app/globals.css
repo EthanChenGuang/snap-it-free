@@ -96,8 +96,19 @@ body {
   scrollbar-width: none;
 }
 
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+/* min-height:0 overrides the flex default of auto, which would let tall content
+   grow .app-main past the shell instead of scrolling inside it. */
 .app-main {
-  height: calc(100dvh - 128px);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .map-container {
@@ -119,6 +130,11 @@ body {
   display: none;
 }
 
-body[data-vaul-drawer][data-vaul-drawer-visible='true'] {
-  pointer-events: auto !important;
+/* Non-modal map sheet: only the visible sheet area receives touches (mobile/ngrok safe). */
+[data-vaul-drawer][data-vaul-snap-points='true'] {
+  pointer-events: none;
+}
+
+[data-vaul-drawer][data-vaul-snap-points='true'] > * {
+  pointer-events: auto;
 }

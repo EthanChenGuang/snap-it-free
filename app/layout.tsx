@@ -20,20 +20,25 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="it" className={inter.variable}>
+    <html lang="it" className={inter.variable} suppressHydrationWarning>
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
           rel="stylesheet"
         />
       </head>
-      <body className="overflow-hidden bg-background text-on-background">
+      <body
+        className="overflow-hidden bg-background text-on-background"
+        suppressHydrationWarning
+      >
         <AppSerwistProvider>
           <FavoritesMergeProvider>
             <PwaOnboardingProvider>
-              <Header />
-              <div className="app-main">{children}</div>
-              <BottomNav />
+              <div className="app-shell">
+                <Header />
+                <div className="app-main">{children}</div>
+                <BottomNav />
+              </div>
               <Toaster />
             </PwaOnboardingProvider>
           </FavoritesMergeProvider>
