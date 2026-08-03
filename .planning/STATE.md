@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 4 — Auth, Alerts & Push Notifications
 Plan: 7/7 executed
 Status: Code complete — pending `/gsd-verify-work 4` and iPhone NOTF-04 QA
-Last activity: 2026-08-03 - Completed quick task 260803-wi0: Research Italian and European free-item source candidates beyond Subito
+Last activity: 2026-08-03 - Completed quick task 260803-whr: fix Subito geo/zone pipeline so scraped free items surface in Elenco
 
 Progress: [██████████] 100%
 
