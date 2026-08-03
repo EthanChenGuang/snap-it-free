@@ -32,4 +32,17 @@ describe('validateBatch', () => {
       expect(result.reason).toMatch(/count 20 < min 25 \(50% of median 50\)/);
     }
   });
+
+  it('fails when geo resolution rate is below the minimum', () => {
+    const result = validateBatch(Array(100).fill({}), trailingMedians, 0.95, 0.5, 0.9, 0.2, 0.5);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toMatch(/geo resolution rate 0\.20 < 0\.5/);
+    }
+  });
+
+  it('passes when geo resolution rate meets the minimum', () => {
+    const result = validateBatch(Array(100).fill({}), trailingMedians, 0.95, 0.5, 0.9, 0.8, 0.5);
+    expect(result).toEqual({ ok: true });
+  });
 });

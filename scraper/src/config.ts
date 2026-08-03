@@ -16,7 +16,10 @@ export const supabaseAdmin: SupabaseClient = createClient(
 );
 
 export const SCRAPE_MIN_SELECTOR_RATE = 0.9;
-export const SCRAPE_MIN_COUNT_RATIO = 0.5;
+export const SCRAPE_MIN_COUNT_RATIO = Number.parseFloat(process.env.SCRAPE_MIN_COUNT_RATIO ?? '0.5') || 0.5;
+/** Minimum share of extracted listings that must resolve non-null coordinates. */
+export const SCRAPE_MIN_GEO_RESOLUTION_RATE =
+  Number.parseFloat(process.env.SCRAPE_MIN_GEO_RESOLUTION_RATE ?? '0.5') || 0.5;
 export const TRAILING_RUN_WINDOW = 7;
 
 export const CRON_ENABLED = process.env.CRON_ENABLED === 'true';

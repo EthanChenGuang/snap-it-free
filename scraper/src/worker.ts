@@ -3,6 +3,7 @@ import { pathToFileURL } from 'node:url';
 import {
   CRON_ENABLED,
   SCRAPE_MIN_COUNT_RATIO,
+  SCRAPE_MIN_GEO_RESOLUTION_RATE,
   SCRAPE_MIN_SELECTOR_RATE,
   TRAILING_RUN_WINDOW,
   supabaseAdmin,
@@ -10,6 +11,7 @@ import {
 import { notifyOperator } from './alert/notify.js';
 import { persistBatch } from './shared/persist.js';
 import { validateBatch } from './shared/validate-run.js';
+import { loadZonePolygons, tagZone } from './shared/zone-tag.js';
 import { runSubitoCrawler } from './subito/crawler.js';
 import { SUBITO_CATEGORY_URLS } from './subito/categories.js';
 
@@ -85,6 +87,9 @@ export async function finishScrapeRun(
 }
 
 function parseValidationFailure(reason: string): { failureCode: string; failureDetail: string } {
+  if (reason.includes('geo resolution rate')) {
+    return { failureCode: 'LOW_GEO_RESOLUTION', failureDetail: reason };
+  }
   if (reason.includes('selector hit rate')) {
     return { failureCode: 'LOW_SELECTOR_RATE', failureDetail: reason };
   }
@@ -114,8 +119,18 @@ export async function runScrape(supabase: SupabaseClient = supabaseAdmin): Promi
 
     console.log(`Crawling ${SUBITO_CATEGORY_URLS.length} category URL(s)`);
     const { rawListings, selectorHitRate } = await runSubitoCrawler([...SUBITO_CATEGORY_URLS]);
+
+    const zones = loadZonePolygons();
+    const withCoords = rawListings.filter((l) => l.lat != null && l.lng != null);
+    const withZone = withCoords.filter(
+      (l) => l.lat != null && l.lng != null && tagZone(l.lat, l.lng, zones) != null,
+    );
+    const geoResolutionRate = rawListings.length === 0 ? 0 : withCoords.length / rawListings.length;
+    const zoneRate = rawListings.length === 0 ? 0 : withZone.length / rawListings.length;
+
     console.log(
-      `Extracted ${rawListings.length} listing(s); selector hit rate: ${selectorHitRate.toFixed(2)}`,
+      `Extracted ${rawListings.length} listing(s); selector hit rate: ${selectorHitRate.toFixed(2)}; ` +
+        `geo resolution rate: ${geoResolutionRate.toFixed(2)}; zone rate: ${zoneRate.toFixed(2)}`,
     );
 
     const validation = validateBatch(
@@ -124,6 +139,8 @@ export async function runScrape(supabase: SupabaseClient = supabaseAdmin): Promi
       selectorHitRate,
       SCRAPE_MIN_COUNT_RATIO,
       SCRAPE_MIN_SELECTOR_RATE,
+      geoResolutionRate,
+      SCRAPE_MIN_GEO_RESOLUTION_RATE,
     );
 
     if (!validation.ok) {
