@@ -4,16 +4,28 @@ import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { ListingFeed } from '@/components/listings/ListingFeed';
+import { FloatingMapSearch } from '@/components/map/FloatingMapSearch';
 import { excludeReportedIds, filterByZone, filterMapListings } from '@/lib/listings/filters';
 import { useListingsPoll } from '@/lib/listings/useListingsPoll';
 import { readReportedIds, REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
+import { useMapSearchOpen } from '@/lib/ui/map-search-ui';
 import { messages } from '@/messages/it';
 import type { ListingRow, ZoneChip } from '@/lib/listings/types';
-import { ZoneFilterChips } from './ZoneFilterChips';
 
 const ListingMap = dynamic(
   () => import('./ListingMap').then((mod) => mod.ListingMap),
-  { ssr: false },
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="flex h-full w-full items-center justify-center bg-surface-container-low"
+        aria-busy="true"
+        aria-label={messages.post.mapLoading}
+      >
+        <p className="text-label-sm text-on-surface-variant">{messages.post.mapLoading}</p>
+      </div>
+    ),
+  },
 );
 
 type MapExplorerProps = {
@@ -22,8 +34,10 @@ type MapExplorerProps = {
 
 export function MapExplorer({ initialListings }: MapExplorerProps) {
   const { listings } = useListingsPoll(initialListings, 300000);
+  const searchOpen = useMapSearchOpen();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedZone, setSelectedZone] = useState<ZoneChip>('All');
+  const [query, setQuery] = useState('');
   const [activeSnapPoint, setActiveSnapPoint] = useState<number | string | null>(0.25);
   const [flyToListingId, setFlyToListingId] = useState<string | null>(null);
   const [reportedIds, setReportedIds] = useState<string[]>([]);
@@ -35,10 +49,13 @@ export function MapExplorer({ initialListings }: MapExplorerProps) {
     return () => window.removeEventListener(REPORTS_CHANGE_EVENT, handleReportsChange);
   }, []);
 
-  const filteredListings = useMemo(
-    () => excludeReportedIds(filterByZone(listings, selectedZone), reportedIds),
-    [listings, selectedZone, reportedIds],
-  );
+  const filteredListings = useMemo(() => {
+    const byZone = excludeReportedIds(filterByZone(listings, selectedZone), reportedIds);
+    const trimmed = query.trim();
+    if (!trimmed) return byZone;
+    const needle = trimmed.toLowerCase();
+    return byZone.filter((listing) => listing.title.toLowerCase().includes(needle));
+  }, [listings, selectedZone, reportedIds, query]);
 
   const mapListings = useMemo(
     () => filterMapListings(filteredListings),
@@ -76,9 +93,14 @@ export function MapExplorer({ initialListings }: MapExplorerProps) {
         flyToListingId={flyToListingId}
       />
 
-      <div className="pointer-events-auto absolute inset-x-0 top-space-md z-30 px-gutter">
-        <ZoneFilterChips selectedZone={selectedZone} onZoneChange={handleZoneChange} />
-      </div>
+      {searchOpen && (
+        <FloatingMapSearch
+          query={query}
+          onQueryChange={setQuery}
+          selectedZone={selectedZone}
+          onZoneChange={handleZoneChange}
+        />
+      )}
 
       {listings.length === 0 && (
         <div className="pointer-events-none absolute inset-x-0 top-space-xl z-20 flex justify-center px-gutter">
@@ -96,7 +118,7 @@ export function MapExplorer({ initialListings }: MapExplorerProps) {
         activeSnapPoint={activeSnapPoint}
         setActiveSnapPoint={setActiveSnapPoint}
       >
-        <DrawerContent className="h-full max-h-[95dvh]">
+        <DrawerContent nonModal className="max-h-[95dvh]">
           <ListingFeed listings={filteredListings} selectedId={selectedId} />
         </DrawerContent>
       </Drawer>

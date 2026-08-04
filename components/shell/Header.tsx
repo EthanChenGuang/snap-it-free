@@ -1,16 +1,30 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { NavMenuDrawer } from '@/components/shell/NavMenuDrawer';
+import {
+  setMapSearchOpen,
+  toggleMapSearchOpen,
+  useMapSearchOpen,
+} from '@/lib/ui/map-search-ui';
 import { messages } from '@/messages/it';
-import { cn } from '@/lib/utils';
 
 export function Header() {
   const pathname = usePathname();
-  const onFavorites = pathname.startsWith('/favorites');
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const searchOpen = useMapSearchOpen();
+
+  const handleSearchClick = () => {
+    if (pathname !== '/') {
+      setMapSearchOpen(true);
+      router.push('/');
+      return;
+    }
+    toggleMapSearchOpen();
+  };
 
   return (
     <>
@@ -26,38 +40,24 @@ export function Header() {
           >
             <span className="material-symbols-outlined text-primary">menu</span>
           </button>
-        <Link
-          href="/"
-          className="flex items-center gap-space-sm transition-opacity hover:opacity-80"
-        >
-          <div className="flex h-6 w-6 items-center justify-center rounded bg-accent-orange text-xs font-bold text-on-primary">
-            手
-          </div>
-          <span className="text-h3 font-bold text-on-surface">{messages.app.title}</span>
-        </Link>
-        <Link
-          href="/favorites"
-          className={cn(
-            'flex cursor-pointer items-center gap-space-sm transition-opacity active:opacity-80',
-            onFavorites ? 'text-accent-orange' : 'text-primary hover:opacity-80',
-          )}
-          aria-label={messages.header.favorites}
-          aria-current={onFavorites ? 'page' : undefined}
-        >
-          <span
-            className="material-symbols-outlined"
-            style={{
-              fontVariationSettings: onFavorites
-                ? "'FILL' 1, 'wght' 600"
-                : "'FILL' 0, 'wght' 400",
-            }}
+          <Link
+            href="/"
+            className="transition-opacity hover:opacity-80"
           >
-            favorite
-          </span>
-        </Link>
-      </div>
-    </header>
-    <NavMenuDrawer open={menuOpen} onOpenChange={setMenuOpen} />
+            <span className="text-h3 font-bold text-on-surface">{messages.app.title}</span>
+          </Link>
+          <button
+            type="button"
+            className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center transition-opacity active:opacity-80"
+            aria-label={messages.header.search}
+            aria-pressed={pathname === '/' ? searchOpen : undefined}
+            onClick={handleSearchClick}
+          >
+            <span className="material-symbols-outlined text-primary">search</span>
+          </button>
+        </div>
+      </header>
+      <NavMenuDrawer open={menuOpen} onOpenChange={setMenuOpen} />
     </>
   );
 }

@@ -12,8 +12,12 @@ export const messages = {
   },
   header: {
     menu: 'Menu',
+    menuClose: 'Chiudi menu',
     search: 'Cerca',
     favorites: 'Preferiti',
+  },
+  map: {
+    searchPlaceholder: 'Cerca zone o regali…',
   },
   favorites: {
     added: 'Aggiunto ai preferiti',
