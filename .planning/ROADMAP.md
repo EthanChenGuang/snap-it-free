@@ -178,13 +178,13 @@ Plans:
   1. A user can switch the UI language between Chinese (default), English, and Italian from anywhere in the app, and the choice persists across sessions; first visit with no saved preference seeds language from the browser locale (fallback `zh`)
   2. Every piece of user-facing UI chrome — navigation, forms, buttons, notifications, onboarding — is fully translated in all three languages
 
-**Plans**: 3 plans (gap-closure on 260804-hed foundation)
+**Plans**: 2/3 plans executed
 
 Plans:
 
-- [ ] 05-01-PLAN.md — **tracer** Header language dropdown + browser first-visit + doc alignment (I18N-01)
+- [x] 05-01-PLAN.md — **tracer** Header language dropdown + browser first-visit + doc alignment (I18N-01)
 - [ ] 05-02-PLAN.md — Server locale storage + push notification locale (D-129, D-136)
-- [ ] 05-03-PLAN.md — Listing field resolver bridge + I18N-02 audit (D-133, D-138)
+- [x] 05-03-PLAN.md — Listing field resolver bridge + I18N-02 audit (D-133, D-138)
 
 ## Progress
 
@@ -197,7 +197,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Map + List Core Browsing | 5/5 | Complete    | 2026-07-28 |
 | 3. UGC Posting & Community Marketplace | 4/4 | Complete    | 2026-08-01 |
 | 4. Auth, Alerts & Push Notifications | 7/7 | In Progress|  |
-| 5. Trilingual UI (Italian / English / Chinese) | 0/3 | Planned | - |
+| 5. Trilingual UI (Italian / English / Chinese) | 2/3 | In Progress|  |
 
 ### Phase 6: Scraper Admin Console
 

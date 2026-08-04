@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 4
-current_phase_name: Auth, Alerts & Push Notifications
-status: executed
-stopped_at: Phase 5 context gathered
-last_updated: "2026-08-04T17:19:28.224Z"
+current_phase: 06
+current_phase_name: Scraper Admin Console
+status: executing
+stopped_at: Completed 05-03-PLAN.md
+last_updated: "2026-08-04T18:06:41.220Z"
 last_activity: 2026-08-04
-last_activity_desc: "Completed quick task 260804-j8k: map marker spiderfy on cluster click"
+last_activity_desc: Phase 06 execution started
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 20
-  completed_plans: 20
+  total_plans: 32
+  completed_plans: 22
 ---
 
 # Project State
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-24)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
-**Current focus:** Phase 04 — verify work + operator setup (migration 016, VAPID, OAuth providers)
+**Current focus:** Phase 06 — Scraper Admin Console
 
 ## Current Position
 
-Phase: 4 — Auth, Alerts & Push Notifications
-Plan: 7/7 executed
-Status: Code complete — pending `/gsd-verify-work 4` and iPhone NOTF-04 QA
-Last activity: 2026-08-04 - Completed quick task 260804-j8k: map marker spiderfy on cluster click
+Phase: 06 (Scraper Admin Console) — EXECUTING
+Plan: 2 of 9
+Status: Ready to execute
+Last activity: 2026-08-04 — Phase 06 execution started
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 69%
 
 ## Performance Metrics
 
@@ -78,6 +78,7 @@ Progress: [██████████] 100%
 | Phase 04 P05 | 18 min | 3 tasks | 11 files |
 | Phase 04 P06 | 8m | 3 tasks | 17 files |
 | Phase 04-auth-alerts-push-notifications P07 | 12m | 2 tasks | 9 files |
+| Phase 05-trilingual-ui-italian-english-chinese P03 | 4 | 3 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -130,6 +131,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Delete-then-insert push_subscriptions due to RLS no UPDATE policy
 - [Phase ?]: Dedupe push fan-out to one notification per user per listing match
 - [Phase ?]: iOS guide auto-shows once per session on /settings; dismiss persists in localStorage
+- [Phase ?]: Queries unchanged until Phase 6 title_en/zh migration; resolver ready with optional ListingRow fields
+- [Phase ?]: SSR metadata uses getMessages(zh).app.description per D-131
 
 ### Pending Todos
 
@@ -182,6 +185,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T17:19:28.214Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-trilingual-ui-italian-english-chinese/05-CONTEXT.md
+Last session: 2026-08-04T18:06:41.201Z
+Stopped at: Completed 05-03-PLAN.md
+Resume file: None
+Next: /gsd-execute-phase 5
