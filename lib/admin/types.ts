@@ -19,6 +19,12 @@ export type SourceWithLastRun = {
   lastRun: SourceLastRun | null;
 };
 
+export type SourceDetail = SourceWithLastRun & {
+  targetUrls: string[];
+};
+
+export type AntiBlockPreset = 'conservative' | 'standard' | 'aggressive';
+
 export type AdminAlert = {
   id: string;
   source: string;
@@ -30,4 +36,10 @@ export type AdminAlert = {
 export type GlobalAdminStatus = {
   globalPause: boolean;
   lastSyncAt: string | null;
+};
+
+export type FooterStats = {
+  inserted24h: number;
+  failedRuns7d: number;
+  avgSelectorRate: number | null;
 };

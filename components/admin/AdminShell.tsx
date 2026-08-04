@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { adminNav, adminNavItems, adminShellMessages } from '@/components/admin/admin-messages';
+import type { FooterStats } from '@/lib/admin/types';
 import { cn } from '@/lib/utils';
 
 type AdminShellProps = {
@@ -10,6 +11,7 @@ type AdminShellProps = {
   children: React.ReactNode;
   pendingTranslationsCount?: number;
   rejectsCount?: number;
+  footerStats?: FooterStats;
 };
 
 function operatorInitials(email: string): string {
@@ -48,6 +50,7 @@ export function AdminShell({
   children,
   pendingTranslationsCount = 0,
   rejectsCount = 0,
+  footerStats,
 }: AdminShellProps) {
   const pathname = usePathname();
 
@@ -151,13 +154,24 @@ export function AdminShell({
         <footer className="mt-auto border-t border-outline-variant bg-surface p-gutter">
           <div className="mx-auto flex max-w-container-max flex-wrap gap-x-space-xl gap-y-space-sm text-label-sm text-secondary">
             <div>
-              24h 新增：<span className="font-medium text-primary">—</span>
+              24h 新增：
+              <span className="font-medium text-primary">
+                {footerStats ? footerStats.inserted24h.toLocaleString('zh-CN') : '—'}
+              </span>
             </div>
             <div>
-              7d 失败运行：<span className="font-medium text-error">—</span>
+              7d 失败运行：
+              <span className="font-medium text-error">
+                {footerStats ? footerStats.failedRuns7d.toLocaleString('zh-CN') : '—'}
+              </span>
             </div>
             <div>
-              平均选择器命中率：<span className="font-medium text-primary">—</span>
+              平均选择器命中率：
+              <span className="font-medium text-primary">
+                {footerStats?.avgSelectorRate != null
+                  ? `${(footerStats.avgSelectorRate * 100).toFixed(1)}%`
+                  : '—'}
+              </span>
             </div>
           </div>
         </footer>
