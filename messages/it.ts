@@ -4,6 +4,7 @@ import type { VeniceZone } from '@/lib/listings/types';
 export const messages = {
   app: {
     title: '手慢无',
+    description: 'Regali gratuiti a Venezia sulla mappa',
   },
   nav: {
     map: 'Mappa',

@@ -3,6 +3,7 @@ import type { Messages } from './it';
 export const messages: Messages = {
   app: {
     title: '手慢无',
+    description: 'Venice free finds on a map',
   },
   nav: {
     map: 'Map',

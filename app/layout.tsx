@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { getMessages } from '@/messages';
 import { AppThemeProvider } from '@/components/providers/AppThemeProvider';
 import { AppSerwistProvider } from '@/components/providers/SerwistProvider';
 import { FavoritesMergeProvider } from '@/components/providers/FavoritesMergeProvider';
@@ -15,9 +16,11 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
+const defaultMessages = getMessages('zh');
+
 export const metadata: Metadata = {
-  title: '手慢无 — Map Explorer',
-  description: 'Venice free finds on a map',
+  title: `${defaultMessages.app.title} — Map Explorer`,
+  description: defaultMessages.app.description,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

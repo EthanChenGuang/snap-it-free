@@ -3,6 +3,7 @@ import type { Messages } from './it';
 export const messages: Messages = {
   app: {
     title: '手慢无',
+    description: '威尼斯免费物品地图',
   },
   nav: {
     map: '地图',
