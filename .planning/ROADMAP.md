@@ -269,15 +269,15 @@ Plans:
 
 **Wave 1** *(blocked on Wave 0)*
 
-- [ ] 07-02-PLAN.md — Supabase auth URLs + Google OAuth + cron-job.org external cron + curl smoke
+- [ ] 07-02-PLAN.md — Supabase auth URLs + Google OAuth + cron-job.org primary (pg_cron fallback, GHA last-resort) + curl smoke
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 07-03-PLAN.md — Fly.io worker (fly.toml, secrets, deploy, 512MB ams)
+- [ ] 07-03-PLAN.md — Fly.io worker (fly.toml, secrets, deploy, 512MB ams $3.99/mo)
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 07-04-PLAN.md — D-19 full smoke checklist + rollback drill + DEPLOY-RUNBOOK.md
+- [ ] 07-04-PLAN.md — D-19 smoke checklist + D-20 rollback checkpoint + DEPLOY-RUNBOOK.md
 
 ---
 *Roadmap created: 2026-07-26*
