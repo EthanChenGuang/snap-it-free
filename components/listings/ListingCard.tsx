@@ -23,20 +23,19 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
   function ListingCard({ listing, isSelected }, ref) {
     const zoneText = listing.zone ? zoneLabel(listing.zone) : messages.listing.approximateZone;
     const postedLabel = formatRelativeTimeItalian(listing.posted_at);
-    const isUgc = listing.source === 'ugc';
 
     return (
       <Link
         ref={ref}
         href={`/listing/${listing.id}`}
-        className={cn(
-          'group block w-full cursor-pointer rounded border border-outline-variant bg-surface p-space-sm text-left transition-colors',
-          isSelected
-            ? 'border-primary ring-1 ring-primary'
-            : 'hover:border-on-surface',
-        )}
+        className="group block w-full cursor-pointer text-left"
       >
-        <div className="relative mb-space-sm aspect-square overflow-hidden rounded-sm border border-outline-variant bg-surface-container-high">
+        <div
+          className={cn(
+            'relative mb-space-sm aspect-square overflow-hidden rounded-lg border border-outline-variant bg-surface-container-high',
+            isSelected && 'ring-1 ring-primary',
+          )}
+        >
           {listing.photo_url ? (
             <Image
               src={listing.photo_url}
@@ -52,13 +51,7 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
             </div>
           )}
           <div className="absolute left-space-sm top-space-sm flex flex-wrap gap-space-xs">
-            <span
-              className={`rounded-sm px-space-sm py-space-xs text-[10px] font-bold uppercase tracking-wider ${
-                isUgc
-                  ? 'bg-surface-container-high text-on-surface-variant'
-                  : 'bg-accent-orange text-on-primary'
-              }`}
-            >
+            <span className="rounded-sm border border-outline-variant bg-surface px-space-sm py-space-xs text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
               {sourceBadgeLabel(listing.source)}
             </span>
             {listing.status === 'claimed' && <ReservedBadge />}
@@ -70,15 +63,15 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
 
         <div className="flex items-start justify-between gap-space-sm">
           <div className="min-w-0">
-            <p className="text-label-sm font-semibold uppercase tracking-wider text-secondary">
+            <p className="text-label-sm uppercase tracking-wider text-secondary">
               {zoneText}
             </p>
-            <h3 className="text-body-md font-semibold leading-snug text-on-surface group-hover:underline">
+            <h3 className="text-body-lg font-semibold leading-snug text-on-surface group-hover:underline">
               {listing.title}
             </h3>
             <p className="mt-space-xs text-label-sm text-on-surface-variant">{postedLabel}</p>
           </div>
-          <span className="shrink-0 rounded border border-accent-orange/30 bg-accent-orange/10 px-space-sm py-space-xs text-label-sm font-bold text-accent-orange">
+          <span className="shrink-0 rounded border border-outline-variant bg-surface-container px-space-sm py-space-xs text-label-sm font-bold text-on-surface">
             {messages.listing.free}
           </span>
         </div>

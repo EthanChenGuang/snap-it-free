@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Drawer as DrawerPrimitive } from 'vaul';
+import { useUnlockBodyPointerEvents } from '@/lib/ui/useUnlockBodyPointerEvents';
 import { cn } from '@/lib/utils';
 
 const Drawer = ({
@@ -30,23 +31,38 @@ DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DrawerPortal>
-    <DrawerOverlay />
-    <DrawerPrimitive.Content
-      ref={ref}
-      className={cn(
-        'fixed inset-x-0 bottom-16 z-50 flex max-h-[95dvh] flex-col rounded-t-lg border border-outline-variant bg-surface outline-none',
-        className,
-      )}
-      {...props}
-    >
-      <div className="mx-auto mt-space-sm h-1.5 w-12 shrink-0 rounded-full bg-outline-variant" />
-      {children}
-    </DrawerPrimitive.Content>
-  </DrawerPortal>
-));
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
+    /** When true (map sheet with modal={false}), don't block taps on header/map above the sheet. */
+    nonModal?: boolean;
+  }
+>(({ className, children, nonModal, ...props }, ref) => {
+  useUnlockBodyPointerEvents(Boolean(nonModal));
+
+  return (
+    <DrawerPortal>
+      {!nonModal && <DrawerOverlay />}
+      <DrawerPrimitive.Content
+        ref={ref}
+        className={cn(
+          'fixed inset-x-0 bottom-16 z-50 flex max-h-[95dvh] flex-col rounded-t-lg border border-outline-variant bg-surface outline-none',
+          nonModal && 'pointer-events-none',
+          className,
+        )}
+        {...props}
+      >
+        <div
+          className={cn(
+            'mx-auto my-space-sm h-1.5 w-12 shrink-0 rounded-full bg-outline',
+            nonModal && 'pointer-events-auto',
+          )}
+        />
+        <div className={cn('flex min-h-0 flex-1 flex-col', nonModal && 'pointer-events-auto')}>
+          {children}
+        </div>
+      </DrawerPrimitive.Content>
+    </DrawerPortal>
+  );
+});
 DrawerContent.displayName = 'DrawerContent';
 
 const DrawerHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
