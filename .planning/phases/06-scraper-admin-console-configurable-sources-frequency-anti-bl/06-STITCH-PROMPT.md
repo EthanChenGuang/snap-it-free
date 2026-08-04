@@ -85,10 +85,10 @@ Output: clean HTML prototype per screen folder, matching existing app screens li
 
 `.planning/google-stitch-ui-design/scraper-dashboard/`
 
-Screens: `admin_dashboard`, `source_detail_subito`, `run_history_empty_state`, `translation_queue`, `admin_settings` — each with `code.html` + `screen.png`. Tokens in `scraper-dashboard/DESIGN.md`.
+Screens: `admin_dashboard`, `source_list_admin_console`, `source_detail_subito`, `run_history_empty_state`, `run_detail_subito`, `reject-details`, `translation_queue`, `admin_settings` — each with `code.html` + `screen.png`. Tokens in `scraper-dashboard/DESIGN.md`.
 
 Next: `/gsd-plan-phase 6` (port prototypes to Next.js `/admin` routes).
 
 ---
 
-*Prompt version: 1.1 — 2026-08-04 (prototypes exported)*
+*Prompt version: 1.2 — 2026-08-04 (8 screens)*

@@ -187,15 +187,18 @@ Filters: source, status, date range.
 | Route | Prototype folder | Files |
 |-------|------------------|-------|
 | `/admin` | `admin_dashboard/` | `code.html`, `screen.png` |
+| `/admin/sources` | `source_list_admin_console/` | `code.html`, `screen.png` |
 | `/admin/sources/subito` (template for `[id]`) | `source_detail_subito/` | `code.html`, `screen.png` |
 | `/admin/runs` (empty state) | `run_history_empty_state/` | `code.html`, `screen.png` |
+| `/admin/runs/[id]` | `run_detail_subito/` | `code.html`, `screen.png` |
+| `/admin/rejects` | `reject-details/` | `code.html`, `screen.png` |
 | `/admin/translation` | `translation_queue/` | `code.html`, `screen.png` |
 | `/admin/settings` | `admin_settings/` | `code.html`, `screen.png` |
 
 **Design tokens:** `scraper-dashboard/DESIGN.md`
 
-**Gap:** Populated run-history table with rows — extend `run_history_empty_state` layout per §5.4 when implementing; no separate Stitch export yet.
+**Gap:** Populated `/admin/runs` table with rows — extend `run_history_empty_state` layout per §5.4 when implementing; no separate Stitch export yet.
 
 ---
 
-*PRD version: 1.1 — 2026-08-04 (prototypes linked)*
+*PRD version: 1.2 — 2026-08-04 (8 screens linked)*

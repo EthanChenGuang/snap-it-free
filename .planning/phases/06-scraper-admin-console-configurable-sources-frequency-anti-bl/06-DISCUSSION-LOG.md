@@ -243,4 +243,25 @@
 ### Stitch prototypes
 **Selected:** Prototypes **done in Google Stitch**.
 
-**Exported to:** `.planning/google-stitch-ui-design/scraper-dashboard/` — `DESIGN.md` + 5 screens (`admin_dashboard`, `source_detail_subito`, `run_history_empty_state`, `translation_queue`, `admin_settings`), each with `code.html` and `screen.png`.
+**Exported to:** `.planning/google-stitch-ui-design/scraper-dashboard/` — 8 screens (see CONTEXT canonical refs).
+
+---
+
+## Continued discussion (2026-08-04, session 3 — questionnaire)
+
+### Missing screens
+**Sources list:** Stitch export `source_list_admin_console/` → `/admin/sources`.
+**Run detail:** Stitch export `run_detail_subito/` → `/admin/runs/[id]`.
+**Rejects browser:** Stitch export `reject-details/` → `/admin/rejects`.
+**Populated runs table:** Extend `run_history_empty_state` in code (no new Stitch export).
+
+### Proxy URL storage
+**Selected:** Encrypted Supabase column; service role + admin API only; env bootstrap fallback.
+
+### Translation schema
+**Selected:** Separate columns (`title_en`, `title_zh`, etc.) — not jsonb blob.
+
+### Translation provider & budget
+**Selected:** Gemini primary + OpenRouter fallback; admin-selectable provider.
+**Selected:** Configurable daily translation cap in admin (shared across providers); exceed cap → pause auto-translate only, scraping continues.
+**User note:** Research open-source/cheap models via OpenRouter during plan phase.

@@ -8,7 +8,7 @@
 
 Phase 6 delivers an operator-facing **Scraper Admin Console** at `/admin` that replaces hardcoded `scraper/.env` configuration with a Supabase-backed control plane. A solo operator can: view scrape health, enable/disable sources, set per-source schedules and URLs (Venice-scoped), choose anti-block presets, configure proxy and alert channels, toggle auto-translation, trigger manual runs, pause all scraping globally, and review run history — while the existing `scraper/` worker reads config from the DB each run.
 
-**In scope:** Admin UI (Google Stitch-designed), config schema + RLS, worker config pull, Subito crawler wired to dynamic config, placeholder config for Facebook / Vinted / Wallapop / eBay (UI + DB + "coming soon" status), per-source scheduling with stagger, job queue for manual runs, ingest-time translation (title + description + category) to en/zh via Gemini with retry queue, translation failure does not block ingest.
+**In scope:** Admin UI (Google Stitch-designed, 8 screens), config schema + RLS, worker config pull, Subito crawler wired to dynamic config, placeholder config for Facebook / Vinted / Wallapop / eBay (UI + DB + "coming soon" status), per-source scheduling with stagger, job queue for manual runs, ingest-time translation (title + description + category) to en/zh via **Gemini primary + OpenRouter fallback** with configurable daily cap, translation retry queue, **`/admin/rejects`** browser.
 
 **Out of scope:** Implementing live crawlers for Facebook, Vinted, Wallapop, eBay in this phase (config + status only); end-user-facing settings changes; changing Phase 1 validation threshold values; closed FB group scraping (SCRP-08).
 
@@ -23,7 +23,7 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - **D-01:** Dedicated **`/admin` route** separate from consumer app — Stitch document-first aesthetic, table-heavy ops layout — **Reversibility:** reversible.
 - **D-02:** **Supabase Auth + operator email allowlist** for admin access (reuse Phase 4 Google/email login; RLS gates admin tables) — **Reversibility:** costly — auth/RLS model anchors all admin mutations.
 - **D-03:** Admin home is **status-first dashboard**: per-source last run, success/failure, listing counts, recent alerts — **Reversibility:** reversible.
-- **D-04:** **Run history** via existing `scrape_runs` table (list + detail with failure_reason and counts); no `scrape_rejects` browser in MVP unless planner adds trivially — **Reversibility:** reversible.
+- **D-04:** **Run history** via `scrape_runs` (list + detail); **`scrape_rejects` browser** at `/admin/rejects` per Stitch prototype — **Reversibility:** reversible.
 - **D-05:** **"Run now"** for any configured source (including placeholders that no-op with clear message until crawler exists) — **Reversibility:** reversible.
 - **D-06:** **Alert channels configurable in admin** — Telegram chat ID and email recipients editable; secrets (bot token, Resend key) remain server-side env, not stored in plaintext in DB — **Reversibility:** reversible.
 - **D-07:** Admin UI **designed via Google Stitch** — use `06-STITCH-PRD.md` and `06-STITCH-PROMPT.md` as Stitch inputs before implementation — **Reversibility:** reversible.
@@ -47,7 +47,7 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - **D-19:** Manual runs via **`scrape_jobs` queue** — admin inserts job row; worker picks up on next tick or dedicated poll; same runner path as cron — **Reversibility:** reversible.
 
 ### Anti-Block & Validation
-- **D-20:** **Proxy URL editable in admin** — stored in Supabase secrets/config table; worker reads at run start; env `PROXY_URL` becomes fallback/bootstrap only — **Reversibility:** costly — secret storage pattern.
+- **D-20:** **Proxy URL editable in admin** — stored in Supabase **encrypted column**; readable only via service role + admin API routes; env `PROXY_URL` fallback for bootstrap — **Reversibility:** costly — secret storage pattern.
 - **D-21:** Anti-block exposed as **preset profiles per source**: Conservative / Standard / Aggressive — maps to delay, retries, session pool size internally; no raw numeric fields in MVP — **Reversibility:** reversible.
 - **D-22:** **Per-source anti-block preset** — Facebook defaults to Conservative, Subito to Standard when first enabled — **Reversibility:** reversible.
 - **D-23:** Soft-block **validation thresholds remain fixed in code** (selector ≥90%, count ≥50% trailing median, geo ≥50%) — admin displays read-only; operator cannot loosen — **Reversibility:** reversible. *(Claude-selected: most conservative scraping posture.)*
@@ -55,8 +55,10 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 ### Auto-Translation
 - **D-24:** Translate at **ingest time** after successful normalize — store original Italian + generated **en** and **zh** for title, description, and category label — **Reversibility:** costly — schema adds translation columns.
 - **D-25:** **Global "auto-translate" toggle** in admin — when off, only original text stored — **Reversibility:** reversible.
-- **D-26:** Translation provider: **Google Gemini** — API key server-side env; batch per listing — **Reversibility:** reversible.
+- **D-26:** Translation provider: **Google Gemini primary**, **OpenRouter fallback** — admin-selectable provider; API keys server-side env — **Reversibility:** reversible.
 - **D-27:** On translation failure: **listing still ingests**; UI falls back to original; failed items enter **translation retry queue**; admin shows pending count + **one-click re-translate** — **Reversibility:** reversible.
+- **D-37:** **Daily translation cap configurable in admin** (default TBD in plan, e.g. 500 listings/day) — **shared across Gemini + OpenRouter**; when exceeded **pause auto-translate only** (scraping continues) — **Reversibility:** reversible.
+- **D-38:** Listing translations stored as **separate columns** (`title_en`, `title_zh`, `description_en`, `description_zh`, `category_en`, `category_zh`) — not jsonb blob — **Reversibility:** costly — schema migration.
 
 ### Operator Allowlist (continued discussion)
 - **D-28:** Operator allowlist: **env bootstraps first operator(s)**; ongoing add/remove via **`/admin/settings` backed by DB table** — **Reversibility:** costly — RLS + bootstrap story.
@@ -76,14 +78,19 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 ### Stitch Prototypes
 - **D-35:** Admin UI **implemented from Google Stitch exports** in `.planning/google-stitch-ui-design/scraper-dashboard/` — port `code.html` per screen; do not redesign — **Reversibility:** reversible.
 - **D-36:** Admin design authority for Phase 6: **`scraper-dashboard/DESIGN.md`** (not consumer `google-stitch-ui-design/DESIGN.md` alone) — **Reversibility:** reversible.
+- **D-39:** **`/admin/sources`** list page ports `source_list_admin_console/code.html` — **Reversibility:** reversible.
+- **D-40:** **`/admin/runs/[id]`** detail page ports `run_detail_subito/code.html` — **Reversibility:** reversible.
+- **D-41:** **`/admin/rejects`** page ports `reject-details/code.html` — filter by rejection reason, view raw snippet for filter tuning — **Reversibility:** reversible.
+- **D-42:** **`/admin/runs` populated table** — extend `run_history_empty_state` layout for rows (no separate Stitch export); empty state remains for zero runs — **Reversibility:** reversible.
 
 ### Claude's Discretion
 - Exact Supabase table names (`scraper_sources`, `scraper_config`, `scrape_jobs`, `translation_queue`)
-- Secret encryption approach for proxy URL at rest
+- Secret encryption approach for proxy URL at rest (pgcrypto vs app-level)
+- Default translation daily cap initial value
+- OpenRouter model slug for fallback (cheap multilingual model — research in plan phase)
 - Default stagger minutes (5 vs 10) within stated range
 - Gemini model choice and rate limiting within $20–100/mo budget
 - Whether admin uses Next.js Route Handlers only or Server Actions
-- `scrape_rejects` admin view if trivial add-on during implementation
 
 </decisions>
 
@@ -109,8 +116,11 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 ### Phase 6 Stitch Design Inputs (authoritative prototypes)
 - `.planning/google-stitch-ui-design/scraper-dashboard/DESIGN.md` — admin design tokens and brand rules (**read before any /admin UI**)
 - `.planning/google-stitch-ui-design/scraper-dashboard/admin_dashboard/code.html` — `/admin` dashboard (+ `screen.png` reference)
+- `.planning/google-stitch-ui-design/scraper-dashboard/source_list_admin_console/code.html` — `/admin/sources` list (+ `screen.png`)
 - `.planning/google-stitch-ui-design/scraper-dashboard/source_detail_subito/code.html` — `/admin/sources/[id]` (Subito example)
-- `.planning/google-stitch-ui-design/scraper-dashboard/run_history_empty_state/code.html` — `/admin/runs` empty state (extend for populated table per PRD)
+- `.planning/google-stitch-ui-design/scraper-dashboard/run_history_empty_state/code.html` — `/admin/runs` empty state (+ populated table extension per D-42)
+- `.planning/google-stitch-ui-design/scraper-dashboard/run_detail_subito/code.html` — `/admin/runs/[id]` run detail
+- `.planning/google-stitch-ui-design/scraper-dashboard/reject-details/code.html` — `/admin/rejects` scrape rejects browser
 - `.planning/google-stitch-ui-design/scraper-dashboard/translation_queue/code.html` — `/admin/translation`
 - `.planning/google-stitch-ui-design/scraper-dashboard/admin_settings/code.html` — `/admin/settings`
 - `.planning/phases/06-scraper-admin-console-configurable-sources-frequency-anti-bl/06-STITCH-PRD.md` — functional PRD (screens ↔ routes)
@@ -143,7 +153,7 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - New `/admin` routes in Next.js App Router
 - New Supabase tables for source config, global settings, scrape_jobs, translation_queue
 - Worker poll: config + pending jobs each run cycle
-- Listing rows: add `title_en`, `title_zh`, `description_en`, `description_zh`, `category_en`, `category_zh` (or jsonb i18n blob — planner decides)
+- Listing rows: add separate columns `title_en`, `title_zh`, `description_en`, `description_zh`, `category_en`, `category_zh` (D-38)
 
 </code_context>
 
@@ -153,7 +163,7 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - User wants a **simple backend** to configure Facebook Marketplace, Vinted, Wallapop, eBay, Subito — frequency, anti-block, auto-translation (Chinese + English)
 - Admin visual design will be produced in **Google Stitch** using generated PRD + prompt (not improvised in code)
 - Translation failure UX: don't block scrape; show pending translations in admin with bulk re-translate
-- Stitch admin prototypes exported to `.planning/google-stitch-ui-design/scraper-dashboard/` (5 screens: dashboard, source detail, runs empty, translation, settings)
+- Stitch admin prototypes: **8 screens** under `scraper-dashboard/` (dashboard, sources list, source detail, runs empty, run detail, rejects, translation, settings)
 
 </specifics>
 
@@ -164,7 +174,6 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - Per-source editable free-filter keyword lists
 - Raw numeric anti-bot tuning (beyond Conservative/Standard/Aggressive presets)
 - Config hot-reload webhook to worker
-- `scrape_rejects` browser in admin (optional nice-to-have)
 
 </deferred>
 
