@@ -21,9 +21,11 @@ export function ListingFeed({ listings, selectedId }: ListingFeedProps) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="shrink-0 px-gutter pb-space-sm">
-        <h2 className="text-h3 font-bold text-on-surface">{messages.sheet.newArrivals}</h2>
-        <p className="text-label-sm text-on-surface-variant">
+      <div className="shrink-0 px-gutter pb-space-lg pt-space-sm">
+        <h2 className="text-h2 font-semibold text-on-surface">
+          {messages.sheet.newArrivals}
+        </h2>
+        <p className="mt-space-xs text-label-sm text-on-surface-variant">
           {messages.sheet.itemsInArea(listings.length)}
         </p>
       </div>
