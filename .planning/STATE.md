@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 06
 current_phase_name: Scraper Admin Console
 status: executing
-stopped_at: Completed 05-03-PLAN.md
-last_updated: "2026-08-04T18:06:41.220Z"
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-08-04T18:07:09.461Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 06 execution started
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 32
-  completed_plans: 22
+  completed_plans: 23
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 ## Current Position
 
 Phase: 06 (Scraper Admin Console) — EXECUTING
-Plan: 2 of 9
+Plan: 3 of 9
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 06 execution started
 
-Progress: [███████░░░] 69%
+Progress: [███████░░░] 72%
 
 ## Performance Metrics
 
@@ -79,6 +79,7 @@ Progress: [███████░░░] 69%
 | Phase 04 P06 | 8m | 3 tasks | 17 files |
 | Phase 04-auth-alerts-push-notifications P07 | 12m | 2 tasks | 9 files |
 | Phase 05-trilingual-ui-italian-english-chinese P03 | 4 | 3 tasks | 14 files |
+| Phase 05-trilingual-ui-italian-english-chinese P02 | 15min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -133,6 +134,8 @@ Recent decisions affecting current work:
 - [Phase ?]: iOS guide auto-shows once per session on /settings; dismiss persists in localStorage
 - [Phase ?]: Queries unchanged until Phase 6 title_en/zh migration; resolver ready with optional ListingRow fields
 - [Phase ?]: SSR metadata uses getMessages(zh).app.description per D-131
+- [Phase ?]: D-129 option-a: profiles.language + push_subscriptions.locale for server locale storage
+- [Phase ?]: D-136 push fan-out uses per-user getMessages(locale) and resolveListingTitle for push titles
 
 ### Pending Todos
 
@@ -185,7 +188,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T18:06:41.201Z
-Stopped at: Completed 05-03-PLAN.md
+Last session: 2026-08-04T18:07:09.444Z
+Stopped at: Completed 05-02-PLAN.md
 Resume file: None
 Next: /gsd-execute-phase 5

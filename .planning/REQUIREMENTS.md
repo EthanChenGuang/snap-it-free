@@ -60,7 +60,7 @@
 
 ### Internationalization
 
-- [ ] **I18N-01**: User can switch UI language between Chinese (default), English, and Italian from header or Settings; first visit seeds from browser locale with `zh` fallback
+- [x] **I18N-01**: User can switch UI language between Chinese (default), English, and Italian from header or Settings; first visit seeds from browser locale with `zh` fallback
 - [x] **I18N-02**: All user-facing UI chrome is translated in all three languages
 
 ## v2 Requirements
@@ -129,7 +129,7 @@ Deferred to future release. Tracked but not in current roadmap.
 | NOTF-03 | Phase 4 | Complete |
 | NOTF-04 | Phase 4 | Complete |
 | NOTF-05 | Phase 4 | Complete |
-| I18N-01 | Phase 5 | Pending |
+| I18N-01 | Phase 5 | Complete |
 | I18N-02 | Phase 5 | Complete |
 
 **Coverage:**
