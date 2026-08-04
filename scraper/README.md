@@ -18,8 +18,11 @@ Apply migrations from `../supabase/migrations/` before first run.
 ```bash
 npm ci
 npm test
-CRON_ENABLED=false node --import tsx src/worker.ts   # one-shot manual run
+npm run scrape:once   # one-shot Subito run (DB config via config-loader, D-18)
+CRON_ENABLED=false node --import tsx src/worker.ts -- --source subito --once
 ```
+
+`config-loader` logs when falling back to `SUBITO_CATEGORY_URLS` or `PROXY_URL` env (bootstrap path per D-20). DB `proxy_enc` decrypts via `SCRAPER_SECRETS_KEY` when set.
 
 ## Docker
 

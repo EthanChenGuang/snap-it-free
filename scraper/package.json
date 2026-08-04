@@ -6,7 +6,8 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "start": "node --import tsx src/worker.ts"
+    "start": "node --import tsx src/worker.ts",
+    "scrape:once": "node --import tsx src/worker.ts -- --source subito --once"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.0",
