@@ -78,7 +78,17 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
   - **Vinted:** `vinted.it/catalog?search_text=` × `gratis` | `regalo` | `0+euro`
   - **Wallapop:** `wallapop.com/app/search?keywords=` × `gratis` | `regalo` | `free` with `latitude=45.4408&longitude=12.3155` (Venice centro)
   - **eBay.it:** `ebay.it/sch/i.html?_nkw=` × `gratis` | `regalo` | `free` with `_stpos=30100&_sadis=15&LH_FS=1&_sop=10` (Venice CAP, free shipping filter)
+- **D-52:** Default URL keyword sets per source (full `https://` URLs in plan seed):
+  - **Facebook Marketplace:** `marketplace/venice/search?query=` × `gratis` | `regalo` | `free`
+  - **Vinted:** `vinted.it/catalog?search_text=` × `gratis` | `regalo` | `0+euro`
+  - **Wallapop:** `wallapop.com/app/search?keywords=` × `gratis` | `regalo` | `free` with `latitude=45.4408&longitude=12.3155` (Venice centro)
+  - **eBay.it:** `ebay.it/sch/i.html?_nkw=` × `gratis` | `regalo` | `free` with `_stpos=30100&_sadis=15&LH_FS=1&_sop=10` (Venice CAP, free shipping filter)
   - **Subito:** existing three Venice regalo category URLs (unchanged from Phase 1) — **Reversibility:** reversible.
+
+### Reference Implementation (AI Studio)
+- **D-53:** **`scraper-admin/`** is the **reference implementation** for Phase 6 UI/interactions — port components into Next.js `/admin`, wire Supabase/worker; **do not deploy** standalone Vite app as production — **Reversibility:** reversible.
+- **D-54:** Mock-only features in reference (`handleAddSource`, `handleForceAccept`, Immobiliare demo data) are **out of scope** unless explicitly added during plan — **Reversibility:** reversible.
+- **D-55:** Reference `POST /api/translate` (Gemini `gemini-3.6-flash`, English-only) is a **spike** — production must match D-26/D-43/D-44 (en+zh, cap, OpenRouter fallback) — **Reversibility:** reversible.
 
 ### Phase Timing & Consumer i18n Bridge
 - **D-29:** **Phase 6 may execute in parallel with Phase 5** — do not gate admin on trilingual UI completion — **Reversibility:** reversible.
@@ -130,6 +140,12 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - `scraper/src/subito/crawler.ts` — Playwright crawler, proxy, session pool
 - `supabase/migrations/003_scrape_audit_tables.sql` — `scrape_runs`, `scrape_rejects`
 
+### Implementation Reference (AI Studio)
+- **`scraper-admin/`** — Google AI Studio generated reference UI (Vite + React + Express). **Read `06-REFERENCE-IMPLEMENTATION.md` before planning execution.** Port to Next.js `/admin`; do not ship standalone app as production admin.
+- `scraper-admin/src/types.ts` — domain shape reference for DB/API design
+- `scraper-admin/src/data/initialData.ts` — mock seeds (**URLs and Immobiliare data are wrong for production** — use Phase 1 Subito URLs + D-52 templates)
+- `scraper-admin/server.ts` — Gemini `/api/translate` spike only
+
 ### Phase 6 Stitch Design Inputs (authoritative prototypes)
 - `.planning/google-stitch-ui-design/scraper-dashboard/DESIGN.md` — admin design tokens and brand rules (**read before any /admin UI**)
 - `.planning/google-stitch-ui-design/scraper-dashboard/admin_dashboard/code.html` — `/admin` dashboard (+ `screen.png` reference)
@@ -153,6 +169,7 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 ## Existing Code Insights
 
 ### Reusable Assets
+- **`scraper-admin/`** — AI Studio reference admin SPA (8 views, mock state, Gemini translate spike). See `06-REFERENCE-IMPLEMENTATION.md`.
 - `scraper/` package — worker, Subito crawler, normalize/persist, validate-run, alert notify
 - `scraper/src/worker.ts` — `runScrape()`, cron loop, overlap guard; refactor target for per-source + job queue
 - `scraper/src/config.ts` — thresholds and env; migrate to DB-backed config loader
@@ -167,6 +184,7 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - Stitch monochrome UI for consumer app — admin follows same tokens, denser tables
 
 ### Integration Points
+- **Port path:** `scraper-admin/src/components/*` → `app/admin/**` (or `components/admin/**`) in main Next.js app
 - New `/admin` routes in Next.js App Router
 - New Supabase tables for source config, global settings, scrape_jobs, translation_queue
 - Worker poll: config + pending jobs each run cycle
@@ -181,6 +199,7 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - Admin visual design will be produced in **Google Stitch** using generated PRD + prompt (not improvised in code)
 - Translation failure UX: don't block scrape; show pending translations in admin with bulk re-translate
 - Stitch admin prototypes: **8 screens** under `scraper-dashboard/`
+- **AI Studio reference code:** `scraper-admin/` at repo root (mock UI + `/api/translate`)
 - Default URL templates: 3 per coming-soon source (FB/Vinted/Wallapop/eBay), operator can append more
 
 </specifics>

@@ -199,6 +199,8 @@ Filters: source, status, date range.
 
 **Gap:** Populated `/admin/runs` table with rows — extend `run_history_empty_state` layout per §5.4 when implementing; no separate Stitch export yet.
 
+**Reference code:** Full interactive prototype in `scraper-admin/` — see `06-REFERENCE-IMPLEMENTATION.md` for port notes and drift list.
+
 ---
 
-*PRD version: 1.2 — 2026-08-04 (8 screens linked)*
+*PRD version: 1.3 — 2026-08-04 (scraper-admin reference linked)*
