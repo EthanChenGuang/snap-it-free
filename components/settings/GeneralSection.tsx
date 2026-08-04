@@ -4,13 +4,6 @@ import { useState } from 'react';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
-import {
   SettingsCard,
   SettingsSectionTitle,
 } from '@/components/settings/SettingsUi';
@@ -32,20 +25,27 @@ function appearanceLabel(mode: AppearanceMode): string {
   return messages.settings.appearanceSystem;
 }
 
+function emailInitials(email: string): string {
+  const local = email.split('@')[0] ?? '';
+  const parts = local.split(/[._-]/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0]![0] ?? ''}${parts[1]![0] ?? ''}`.toUpperCase();
+  }
+  return (local.slice(0, 2) || '?').toUpperCase();
+}
+
 export function GeneralSection() {
   const { email, loading } = useAuthSession();
   const [authOpen, setAuthOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
   const preferences = useSyncExternalStore(
     subscribeAppPreferences,
     readAppPreferences,
-    () => readAppPreferences(),
+    readAppPreferences,
   );
 
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    setProfileOpen(false);
   };
 
   const handleAppearanceClick = () => {
@@ -56,23 +56,61 @@ export function GeneralSection() {
     <>
       <section className="mb-space-xl">
         <SettingsSectionTitle>{messages.settings.generalSection}</SettingsSectionTitle>
-        <SettingsCard>
-          <button
-            type="button"
-            onClick={() => setProfileOpen(true)}
-            className="flex w-full items-center justify-between border-b border-outline-variant p-space-md text-left transition-colors hover:bg-surface-container-low"
-          >
-            <div className="flex items-center gap-space-md">
-              <span className="material-symbols-outlined text-secondary">person</span>
-              <span className="text-body-md text-on-surface">{messages.settings.profileInformation}</span>
-            </div>
-            <span className="material-symbols-outlined text-outline">chevron_right</span>
-          </button>
 
+        <SettingsCard className="p-space-md">
+          {loading ? (
+            <p className="text-body-md text-on-surface-variant">{messages.settings.profileLoading}</p>
+          ) : email ? (
+            <div className="flex items-center justify-between gap-space-md">
+              <div className="flex min-w-0 items-center gap-space-md">
+                <div
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface-container text-label-md font-semibold text-on-surface"
+                  aria-hidden
+                >
+                  {emailInitials(email)}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-body-md font-medium text-on-surface">{email}</p>
+                  <p className="text-label-sm text-secondary">{messages.settings.profileSignedIn}</p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                className="shrink-0"
+                onClick={handleSignOut}
+              >
+                {messages.settings.signOut}
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-space-md">
+              <div className="flex min-w-0 items-center gap-space-md">
+                <div
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface-container text-on-surface-variant"
+                  aria-hidden
+                >
+                  <span className="material-symbols-outlined text-[20px]">person</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-body-md font-medium text-on-surface">
+                    {messages.settings.profilePlaceholder}
+                  </p>
+                  <p className="text-label-sm text-secondary">{messages.settings.profileStub}</p>
+                </div>
+              </div>
+              <Button type="button" className="shrink-0" onClick={() => setAuthOpen(true)}>
+                {messages.settings.signIn}
+              </Button>
+            </div>
+          )}
+        </SettingsCard>
+
+        <SettingsCard className="mt-space-md">
           <button
             type="button"
             onClick={handleAppearanceClick}
-            className="flex w-full items-center justify-between border-b border-outline-variant p-space-md text-left transition-colors hover:bg-surface-container-low"
+            className="flex w-full items-center justify-between p-space-md text-left transition-colors hover:bg-surface-container-low"
           >
             <div className="flex items-center gap-space-md">
               <span className="material-symbols-outlined text-secondary">dark_mode</span>
@@ -82,61 +120,8 @@ export function GeneralSection() {
               {appearanceLabel(preferences.appearance)}
             </span>
           </button>
-
-          <div className="p-space-md">
-            {loading ? (
-              <p className="text-body-md text-on-surface-variant">{messages.settings.profileLoading}</p>
-            ) : email ? (
-              <div className="flex flex-col gap-space-md sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-body-md text-on-surface">{email}</p>
-                <Button type="button" variant="secondary" onClick={handleSignOut}>
-                  {messages.settings.signOut}
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-space-sm">
-                <p className="text-body-md text-on-surface-variant">{messages.settings.profileStub}</p>
-                <Button type="button" className="w-fit" onClick={() => setAuthOpen(true)}>
-                  {messages.settings.signIn}
-                </Button>
-              </div>
-            )}
-          </div>
         </SettingsCard>
       </section>
-
-      <Drawer open={profileOpen} onOpenChange={setProfileOpen}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>{messages.settings.profileInformation}</DrawerTitle>
-          </DrawerHeader>
-          <div className="space-y-space-md px-gutter pb-space-lg">
-            {loading ? (
-              <p className="text-body-md text-on-surface-variant">{messages.settings.profileLoading}</p>
-            ) : email ? (
-              <>
-                <p className="text-body-md text-on-surface">{email}</p>
-                <p className="text-label-sm text-secondary">{messages.settings.profileSignedIn}</p>
-                <Button type="button" variant="secondary" className="w-fit" onClick={handleSignOut}>
-                  {messages.settings.signOut}
-                </Button>
-              </>
-            ) : (
-              <>
-                <p className="text-body-md text-on-surface-variant">{messages.settings.profilePlaceholder}</p>
-                <Button type="button" onClick={() => setAuthOpen(true)}>
-                  {messages.settings.signIn}
-                </Button>
-              </>
-            )}
-            <DrawerClose asChild>
-              <Button type="button" variant="ghost" className="w-fit">
-                {messages.settings.close}
-              </Button>
-            </DrawerClose>
-          </div>
-        </DrawerContent>
-      </Drawer>
 
       <AuthPromptModal
         open={authOpen}

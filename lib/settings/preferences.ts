@@ -16,6 +16,16 @@ const DEFAULT_PREFERENCES: AppPreferences = {
   soundAlerts: false,
 };
 
+let cachedSnapshot: AppPreferences = DEFAULT_PREFERENCES;
+
+function preferencesEqual(a: AppPreferences, b: AppPreferences): boolean {
+  return (
+    a.language === b.language &&
+    a.appearance === b.appearance &&
+    a.soundAlerts === b.soundAlerts
+  );
+}
+
 function parsePreferences(raw: string | null): AppPreferences {
   if (!raw) return DEFAULT_PREFERENCES;
   try {
@@ -38,13 +48,31 @@ function parsePreferences(raw: string | null): AppPreferences {
   }
 }
 
-export function readAppPreferences(): AppPreferences {
+function syncSnapshotFromStorage(): AppPreferences {
   if (typeof window === 'undefined') return DEFAULT_PREFERENCES;
-  return parsePreferences(localStorage.getItem(APP_PREFERENCES_KEY));
+
+  const parsed = parsePreferences(localStorage.getItem(APP_PREFERENCES_KEY));
+  if (preferencesEqual(parsed, cachedSnapshot)) {
+    return cachedSnapshot;
+  }
+
+  cachedSnapshot = parsed;
+  return cachedSnapshot;
+}
+
+export function readAppPreferences(): AppPreferences {
+  return syncSnapshotFromStorage();
 }
 
 export function writeAppPreferences(partial: Partial<AppPreferences>): AppPreferences {
-  const next = { ...readAppPreferences(), ...partial };
+  const current = readAppPreferences();
+  const next: AppPreferences = { ...current, ...partial };
+
+  if (preferencesEqual(next, current)) {
+    return current;
+  }
+
+  cachedSnapshot = next;
   if (typeof window !== 'undefined') {
     localStorage.setItem(APP_PREFERENCES_KEY, JSON.stringify(next));
     window.dispatchEvent(new CustomEvent(APP_PREFERENCES_CHANGE_EVENT, { detail: next }));
@@ -64,6 +92,7 @@ export function resetLocalAppData(): void {
   localStorage.removeItem('shoumanwu_favorites');
   localStorage.removeItem('shoumanwu_reported_listings');
   localStorage.removeItem('shoumanwu_ios_push_dismissed');
+  cachedSnapshot = DEFAULT_PREFERENCES;
   window.dispatchEvent(new CustomEvent(APP_PREFERENCES_CHANGE_EVENT, { detail: DEFAULT_PREFERENCES }));
 }
 
