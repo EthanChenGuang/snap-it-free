@@ -1,9 +1,11 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { AlertsSection } from '@/components/settings/AlertsSection';
-import { MatchesSection } from '@/components/settings/MatchesSection';
-import { ProfileSection } from '@/components/settings/ProfileSection';
+import { AdvancedSection } from '@/components/settings/AdvancedSection';
+import { GeneralSection } from '@/components/settings/GeneralSection';
+import { LanguageSection } from '@/components/settings/LanguageSection';
+import { NotificationsSection } from '@/components/settings/NotificationsSection';
+import { ZonesSection } from '@/components/settings/ZonesSection';
 import { messages } from '@/messages/it';
 
 export function SettingsPageClient() {
@@ -12,16 +14,17 @@ export function SettingsPageClient() {
   const autoOpenCreate = tab === 'alerts';
 
   return (
-    <main className="mx-auto flex min-h-full max-w-container-max flex-col px-gutter py-space-lg">
-      <div className="mb-space-lg border-b border-outline-variant pb-space-md">
-        <p className="text-label-sm text-on-surface-variant">{messages.nav.settings}</p>
-        <h1 className="text-h2 font-bold text-on-surface">{messages.settings.title}</h1>
-        <p className="mt-space-xs text-body-md text-secondary">{messages.settings.subtitle}</p>
-      </div>
+    <main className="mx-auto flex min-h-full max-w-[800px] flex-col px-gutter py-space-xl pb-32">
+      <section className="mb-space-xl space-y-space-xs">
+        <h1 className="text-h2 font-semibold text-primary">{messages.settings.title}</h1>
+        <p className="text-body-md text-secondary">{messages.settings.subtitle}</p>
+      </section>
 
-      <ProfileSection />
-      <AlertsSection autoOpenCreate={autoOpenCreate} />
-      <MatchesSection />
+      <GeneralSection />
+      <NotificationsSection />
+      <ZonesSection autoOpenCreate={autoOpenCreate} />
+      <LanguageSection />
+      <AdvancedSection />
     </main>
   );
 }
