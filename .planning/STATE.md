@@ -7,8 +7,8 @@ current_phase_name: Auth, Alerts & Push Notifications
 status: executed
 stopped_at: Completed 04-07-PLAN.md — Phase 4 code complete, pending verify/UAT
 last_updated: "2026-08-01T16:00:00.000Z"
-last_activity: 2026-08-03
-last_activity_desc: Completed quick task 260803-whr: fix Subito geo/zone pipeline so scraped free items surface in Elenco
+last_activity: 2026-08-04
+last_activity_desc: Completed quick task 260804-dn7: strict Stitch UI compliance for map shell chrome
 progress:
   total_phases: 4
   completed_phases: 4
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 4 — Auth, Alerts & Push Notifications
 Plan: 7/7 executed
 Status: Code complete — pending `/gsd-verify-work 4` and iPhone NOTF-04 QA
-Last activity: 2026-08-03 - Completed quick task 260803-whr: fix Subito geo/zone pipeline so scraped free items surface in Elenco
+Last activity: 2026-08-04 - Completed quick task 260804-dn7: strict Stitch UI compliance for map shell chrome
 
 Progress: [██████████] 100%
 
@@ -145,6 +145,7 @@ None yet.
 | 260803-us1 | Elenco list scroll region too small; Pubblica did not scroll | 2026-08-03 | c7023f6, 2524d90 | [260803-us1-list-post-scroll-regions](./quick/260803-us1-list-post-scroll-regions/) |
 | 260803-whr | fix Subito geo/zone pipeline so scraped free items surface in Elenco | 2026-08-03 | 8c6f24e, ca573b6, 9956629 | [260803-whr-fix-subito-geo-zone-pipeline-so-scraped-](./quick/260803-whr-fix-subito-geo-zone-pipeline-so-scraped-/) |
 | 260803-wi0 | Research Italian and European free-item source candidates beyond Subito | 2026-08-03 | 893d917 | [260803-wi0-free-item-source-candidates](./quick/260803-wi0-free-item-source-candidates/) |
+| 260804-dn7 | Strict Stitch UI compliance: header search, floating chips, cards, bottom nav | 2026-08-04 | 97e2911, e4004b9, b117d7e | [260804-dn7-strict-ui-compliance-refactor-based-on-p](./quick/260804-dn7-strict-ui-compliance-refactor-based-on-p/) |
 
 ### Blockers/Concerns
 
