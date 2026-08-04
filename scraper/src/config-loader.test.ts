@@ -91,4 +91,19 @@ describe('loadSourceConfig', () => {
     expect(config!.preset).toBe('aggressive');
     expect(config!.enabled).toBe(false);
   });
+
+  it('defaults preset to standard when anti_block_preset is missing (D-21)', async () => {
+    const supabase = mockSupabase({
+      source: {
+        slug: 'subito',
+        target_urls: ['https://www.subito.it/db-only/'],
+        anti_block_preset: null,
+        enabled: true,
+        implementation_status: 'live',
+      },
+    });
+
+    const config = await loadSourceConfig(supabase, 'subito');
+    expect(config!.preset).toBe('standard');
+  });
 });
