@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 06
 current_phase_name: Scraper Admin Console
 status: executing
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-08-04T18:07:09.461Z"
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-08-04T18:36:49.526Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 06 execution started
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 32
-  completed_plans: 23
+  completed_plans: 24
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 ## Current Position
 
 Phase: 06 (Scraper Admin Console) — EXECUTING
-Plan: 3 of 9
+Plan: 4 of 9
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 06 execution started
 
-Progress: [███████░░░] 72%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -80,6 +80,7 @@ Progress: [███████░░░] 72%
 | Phase 04-auth-alerts-push-notifications P07 | 12m | 2 tasks | 9 files |
 | Phase 05-trilingual-ui-italian-english-chinese P03 | 4 | 3 tasks | 14 files |
 | Phase 05-trilingual-ui-italian-english-chinese P02 | 15min | 3 tasks | 12 files |
+| Phase 06-scraper-admin-console-configurable-sources-frequency-anti-bl P01 | 5min | 2 tasks | 23 files |
 
 ## Accumulated Context
 
@@ -136,6 +137,8 @@ Recent decisions affecting current work:
 - [Phase ?]: SSR metadata uses getMessages(zh).app.description per D-131
 - [Phase ?]: D-129 option-a: profiles.language + push_subscriptions.locale for server locale storage
 - [Phase ?]: D-136 push fan-out uses per-user getMessages(locale) and resolveListingTitle for push titles
+- [Phase ?]: Checkpoint option-a: full migration with is_operator RLS and translation columns (D-02,D-28,D-32,D-44)
+- [Phase ?]: Migration numbered 018 because 017_user_locale.sql already exists
 
 ### Pending Todos
 
@@ -188,7 +191,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T18:07:09.444Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-08-04T18:36:49.502Z
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None
 Next: /gsd-execute-phase 5
