@@ -6,9 +6,9 @@ current_phase: 4
 current_phase_name: Auth, Alerts & Push Notifications
 status: executed
 stopped_at: Completed 04-07-PLAN.md — Phase 4 code complete, pending verify/UAT
-last_updated: "2026-08-01T16:00:00.000Z"
+last_updated: "2026-08-04T10:27:56.092Z"
 last_activity: 2026-08-04
-last_activity_desc: Completed quick task 260804-h7l: Stitch dark theme palette fix
+last_activity_desc: "Completed quick task 260804-hed: 中文/English/Italiano language switching"
 progress:
   total_phases: 4
   completed_phases: 4
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 4 — Auth, Alerts & Push Notifications
 Plan: 7/7 executed
 Status: Code complete — pending `/gsd-verify-work 4` and iPhone NOTF-04 QA
-Last activity: 2026-08-04 - Completed quick task 260804-h7l: Stitch dark theme palette fix
+Last activity: 2026-08-04 - Completed quick task 260804-hed: 中文/English/Italiano language switching
 
 Progress: [██████████] 100%
 
@@ -153,6 +153,8 @@ None yet.
 | 260804-h34 | Settings GENERALE profile banner refactor | 2026-08-04 | 5ccff49 | [260804-h34-refactor-generale-profile-banner-and-setti](./quick/260804-h34-refactor-generale-profile-banner-and-setti/) |
 | 260804-h4c | Wire dark/light theme switching via next-themes and existing appearance preferences | 2026-08-04 | fb270c7 | [260804-h4c-wire-dark-light-theme-switching-via-next](./quick/260804-h4c-wire-dark-light-theme-switching-via-next/) |
 | 260804-h7l | Fix dark theme to strictly follow Stitch DESIGN.md palette | 2026-08-04 | 9efa1a9 | [260804-h7l-fix-dark-theme-to-strictly-follow-stitch](./quick/260804-h7l-fix-dark-theme-to-strictly-follow-stitch/) |
+| 15 | Remove system appearance option, keep Chiaro and Scuro only | 2026-08-04 | 702c4c8 | — |
+| 260804-hed | 中文 / English / Italiano UI language switching (default zh) | 2026-08-04 | c39ef46, decf18b, 467c4ee, 785964d | [260804-hed-english-italiano](./quick/260804-hed-english-italiano/) |
 
 ### Blockers/Concerns
 
