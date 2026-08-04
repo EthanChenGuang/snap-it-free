@@ -1,53 +1,76 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toaster';
 import { createClient } from '@/lib/supabase/client';
-import type { VeniceZone } from '@/lib/listings/types';
+import { nearestVeniceZone } from '@/lib/geo/nearest-zone';
 import { ZONE_CENTERS } from '@/lib/geo/zone-centers';
 import { messages, zoneLabel } from '@/messages/it';
 
-const PinMap = dynamic(() => import('@/components/ugc/PinMap').then((mod) => mod.PinMap), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-48 items-center justify-center rounded border border-outline-variant bg-surface-container-low text-label-sm text-on-surface-variant">
-      {messages.post.mapLoading}
-    </div>
-  ),
-});
+type PostCategory =
+  | 'furniture'
+  | 'tech'
+  | 'books'
+  | 'apparel'
+  | 'kitchenware'
+  | 'others';
 
-const ZONES: VeniceZone[] = ['centro_storico', 'mestre_marghera', 'lido_murano'];
+type ItemCondition = 'new' | 'good' | 'fair';
 
-type PostFormProps = {
-  title: string;
-  onTitleChange: (value: string) => void;
-  photoFile: File | null;
-  photoPreview: string | null;
-  onPhotoChange: (file: File | null, preview: string | null) => void;
-};
+const POST_CATEGORIES: PostCategory[] = [
+  'furniture',
+  'tech',
+  'books',
+  'apparel',
+  'kitchenware',
+  'others',
+];
 
-export function PostForm({
-  title,
-  onTitleChange,
-  photoFile,
-  photoPreview,
-  onPhotoChange,
-}: PostFormProps) {
+const CONDITIONS: ItemCondition[] = ['new', 'good', 'fair'];
+
+function postCategoryLabel(category: PostCategory): string {
+  return messages.post.categories[category];
+}
+
+function conditionLabel(condition: ItemCondition): string {
+  return messages.post.conditions[condition];
+}
+
+function buildDescription(
+  userText: string,
+  category: PostCategory,
+  condition: ItemCondition,
+): string | undefined {
+  const meta = [
+    `${messages.post.categoryMeta}: ${postCategoryLabel(category)}`,
+    `${messages.post.conditionMeta}: ${conditionLabel(condition)}`,
+  ].join('\n');
+
+  const trimmed = userText.trim();
+  if (!trimmed) return meta;
+  return `${meta}\n\n${trimmed}`;
+}
+
+export function PostForm() {
   const router = useRouter();
+  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [showDetails, setShowDetails] = useState(false);
-  const [zone, setZone] = useState<VeniceZone>('centro_storico');
+  const [category, setCategory] = useState<PostCategory>('furniture');
+  const [condition, setCondition] = useState<ItemCondition>('good');
+  const [pinLocation, setPinLocation] = useState(true);
   const [lat, setLat] = useState(ZONE_CENTERS.centro_storico.lat);
   const [lng, setLng] = useState(ZONE_CENTERS.centro_storico.lng);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [geoError, setGeoError] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -56,15 +79,63 @@ export function PostForm({
     });
   }, []);
 
-  const handlePinChange = useCallback((nextLat: number, nextLng: number) => {
-    setLat(nextLat);
-    setLng(nextLng);
+  const requestGeolocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setGeoError(messages.post.geolocationUnavailable);
+      return;
+    }
+
+    setGeoError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLat(position.coords.latitude);
+        setLng(position.coords.longitude);
+      },
+      (positionError) => {
+        if (positionError.code === positionError.PERMISSION_DENIED) {
+          setGeoError(messages.post.geolocationDenied);
+        } else if (positionError.code === positionError.TIMEOUT) {
+          setGeoError(messages.post.geolocationTimeout);
+        } else {
+          setGeoError(messages.post.geolocationUnavailable);
+        }
+        setPinLocation(false);
+        setLat(ZONE_CENTERS.centro_storico.lat);
+        setLng(ZONE_CENTERS.centro_storico.lng);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
   }, []);
+
+  useEffect(() => {
+    if (pinLocation) {
+      requestGeolocation();
+    } else {
+      setLat(ZONE_CENTERS.centro_storico.lat);
+      setLng(ZONE_CENTERS.centro_storico.lng);
+      setGeoError(null);
+    }
+  }, [pinLocation, requestGeolocation]);
+
+  const locationLine = useMemo(() => {
+    const zone = nearestVeniceZone(lat, lng);
+    return `Venezia, ${zoneLabel(zone)}`;
+  }, [lat, lng]);
+
+  const applyPhotoFile = (file: File) => {
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
 
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
-    onPhotoChange(file, URL.createObjectURL(file));
+    if (file) applyPhotoFile(file);
+  };
+
+  const handlePhotoDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) applyPhotoFile(file);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -110,7 +181,7 @@ export function PostForm({
           photoUrl,
           lat,
           lng,
-          description: description.trim() || undefined,
+          description: buildDescription(description, category, condition),
         }),
       });
 
@@ -152,11 +223,19 @@ export function PostForm({
           </label>
           <div className="group relative cursor-pointer">
             <div
-              className="flex aspect-[16/9] w-full flex-col items-center justify-center gap-space-sm rounded border border-dashed border-outline-variant bg-surface-container-lowest transition-colors hover:bg-surface-container"
+              className="flex aspect-[16/9] w-full flex-col items-center justify-center gap-space-sm rounded-lg border border-dashed border-outline-variant bg-surface-container-lowest transition-colors hover:bg-surface-container"
               style={{
                 backgroundImage:
                   'url("data:image/svg+xml,%3csvg width=\'100%25\' height=\'100%25\' xmlns=\'http://www.w3.org/2000/svg\'%3e%3crect width=\'100%25\' height=\'100%25\' fill=\'none\' stroke=\'%23C4C7C7\' stroke-width=\'2\' stroke-dasharray=\'8%2c 8\'/%3e%3c/svg%3e")',
               }}
+              onDragOver={(event) => {
+                event.preventDefault();
+                event.currentTarget.classList.add('bg-surface-container');
+              }}
+              onDragLeave={(event) => {
+                event.currentTarget.classList.remove('bg-surface-container');
+              }}
+              onDrop={handlePhotoDrop}
             >
               {photoPreview ? (
                 <div className="relative h-full w-full">
@@ -164,7 +243,7 @@ export function PostForm({
                     src={photoPreview}
                     alt={messages.post.photoLabel}
                     fill
-                    className="object-cover"
+                    className="rounded-lg object-cover"
                     unoptimized
                   />
                 </div>
@@ -172,6 +251,9 @@ export function PostForm({
                 <>
                   <span className="material-symbols-outlined text-4xl text-outline">add_a_photo</span>
                   <span className="text-label-md text-outline">{messages.post.uploadHint}</span>
+                  <span className="text-label-sm text-on-surface-variant">
+                    {messages.post.uploadFormatHint}
+                  </span>
                 </>
               )}
             </div>
@@ -184,7 +266,7 @@ export function PostForm({
           </div>
         </section>
 
-        <section className="space-y-space-lg">
+        <section className="grid grid-cols-1 gap-space-lg">
           <div className="space-y-space-xs">
             <label className="block text-label-md text-on-surface-variant">
               {messages.post.titleLabel}
@@ -192,65 +274,102 @@ export function PostForm({
             <input
               type="text"
               value={title}
-              onChange={(event) => onTitleChange(event.target.value)}
+              onChange={(event) => setTitle(event.target.value)}
               placeholder={messages.post.titlePlaceholder}
               className="w-full border-0 border-b border-transparent bg-transparent px-0 py-space-xs text-h3 font-semibold text-on-surface outline-none transition-colors placeholder:text-outline-variant focus:border-outline-variant"
             />
           </div>
 
-          <div className="space-y-space-sm">
-            <span className="block text-label-md text-on-surface-variant">{messages.post.zoneLabel}</span>
-            <div className="flex flex-wrap gap-space-sm">
-              {ZONES.map((z) => (
-                <Button
-                  key={z}
-                  type="button"
-                  variant={zone === z ? 'chipActive' : 'chip'}
-                  size="sm"
-                  onClick={() => setZone(z)}
-                >
-                  {zoneLabel(z)}
-                </Button>
-              ))}
-            </div>
+          <div className="space-y-space-xs">
+            <label className="block text-label-md text-on-surface-variant">
+              {messages.post.descriptionLabel}
+            </label>
+            <textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder={messages.post.descriptionPlaceholder}
+              rows={4}
+              className="w-full resize-none border-0 border-b border-transparent bg-transparent px-0 py-space-xs text-body-lg text-on-surface outline-none transition-colors placeholder:text-outline-variant focus:border-outline-variant"
+            />
           </div>
 
-          <div className="space-y-space-sm">
-            <span className="block text-label-md text-on-surface-variant">{messages.post.pinLabel}</span>
-            <PinMap zone={zone} lat={lat} lng={lng} onPinChange={handlePinChange} />
-          </div>
-
-          {!showDetails ? (
-            <button
-              type="button"
-              onClick={() => setShowDetails(true)}
-              className="text-label-md text-secondary underline-offset-2 hover:underline"
-            >
-              {messages.post.addDetails}
-            </button>
-          ) : (
+          <div className="grid grid-cols-1 gap-space-lg md:grid-cols-2">
             <div className="space-y-space-xs">
               <label className="block text-label-md text-on-surface-variant">
-                {messages.post.descriptionLabel}
+                {messages.post.categoryLabel}
               </label>
-              <textarea
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder={messages.post.descriptionPlaceholder}
-                rows={4}
-                className="w-full resize-none rounded border border-outline-variant bg-surface px-space-sm py-space-sm text-body-md text-on-surface outline-none focus:border-primary"
-              />
+              <select
+                value={category}
+                onChange={(event) => setCategory(event.target.value as PostCategory)}
+                className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest p-space-sm text-body-md text-on-surface outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary"
+              >
+                {POST_CATEGORIES.map((value) => (
+                  <option key={value} value={value}>
+                    {postCategoryLabel(value)}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
+
+            <div className="space-y-space-xs">
+              <span className="block text-label-md text-on-surface-variant">
+                {messages.post.conditionLabel}
+              </span>
+              <div className="flex flex-wrap gap-space-sm">
+                {CONDITIONS.map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setCondition(value)}
+                    className={`rounded-full border px-space-md py-space-xs text-label-md transition-colors ${
+                      condition === value
+                        ? 'border-primary bg-primary text-on-primary'
+                        : 'border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-high'
+                    }`}
+                  >
+                    {conditionLabel(value)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border border-outline-variant bg-surface-container-low p-space-md">
+            <div className="flex items-center gap-space-md">
+              <span className="material-symbols-outlined text-on-surface-variant">location_on</span>
+              <div>
+                <p className="text-label-md text-primary">{messages.post.pinCurrentLocation}</p>
+                <p className="text-label-sm text-secondary">
+                  {pinLocation ? locationLine : messages.post.pinLocationDefault}
+                </p>
+                {geoError && pinLocation && (
+                  <p className="mt-space-xs text-label-sm text-error">{geoError}</p>
+                )}
+              </div>
+            </div>
+            <label className="relative inline-flex cursor-pointer items-center">
+              <input
+                type="checkbox"
+                className="peer sr-only"
+                checked={pinLocation}
+                onChange={(event) => setPinLocation(event.target.checked)}
+              />
+              <div className="relative h-6 w-11 rounded-full bg-outline-variant after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:outline-none rtl:peer-checked:after:-translate-x-full" />
+            </label>
+          </div>
         </section>
 
         {error && <p className="text-label-sm text-error">{error}</p>}
 
         <section className="pt-space-lg">
-          <Button type="submit" className="w-full" disabled={submitting}>
+          <Button
+            type="submit"
+            className="w-full py-space-md text-label-md font-bold uppercase tracking-wider"
+            disabled={submitting}
+          >
             {submitting ? messages.post.submitting : messages.post.submit}
           </Button>
-          <p className="mt-space-md text-center text-label-sm text-on-surface-variant">
+          <p className="mt-space-md text-center text-label-sm text-secondary">
             {messages.post.guidelines}
           </p>
         </section>
