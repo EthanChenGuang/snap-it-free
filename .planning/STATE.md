@@ -148,7 +148,7 @@ None yet.
 | 260804-dn7 | Strict Stitch UI compliance: header search, floating chips, cards, bottom nav | 2026-08-04 | 97e2911, e4004b9, b117d7e | [260804-dn7-strict-ui-compliance-refactor-based-on-p](./quick/260804-dn7-strict-ui-compliance-refactor-based-on-p/) |
 | 260804-e2m | Strict Stitch UI compliance for Elenco list page | 2026-08-04 | dd5ba20 | [260804-e2m-strict-ui-compliance-refactor-for-elenco](./quick/260804-e2m-strict-ui-compliance-refactor-for-elenco/) |
 | 260804-f03 | Strict Stitch UI compliance for item detail page | 2026-08-04 | d3c60e5 | [260804-f03-strict-ui-compliance-refactor-for-item-d](./quick/260804-f03-strict-ui-compliance-refactor-for-item-d/) |
-| 260804-f75 | Strict Stitch UI compliance for Pubblica (Post Free Item) page | 2026-08-04 | — | [260804-f75-strict-ui-compliance-refactor-for-pubbli](./quick/260804-f75-strict-ui-compliance-refactor-for-pubbli/) |
+| 260804-f75 | Strict Stitch UI compliance for Pubblica (Post Free Item) page | 2026-08-04 | 2594ce2 | [260804-f75-strict-ui-compliance-refactor-for-pubbli](./quick/260804-f75-strict-ui-compliance-refactor-for-pubbli/) |
 
 ### Blockers/Concerns
 
