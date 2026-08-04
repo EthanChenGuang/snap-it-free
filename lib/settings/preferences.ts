@@ -1,3 +1,5 @@
+import { detectBrowserLanguage } from '@/lib/i18n/detect-browser-language';
+
 export type AppLanguage = 'zh' | 'en' | 'it';
 export type AppearanceMode = 'light' | 'dark';
 
@@ -17,6 +19,7 @@ export const DEFAULT_PREFERENCES: AppPreferences = {
 };
 
 let cachedSnapshot: AppPreferences = DEFAULT_PREFERENCES;
+let seedingFirstVisit = false;
 
 function preferencesEqual(a: AppPreferences, b: AppPreferences): boolean {
   return (
@@ -46,7 +49,17 @@ function parsePreferences(raw: string | null): AppPreferences {
 function syncSnapshotFromStorage(): AppPreferences {
   if (typeof window === 'undefined') return DEFAULT_PREFERENCES;
 
-  const parsed = parsePreferences(localStorage.getItem(APP_PREFERENCES_KEY));
+  const raw = localStorage.getItem(APP_PREFERENCES_KEY);
+  if (raw === null) {
+    if (!seedingFirstVisit) {
+      seedingFirstVisit = true;
+      writeAppPreferences({ language: detectBrowserLanguage() });
+      seedingFirstVisit = false;
+    }
+    return cachedSnapshot;
+  }
+
+  const parsed = parsePreferences(raw);
   if (preferencesEqual(parsed, cachedSnapshot)) {
     return cachedSnapshot;
   }
@@ -60,7 +73,7 @@ export function readAppPreferences(): AppPreferences {
 }
 
 export function writeAppPreferences(partial: Partial<AppPreferences>): AppPreferences {
-  const current = readAppPreferences();
+  const current = seedingFirstVisit ? DEFAULT_PREFERENCES : readAppPreferences();
   const next: AppPreferences = { ...current, ...partial };
 
   if (preferencesEqual(next, current)) {
@@ -106,4 +119,10 @@ export function subscribeAppPreferences(onStoreChange: () => void): () => void {
     window.removeEventListener(APP_PREFERENCES_CHANGE_EVENT, handler);
     window.removeEventListener('storage', handler);
   };
+}
+
+/** @internal Test-only reset for module state between unit tests. */
+export function __resetPreferencesModuleForTests(): void {
+  cachedSnapshot = DEFAULT_PREFERENCES;
+  seedingFirstVisit = false;
 }
