@@ -2,10 +2,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { alertMatchesListing } from './matcher';
 import type { VeniceZone } from '@/lib/listings/types';
 import { fanOutMatchPush } from '@/lib/notifications/web-push';
-import { getMessages, zoneLabel as zoneLabelFor } from '@/messages';
-
-const messages = getMessages('zh');
-const zoneLabel = (zone: Parameters<typeof zoneLabelFor>[0]) => zoneLabelFor(zone, messages);
+import { buildMatchPushContent, loadUserLocales } from '@/lib/user/locale';
+import type { AppLanguage } from '@/lib/settings/preferences';
 
 const BATCH_LIMIT = 50;
 
@@ -17,6 +15,8 @@ type PendingEvent = {
 type ListingRow = {
   id: string;
   title: string;
+  title_en?: string | null;
+  title_zh?: string | null;
   zone: VeniceZone | null;
 };
 
@@ -49,7 +49,7 @@ async function processOneEvent(
 ): Promise<boolean> {
   const { data: listing, error: listingError } = await supabase
     .from('listings')
-    .select('id, title, zone')
+    .select('id, title, title_en, title_zh, zone')
     .eq('id', event.listing_id)
     .maybeSingle();
 
@@ -82,19 +82,22 @@ async function processOneEvent(
       return false;
     }
 
+    const userIds = [...new Set(matches.map((alert) => alert.user_id))];
+    const localeByUser = await loadUserLocales(supabase, userIds);
+
     const notifiedUsers = new Set<string>();
-    const zoneText = listingRow.zone
-      ? zoneLabel(listingRow.zone)
-      : messages.settings.matches.zoneUnknown;
-    const pushBody = `${zoneText} · ${messages.settings.push.matchBodySuffix}`;
 
     await Promise.allSettled(
       matches.map(async (alert) => {
         if (notifiedUsers.has(alert.user_id)) return;
         notifiedUsers.add(alert.user_id);
+
+        const locale: AppLanguage = localeByUser.get(alert.user_id) ?? 'zh';
+        const { title, body } = buildMatchPushContent(listingRow, locale);
+
         await fanOutMatchPush(supabase, alert.user_id, {
-          title: listingRow.title,
-          body: pushBody,
+          title,
+          body,
           url: `/listing/${listingRow.id}`,
         });
       }),
@@ -105,7 +108,7 @@ async function processOneEvent(
   return true;
 }
 
-/** D-106: batch match pending listing_events → alert_matches (no push in Plan 05). */
+/** D-106/D-136: batch match pending listing_events → alert_matches + locale-aware push. */
 export async function processPendingListingEvents(
   supabase: SupabaseClient,
 ): Promise<number> {
