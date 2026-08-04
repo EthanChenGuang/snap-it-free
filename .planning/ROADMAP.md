@@ -175,10 +175,16 @@ Plans:
 **Requirements**: I18N-01, I18N-02
 **Success Criteria** (what must be TRUE):
 
-  1. A user can switch the UI language between Italian (default), English, and Chinese from anywhere in the app, and the choice persists across sessions
+  1. A user can switch the UI language between Chinese (default), English, and Italian from anywhere in the app, and the choice persists across sessions; first visit with no saved preference seeds language from the browser locale (fallback `zh`)
   2. Every piece of user-facing UI chrome — navigation, forms, buttons, notifications, onboarding — is fully translated in all three languages
 
-**Plans**: TBD
+**Plans**: 3 plans (gap-closure on 260804-hed foundation)
+
+Plans:
+
+- [ ] 05-01-PLAN.md — **tracer** Header language dropdown + browser first-visit + doc alignment (I18N-01)
+- [ ] 05-02-PLAN.md — Server locale storage + push notification locale (D-129, D-136)
+- [ ] 05-03-PLAN.md — Listing field resolver bridge + I18N-02 audit (D-133, D-138)
 
 ## Progress
 
@@ -191,18 +197,55 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Map + List Core Browsing | 5/5 | Complete    | 2026-07-28 |
 | 3. UGC Posting & Community Marketplace | 4/4 | Complete    | 2026-08-01 |
 | 4. Auth, Alerts & Push Notifications | 7/7 | In Progress|  |
-| 5. Trilingual UI (Italian / English / Chinese) | 0/TBD | Not started | - |
+| 5. Trilingual UI (Italian / English / Chinese) | 0/3 | Planned | - |
 
 ### Phase 6: Scraper Admin Console
 
 **Goal:** As solo operator, I want a `/admin` console to configure scrape sources (Subito live; FB/Vinted/Wallapop/eBay configurable), per-source schedules and anti-block presets, proxy/alerts, auto-translation (Gemini → en/zh), and run history — so I can operate ingestion without editing `scraper/.env` or redeploying the worker.
-**Requirements**: TBD (derive from 06-CONTEXT.md at plan time)
+**Requirements**: SCRP-01, SCRP-02, SCRP-03, SCRP-05, SCRP-06, SCRP-07 (placeholder)
 **Depends on:** Phase 4 (auth for operator login). May run in parallel with Phase 5.
-**Plans:** 0 plans
+**Success Criteria** (what must be TRUE):
+
+  1. Operator configures Subito URLs, interval (30–1440 min), and anti-block preset in `/admin` without editing `scraper/.env`
+  2. Worker reads config from Supabase each run; per-source schedule replaces fixed 90min cron; manual Run now enqueues `scrape_jobs`
+  3. FB/Vinted/Wallapop/eBay appear as coming-soon configurable sources (not live crawlers)
+  4. Ingest-time translation writes en/zh columns with Gemini primary + OpenRouter fallback; daily cap pauses translate only
+  5. Operator views run history, rejects browser, translation queue, and manages allowlist in settings
+
+**Plans:** 9 plans
 
 Plans:
+**Wave 0**
 
-- [ ] TBD (run /gsd-plan-phase 6 to break down)
+- [ ] 06-01-PLAN.md — Decision checkpoint + migration 017 + Wave 0 test scaffolds
+
+**Wave 1** *(blocked on Wave 0)*
+
+- [ ] 06-02-PLAN.md — Tracer: Subito DB config → worker run → minimal `/admin` dashboard
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 06-03-PLAN.md — Middleware auth gate + Stitch AdminShell
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 06-04-PLAN.md — Dashboard: global pause, Run now, alerts, footer stats
+- [ ] 06-05-PLAN.md — Sources list/detail + URL validation + anti-block presets
+
+**Wave 4** *(blocked on Wave 1 + 3)*
+
+- [ ] 06-06-PLAN.md — Worker scheduler: 60s tick, stagger, jobs queue, DB alerts
+
+**Wave 5** *(blocked on Wave 4)*
+
+- [ ] 06-07-PLAN.md — Run history, run detail, rejects browser
+- [ ] 06-08-PLAN.md — Ingest translation pipeline + translation queue UI
+
+**Wave 6** *(blocked on Waves 3–5)*
+
+- [ ] 06-09-PLAN.md — Settings: proxy encryption, alerts, cap, operator allowlist
+
+**UI hint**: yes (scraper-dashboard/DESIGN.md)
 
 ---
 *Roadmap created: 2026-07-26*

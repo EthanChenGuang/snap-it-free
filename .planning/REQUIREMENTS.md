@@ -60,7 +60,7 @@
 
 ### Internationalization
 
-- [ ] **I18N-01**: User can switch UI language between Italian (default), English, and Chinese
+- [ ] **I18N-01**: User can switch UI language between Chinese (default), English, and Italian from header or Settings; first visit seeds from browser locale with `zh` fallback
 - [ ] **I18N-02**: All user-facing UI chrome is translated in all three languages
 
 ## v2 Requirements
