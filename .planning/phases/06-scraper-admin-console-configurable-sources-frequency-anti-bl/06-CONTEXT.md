@@ -57,8 +57,8 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - **D-25:** **Global "auto-translate" toggle** in admin — when off, only original text stored — **Reversibility:** reversible.
 - **D-26:** Translation provider: **Google Gemini primary**, **OpenRouter fallback** — admin-selectable provider; API keys server-side env — **Reversibility:** reversible.
 - **D-27:** On translation failure: **listing still ingests**; UI falls back to original; failed items enter **translation retry queue**; admin shows pending count + **one-click re-translate** — **Reversibility:** reversible.
-- **D-37:** **Daily translation cap configurable in admin** (default TBD in plan, e.g. 500 listings/day) — **shared across Gemini + OpenRouter**; when exceeded **pause auto-translate only** (scraping continues) — **Reversibility:** reversible.
-- **D-38:** Listing translations stored as **separate columns** (`title_en`, `title_zh`, `description_en`, `description_zh`, `category_en`, `category_zh`) — not jsonb blob — **Reversibility:** costly — schema migration.
+- **D-43:** **Daily translation cap configurable in admin** (default TBD in plan, e.g. 500 listings/day) — **shared across Gemini + OpenRouter**; when exceeded **pause auto-translate only** (scraping continues) — **Reversibility:** reversible.
+- **D-44:** Listing translations stored as **separate columns** (`title_en`, `title_zh`, `description_en`, `description_zh`, `category_en`, `category_zh`) — not jsonb blob — **Reversibility:** costly — schema migration.
 
 ### Operator Allowlist (continued discussion)
 - **D-28:** Operator allowlist: **env bootstraps first operator(s)**; ongoing add/remove via **`/admin/settings` backed by DB table** — **Reversibility:** costly — RLS + bootstrap story.
@@ -153,7 +153,7 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - New `/admin` routes in Next.js App Router
 - New Supabase tables for source config, global settings, scrape_jobs, translation_queue
 - Worker poll: config + pending jobs each run cycle
-- Listing rows: add separate columns `title_en`, `title_zh`, `description_en`, `description_zh`, `category_en`, `category_zh` (D-38)
+- Listing rows: add separate columns per D-44 (`title_en`, `title_zh`, …)
 
 </code_context>
 
