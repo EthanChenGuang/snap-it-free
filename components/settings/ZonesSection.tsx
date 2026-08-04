@@ -248,7 +248,7 @@ export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
                     className={cn(
                       'rounded-sm px-2 py-0.5 text-[10px] font-bold uppercase',
                       alert.enabled
-                        ? 'bg-[#e6f4ea] text-[#137333]'
+                        ? 'bg-secondary-fixed text-on-surface'
                         : 'bg-surface-container-high text-on-surface-variant',
                     )}
                   >

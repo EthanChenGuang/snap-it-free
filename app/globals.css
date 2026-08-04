@@ -21,6 +21,9 @@
   --color-on-secondary: #ffffff;
   --color-secondary-container: #e7e2d9;
   --color-on-secondary-container: #67645d;
+  --color-secondary-fixed: #e7e2d9;
+  --color-secondary-fixed-dim: #cbc6bd;
+  --color-on-primary-container: #858383;
   --color-outline: #747878;
   --color-outline-variant: #c4c7c7;
   --color-error: #ba1a1a;
@@ -70,10 +73,13 @@
 }
 
 .dark {
+  /* Stitch / MD3 dark palette — values sourced from DESIGN.md inverse + fixed roles */
+  --color-background: #1a1c1c;
+  --color-on-background: #f1f1f0;
   --color-surface: #2f3130;
   --color-surface-dim: #1a1c1c;
   --color-surface-bright: #3a3c3b;
-  --color-surface-container-lowest: #121414;
+  --color-surface-container-lowest: #1c1b1b;
   --color-surface-container-low: #1f2121;
   --color-surface-container: #2a2c2c;
   --color-surface-container-high: #353737;
@@ -81,15 +87,16 @@
   --color-surface-variant: #444748;
   --color-on-surface: #f1f1f0;
   --color-on-surface-variant: #c4c7c7;
-  --color-background: #1a1c1c;
-  --color-on-background: #f1f1f0;
-  --color-primary: #ffffff;
-  --color-on-primary: #000000;
-  --color-primary-container: #e5e2e1;
+  --color-primary: #e5e2e1;
+  --color-on-primary: #1c1b1b;
+  --color-primary-container: #474746;
+  --color-on-primary-container: #e5e2e1;
   --color-secondary: #cbc6bd;
   --color-on-secondary: #1d1c16;
   --color-secondary-container: #494740;
-  --color-on-secondary-container: #e7e2d9;
+  --color-on-secondary-container: #cbc6bd;
+  --color-secondary-fixed: #494740;
+  --color-secondary-fixed-dim: #67645d;
   --color-outline: #8e9192;
   --color-outline-variant: #444748;
   --color-error: #ffb4ab;
