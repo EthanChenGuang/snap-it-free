@@ -8,7 +8,7 @@ status: executed
 stopped_at: Completed 04-07-PLAN.md — Phase 4 code complete, pending verify/UAT
 last_updated: "2026-08-01T16:00:00.000Z"
 last_activity: 2026-08-04
-last_activity_desc: Completed quick task 260804-h4c: dark/light theme via next-themes
+last_activity_desc: Completed quick task 260804-h7l: Stitch dark theme palette fix
 progress:
   total_phases: 4
   completed_phases: 4
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 4 — Auth, Alerts & Push Notifications
 Plan: 7/7 executed
 Status: Code complete — pending `/gsd-verify-work 4` and iPhone NOTF-04 QA
-Last activity: 2026-08-04 - Completed quick task 260804-h4c: dark/light theme via next-themes
+Last activity: 2026-08-04 - Completed quick task 260804-h7l: Stitch dark theme palette fix
 
 Progress: [██████████] 100%
 
@@ -152,6 +152,7 @@ None yet.
 | 260804-g12 | Strict Stitch UI compliance for Settings page | 2026-08-04 | bca8a16 | [260804-g12-strict-ui-compliance-refactor-for-settings](./quick/260804-g12-strict-ui-compliance-refactor-for-settings/) |
 | 260804-h34 | Settings GENERALE profile banner refactor | 2026-08-04 | 5ccff49 | [260804-h34-refactor-generale-profile-banner-and-setti](./quick/260804-h34-refactor-generale-profile-banner-and-setti/) |
 | 260804-h4c | Wire dark/light theme switching via next-themes and existing appearance preferences | 2026-08-04 | fb270c7 | [260804-h4c-wire-dark-light-theme-switching-via-next](./quick/260804-h4c-wire-dark-light-theme-switching-via-next/) |
+| 260804-h7l | Fix dark theme to strictly follow Stitch DESIGN.md palette | 2026-08-04 | 9efa1a9 | [260804-h7l-fix-dark-theme-to-strictly-follow-stitch](./quick/260804-h7l-fix-dark-theme-to-strictly-follow-stitch/) |
 
 ### Blockers/Concerns
 
