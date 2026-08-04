@@ -81,10 +81,14 @@ Output: clean HTML prototype per screen folder, matching existing app screens li
 
 ## After Stitch
 
-1. Save prototypes under `.planning/google-stitch-ui-design/admin_*_notion_style/`
-2. Update `DESIGN.md` if new admin-specific tokens needed
-3. Run `/gsd-ui-phase 6` or reference prototypes in `/gsd-plan-phase 6`
+**Done.** Prototypes live at:
+
+`.planning/google-stitch-ui-design/scraper-dashboard/`
+
+Screens: `admin_dashboard`, `source_detail_subito`, `run_history_empty_state`, `translation_queue`, `admin_settings` — each with `code.html` + `screen.png`. Tokens in `scraper-dashboard/DESIGN.md`.
+
+Next: `/gsd-plan-phase 6` (port prototypes to Next.js `/admin` routes).
 
 ---
 
-*Prompt version: 1.0 — 2026-08-04*
+*Prompt version: 1.1 — 2026-08-04 (prototypes exported)*

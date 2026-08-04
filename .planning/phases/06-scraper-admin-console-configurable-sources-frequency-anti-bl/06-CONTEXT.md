@@ -74,7 +74,8 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - **D-34:** Admin UI **Chinese-primary** copy for operator; keep source names and technical labels in English (Subito, Facebook, selector rate, etc.) — **Reversibility:** reversible.
 
 ### Stitch Prototypes
-- **D-35:** Operator **completed Google Stitch prototypes** — screen HTML paths to be recorded in `<canonical_refs>` when user provides folder paths (pending) — **Reversibility:** reversible.
+- **D-35:** Admin UI **implemented from Google Stitch exports** in `.planning/google-stitch-ui-design/scraper-dashboard/` — port `code.html` per screen; do not redesign — **Reversibility:** reversible.
+- **D-36:** Admin design authority for Phase 6: **`scraper-dashboard/DESIGN.md`** (not consumer `google-stitch-ui-design/DESIGN.md` alone) — **Reversibility:** reversible.
 
 ### Claude's Discretion
 - Exact Supabase table names (`scraper_sources`, `scraper_config`, `scrape_jobs`, `translation_queue`)
@@ -105,10 +106,16 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - `scraper/src/subito/crawler.ts` — Playwright crawler, proxy, session pool
 - `supabase/migrations/003_scrape_audit_tables.sql` — `scrape_runs`, `scrape_rejects`
 
-### Phase 6 Stitch Design Inputs
-- `.planning/phases/06-scraper-admin-console-configurable-sources-frequency-anti-bl/06-STITCH-PRD.md` — PRD for Google Stitch admin screens
-- `.planning/phases/06-scraper-admin-console-configurable-sources-frequency-anti-bl/06-STITCH-PROMPT.md` — Stitch generation prompt
-- `.planning/google-stitch-ui-design/DESIGN.md` — Stitch tokens and document-first rules
+### Phase 6 Stitch Design Inputs (authoritative prototypes)
+- `.planning/google-stitch-ui-design/scraper-dashboard/DESIGN.md` — admin design tokens and brand rules (**read before any /admin UI**)
+- `.planning/google-stitch-ui-design/scraper-dashboard/admin_dashboard/code.html` — `/admin` dashboard (+ `screen.png` reference)
+- `.planning/google-stitch-ui-design/scraper-dashboard/source_detail_subito/code.html` — `/admin/sources/[id]` (Subito example)
+- `.planning/google-stitch-ui-design/scraper-dashboard/run_history_empty_state/code.html` — `/admin/runs` empty state (extend for populated table per PRD)
+- `.planning/google-stitch-ui-design/scraper-dashboard/translation_queue/code.html` — `/admin/translation`
+- `.planning/google-stitch-ui-design/scraper-dashboard/admin_settings/code.html` — `/admin/settings`
+- `.planning/phases/06-scraper-admin-console-configurable-sources-frequency-anti-bl/06-STITCH-PRD.md` — functional PRD (screens ↔ routes)
+- `.planning/phases/06-scraper-admin-console-configurable-sources-frequency-anti-bl/06-STITCH-PROMPT.md` — Stitch generation prompt (historical)
+- `.planning/google-stitch-ui-design/DESIGN.md` — consumer app tokens (shared Structured Minimalist baseline)
 
 ### Legal / Ops
 - `docs/legal/subito-scraping-note.md` — robots.txt acknowledgment (if present)
@@ -146,7 +153,7 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - User wants a **simple backend** to configure Facebook Marketplace, Vinted, Wallapop, eBay, Subito — frequency, anti-block, auto-translation (Chinese + English)
 - Admin visual design will be produced in **Google Stitch** using generated PRD + prompt (not improvised in code)
 - Translation failure UX: don't block scrape; show pending translations in admin with bulk re-translate
-- Stitch admin prototypes done in Google Stitch — user will paste export paths into repo next
+- Stitch admin prototypes exported to `.planning/google-stitch-ui-design/scraper-dashboard/` (5 screens: dashboard, source detail, runs empty, translation, settings)
 
 </specifics>
 

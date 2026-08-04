@@ -241,4 +241,6 @@
 **Selected:** **Chinese-primary** admin copy; English for source/technical names.
 
 ### Stitch prototypes
-**Selected:** Prototypes **done in Google Stitch** — user will paste folder paths in a follow-up message to update canonical refs.
+**Selected:** Prototypes **done in Google Stitch**.
+
+**Exported to:** `.planning/google-stitch-ui-design/scraper-dashboard/` — `DESIGN.md` + 5 screens (`admin_dashboard`, `source_detail_subito`, `run_history_empty_state`, `translation_queue`, `admin_settings`), each with `code.html` and `screen.png`.

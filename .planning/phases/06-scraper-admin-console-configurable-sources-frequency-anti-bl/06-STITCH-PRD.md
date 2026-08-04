@@ -180,6 +180,22 @@ Filters: source, status, date range.
 4. Operator can turn auto-translate off/on and see pending translation queue
 5. All screens match Stitch Structured Minimalist tokens and pass workspace stitch-ui-design rule
 
+## 11. Stitch Prototypes (exported)
+
+**Directory:** `.planning/google-stitch-ui-design/scraper-dashboard/`
+
+| Route | Prototype folder | Files |
+|-------|------------------|-------|
+| `/admin` | `admin_dashboard/` | `code.html`, `screen.png` |
+| `/admin/sources/subito` (template for `[id]`) | `source_detail_subito/` | `code.html`, `screen.png` |
+| `/admin/runs` (empty state) | `run_history_empty_state/` | `code.html`, `screen.png` |
+| `/admin/translation` | `translation_queue/` | `code.html`, `screen.png` |
+| `/admin/settings` | `admin_settings/` | `code.html`, `screen.png` |
+
+**Design tokens:** `scraper-dashboard/DESIGN.md`
+
+**Gap:** Populated run-history table with rows — extend `run_history_empty_state` layout per §5.4 when implementing; no separate Stitch export yet.
+
 ---
 
-*PRD version: 1.0 — 2026-08-04*
+*PRD version: 1.1 — 2026-08-04 (prototypes linked)*
