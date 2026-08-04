@@ -4,8 +4,8 @@ import { SettingsCard, SettingsSectionTitle } from '@/components/settings/Settin
 import {
   readAppPreferences,
   subscribeAppPreferences,
-  writeAppPreferences,
 } from '@/lib/settings/preferences';
+import { setAppLanguage } from '@/lib/user/locale-client';
 import { LANGUAGES } from '@/lib/i18n/languages';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
@@ -30,7 +30,7 @@ export function LanguageSection() {
               <button
                 key={language.id}
                 type="button"
-                onClick={() => writeAppPreferences({ language: language.id })}
+                onClick={() => setAppLanguage(language.id)}
                 className={cn(
                   'flex flex-1 flex-col items-center gap-space-xs rounded-md px-space-sm py-space-sm transition-colors',
                   active

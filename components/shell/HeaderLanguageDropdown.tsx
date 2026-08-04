@@ -3,7 +3,7 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { LANGUAGES } from '@/lib/i18n/languages';
 import { useMessages } from '@/lib/i18n/useMessages';
-import { writeAppPreferences } from '@/lib/settings/preferences';
+import { setAppLanguage } from '@/lib/user/locale-client';
 import { cn } from '@/lib/utils';
 
 export function HeaderLanguageDropdown() {
@@ -40,7 +40,7 @@ export function HeaderLanguageDropdown() {
                   'data-[highlighted]:bg-surface-container-low',
                   active && 'bg-surface-container-high',
                 )}
-                onSelect={() => writeAppPreferences({ language: entry.id })}
+                onSelect={() => setAppLanguage(entry.id)}
               >
                 {entry.label}
               </DropdownMenu.Item>

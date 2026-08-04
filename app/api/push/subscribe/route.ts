@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { PushSubscribeSchema } from '@/lib/notifications/push-schemas';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
+import { resolveUserLocale } from '@/lib/user/locale';
 
 export async function POST(request: Request) {
   const user = await requireAuth();
@@ -21,9 +22,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { endpoint, keys } = parsed.data;
+  const { endpoint, keys, locale: clientLocale } = parsed.data;
   const supabase = await createClient();
   const userAgent = request.headers.get('user-agent') ?? null;
+  const locale = clientLocale ?? (await resolveUserLocale(supabase, user.id));
 
   await supabase
     .from('push_subscriptions')
@@ -37,6 +39,7 @@ export async function POST(request: Request) {
     p256dh: keys.p256dh,
     auth: keys.auth,
     user_agent: userAgent,
+    locale,
   });
 
   if (error) {

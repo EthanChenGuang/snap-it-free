@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { canOfferPush, canRequestPushPermission } from '@/lib/pwa/ios-detect';
 import { urlBase64ToUint8Array } from '@/lib/pwa/vapid';
+import { readAppPreferences } from '@/lib/settings/preferences';
 
 export type PushSubscribeResult =
   | { ok: true }
@@ -50,10 +51,12 @@ export async function requestPushPermissionAndSubscribe(): Promise<PushSubscribe
       applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
     });
 
+    const { language } = readAppPreferences();
+    const subscriptionJson = subscription.toJSON();
     const response = await fetch('/api/push/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(subscription.toJSON()),
+      body: JSON.stringify({ ...subscriptionJson, locale: language }),
     });
 
     if (!response.ok) {
