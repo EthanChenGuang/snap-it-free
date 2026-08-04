@@ -120,6 +120,10 @@ body {
   line-height: 1;
 }
 
+.admin-skeleton {
+  @apply animate-pulse rounded bg-surface-container-high;
+}
+
 .notion-border {
   border: 1px solid var(--color-outline-variant);
 }
@@ -152,6 +156,11 @@ body {
   height: 100%;
 }
 
+/* HTML markers must sit above the WebGL canvas (MapLibre default z-index stack). */
+.maplibregl-marker {
+  z-index: 2;
+}
+
 .maplibregl-ctrl-attrib {
   font-size: 10px;
 }
@@ -174,4 +183,48 @@ body {
 
 [data-vaul-drawer][data-vaul-snap-points='true'] > * {
   pointer-events: auto;
+}
+
+/* Reset vaul default handle chrome so the pill handle renders cleanly. */
+[data-vaul-handle] {
+  background: transparent !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 24px;
+  margin: 0 !important;
+  opacity: 1 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+[data-vaul-handle-hitarea] {
+  position: static !important;
+  transform: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 24px;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+@keyframes drawer-handle-hint-periodic {
+  0%,
+  12%,
+  100% {
+    transform: translateY(0);
+  }
+  6% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-drawer-handle-hint-periodic {
+    animation: drawer-handle-hint-periodic 4s ease-in-out infinite;
+  }
 }
