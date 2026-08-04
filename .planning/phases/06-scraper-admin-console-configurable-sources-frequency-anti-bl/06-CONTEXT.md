@@ -62,6 +62,23 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 
 ### Operator Allowlist (continued discussion)
 - **D-28:** Operator allowlist: **env bootstraps first operator(s)**; ongoing add/remove via **`/admin/settings` backed by DB table** — **Reversibility:** costly — RLS + bootstrap story.
+- **D-45:** Add operator by **typing email + save** — no invite link; user need not pre-exist in Supabase — **Reversibility:** reversible.
+- **D-46:** Operator **cannot remove their own email** from allowlist (UI disabled) — **Reversibility:** reversible.
+- **D-47:** Allowlist must keep **at least one operator** — cannot delete the last remaining entry — **Reversibility:** reversible.
+
+### Admin Access Control (continued discussion)
+- **D-48:** **Logged-out** visitor to `/admin` → **login flow**; after auth, non-allowlist → **redirect to `/`** (no 403 page) — **Reversibility:** reversible.
+- **D-49:** **Logged-in non-operator** → silent **redirect to `/`** — do not expose admin chrome — **Reversibility:** reversible.
+- **D-50:** **No link** to `/admin` from consumer app (Settings/nav) — operator bookmarks URL directly — **Reversibility:** reversible.
+
+### Default Source URLs (continued discussion)
+- **D-51:** Coming-soon sources seed **3 default URLs each** (Venice/Veneto); operator may **add more URLs** per source in admin — no hard cap in MVP — **Reversibility:** reversible.
+- **D-52:** Default URL keyword sets per source (full `https://` URLs in plan seed):
+  - **Facebook Marketplace:** `marketplace/venice/search?query=` × `gratis` | `regalo` | `free`
+  - **Vinted:** `vinted.it/catalog?search_text=` × `gratis` | `regalo` | `0+euro`
+  - **Wallapop:** `wallapop.com/app/search?keywords=` × `gratis` | `regalo` | `free` with `latitude=45.4408&longitude=12.3155` (Venice centro)
+  - **eBay.it:** `ebay.it/sch/i.html?_nkw=` × `gratis` | `regalo` | `free` with `_stpos=30100&_sadis=15&LH_FS=1&_sop=10` (Venice CAP, free shipping filter)
+  - **Subito:** existing three Venice regalo category URLs (unchanged from Phase 1) — **Reversibility:** reversible.
 
 ### Phase Timing & Consumer i18n Bridge
 - **D-29:** **Phase 6 may execute in parallel with Phase 5** — do not gate admin on trilingual UI completion — **Reversibility:** reversible.
@@ -163,7 +180,7 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - User wants a **simple backend** to configure Facebook Marketplace, Vinted, Wallapop, eBay, Subito — frequency, anti-block, auto-translation (Chinese + English)
 - Admin visual design will be produced in **Google Stitch** using generated PRD + prompt (not improvised in code)
 - Translation failure UX: don't block scrape; show pending translations in admin with bulk re-translate
-- Stitch admin prototypes: **8 screens** under `scraper-dashboard/` (dashboard, sources list, source detail, runs empty, run detail, rejects, translation, settings)
+- Default URL templates: 3 per coming-soon source (FB/Vinted/Wallapop/eBay), operator can append more
 
 </specifics>
 

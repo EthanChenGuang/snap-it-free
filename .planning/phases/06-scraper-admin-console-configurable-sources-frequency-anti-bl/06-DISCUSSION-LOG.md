@@ -265,3 +265,21 @@
 **Selected:** Gemini primary + OpenRouter fallback; admin-selectable provider.
 **Selected:** Configurable daily translation cap in admin (shared across providers); exceed cap → pause auto-translate only, scraping continues.
 **User note:** Research open-source/cheap models via OpenRouter during plan phase.
+
+---
+
+## Continued discussion (2026-08-04, session 4 — round 2 leftovers)
+
+### Non-operator /admin access
+**Logged out:** Redirect to login → if not on allowlist after auth, redirect to `/`.
+**Logged in, not allowlisted:** Silent redirect to `/` (no 403 page).
+**Consumer app:** No link to `/admin`.
+
+### Allowlist UX
+**Add:** Type email + save (no invite flow).
+**Delete self:** Blocked (disabled control).
+**Minimum:** At least 1 operator must remain; last entry cannot be deleted.
+
+### Default URLs (4 coming-soon sources)
+**Strategy:** 3 seed URLs per source; operator can add unlimited additional URLs in admin.
+**Confirmed templates:** FB Venice marketplace search (gratis/regalo/free); Vinted.it catalog search; Wallapop search with Venice lat/lng; eBay.it local Venice CAP 30100 searches. Subito keeps Phase 1 three regalo URLs.
