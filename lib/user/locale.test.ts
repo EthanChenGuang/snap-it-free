@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
+import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import {
   buildMatchPushContent,
   isValidAppLanguage,
-  resolveListingTitle,
   syncUserLocale,
 } from './locale';
 

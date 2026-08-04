@@ -24,3 +24,8 @@ create policy "profiles_update_own"
 
 alter table public.push_subscriptions
   add column locale text not null default 'zh' check (locale in ('zh', 'en', 'it'));
+
+create policy "push_subscriptions_update_own"
+  on public.push_subscriptions for update to authenticated
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());

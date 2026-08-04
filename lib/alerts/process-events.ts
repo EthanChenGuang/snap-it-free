@@ -15,8 +15,6 @@ type PendingEvent = {
 type ListingRow = {
   id: string;
   title: string;
-  title_en?: string | null;
-  title_zh?: string | null;
   zone: VeniceZone | null;
 };
 
@@ -49,7 +47,7 @@ async function processOneEvent(
 ): Promise<boolean> {
   const { data: listing, error: listingError } = await supabase
     .from('listings')
-    .select('id, title, title_en, title_zh, zone')
+    .select('id, title, zone')
     .eq('id', event.listing_id)
     .maybeSingle();
 
@@ -85,17 +83,12 @@ async function processOneEvent(
     const userIds = [...new Set(matches.map((alert) => alert.user_id))];
     const localeByUser = await loadUserLocales(supabase, userIds);
 
-    const notifiedUsers = new Set<string>();
-
     await Promise.allSettled(
-      matches.map(async (alert) => {
-        if (notifiedUsers.has(alert.user_id)) return;
-        notifiedUsers.add(alert.user_id);
-
-        const locale: AppLanguage = localeByUser.get(alert.user_id) ?? 'zh';
+      userIds.map(async (userId) => {
+        const locale: AppLanguage = localeByUser.get(userId) ?? 'zh';
         const { title, body } = buildMatchPushContent(listingRow, locale);
 
-        await fanOutMatchPush(supabase, alert.user_id, {
+        await fanOutMatchPush(supabase, userId, {
           title,
           body,
           url: `/listing/${listingRow.id}`,

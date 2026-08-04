@@ -1,21 +1,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { VeniceZone } from '@/lib/listings/types';
 import type { AppLanguage } from '@/lib/settings/preferences';
+import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { getMessages, zoneLabel as zoneLabelFor } from '@/messages';
 
 export const APP_LANGUAGES = ['zh', 'en', 'it'] as const;
 
 export function isValidAppLanguage(value: unknown): value is AppLanguage {
   return typeof value === 'string' && (APP_LANGUAGES as readonly string[]).includes(value);
-}
-
-export function resolveListingTitle(
-  row: { title: string; title_en?: string | null; title_zh?: string | null },
-  locale: AppLanguage,
-): string {
-  if (locale === 'en' && row.title_en) return row.title_en;
-  if (locale === 'zh' && row.title_zh) return row.title_zh;
-  return row.title;
 }
 
 export function buildMatchPushContent(

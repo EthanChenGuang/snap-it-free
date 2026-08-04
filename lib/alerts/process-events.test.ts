@@ -88,8 +88,6 @@ describe('processPendingListingEvents locale fan-out', () => {
       listing: {
         id: listingId,
         title: 'Divano gratis',
-        title_en: 'Free sofa',
-        title_zh: null,
         zone: 'mestre_marghera',
       },
       profiles: [{ user_id: userId, language: 'en' }],
@@ -104,7 +102,7 @@ describe('processPendingListingEvents locale fan-out', () => {
       expect.anything(),
       userId,
       expect.objectContaining({
-        title: 'Free sofa',
+        title: 'Divano gratis',
         body: expect.stringContaining('New free item'),
         url: `/listing/${listingId}`,
       }),
@@ -123,8 +121,6 @@ describe('processPendingListingEvents locale fan-out', () => {
       listing: {
         id: listingId,
         title: 'Divano',
-        title_en: null,
-        title_zh: '免费沙发',
         zone: 'mestre_marghera',
       },
       profiles: [],
@@ -137,7 +133,7 @@ describe('processPendingListingEvents locale fan-out', () => {
       expect.anything(),
       userId,
       expect.objectContaining({
-        title: '免费沙发',
+        title: 'Divano',
         body: expect.stringContaining('新的免费物品'),
       }),
     );
