@@ -1,3 +1,4 @@
+import type { ListingCategory } from '@/lib/listings/categories';
 import type { VeniceZone } from '@/lib/listings/types';
 
 export const messages = {
@@ -35,8 +36,9 @@ export const messages = {
     syncCta: 'Accedi',
   },
   list: {
-    pageTitle: 'Elenco completo',
-    refresh: 'Aggiorna',
+    searchPlaceholder: 'Cerca oggetti vicino a te…',
+    emptyTitle: 'Nessun annuncio trovato',
+    emptyDescription: 'Prova a modificare la ricerca o la categoria.',
     refreshing: 'Aggiornamento…',
   },
   post: {
@@ -275,6 +277,8 @@ export const messages = {
     sourceCommunity: 'Community',
     reserved: 'Riservato',
     free: 'Gratis',
+    claimItem: 'Reclama oggetto',
+    claimed: 'Reclamato',
     approximateZone: 'Zona approssimativa',
     viewOnSubito: 'Vedi su Subito',
     viewDetail: 'Vedi dettaglio',
@@ -296,6 +300,18 @@ export const messages = {
 export function zoneLabel(zone: VeniceZone | 'All'): string {
   if (zone === 'All') return messages.zones.all;
   return messages.zones[zone];
+}
+
+export function categoryLabel(category: ListingCategory): string {
+  const labels: Record<ListingCategory, string> = {
+    All: 'Tutti',
+    furniture: 'Arredamento',
+    tech: 'Tech',
+    apparel: 'Abbigliamento',
+    books: 'Libri',
+    home_decor: 'Casa',
+  };
+  return labels[category];
 }
 
 export function formatRelativeTimeItalian(isoDate: string, now = new Date()): string {
