@@ -1,3 +1,6 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '../config.js';
+
 export type AlertPayload = {
   runId: string;
   startedAt: Date;
@@ -68,22 +71,46 @@ function buildTelegramMessage(payload: AlertPayload): string {
     .join('\n');
 }
 
-function resolveChannel(): 'telegram' | 'resend' | null {
-  if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
+type AlertRouting = {
+  telegramChatId: string | null;
+  alertEmail: string | null;
+};
+
+async function loadAlertRouting(supabase: SupabaseClient): Promise<AlertRouting> {
+  const { data, error } = await supabase
+    .from('scraper_global_config')
+    .select('telegram_chat_id, alert_email')
+    .eq('id', 1)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    telegramChatId: (data?.telegram_chat_id as string | null) ?? null,
+    alertEmail: (data?.alert_email as string | null) ?? null,
+  };
+}
+
+function resolveChannel(routing?: AlertRouting): 'telegram' | 'resend' | null {
+  const chatId = routing?.telegramChatId ?? process.env.TELEGRAM_CHAT_ID;
+  if (process.env.TELEGRAM_BOT_TOKEN && chatId) {
     return 'telegram';
   }
-  if (process.env.RESEND_API_KEY && process.env.ALERT_FROM && process.env.ALERT_TO) {
+  const alertTo = routing?.alertEmail ?? process.env.ALERT_TO;
+  if (process.env.RESEND_API_KEY && process.env.ALERT_FROM && alertTo) {
     return 'resend';
   }
   return null;
 }
 
-async function sendResendEmail(payload: AlertPayload): Promise<void> {
+async function sendResendEmail(payload: AlertPayload, alertTo: string): Promise<void> {
   const { Resend } = await import('resend');
   const resend = new Resend(process.env.RESEND_API_KEY);
   const { error } = await resend.emails.send({
     from: process.env.ALERT_FROM!,
-    to: process.env.ALERT_TO!,
+    to: alertTo,
     subject: buildEmailSubject(payload.runId),
     text: buildEmailBody(payload),
   });
@@ -92,14 +119,18 @@ async function sendResendEmail(payload: AlertPayload): Promise<void> {
   }
 }
 
-async function sendTelegramMessage(payload: AlertPayload): Promise<void> {
+async function sendTelegramMessage(payload: AlertPayload, chatId: string): Promise<void> {
   const TelegramBot = (await import('node-telegram-bot-api')).default;
   const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, { polling: false });
-  await bot.sendMessage(process.env.TELEGRAM_CHAT_ID!, buildTelegramMessage(payload));
+  await bot.sendMessage(chatId, buildTelegramMessage(payload));
 }
 
-export async function notifyOperator(payload: AlertPayload): Promise<void> {
-  const channel = resolveChannel();
+export async function notifyOperator(
+  supabase: SupabaseClient,
+  payload: AlertPayload,
+): Promise<void> {
+  const routing = await loadAlertRouting(supabase);
+  const channel = resolveChannel(routing);
   if (!channel) {
     console.error(
       `ALERT_DELIVERY_FAILED channel=none run_id=${payload.runId} error=No alerting credentials configured`,
@@ -109,9 +140,11 @@ export async function notifyOperator(payload: AlertPayload): Promise<void> {
 
   try {
     if (channel === 'telegram') {
-      await sendTelegramMessage(payload);
+      const chatId = routing.telegramChatId ?? process.env.TELEGRAM_CHAT_ID!;
+      await sendTelegramMessage(payload, chatId);
     } else {
-      await sendResendEmail(payload);
+      const alertTo = routing.alertEmail ?? process.env.ALERT_TO!;
+      await sendResendEmail(payload, alertTo);
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -119,4 +152,10 @@ export async function notifyOperator(payload: AlertPayload): Promise<void> {
   }
 }
 
-export { buildEmailSubject, buildEmailBody, buildTelegramMessage, resolveChannel };
+export {
+  buildEmailSubject,
+  buildEmailBody,
+  buildTelegramMessage,
+  loadAlertRouting,
+  resolveChannel,
+};

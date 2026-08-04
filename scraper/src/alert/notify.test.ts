@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import {
   buildEmailSubject,
   buildTelegramMessage,
@@ -19,6 +20,21 @@ const basePayload: AlertPayload = {
 
 const resendSend = vi.fn();
 const telegramSend = vi.fn();
+
+function mockSupabase(routing: { telegram_chat_id?: string | null; alert_email?: string | null } = {}) {
+  return {
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: routing,
+            error: null,
+          }),
+        }),
+      }),
+    }),
+  } as unknown as SupabaseClient;
+}
 
 vi.mock('resend', () => ({
   Resend: vi.fn().mockImplementation(() => ({
@@ -52,7 +68,7 @@ describe('notifyOperator', () => {
     process.env.ALERT_TO = 'ops@example.com';
     resendSend.mockResolvedValue({ data: { id: 'email-1' }, error: null });
 
-    await notifyOperator(basePayload);
+    await notifyOperator(mockSupabase(), basePayload);
 
     expect(resendSend).toHaveBeenCalledOnce();
     const call = resendSend.mock.calls[0][0];
@@ -67,7 +83,7 @@ describe('notifyOperator', () => {
     telegramSend.mockResolvedValue({ message_id: 1 });
 
     const longDetail = 'x'.repeat(5000);
-    await notifyOperator({ ...basePayload, failureDetail: longDetail });
+    await notifyOperator(mockSupabase(), { ...basePayload, failureDetail: longDetail });
 
     expect(telegramSend).toHaveBeenCalledOnce();
     const message = telegramSend.mock.calls[0][1] as string;
@@ -83,7 +99,7 @@ describe('notifyOperator', () => {
 
     const stderrSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    await notifyOperator(basePayload);
+    await notifyOperator(mockSupabase(), basePayload);
 
     expect(stderrSpy).toHaveBeenCalledWith(
       expect.stringContaining('ALERT_DELIVERY_FAILED channel=resend run_id=run-abc-123'),
