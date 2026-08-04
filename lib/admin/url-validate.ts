@@ -37,3 +37,21 @@ export function validateTargetUrl(
 
   return { ok: true };
 }
+
+export function validateTargetUrls(
+  slug: string,
+  urls: string[],
+): { ok: true } | { ok: false; error: string } {
+  if (urls.length === 0) {
+    return { ok: false, error: 'At least one URL is required' };
+  }
+
+  for (const url of urls) {
+    const result = validateTargetUrl(url, slug);
+    if (!result.ok) {
+      return result;
+    }
+  }
+
+  return { ok: true };
+}

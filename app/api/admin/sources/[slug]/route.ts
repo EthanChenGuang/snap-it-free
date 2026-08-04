@@ -1,8 +1,25 @@
 import { NextResponse } from 'next/server';
+import { getSourceBySlug } from '@/lib/admin/queries';
 import { canEnableSource, getOperatorSession } from '@/lib/admin/require-operator';
 import { UpdateSourceSchema } from '@/lib/admin/schemas';
+import { validateTargetUrls } from '@/lib/admin/url-validate';
 
 type RouteContext = { params: Promise<{ slug: string }> };
+
+export async function GET(_request: Request, context: RouteContext) {
+  const session = await getOperatorSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  const { slug } = await context.params;
+  const source = await getSourceBySlug(slug);
+  if (!source) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
+  return NextResponse.json({ source });
+}
 
 export async function PATCH(request: Request, context: RouteContext) {
   const session = await getOperatorSession();
@@ -49,6 +66,13 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ error: '该数据源尚未接入，无法启用' }, { status: 422 });
   }
 
+  if (parsed.data.target_urls != null) {
+    const urlCheck = validateTargetUrls(slug, parsed.data.target_urls);
+    if (!urlCheck.ok) {
+      return NextResponse.json({ error: urlCheck.error }, { status: 400 });
+    }
+  }
+
   const { data, error } = await session.supabase
     .from('scraper_sources')
     .update({
@@ -58,7 +82,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     })
     .eq('slug', slug)
     .select(
-      'slug, display_name, implementation_status, enabled, interval_minutes, anti_block_preset',
+      'slug, display_name, implementation_status, enabled, interval_minutes, anti_block_preset, target_urls',
     )
     .single();
 
@@ -66,5 +90,15 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ source: data });
+  return NextResponse.json({
+    source: {
+      slug: data.slug,
+      displayName: data.display_name,
+      implementationStatus: data.implementation_status,
+      enabled: data.enabled,
+      intervalMinutes: data.interval_minutes,
+      antiBlockPreset: data.anti_block_preset,
+      targetUrls: data.target_urls ?? [],
+    },
+  });
 }
