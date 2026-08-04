@@ -212,7 +212,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
   4. Ingest-time translation writes en/zh columns with Gemini primary + OpenRouter fallback; daily cap pauses translate only
   5. Operator views run history, rejects browser, translation queue, and manages allowlist in settings
 
-**Plans:** 1/9 plans executed
+**Plans:** 2/9 plans executed
 
 Plans:
 **Wave 0**
@@ -221,7 +221,7 @@ Plans:
 
 **Wave 1** *(blocked on Wave 0)*
 
-- [ ] 06-02-PLAN.md — Tracer: Subito DB config → worker run → minimal `/admin` dashboard
+- [x] 06-02-PLAN.md — Tracer: Subito DB config → worker run → minimal `/admin` dashboard
 
 **Wave 2** *(blocked on Wave 1)*
 

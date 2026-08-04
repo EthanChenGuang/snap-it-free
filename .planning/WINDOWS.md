@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 2
+open_count: 5
 waived_count: 0
 fixed_count: 0
-total_count: 2
-last_updated: 2026-08-01T09:03:12.216Z
+total_count: 5
+last_updated: 2026-08-04T18:39:30.035Z
 ---
 
 # Broken Windows Ledger
@@ -17,6 +17,9 @@ last_updated: 2026-08-01T09:03:12.216Z
 |----|-------|------|------|------|-------------|--------|--------|-------------|-------------|
 | 1 | 02 | stub | components/detail/DetailTopBar.tsx | 65 | Favorite toggle disabled until Plan 04 localStorage favorites | open |  | 2026-07-28T14:06:20.356Z |  |
 | 2 | 03 | stub | components/detail/UgcListingShell.tsx |  | Contatta button disabled stub until Plan 02 DM (D-71) | open |  | 2026-08-01T09:03:12.216Z |  |
+| 3 | 04 | stub | messages/it.ts |  | Map Crea avviso CTA string only — map wiring deferred (D-117 optional) | open |  | 2026-08-01T14:31:47.738Z |  |
+| 4 | 04 | unrun-verify | app/api/alerts/matches/route.ts |  | npx next build blocked by pre-existing maplibre-gl Turbopack error | open |  | 2026-08-01T14:35:17.427Z |  |
+| 5 | 06 | stub | app/admin/page.tsx | 8 | Auth gate TODO — Plan 03 middleware (D-48) | open |  | 2026-08-04T18:39:30.035Z |  |
 
 ````json
 [
@@ -42,6 +45,42 @@ last_updated: 2026-08-01T09:03:12.216Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-01T09:03:12.216Z",
+    "resolved_at": null
+  },
+  {
+    "id": 3,
+    "kind": "stub",
+    "phase": "04",
+    "file": "messages/it.ts",
+    "line": null,
+    "description": "Map Crea avviso CTA string only — map wiring deferred (D-117 optional)",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-01T14:31:47.738Z",
+    "resolved_at": null
+  },
+  {
+    "id": 4,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "app/api/alerts/matches/route.ts",
+    "line": null,
+    "description": "npx next build blocked by pre-existing maplibre-gl Turbopack error",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-01T14:35:17.427Z",
+    "resolved_at": null
+  },
+  {
+    "id": 5,
+    "kind": "stub",
+    "phase": "06",
+    "file": "app/admin/page.tsx",
+    "line": 8,
+    "description": "Auth gate TODO — Plan 03 middleware (D-48)",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-04T18:39:30.035Z",
     "resolved_at": null
   }
 ]
