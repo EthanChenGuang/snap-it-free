@@ -5,17 +5,11 @@ import {
   readAppPreferences,
   subscribeAppPreferences,
   writeAppPreferences,
-  type AppLanguage,
 } from '@/lib/settings/preferences';
+import { LANGUAGES } from '@/lib/i18n/languages';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 import { useSyncExternalStore } from 'react';
-
-const LANGUAGES: { id: AppLanguage; label: string; sublabel: string }[] = [
-  { id: 'zh', label: '中文', sublabel: 'Chinese' },
-  { id: 'en', label: 'English', sublabel: 'English' },
-  { id: 'it', label: 'Italiano', sublabel: 'Italian' },
-];
 
 export function LanguageSection() {
   const { messages } = useMessages();
