@@ -69,6 +69,36 @@
   --radius-full: 9999px;
 }
 
+.dark {
+  --color-surface: #2f3130;
+  --color-surface-dim: #1a1c1c;
+  --color-surface-bright: #3a3c3b;
+  --color-surface-container-lowest: #121414;
+  --color-surface-container-low: #1f2121;
+  --color-surface-container: #2a2c2c;
+  --color-surface-container-high: #353737;
+  --color-surface-container-highest: #3f4141;
+  --color-surface-variant: #444748;
+  --color-on-surface: #f1f1f0;
+  --color-on-surface-variant: #c4c7c7;
+  --color-background: #1a1c1c;
+  --color-on-background: #f1f1f0;
+  --color-primary: #ffffff;
+  --color-on-primary: #000000;
+  --color-primary-container: #e5e2e1;
+  --color-secondary: #cbc6bd;
+  --color-on-secondary: #1d1c16;
+  --color-secondary-container: #494740;
+  --color-on-secondary-container: #e7e2d9;
+  --color-outline: #8e9192;
+  --color-outline-variant: #444748;
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+  color-scheme: dark;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--color-background);
@@ -84,7 +114,7 @@ body {
 }
 
 .notion-border {
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--color-outline-variant);
 }
 
 .no-scrollbar::-webkit-scrollbar {
