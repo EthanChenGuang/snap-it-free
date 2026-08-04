@@ -212,7 +212,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
   4. Ingest-time translation writes en/zh columns with Gemini primary + OpenRouter fallback; daily cap pauses translate only
   5. Operator views run history, rejects browser, translation queue, and manages allowlist in settings
 
-**Plans:** 9/9 plans executed
+**Plans:** 9/9 plans complete
 
 Plans:
 **Wave 0**
@@ -249,14 +249,35 @@ Plans:
 
 ### Phase 7: deploy it to Vercel
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** As a solo operator, I want the ShouManWu PWA on Vercel Hobby and the scraper worker on Fly.io with correct env, OAuth, and alert cron — so real users can browse, auth, favorite, alert, and post against the live Supabase backend (~$3–6/mo incremental).
+**Requirements**: D-01–D-21 (deployment decisions from 07-CONTEXT.md)
 **Depends on:** Phase 6
-**Plans:** 0 plans
+**Success Criteria** (what must be TRUE):
+
+  1. Next.js PWA serves on `https://<project>.vercel.app` with map, auth, admin, and Serwist SW on HTTPS
+  2. Google OAuth completes round-trip on production URL with Supabase redirect allowlist configured
+  3. Alert matcher runs every 3 min via external cron (not Vercel Pro) with CRON_SECRET auth
+  4. Scraper worker runs on Fly.io 512MB ams and ingests listings from Supabase DB config
+  5. D-19 smoke checklist all green; instant rollback verified
+
+**Plans:** 4 plans
 
 Plans:
+**Wave 0**
 
-- [ ] TBD (run /gsd-plan-phase 7 to break down)
+- [ ] 07-01-PLAN.md — **tracer** Pre-deploy fixes (vercel.json, .env.example), local build, first Vercel production URL
+
+**Wave 1** *(blocked on Wave 0)*
+
+- [ ] 07-02-PLAN.md — Supabase auth URLs + Google OAuth + cron-job.org external cron + curl smoke
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 07-03-PLAN.md — Fly.io worker (fly.toml, secrets, deploy, 512MB ams)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 07-04-PLAN.md — D-19 full smoke checklist + rollback drill + DEPLOY-RUNBOOK.md
 
 ---
 *Roadmap created: 2026-07-26*
