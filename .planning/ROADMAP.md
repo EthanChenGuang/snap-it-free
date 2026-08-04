@@ -125,7 +125,7 @@ Plans:
 
 ### Phase 4: Auth, Alerts & Push Notifications
 
-**Goal**: Users log in only at the moment an action requires it, and get notified when new listings match what they're looking for
+**Goal**: As a Venice bargain hunter, I want to log in only when I favorite, alert, post, or contact a seller and get notified when new listings match my alerts, so that I find free items near me faster without manual checking.
 **Mode**: mvp
 **Depends on**: Phase 3
 **Requirements**: AUTH-01, AUTH-02, NOTF-01, NOTF-02, NOTF-03, NOTF-04, NOTF-05
@@ -192,6 +192,17 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 3. UGC Posting & Community Marketplace | 4/4 | Complete    | 2026-08-01 |
 | 4. Auth, Alerts & Push Notifications | 7/7 | In Progress|  |
 | 5. Trilingual UI (Italian / English / Chinese) | 0/TBD | Not started | - |
+
+### Phase 6: Scraper Admin Console
+
+**Goal:** As solo operator, I want a `/admin` console to configure scrape sources (Subito live; FB/Vinted/Wallapop/eBay configurable), per-source schedules and anti-block presets, proxy/alerts, auto-translation (Gemini → en/zh), and run history — so I can operate ingestion without editing `scraper/.env` or redeploying the worker.
+**Requirements**: TBD (derive from 06-CONTEXT.md at plan time)
+**Depends on:** Phase 4 (auth for operator login). May run in parallel with Phase 5.
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 6 to break down)
 
 ---
 *Roadmap created: 2026-07-26*

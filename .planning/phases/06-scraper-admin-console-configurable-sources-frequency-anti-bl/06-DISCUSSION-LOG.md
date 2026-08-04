@@ -214,3 +214,31 @@
 - Per-source free-filter keyword editing
 - scrape_rejects admin browser
 - Config webhook hot-reload
+
+---
+
+## Continued discussion (2026-08-04, session 2)
+
+### Operator allowlist
+**Selected:** Env bootstrap first operator(s) + DB table for ongoing add/remove in `/admin/settings`.
+
+### Phase timing
+**Selected:** Phase 6 may run **in parallel with Phase 5** (not blocked on trilingual UI).
+
+### Translation display (consumer)
+**Selected:** App reads locale-specific columns (`title_en`, `title_zh`, etc.) with fallback to original.
+
+### Default URLs (coming-soon sources)
+**Selected:** Prefilled Venice/Veneto template URLs, operator-editable.
+
+### scrape_runs audit
+**Selected:** Add **`source` column** — one run record per source.
+
+### Job queue polling
+**Selected:** Worker polls **`scrape_jobs` every 60 seconds**.
+
+### Admin UI language
+**Selected:** **Chinese-primary** admin copy; English for source/technical names.
+
+### Stitch prototypes
+**Selected:** Prototypes **done in Google Stitch** — user will paste folder paths in a follow-up message to update canonical refs.

@@ -12,7 +12,7 @@ Phase 6 delivers an operator-facing **Scraper Admin Console** at `/admin` that r
 
 **Out of scope:** Implementing live crawlers for Facebook, Vinted, Wallapop, eBay in this phase (config + status only); end-user-facing settings changes; changing Phase 1 validation threshold values; closed FB group scraping (SCRP-08).
 
-Depends on Phase 5 for full user i18n, but admin console and translation columns can ship independently of UI locale switching.
+May run **in parallel with Phase 5** — admin console and ingest-time translation columns do not block on consumer trilingual UI. Requires Phase 4 auth for operator login. Consumer app reads translated columns per locale when Phase 5 ships (fallback to original until then).
 
 </domain>
 
@@ -57,6 +57,24 @@ Depends on Phase 5 for full user i18n, but admin console and translation columns
 - **D-25:** **Global "auto-translate" toggle** in admin — when off, only original text stored — **Reversibility:** reversible.
 - **D-26:** Translation provider: **Google Gemini** — API key server-side env; batch per listing — **Reversibility:** reversible.
 - **D-27:** On translation failure: **listing still ingests**; UI falls back to original; failed items enter **translation retry queue**; admin shows pending count + **one-click re-translate** — **Reversibility:** reversible.
+
+### Operator Allowlist (continued discussion)
+- **D-28:** Operator allowlist: **env bootstraps first operator(s)**; ongoing add/remove via **`/admin/settings` backed by DB table** — **Reversibility:** costly — RLS + bootstrap story.
+
+### Phase Timing & Consumer i18n Bridge
+- **D-29:** **Phase 6 may execute in parallel with Phase 5** — do not gate admin on trilingual UI completion — **Reversibility:** reversible.
+- **D-30:** Consumer listing display (Phase 5): read **`title` / `title_en` / `title_zh`** (and description/category equivalents) by active user locale; **fallback to original** if translation column missing — **Reversibility:** reversible.
+
+### Source Defaults & Audit
+- **D-31:** Coming-soon sources (FB, Vinted, Wallapop, eBay) ship with **prefilled Venice/Veneto template URLs** editable by operator — **Reversibility:** reversible.
+- **D-32:** Add **`source` column to `scrape_runs`** — one audit row per source run; dashboard filters and stats per source — **Reversibility:** costly — migration on audit table.
+
+### Jobs & Admin Locale
+- **D-33:** Worker **polls `scrape_jobs` every 60 seconds** for Run now (in addition to per-source cron) — **Reversibility:** reversible.
+- **D-34:** Admin UI **Chinese-primary** copy for operator; keep source names and technical labels in English (Subito, Facebook, selector rate, etc.) — **Reversibility:** reversible.
+
+### Stitch Prototypes
+- **D-35:** Operator **completed Google Stitch prototypes** — screen HTML paths to be recorded in `<canonical_refs>` when user provides folder paths (pending) — **Reversibility:** reversible.
 
 ### Claude's Discretion
 - Exact Supabase table names (`scraper_sources`, `scraper_config`, `scrape_jobs`, `translation_queue`)
@@ -128,6 +146,7 @@ Depends on Phase 5 for full user i18n, but admin console and translation columns
 - User wants a **simple backend** to configure Facebook Marketplace, Vinted, Wallapop, eBay, Subito — frequency, anti-block, auto-translation (Chinese + English)
 - Admin visual design will be produced in **Google Stitch** using generated PRD + prompt (not improvised in code)
 - Translation failure UX: don't block scrape; show pending translations in admin with bulk re-translate
+- Stitch admin prototypes done in Google Stitch — user will paste export paths into repo next
 
 </specifics>
 
