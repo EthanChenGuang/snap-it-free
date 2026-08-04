@@ -3,6 +3,9 @@ import type {
   AdminAlert,
   FooterStats,
   GlobalAdminStatus,
+  ScrapeRejectItem,
+  ScrapeRunDetail,
+  ScrapeRunListItem,
   ScrapeRunStatus,
   SourceDetail,
   SourceWithLastRun,
@@ -246,5 +249,171 @@ export async function getFooterStats(): Promise<FooterStats> {
     };
   } catch {
     return empty;
+  }
+}
+
+type ScrapeRunListRow = {
+  id: string;
+  started_at: string;
+  finished_at: string | null;
+  source: string;
+  status: ScrapeRunStatus;
+  listings_found: number;
+  listings_inserted: number;
+  listings_rejected: number;
+  selector_hit_rate: number | null;
+};
+
+function mapScrapeRunListItem(row: ScrapeRunListRow): ScrapeRunListItem {
+  return {
+    id: row.id,
+    startedAt: row.started_at,
+    finishedAt: row.finished_at,
+    source: row.source,
+    status: row.status,
+    listingsFound: row.listings_found,
+    listingsInserted: row.listings_inserted,
+    listingsRejected: row.listings_rejected,
+    selectorHitRate:
+      row.selector_hit_rate != null ? Number(row.selector_hit_rate) : null,
+  };
+}
+
+export async function getScrapeRuns(options?: {
+  source?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<ScrapeRunListItem[]> {
+  const limit = options?.limit ?? 100;
+  const offset = options?.offset ?? 0;
+
+  try {
+    const supabase = await createClient();
+    let query = supabase
+      .from('scrape_runs')
+      .select(
+        'id, started_at, finished_at, source, status, listings_found, listings_inserted, listings_rejected, selector_hit_rate',
+      )
+      .order('started_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (options?.source) {
+      query = query.eq('source', options.source);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      return [];
+    }
+
+    return ((data ?? []) as ScrapeRunListRow[]).map(mapScrapeRunListItem);
+  } catch {
+    return [];
+  }
+}
+
+export async function getScrapeRunById(id: string): Promise<ScrapeRunDetail | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('scrape_runs')
+      .select(
+        'id, started_at, finished_at, source, status, listings_found, listings_inserted, listings_updated, listings_skipped, listings_rejected, selector_hit_rate, failure_reason',
+      )
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error || !data) {
+      return null;
+    }
+
+    const row = data as ScrapeRunListRow & {
+      listings_updated: number;
+      listings_skipped: number;
+      failure_reason: string | null;
+    };
+
+    return {
+      ...mapScrapeRunListItem(row),
+      listingsUpdated: row.listings_updated,
+      listingsSkipped: row.listings_skipped,
+      failureReason: row.failure_reason,
+    };
+  } catch {
+    return null;
+  }
+}
+
+type ScrapeRejectRow = {
+  id: string;
+  scrape_run_id: string | null;
+  external_id: string | null;
+  reject_reason: string;
+  raw_snippet: Record<string, unknown>;
+  created_at: string;
+  scrape_runs: { source: string } | { source: string }[] | null;
+};
+
+function resolveRejectSource(row: ScrapeRejectRow): string | null {
+  const run = row.scrape_runs;
+  if (!run) {
+    return null;
+  }
+  if (Array.isArray(run)) {
+    return run[0]?.source ?? null;
+  }
+  return run.source ?? null;
+}
+
+export async function getScrapeRejects(options?: {
+  source?: string;
+  reason?: string;
+  runId?: string;
+  limit?: number;
+}): Promise<ScrapeRejectItem[]> {
+  const limit = options?.limit ?? 200;
+
+  try {
+    const supabase = await createClient();
+    let query = supabase
+      .from('scrape_rejects')
+      .select(
+        'id, scrape_run_id, external_id, reject_reason, raw_snippet, created_at, scrape_runs(source)',
+      )
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (options?.runId) {
+      query = query.eq('scrape_run_id', options.runId);
+    }
+
+    if (options?.reason) {
+      query = query.ilike('reject_reason', `%${options.reason}%`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      return [];
+    }
+
+    const mapped = ((data ?? []) as ScrapeRejectRow[]).map((row) => ({
+      id: row.id,
+      scrapeRunId: row.scrape_run_id,
+      externalId: row.external_id,
+      rejectReason: row.reject_reason,
+      rawSnippet: row.raw_snippet ?? {},
+      createdAt: row.created_at,
+      source: resolveRejectSource(row),
+    }));
+
+    if (options?.source) {
+      return mapped.filter((item) => item.source === options.source);
+    }
+
+    return mapped;
+  } catch {
+    return [];
   }
 }

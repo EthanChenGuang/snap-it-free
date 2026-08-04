@@ -43,3 +43,31 @@ export type FooterStats = {
   failedRuns7d: number;
   avgSelectorRate: number | null;
 };
+
+export type ScrapeRunListItem = {
+  id: string;
+  startedAt: string;
+  finishedAt: string | null;
+  source: string;
+  status: ScrapeRunStatus;
+  listingsFound: number;
+  listingsInserted: number;
+  listingsRejected: number;
+  selectorHitRate: number | null;
+};
+
+export type ScrapeRunDetail = ScrapeRunListItem & {
+  listingsUpdated: number;
+  listingsSkipped: number;
+  failureReason: string | null;
+};
+
+export type ScrapeRejectItem = {
+  id: string;
+  scrapeRunId: string | null;
+  externalId: string | null;
+  rejectReason: string;
+  rawSnippet: Record<string, unknown>;
+  createdAt: string;
+  source: string | null;
+};

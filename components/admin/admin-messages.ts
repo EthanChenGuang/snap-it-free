@@ -64,6 +64,76 @@ export const antiBlockPresetLabels: Record<string, string> = {
   aggressive: sourcesMessages.presetAggressive,
 };
 
+export const SOURCE_SLUGS = ['subito', 'facebook', 'vinted', 'wallapop', 'ebay'] as const;
+
+export const sourceDisplayNames: Record<string, string> = {
+  subito: 'Subito',
+  facebook: 'Facebook Marketplace',
+  vinted: 'Vinted',
+  wallapop: 'Wallapop',
+  ebay: 'eBay.it',
+};
+
+export const runsMessages = {
+  pageTitle: '运行记录',
+  filterAllSources: '全部数据源',
+  emptyHeading: '暂无运行记录',
+  emptyBody: '系统中尚无后台抓取记录。请在概览页对 Subito 点击「立即运行」以填充此视图。',
+  emptyCta: '返回概览',
+  tableStarted: '开始时间',
+  tableSource: '数据源',
+  tableStatus: '状态',
+  tableFound: '发现',
+  tableInserted: '入库',
+  tableRejected: '拒绝',
+  tableSelectorRate: 'Selector rate',
+  tableActions: '操作',
+  viewDetail: '查看详情',
+  statusSuccess: '成功',
+  statusFailed: '失败',
+  statusPartial: '部分成功',
+  statusRunning: '运行中',
+  runCount: (n: number) => `${n} 条记录`,
+} as const;
+
+export const runDetailMessages = {
+  pageTitle: '运行详情',
+  breadcrumbRuns: '运行记录',
+  runLabel: (id: string) => `运行 #${id.slice(0, 8)}`,
+  metricFound: '发现数',
+  metricInserted: '入库数',
+  metricRejected: '拒绝数',
+  metricSelectorRate: 'Selector rate',
+  logSection: '日志摘要',
+  logSuccess: '运行成功完成，未发现错误。',
+  rejectsLink: '查看本次拒绝记录',
+  sourceConfig: '数据源配置',
+} as const;
+
+export const rejectsMessages = {
+  pageTitle: '抓取拒绝记录',
+  pageSubtitle: '查看被过滤规则拒绝的抓取结果，用于调优过滤策略。',
+  filterAllSources: '全部数据源',
+  filterAllReasons: '全部拒绝原因',
+  reasonOutsideVenice: '超出 Venice 范围',
+  reasonDuplicate: '重复 listing',
+  reasonKeywordFilter: '关键词过滤',
+  reasonPriceOutlier: '价格异常',
+  reasonMissingData: '缺少关键字段',
+  showingCount: (n: number) => `共 ${n} 条拒绝记录`,
+  export: '导出',
+  emptyHeading: '暂无拒绝记录',
+  emptyBody: '当抓取结果被过滤规则拒绝时，记录会出现在此处。',
+  tableFoundAt: '发现时间',
+  tableSource: '数据源',
+  tableListingId: 'Listing ID',
+  tableReason: '原因',
+  tablePreview: '预览',
+  tableActions: '操作',
+  viewJson: '查看 JSON',
+  hideJson: '收起 JSON',
+} as const;
+
 export type AdminNavKey = keyof typeof adminNav;
 
 export const adminNavItems: Array<{
