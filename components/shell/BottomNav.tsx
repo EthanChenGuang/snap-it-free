@@ -38,19 +38,15 @@ export function BottomNav() {
             key={item.href}
             href={item.href}
             className={cn(
-              'relative flex flex-col items-center justify-center rounded px-space-sm py-space-xs transition-all duration-150 active:scale-95',
-              isActive
-                ? 'bg-surface-container font-semibold text-on-surface'
-                : 'text-on-surface-variant hover:bg-surface-container/60 hover:text-on-surface',
+              'relative flex flex-col items-center justify-center px-space-sm py-space-xs transition-transform duration-200 active:scale-95',
+              isActive ? 'font-bold text-primary' : 'text-secondary',
             )}
           >
             <span className="relative">
               <span
                 className="material-symbols-outlined text-[20px]"
                 style={{
-                  fontVariationSettings: isActive
-                    ? "'FILL' 1, 'wght' 600"
-                    : "'FILL' 0, 'wght' 400",
+                  fontVariationSettings: "'FILL' 0, 'wght' 400",
                 }}
               >
                 {item.icon}
@@ -64,7 +60,7 @@ export function BottomNav() {
                 </span>
               )}
             </span>
-            <span className="mt-space-xs text-[11px] font-medium tracking-tight">{item.label}</span>
+            <span className="mt-space-xs text-label-sm font-label-sm">{item.label}</span>
           </Link>
         );
       })}
