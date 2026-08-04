@@ -34,7 +34,7 @@ export function ScrapedListingShell({ listing, similarListings }: ScrapedListing
         <div className="grid grid-cols-1 gap-space-xl lg:grid-cols-12">
           <div className="flex flex-col gap-space-lg lg:col-span-8">
             <HeroMetadata listing={listing} />
-            <DetailArticle isUgc={false} />
+            <DetailArticle listing={listing} isUgc={false} />
           </div>
 
           <aside className="flex flex-col gap-space-lg lg:col-span-4">

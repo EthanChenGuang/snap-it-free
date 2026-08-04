@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { inferListingCategory } from '@/lib/listings/categories';
 import type { ListingRow } from '@/lib/listings/types';
+import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
@@ -13,7 +14,8 @@ type ListListingCardProps = {
 
 /** Stitch listing_feed Notion card — image, metadata, full-width Claim Item CTA. */
 export function ListListingCard({ listing }: ListListingCardProps) {
-  const { messages, zoneLabel, categoryLabel, formatRelativeTime } = useMessages();
+  const { language, messages, zoneLabel, categoryLabel, formatRelativeTime } = useMessages();
+  const displayTitle = resolveListingTitle(listing, language);
 
   const router = useRouter();
   const isClaimed = listing.status === 'claimed';
@@ -44,7 +46,7 @@ export function ListListingCard({ listing }: ListListingCardProps) {
         {listing.photo_url ? (
           <Image
             src={listing.photo_url}
-            alt={listing.title}
+            alt={displayTitle}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 400px"
@@ -60,7 +62,7 @@ export function ListListingCard({ listing }: ListListingCardProps) {
       <div className="flex flex-1 flex-col">
         <div className="mb-space-sm flex items-start justify-between gap-space-sm">
           <h3 className="text-body-lg font-semibold leading-tight text-on-surface group-hover:underline">
-            {listing.title}
+            {displayTitle}
           </h3>
           <span className="shrink-0 text-body-md font-bold text-on-surface">
             {messages.listing.free}

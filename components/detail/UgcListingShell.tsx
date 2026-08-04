@@ -173,7 +173,7 @@ export function UgcListingShell({
           <div className="flex flex-col gap-space-lg lg:col-span-8">
             {showHiddenBanner && <HiddenReviewBanner />}
             <HeroMetadata listing={listing} />
-            <DetailArticle description={listing.description} isUgc />
+            <DetailArticle listing={listing} isUgc />
           </div>
 
           <aside className="flex flex-col gap-space-lg lg:col-span-4">

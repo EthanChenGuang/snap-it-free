@@ -6,6 +6,11 @@ export type ListingRow = {
   id: string;
   source: ListingSource;
   title: string;
+  /** Phase 6 translation columns — optional until migration applied */
+  title_en?: string | null;
+  title_zh?: string | null;
+  description_en?: string | null;
+  description_zh?: string | null;
   photo_url: string;
   external_url: string;
   lat: number | null;

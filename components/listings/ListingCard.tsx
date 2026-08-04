@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { forwardRef } from 'react';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { ReservedBadge } from '@/components/listings/ReservedBadge';
+import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { useMessages } from '@/lib/i18n/useMessages';
 import type { ListingRow } from '@/lib/listings/types';
 import { cn } from '@/lib/utils';
@@ -24,7 +25,8 @@ function sourceBadgeLabel(
 
 export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
   function ListingCard({ listing, isSelected }, ref) {
-    const { messages, zoneLabel, formatRelativeTime } = useMessages();
+    const { language, messages, zoneLabel, formatRelativeTime } = useMessages();
+    const displayTitle = resolveListingTitle(listing, language);
     const zoneText = listing.zone ? zoneLabel(listing.zone) : messages.listing.approximateZone;
     const postedLabel = formatRelativeTime(listing.posted_at);
 
@@ -43,7 +45,7 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
           {listing.photo_url ? (
             <Image
               src={listing.photo_url}
-              alt={listing.title}
+              alt={displayTitle}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, 320px"
@@ -71,7 +73,7 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
               {zoneText}
             </p>
             <h3 className="text-body-lg font-semibold leading-snug text-on-surface group-hover:underline">
-              {listing.title}
+              {displayTitle}
             </h3>
             <p className="mt-space-xs text-label-sm text-on-surface-variant">{postedLabel}</p>
           </div>

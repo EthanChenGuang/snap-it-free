@@ -1,17 +1,20 @@
 'use client';
 
+import { resolveListingDescription } from '@/lib/i18n/listing-fields';
+import type { ListingFieldRow } from '@/lib/i18n/listing-fields';
 import { useMessages } from '@/lib/i18n/useMessages';
 
 type DetailArticleProps = {
-  description?: string | null;
+  listing?: ListingFieldRow;
   isUgc?: boolean;
 };
 
-export function DetailArticle({ description, isUgc }: DetailArticleProps) {
-  const { messages } = useMessages();
+export function DetailArticle({ listing, isUgc }: DetailArticleProps) {
+  const { language, messages } = useMessages();
 
+  const resolvedDescription = listing ? resolveListingDescription(listing, language) : null;
   const body =
-    description?.trim() ||
+    resolvedDescription?.trim() ||
     (isUgc ? messages.detail.descriptionFallbackUgc : messages.detail.descriptionFallbackScraped);
 
   return (

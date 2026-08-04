@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { useMessages } from '@/lib/i18n/useMessages';
 import type { ListingRow } from '@/lib/listings/types';
 
@@ -9,7 +10,8 @@ type HeroMetadataProps = {
 };
 
 export function HeroMetadata({ listing }: HeroMetadataProps) {
-  const { messages, zoneLabel, formatRelativeTime } = useMessages();
+  const { language, messages, zoneLabel, formatRelativeTime } = useMessages();
+  const displayTitle = resolveListingTitle(listing, language);
 
   const zoneText = listing.zone ? zoneLabel(listing.zone) : messages.listing.approximateZone;
   const postedLabel = formatRelativeTime(listing.posted_at);
@@ -20,7 +22,7 @@ export function HeroMetadata({ listing }: HeroMetadataProps) {
         {listing.photo_url ? (
           <Image
             src={listing.photo_url}
-            alt={listing.title}
+            alt={displayTitle}
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-105"
             sizes="(max-width: 1024px) 100vw, 720px"
@@ -44,7 +46,7 @@ export function HeroMetadata({ listing }: HeroMetadataProps) {
 
       <div className="border-b border-outline-variant pb-space-lg">
         <h1 className="text-h1-mobile font-bold leading-tight text-on-surface md:text-h1">
-          {listing.title}
+          {displayTitle}
         </h1>
         <p className="mt-space-xs flex items-center gap-space-xs text-body-lg text-secondary">
           <span className="material-symbols-outlined text-sm">location_on</span>
