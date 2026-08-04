@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { cannotRemoveLast, cannotRemoveSelf, canEnableSource, isOperatorEmail } from './require-operator';
+import {
+  assertCanRemoveOperator,
+  cannotRemoveLast,
+  cannotRemoveSelf,
+  canEnableSource,
+  isOperatorEmail,
+} from './require-operator';
 
 describe('allowlist guard helpers', () => {
   const allowlist = ['ops@example.com', 'admin@example.com'];
@@ -28,6 +34,32 @@ describe('allowlist guard helpers', () => {
 
   it('cannotRemoveLast is false when other operators remain', () => {
     expect(cannotRemoveLast(allowlist, 'ops@example.com')).toBe(false);
+  });
+});
+
+describe('assertCanRemoveOperator', () => {
+  const allowlist = ['ops@example.com', 'admin@example.com'];
+
+  it('blocks self-delete (D-46)', () => {
+    expect(assertCanRemoveOperator('ops@example.com', 'ops@example.com', allowlist)).toEqual({
+      allowed: false,
+      reason: 'self',
+    });
+  });
+
+  it('blocks deleting the last operator (D-47)', () => {
+    expect(
+      assertCanRemoveOperator('ops@example.com', 'solo@example.com', ['solo@example.com']),
+    ).toEqual({
+      allowed: false,
+      reason: 'last',
+    });
+  });
+
+  it('allows deleting another operator when others remain', () => {
+    expect(assertCanRemoveOperator('ops@example.com', 'admin@example.com', allowlist)).toEqual({
+      allowed: true,
+    });
   });
 });
 

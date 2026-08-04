@@ -22,6 +22,22 @@ export function cannotRemoveLast(allowlist: string[], targetEmail: string): bool
   return remaining.length === 0;
 }
 
+export type OperatorRemovalBlockReason = 'self' | 'last';
+
+export function assertCanRemoveOperator(
+  actorEmail: string,
+  targetEmail: string,
+  allowlistEmails: string[],
+): { allowed: true } | { allowed: false; reason: OperatorRemovalBlockReason } {
+  if (cannotRemoveSelf(actorEmail, targetEmail)) {
+    return { allowed: false, reason: 'self' };
+  }
+  if (cannotRemoveLast(allowlistEmails, targetEmail)) {
+    return { allowed: false, reason: 'last' };
+  }
+  return { allowed: true };
+}
+
 export async function requireOperator(
   supabase: SupabaseClient,
   email: string,
