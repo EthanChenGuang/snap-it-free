@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { DetailOverflowMenu } from '@/components/detail/DetailOverflowMenu';
 import { ReportListingMenu } from '@/components/detail/ReportListingMenu';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toaster';
-import { isAllowedExternalUrl, openExternalListingUrl } from '@/lib/listings/external-url';
 import { shareListing } from '@/lib/listings/share';
 import type { ListingRow } from '@/lib/listings/types';
 import { messages } from '@/messages/it';
@@ -16,10 +16,10 @@ type DetailTopBarProps = {
   listing: ListingRow;
 };
 
+/** Stitch item_details nav: back + title … heart, share, more. */
 export function DetailTopBar({ listing }: DetailTopBarProps) {
   const router = useRouter();
   const [reportOpen, setReportOpen] = useState(false);
-  const canOpenExternal = isAllowedExternalUrl(listing.external_url);
 
   const handleBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 1) {
@@ -41,24 +41,23 @@ export function DetailTopBar({ listing }: DetailTopBarProps) {
   };
 
   return (
-    <div className="sticky top-0 z-30 border-b border-outline-variant bg-surface">
-      <div className="mx-auto flex max-w-container-max items-center justify-between gap-space-sm px-gutter py-space-sm">
-        <div className="flex min-w-0 items-center gap-space-sm">
-          <Button
+    <nav className="sticky top-0 z-40 border-b border-outline-variant bg-surface">
+      <div className="mx-auto flex max-w-container-max items-center justify-between px-gutter py-space-md">
+        <div className="flex items-center gap-space-md">
+          <button
             type="button"
-            variant="ghost"
-            size="icon"
+            className="rounded p-space-xs transition-colors hover:bg-surface-container active:opacity-80"
             onClick={handleBack}
             aria-label={messages.detail.back}
           >
             <span className="material-symbols-outlined text-primary">arrow_back</span>
-          </Button>
-          <span className="truncate text-label-md font-semibold text-on-surface">
-            {messages.detail.pageTitle}
-          </span>
+          </button>
+          <Link href="/" className="text-h3 font-bold text-primary transition-opacity hover:opacity-80">
+            {messages.app.title}
+          </Link>
         </div>
 
-        <div className="flex shrink-0 items-center gap-space-xs">
+        <div className="flex items-center gap-space-md">
           <FavoriteButton listingId={listing.id} />
           <Button
             type="button"
@@ -66,20 +65,11 @@ export function DetailTopBar({ listing }: DetailTopBarProps) {
             size="icon"
             onClick={handleShare}
             aria-label={messages.detail.share}
+            className="rounded p-space-xs hover:bg-surface-container"
           >
             <span className="material-symbols-outlined text-primary">share</span>
           </Button>
           <DetailOverflowMenu onReport={() => setReportOpen(true)} />
-          {canOpenExternal && (
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => openExternalListingUrl(listing.external_url)}
-            >
-              {messages.detail.openOnSubito}
-            </Button>
-          )}
         </div>
       </div>
 
@@ -88,6 +78,6 @@ export function DetailTopBar({ listing }: DetailTopBarProps) {
         open={reportOpen}
         onOpenChange={setReportOpen}
       />
-    </div>
+    </nav>
   );
 }

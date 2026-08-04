@@ -3,8 +3,7 @@ import { Inter } from 'next/font/google';
 import { AppSerwistProvider } from '@/components/providers/SerwistProvider';
 import { FavoritesMergeProvider } from '@/components/providers/FavoritesMergeProvider';
 import { PwaOnboardingProvider } from '@/components/providers/PwaOnboardingProvider';
-import { BottomNav } from '@/components/shell/BottomNav';
-import { Header } from '@/components/shell/Header';
+import { AppChrome } from '@/components/shell/AppChrome';
 import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 
@@ -34,11 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AppSerwistProvider>
           <FavoritesMergeProvider>
             <PwaOnboardingProvider>
-              <div className="app-shell">
-                <Header />
-                <div className="app-main">{children}</div>
-                <BottomNav />
-              </div>
+              <AppChrome>
+                {children}
+              </AppChrome>
               <Toaster />
             </PwaOnboardingProvider>
           </FavoritesMergeProvider>
