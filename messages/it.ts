@@ -127,7 +127,6 @@ export const messages = {
     languageSection: 'Lingua',
     profileInformation: 'Informazioni profilo',
     appearance: 'Aspetto',
-    appearanceSystem: 'Predefinito di sistema',
     appearanceLight: 'Chiaro',
     appearanceDark: 'Scuro',
     close: 'Chiudi',

@@ -1,5 +1,5 @@
 export type AppLanguage = 'zh' | 'en' | 'it';
-export type AppearanceMode = 'system' | 'light' | 'dark';
+export type AppearanceMode = 'light' | 'dark';
 
 export type AppPreferences = {
   language: AppLanguage;
@@ -12,7 +12,7 @@ export const APP_PREFERENCES_CHANGE_EVENT = 'shoumanwu-app-preferences-change';
 
 const DEFAULT_PREFERENCES: AppPreferences = {
   language: 'it',
-  appearance: 'system',
+  appearance: 'light',
   soundAlerts: false,
 };
 
@@ -35,12 +35,7 @@ function parsePreferences(raw: string | null): AppPreferences {
         parsed.language === 'zh' || parsed.language === 'en' || parsed.language === 'it'
           ? parsed.language
           : DEFAULT_PREFERENCES.language,
-      appearance:
-        parsed.appearance === 'system' ||
-        parsed.appearance === 'light' ||
-        parsed.appearance === 'dark'
-          ? parsed.appearance
-          : DEFAULT_PREFERENCES.appearance,
+      appearance: normalizeAppearance(parsed.appearance),
       soundAlerts: Boolean(parsed.soundAlerts),
     };
   } catch {
@@ -80,10 +75,16 @@ export function writeAppPreferences(partial: Partial<AppPreferences>): AppPrefer
   return next;
 }
 
+function normalizeAppearance(value: unknown): AppearanceMode {
+  if (value === 'light' || value === 'dark') return value;
+  if (value === 'system' && typeof window !== 'undefined') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  return DEFAULT_PREFERENCES.appearance;
+}
+
 export function cycleAppearance(current: AppearanceMode): AppearanceMode {
-  if (current === 'system') return 'light';
-  if (current === 'light') return 'dark';
-  return 'system';
+  return current === 'light' ? 'dark' : 'light';
 }
 
 export function resetLocalAppData(): void {

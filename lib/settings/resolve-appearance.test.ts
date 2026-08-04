@@ -6,30 +6,21 @@ import {
 } from '@/lib/settings/resolve-appearance';
 
 describe('resolveEffectiveTheme', () => {
-  it('respects explicit light and dark', () => {
-    expect(resolveEffectiveTheme('light', true)).toBe('light');
-    expect(resolveEffectiveTheme('dark', false)).toBe('dark');
-  });
-
-  it('follows system preference when appearance is system', () => {
-    expect(resolveEffectiveTheme('system', true)).toBe('dark');
-    expect(resolveEffectiveTheme('system', false)).toBe('light');
+  it('returns light or dark directly', () => {
+    expect(resolveEffectiveTheme('light')).toBe('light');
+    expect(resolveEffectiveTheme('dark')).toBe('dark');
   });
 });
 
 describe('appearanceUsesDarkClass', () => {
-  it('maps effective theme to dark class usage', () => {
-    expect(appearanceUsesDarkClass('light', true)).toBe(false);
-    expect(appearanceUsesDarkClass('system', true)).toBe(true);
+  it('maps dark appearance to dark class', () => {
+    expect(appearanceUsesDarkClass('light')).toBe(false);
+    expect(appearanceUsesDarkClass('dark')).toBe(true);
   });
 });
 
 describe('forcedThemeFromAppearance', () => {
-  it('returns undefined for system so next-themes can follow OS', () => {
-    expect(forcedThemeFromAppearance('system')).toBeUndefined();
-  });
-
-  it('returns explicit themes when not system', () => {
+  it('always returns an explicit theme', () => {
     expect(forcedThemeFromAppearance('light')).toBe('light');
     expect(forcedThemeFromAppearance('dark')).toBe('dark');
   });

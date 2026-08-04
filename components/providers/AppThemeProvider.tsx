@@ -9,7 +9,7 @@ import { forcedThemeFromAppearance } from '@/lib/settings/resolve-appearance';
 import { ThemeProvider } from 'next-themes';
 import { useSyncExternalStore } from 'react';
 
-const DEFAULT_APPEARANCE: AppearanceMode = 'system';
+const DEFAULT_APPEARANCE: AppearanceMode = 'light';
 
 export function AppThemeProvider({ children }: { children: React.ReactNode }) {
   const preferences = useSyncExternalStore(
@@ -23,8 +23,8 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme="light"
+      enableSystem={false}
       forcedTheme={forcedTheme}
       disableTransitionOnChange
       storageKey="shoumanwu-next-themes"

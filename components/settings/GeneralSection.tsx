@@ -20,9 +20,7 @@ import { messages } from '@/messages/it';
 import { useSyncExternalStore } from 'react';
 
 function appearanceLabel(mode: AppearanceMode): string {
-  if (mode === 'light') return messages.settings.appearanceLight;
-  if (mode === 'dark') return messages.settings.appearanceDark;
-  return messages.settings.appearanceSystem;
+  return mode === 'dark' ? messages.settings.appearanceDark : messages.settings.appearanceLight;
 }
 
 function emailInitials(email: string): string {
