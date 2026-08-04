@@ -3,6 +3,7 @@ import { isMislabeledFree } from './free-filter.js';
 import { CanonicalListingSchema, type CanonicalListing } from './schema.js';
 import { loadZonePolygons, tagZone } from './zone-tag.js';
 import type { RawListing } from '../subito/extract.js';
+import { extractCategoryFromSubitoUrl } from '../subito/normalize.js';
 
 export type NormalizeResult = CanonicalListing | { reject: string };
 
@@ -31,6 +32,7 @@ export function normalizeRawListing(raw: RawListing): NormalizeResult {
     posted_at: postedAt,
     expires_at: expiresAt,
     content_hash: '',
+    category: extractCategoryFromSubitoUrl(raw.external_url),
     raw_payload: {
       description: raw.description,
     },

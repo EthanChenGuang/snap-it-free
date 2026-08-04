@@ -16,6 +16,7 @@ export const CanonicalListingSchema = z.object({
   posted_at: z.coerce.date(),
   expires_at: z.coerce.date(),
   content_hash: z.string().length(64),
+  category: z.string().nullable().optional(),
   raw_payload: z.record(z.unknown()).optional(),
 });
 

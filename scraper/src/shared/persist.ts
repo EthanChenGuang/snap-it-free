@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { RawListing } from '../subito/extract.js';
 import { normalizeRawListing } from './normalize.js';
 import type { CanonicalListing } from './schema.js';
+import { translateAfterPersist } from '../translate/ingest.js';
 
 export type PersistResult = 'skipped' | 'inserted' | 'updated';
 
@@ -31,13 +32,21 @@ export async function logReject(
   }
 }
 
+function descriptionFromListing(listing: CanonicalListing): string | null {
+  const payload = listing.raw_payload;
+  if (payload && typeof payload.description === 'string') {
+    return payload.description;
+  }
+  return null;
+}
+
 export async function persistListing(
   supabase: SupabaseClient,
   listing: CanonicalListing,
-): Promise<PersistResult> {
+): Promise<{ result: PersistResult; listingId: string | null }> {
   const { data: existing, error: selectError } = await supabase
     .from('listings')
-    .select('content_hash')
+    .select('id, content_hash')
     .eq('source', listing.source)
     .eq('external_id', listing.external_id)
     .maybeSingle();
@@ -47,7 +56,7 @@ export async function persistListing(
   }
 
   if (existing?.content_hash === listing.content_hash) {
-    return 'skipped';
+    return { result: 'skipped', listingId: (existing.id as string) ?? null };
   }
 
   const row = {
@@ -64,6 +73,7 @@ export async function persistListing(
     expires_at: listing.expires_at.toISOString(),
     content_hash: listing.content_hash,
     scraped_at: new Date().toISOString(),
+    category: listing.category ?? null,
     raw_payload: listing.raw_payload ?? null,
     geom:
       listing.lat != null && listing.lng != null
@@ -71,15 +81,26 @@ export async function persistListing(
         : null,
   };
 
-  const { error: upsertError } = await supabase
+  const { data: upserted, error: upsertError } = await supabase
     .from('listings')
-    .upsert(row, { onConflict: 'source,external_id' });
+    .upsert(row, { onConflict: 'source,external_id' })
+    .select('id')
+    .single();
 
   if (upsertError) {
     throw upsertError;
   }
 
-  return existing ? 'updated' : 'inserted';
+  const listingId = upserted.id as string;
+  const persistResult: PersistResult = existing ? 'updated' : 'inserted';
+
+  await translateAfterPersist(supabase, listingId, {
+    title: listing.title,
+    description: descriptionFromListing(listing),
+    category: listing.category ?? null,
+  });
+
+  return { result: persistResult, listingId };
 }
 
 export async function persistBatch(
@@ -107,7 +128,7 @@ export async function persistBatch(
       continue;
     }
 
-    const persistResult = await persistListing(supabase, result);
+    const { result: persistResult } = await persistListing(supabase, result);
     if (persistResult === 'inserted') stats.inserted += 1;
     else if (persistResult === 'updated') stats.updated += 1;
     else stats.skipped += 1;
