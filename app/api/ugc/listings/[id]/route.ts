@@ -3,7 +3,9 @@ import { z } from 'zod';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
 import { mapDeliveredTransition, mapReservedTransition, canDeliver, canReserve, type ListingStatus } from '@/lib/ugc/status';
-import { messages } from '@/messages/it';
+import { getMessages } from '@/messages';
+
+const messages = getMessages('zh');
 
 const patchSchema = z.object({
   action: z.enum(['reserved', 'delivered']),

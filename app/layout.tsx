@@ -5,6 +5,7 @@ import { AppSerwistProvider } from '@/components/providers/SerwistProvider';
 import { FavoritesMergeProvider } from '@/components/providers/FavoritesMergeProvider';
 import { PwaOnboardingProvider } from '@/components/providers/PwaOnboardingProvider';
 import { AppChrome } from '@/components/shell/AppChrome';
+import { DocumentLang } from '@/components/shell/DocumentLang';
 import { Toaster } from '@/components/ui/toaster';
 import { APPEARANCE_INIT_SCRIPT } from '@/lib/settings/resolve-appearance';
 import './globals.css';
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="it" className={inter.variable} suppressHydrationWarning>
+    <html lang="zh" className={inter.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: APPEARANCE_INIT_SCRIPT }} />
         <link
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         suppressHydrationWarning
       >
         <AppThemeProvider>
+          <DocumentLang />
           <AppSerwistProvider>
             <FavoritesMergeProvider>
               <PwaOnboardingProvider>

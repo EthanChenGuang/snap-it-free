@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next';
-import { messages } from '@/messages/it';
+import { getMessages } from '@/messages';
+
+const messages = getMessages('zh');
 
 export default function manifest(): MetadataRoute.Manifest {
   return {

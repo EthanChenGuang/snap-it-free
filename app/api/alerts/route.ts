@@ -3,7 +3,9 @@ import { canCreateAlert } from '@/lib/alerts/limit';
 import { CreateAlertSchema, type AlertRow } from '@/lib/alerts/schemas';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
-import { messages } from '@/messages/it';
+import { getMessages } from '@/messages';
+
+const messages = getMessages('zh');
 
 export async function GET() {
   const user = await requireAuth();

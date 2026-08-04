@@ -7,7 +7,9 @@ import {
 } from '@/lib/alerts/schemas';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
-import { messages } from '@/messages/it';
+import { getMessages } from '@/messages';
+
+const messages = getMessages('zh');
 
 type RouteContext = { params: Promise<{ id: string }> };
 

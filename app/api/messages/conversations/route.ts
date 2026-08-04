@@ -3,7 +3,9 @@ import { CreateConversationSchema } from '@/lib/messages/schemas';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
 import { assertCanStartConversation, RateLimitError } from '@/lib/ugc/rate-limit';
-import { messages } from '@/messages/it';
+import { getMessages } from '@/messages';
+
+const messages = getMessages('zh');
 
 export async function POST(request: Request) {
   const user = await requireAuth();

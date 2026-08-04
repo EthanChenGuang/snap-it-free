@@ -5,7 +5,9 @@ import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
 import { createListingSchemaForUser } from '@/lib/ugc/schemas';
 import { assertCanPost, RateLimitError } from '@/lib/ugc/rate-limit';
-import { messages } from '@/messages/it';
+import { getMessages } from '@/messages';
+
+const messages = getMessages('zh');
 
 function contentHash(title: string, photoUrl: string, lat: number, lng: number): string {
   const payload = `${title}|${photoUrl}|${lat}|${lng}`;

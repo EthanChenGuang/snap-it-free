@@ -2,7 +2,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { alertMatchesListing } from './matcher';
 import type { VeniceZone } from '@/lib/listings/types';
 import { fanOutMatchPush } from '@/lib/notifications/web-push';
-import { messages, zoneLabel } from '@/messages/it';
+import { getMessages, zoneLabel as zoneLabelFor } from '@/messages';
+
+const messages = getMessages('zh');
+const zoneLabel = (zone: Parameters<typeof zoneLabelFor>[0]) => zoneLabelFor(zone, messages);
 
 const BATCH_LIMIT = 50;
 
