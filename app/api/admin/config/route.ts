@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { encryptProxy } from '@/lib/admin/crypto';
 import { getOperatorSession } from '@/lib/admin/require-operator';
 import { UpdateGlobalConfigSchema } from '@/lib/admin/schemas';
 
@@ -30,6 +31,29 @@ function serializeConfig(row: GlobalConfigRow) {
     translations_reset_date: row.translations_reset_date,
     updated_at: row.updated_at,
   };
+}
+
+function buildUpdatePayload(parsed: ReturnType<typeof UpdateGlobalConfigSchema.parse>) {
+  const { proxy_url, telegram_chat_id, alert_email, ...rest } = parsed;
+  const update: Record<string, unknown> = { ...rest };
+
+  if (telegram_chat_id !== undefined) {
+    update.telegram_chat_id = telegram_chat_id?.trim() ? telegram_chat_id.trim() : null;
+  }
+
+  if (alert_email !== undefined) {
+    update.alert_email = alert_email?.trim() ? alert_email.trim() : null;
+  }
+
+  if (proxy_url !== undefined) {
+    const secretsKey = process.env.SCRAPER_SECRETS_KEY;
+    if (!secretsKey) {
+      throw new Error('SCRAPER_SECRETS_KEY not configured');
+    }
+    update.proxy_enc = encryptProxy(proxy_url, secretsKey);
+  }
+
+  return update;
 }
 
 export async function GET() {
@@ -79,10 +103,18 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
   }
 
+  let updatePayload: Record<string, unknown>;
+  try {
+    updatePayload = buildUpdatePayload(parsed.data);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Configuration error';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+
   const { data, error } = await session.supabase
     .from('scraper_global_config')
     .update({
-      ...parsed.data,
+      ...updatePayload,
       updated_at: new Date().toISOString(),
     })
     .eq('id', 1)

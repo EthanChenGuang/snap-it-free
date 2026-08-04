@@ -45,6 +45,21 @@ describe('UpdateGlobalConfigSchema', () => {
     const result = UpdateGlobalConfigSchema.safeParse({ daily_translation_cap: 0 });
     expect(result.success).toBe(false);
   });
+
+  it('accepts proxy_url, alerts, and translation provider (D-20, D-26)', () => {
+    const result = UpdateGlobalConfigSchema.safeParse({
+      proxy_url: 'http://user:pass@proxy.example:8080',
+      telegram_chat_id: '-1001234567890',
+      alert_email: 'ops@example.com',
+      translation_provider: 'openrouter',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects invalid proxy_url', () => {
+    const result = UpdateGlobalConfigSchema.safeParse({ proxy_url: 'not-a-url' });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('CreateJobSchema', () => {

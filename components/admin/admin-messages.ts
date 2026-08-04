@@ -153,6 +153,46 @@ export const translationMessages = {
   emptyBody: '所有 listing 已完成翻译。',
 } as const;
 
+export const settingsMessages = {
+  pageTitle: '系统设置',
+  sectionTitle: '系统配置',
+  sectionSubtitle: '管理核心运行参数与告警路由。',
+  globalPauseTitle: '全局暂停',
+  globalPauseHelp: '立即停止所有计划抓取；手动运行也将禁用。',
+  pauseInactive: '未启用',
+  pauseActive: '已启用',
+  proxyTitle: '代理配置',
+  proxyUrlLabel: 'Proxy URL',
+  proxyHelp: '用于所有出站抓取请求，防止 IP 封禁。',
+  proxyConfigured: '已配置',
+  proxyNotConfigured: '未配置',
+  proxyPlaceholder: 'http://user:pass@proxy.example.com:8080',
+  updateConfiguration: '更新配置',
+  alertRoutingTitle: '告警路由',
+  telegramChatIdLabel: 'Telegram Chat ID',
+  telegramHelp: '用于即时错误广播。',
+  alertEmailLabel: '告警邮件收件人',
+  alertEmailHelp: '用于每日运行摘要与严重失败通知。',
+  autoTranslateLabel: '自动翻译',
+  autoTranslateHelp: '关闭后仅存储原始文本，不写入 title_en/zh 等列。',
+  dailyCapLabel: '每日翻译上限',
+  dailyCapHelp: '全站 Gemini + OpenRouter 共享配额；超出后暂停自动翻译，抓取继续。',
+  capExceededNotice: '已达每日翻译上限，自动翻译已暂停。',
+  translationProviderLabel: '翻译提供商',
+  providerGemini: 'Gemini',
+  providerOpenrouter: 'OpenRouter',
+  serverKeysNote: 'Bot token 与 Resend API key 在服务端配置',
+  saveError: '保存失败。请检查字段后重试，或刷新页面。',
+  allowlistTitle: 'Operator 允许名单',
+  allowlistHelp: '输入邮箱并保存以添加 operator；无需预先注册。',
+  allowlistEmailPlaceholder: 'ops@example.com',
+  allowlistAdd: '保存',
+  allowlistDelete: '删除',
+  allowlistDeleteConfirm: '删除 operator：此操作不可撤销（若仅剩一人则禁用）',
+  allowlistDeleteBlockedSelf: '不能删除自己的 operator 权限',
+  allowlistDeleteBlockedLast: '至少保留一名 operator',
+} as const;
+
 export type AdminNavKey = keyof typeof adminNav;
 
 export const adminNavItems: Array<{

@@ -3,6 +3,7 @@ import type {
   AdminAlert,
   FooterStats,
   GlobalAdminStatus,
+  GlobalSettingsConfig,
   ScrapeRejectItem,
   ScrapeRunDetail,
   ScrapeRunListItem,
@@ -182,6 +183,56 @@ export async function getGlobalAdminStatus(): Promise<GlobalAdminStatus | null> 
     };
   } catch {
     return null;
+  }
+}
+
+export async function getGlobalSettingsConfig(): Promise<GlobalSettingsConfig | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('scraper_global_config')
+      .select(
+        'global_pause, auto_translate, daily_translation_cap, translation_provider, telegram_chat_id, alert_email, proxy_enc, translations_today, translations_reset_date, updated_at',
+      )
+      .eq('id', 1)
+      .maybeSingle();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return {
+      globalPause: Boolean(data.global_pause),
+      autoTranslate: Boolean(data.auto_translate),
+      dailyTranslationCap: data.daily_translation_cap as number,
+      translationProvider: data.translation_provider as 'gemini' | 'openrouter',
+      telegramChatId: (data.telegram_chat_id as string | null) ?? null,
+      alertEmail: (data.alert_email as string | null) ?? null,
+      proxyConfigured: data.proxy_enc != null,
+      translationsToday: data.translations_today as number,
+      translationsResetDate: data.translations_reset_date as string,
+      updatedAt: data.updated_at as string,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function getOperatorAllowlist(): Promise<string[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('operator_allowlist')
+      .select('email')
+      .order('email');
+
+    if (error) {
+      return [];
+    }
+
+    return (data ?? []).map((row) => row.email as string);
+  } catch {
+    return [];
   }
 }
 

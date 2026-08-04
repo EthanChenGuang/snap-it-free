@@ -38,6 +38,19 @@ export type GlobalAdminStatus = {
   lastSyncAt: string | null;
 };
 
+export type GlobalSettingsConfig = {
+  globalPause: boolean;
+  autoTranslate: boolean;
+  dailyTranslationCap: number;
+  translationProvider: 'gemini' | 'openrouter';
+  telegramChatId: string | null;
+  alertEmail: string | null;
+  proxyConfigured: boolean;
+  translationsToday: number;
+  translationsResetDate: string;
+  updatedAt: string;
+};
+
 export type FooterStats = {
   inserted24h: number;
   failedRuns7d: number;

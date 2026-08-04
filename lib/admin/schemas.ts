@@ -13,10 +13,16 @@ export const UpdateSourceSchema = z.object({
   target_urls: z.array(z.string().url()).min(1).optional(),
 });
 
+export const translationProviderSchema = z.enum(['gemini', 'openrouter']);
+
 export const UpdateGlobalConfigSchema = z.object({
   global_pause: z.boolean().optional(),
   auto_translate: z.boolean().optional(),
   daily_translation_cap: z.number().int().min(1).max(100_000).optional(),
+  translation_provider: translationProviderSchema.optional(),
+  proxy_url: z.string().url().optional(),
+  telegram_chat_id: z.string().max(128).nullable().optional(),
+  alert_email: z.union([z.string().email(), z.literal('')]).nullable().optional(),
 });
 
 export const CreateJobSchema = z.object({
