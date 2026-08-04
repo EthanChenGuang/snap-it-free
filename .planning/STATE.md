@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 06
 current_phase_name: Scraper Admin Console
 status: executing
-stopped_at: Completed 06-07-PLAN.md
-last_updated: "2026-08-04T20:04:27.321Z"
+stopped_at: Completed 06-08-PLAN.md
+last_updated: "2026-08-04T20:07:47.323Z"
 last_activity: 2026-08-04
 last_activity_desc: Completed 06-02 tracer plan
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 32
-  completed_plans: 30
+  completed_plans: 31
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 ## Current Position
 
 Phase: 06 — Scraper Admin Console — EXECUTING
-Plan: 8 of 9
+Plan: 9 of 9
 Status: Ready to execute
 Last activity: 2026-08-04 — Completed 06-02 tracer plan
 
-Progress: [█████████░] 94%
+Progress: [██████████] 97%
 
 ## Performance Metrics
 
@@ -88,6 +88,7 @@ Progress: [█████████░] 94%
 | Phase 06 P05 | 4min | 3 tasks | 11 files |
 | Phase 06-scraper-admin-console-configurable-sources-frequency-anti-bl P06 | 3 | 2 tasks | 6 files |
 | Phase 06 P07 | 8 | 3 tasks | 11 files |
+| Phase 06 P08 | 12 | 2 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -158,6 +159,7 @@ Recent decisions affecting current work:
 - [Phase ?]: Manual jobs take precedence over cron due in mergeRunQueue dedupe
 - [Phase ?]: Expandable inline JSON rows for rejects preview instead of side drawer
 - [Phase ?]: Export button disabled UI-only on rejects page per MVP scope
+- [Phase ?]: Ingest-time en+zh columns with scraper-local fetch engine (option-a)
 
 ### Pending Todos
 
@@ -211,7 +213,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T20:04:27.302Z
-Stopped at: Completed 06-07-PLAN.md
+Last session: 2026-08-04T20:07:47.307Z
+Stopped at: Completed 06-08-PLAN.md
 Resume file: None
 Next: /gsd-execute-phase 5
