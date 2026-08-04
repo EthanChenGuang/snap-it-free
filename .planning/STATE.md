@@ -149,7 +149,7 @@ None yet.
 | 260804-e2m | Strict Stitch UI compliance for Elenco list page | 2026-08-04 | dd5ba20 | [260804-e2m-strict-ui-compliance-refactor-for-elenco](./quick/260804-e2m-strict-ui-compliance-refactor-for-elenco/) |
 | 260804-f03 | Strict Stitch UI compliance for item detail page | 2026-08-04 | d3c60e5 | [260804-f03-strict-ui-compliance-refactor-for-item-d](./quick/260804-f03-strict-ui-compliance-refactor-for-item-d/) |
 | 260804-f75 | Strict Stitch UI compliance for Pubblica (Post Free Item) page | 2026-08-04 | 2594ce2 | [260804-f75-strict-ui-compliance-refactor-for-pubbli](./quick/260804-f75-strict-ui-compliance-refactor-for-pubbli/) |
-| 260804-g12 | Strict Stitch UI compliance for Settings page | 2026-08-04 | — | [260804-g12-strict-ui-compliance-refactor-for-settings](./quick/260804-g12-strict-ui-compliance-refactor-for-settings/) |
+| 260804-g12 | Strict Stitch UI compliance for Settings page | 2026-08-04 | bca8a16 | [260804-g12-strict-ui-compliance-refactor-for-settings](./quick/260804-g12-strict-ui-compliance-refactor-for-settings/) |
 
 ### Blockers/Concerns
 
