@@ -212,7 +212,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
   4. Ingest-time translation writes en/zh columns with Gemini primary + OpenRouter fallback; daily cap pauses translate only
   5. Operator views run history, rejects browser, translation queue, and manages allowlist in settings
 
-**Plans:** 5/9 plans executed
+**Plans:** 6/9 plans executed
 
 Plans:
 **Wave 0**
@@ -234,7 +234,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 1 + 3)*
 
-- [ ] 06-06-PLAN.md — Worker scheduler: 60s tick, stagger, jobs queue, DB alerts
+- [x] 06-06-PLAN.md — Worker scheduler: 60s tick, stagger, jobs queue, DB alerts
 
 **Wave 5** *(blocked on Wave 4)*
 
@@ -246,6 +246,17 @@ Plans:
 - [ ] 06-09-PLAN.md — Settings: proxy encryption, alerts, cap, operator allowlist
 
 **UI hint**: yes (scraper-dashboard/DESIGN.md)
+
+### Phase 7: deploy it to Vercel
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 6
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 7 to break down)
 
 ---
 *Roadmap created: 2026-07-26*

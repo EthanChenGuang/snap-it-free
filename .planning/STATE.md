@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 06
 current_phase_name: Scraper Admin Console
 status: executing
-stopped_at: Completed 06-05-PLAN.md
-last_updated: "2026-08-04T18:46:41.031Z"
+stopped_at: Completed 06-06-PLAN.md
+last_updated: "2026-08-04T20:02:13.587Z"
 last_activity: 2026-08-04
 last_activity_desc: Completed 06-02 tracer plan
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 5
   total_plans: 32
-  completed_plans: 28
+  completed_plans: 29
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 ## Current Position
 
 Phase: 06 — Scraper Admin Console — EXECUTING
-Plan: 6 of 9
+Plan: 7 of 9
 Status: Ready to execute
 Last activity: 2026-08-04 — Completed 06-02 tracer plan
 
-Progress: [█████████░] 88%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -86,6 +86,7 @@ Progress: [█████████░] 88%
 | Phase 06 P03 | 4 | 3 tasks | 8 files |
 | Phase 06 P04 | 5min | 3 tasks | 12 files |
 | Phase 06 P05 | 4min | 3 tasks | 11 files |
+| Phase 06-scraper-admin-console-configurable-sources-frequency-anti-bl P06 | 3 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -152,6 +153,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Coming soon jobs insert as skipped with zh message per D-05
 - [Phase ?]: Reused getOperatorSession from 06-04 for all sources API routes
 - [Phase ?]: validation-thresholds.ts mirrors scraper config constants for read-only UI
+- [Phase ?]: Checkpoint option-a: 60s tick + DB next_run_at + scrape_jobs queue (D-13, D-33)
+- [Phase ?]: Manual jobs take precedence over cron due in mergeRunQueue dedupe
 
 ### Pending Todos
 
@@ -191,6 +194,7 @@ None yet.
 ### Roadmap Evolution
 
 - Phase 6 added: Scraper Admin Console — configurable sources, frequency, anti-block, and auto-translation
+- Phase 7 added: deploy it to Vercel
 
 ## Deferred Items
 
@@ -204,7 +208,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T18:46:41.017Z
-Stopped at: Completed 06-05-PLAN.md
+Last session: 2026-08-04T20:02:13.568Z
+Stopped at: Completed 06-06-PLAN.md
 Resume file: None
 Next: /gsd-execute-phase 5
