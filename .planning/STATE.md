@@ -5,12 +5,12 @@ milestone_name: milestone
 current_phase: 4
 current_phase_name: Auth, Alerts & Push Notifications
 status: executed
-stopped_at: Completed 04-07-PLAN.md — Phase 4 code complete, pending verify/UAT
-last_updated: "2026-08-04T10:27:56.092Z"
+stopped_at: Phase 6 context gathered
+last_updated: "2026-08-04T14:54:09.143Z"
 last_activity: 2026-08-04
-last_activity_desc: "Completed quick task 260804-hed: 中文/English/Italiano language switching"
+last_activity_desc: "Completed quick task 260804-j8k: map marker spiderfy on cluster click"
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 4
   total_plans: 20
   completed_plans: 20
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 4 — Auth, Alerts & Push Notifications
 Plan: 7/7 executed
 Status: Code complete — pending `/gsd-verify-work 4` and iPhone NOTF-04 QA
-Last activity: 2026-08-04 - Completed quick task 260804-hed: 中文/English/Italiano language switching
+Last activity: 2026-08-04 - Completed quick task 260804-j8k: map marker spiderfy on cluster click
 
 Progress: [██████████] 100%
 
@@ -155,6 +155,9 @@ None yet.
 | 260804-h7l | Fix dark theme to strictly follow Stitch DESIGN.md palette | 2026-08-04 | 9efa1a9 | [260804-h7l-fix-dark-theme-to-strictly-follow-stitch](./quick/260804-h7l-fix-dark-theme-to-strictly-follow-stitch/) |
 | 15 | Remove system appearance option, keep Chiaro and Scuro only | 2026-08-04 | 702c4c8 | — |
 | 260804-hed | 中文 / English / Italiano UI language switching (default zh) | 2026-08-04 | c39ef46, decf18b, 467c4ee, 785964d | [260804-hed-english-italiano](./quick/260804-hed-english-italiano/) |
+| 260804-ifm | 当前地图上没有物体的标记 — group collocated pins | 2026-08-04 | — | [260804-ifm-map-markers-not-visible](./quick/260804-ifm-map-markers-not-visible/) |
+| 260804-j8k | Fix marker overlapping and clustering on Mappa (spiderfy) | 2026-08-04 | — | [260804-j8k-map-marker-spiderfy](./quick/260804-j8k-map-marker-spiderfy/) |
+| 260804-k9m | Map markers on land + Stitch pin styling | 2026-08-04 | — | [260804-k9m-map-markers-land-stitch](./quick/260804-k9m-map-markers-land-stitch/) |
 
 ### Blockers/Concerns
 
@@ -162,6 +165,10 @@ None yet.
 - Phase 1: Subito national free category structure verified live (~39.5k `regalo` results) — remaining risk is anti-bot durability and sui generis / GDPR exposure, not category existence
 - Phase 4: iOS PWA push behavior is fast-moving and regulatory-sensitive (EU DMA) — verify against WebKit's current official docs at implementation time, and test end-to-end on a real iPhone, not the Simulator
 - SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY not configured — worker persist blocked until operator sets env and applies migrations
+
+### Roadmap Evolution
+
+- Phase 6 added: Scraper Admin Console — configurable sources, frequency, anti-block, and auto-translation
 
 ## Deferred Items
 
@@ -175,6 +182,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-01T14:42:35.421Z
-Stopped at: Completed 04-07-PLAN.md
-Resume file: None
+Last session: 2026-08-04T14:54:09.126Z
+Stopped at: Phase 6 context gathered
+Resume file: .planning/phases/06-scraper-admin-console-configurable-sources-frequency-anti-bl/06-CONTEXT.md
