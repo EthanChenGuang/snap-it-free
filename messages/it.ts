@@ -16,6 +16,8 @@ export const messages = {
     menuClose: 'Chiudi menu',
     search: 'Cerca',
     favorites: 'Preferiti',
+    language: 'Lingua',
+    languageMenu: 'Scegli lingua',
   },
   map: {
     searchPlaceholder: 'Cerca zone o regali…',
@@ -246,6 +248,9 @@ export const messages = {
     newArrivals: 'Nuovi arrivi',
     itemsInArea: (count: number) =>
       count === 1 ? '1 annuncio in questa zona' : `${count} annunci in questa zona`,
+    expandSheet: 'Espandi pannello inferiore',
+    collapseSheet: 'Comprimi pannello inferiore',
+    swipeUpHint: "Scorri verso l'alto",
   },
   zones: {
     all: 'Tutti',

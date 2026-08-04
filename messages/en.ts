@@ -15,6 +15,8 @@ export const messages: Messages = {
     menuClose: 'Close menu',
     search: 'Search',
     favorites: 'Favorites',
+    language: 'Language',
+    languageMenu: 'Choose language',
   },
   map: {
     searchPlaceholder: 'Search zones or free finds…',
@@ -238,6 +240,9 @@ export const messages: Messages = {
     newArrivals: 'New arrivals',
     itemsInArea: (count: number) =>
       count === 1 ? '1 listing in this area' : `${count} listings in this area`,
+    expandSheet: 'Expand bottom sheet',
+    collapseSheet: 'Collapse bottom sheet',
+    swipeUpHint: 'Swipe up',
   },
   zones: {
     all: 'All',

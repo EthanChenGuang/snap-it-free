@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { NavMenuDrawer } from '@/components/shell/NavMenuDrawer';
+import { HeaderLanguageDropdown } from '@/components/shell/HeaderLanguageDropdown';
 import {
   setMapSearchOpen,
   toggleMapSearchOpen,
@@ -48,15 +49,18 @@ export function Header() {
           >
             <span className="text-h3 font-bold text-on-surface">{messages.app.title}</span>
           </Link>
-          <button
-            type="button"
-            className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center transition-opacity active:opacity-80"
-            aria-label={messages.header.search}
-            aria-pressed={pathname === '/' ? searchOpen : undefined}
-            onClick={handleSearchClick}
-          >
-            <span className="material-symbols-outlined text-primary">search</span>
-          </button>
+          <div className="flex items-center gap-space-xs">
+            <HeaderLanguageDropdown />
+            <button
+              type="button"
+              className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center transition-opacity active:opacity-80"
+              aria-label={messages.header.search}
+              aria-pressed={pathname === '/' ? searchOpen : undefined}
+              onClick={handleSearchClick}
+            >
+              <span className="material-symbols-outlined text-primary">search</span>
+            </button>
+          </div>
         </div>
       </header>
       <NavMenuDrawer open={menuOpen} onOpenChange={setMenuOpen} />

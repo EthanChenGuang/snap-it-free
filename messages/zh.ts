@@ -15,6 +15,8 @@ export const messages: Messages = {
     menuClose: '关闭菜单',
     search: '搜索',
     favorites: '收藏',
+    language: '语言',
+    languageMenu: '选择语言',
   },
   map: {
     searchPlaceholder: '搜索区域或免费物品…',
@@ -235,6 +237,9 @@ export const messages: Messages = {
     newArrivals: '新上架',
     itemsInArea: (count: number) =>
       count === 1 ? '该区域有 1 条物品' : `该区域有 ${count} 条物品`,
+    expandSheet: '展开底部面板',
+    collapseSheet: '收起底部面板',
+    swipeUpHint: '向上滑动',
   },
   zones: {
     all: '全部',
