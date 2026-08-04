@@ -180,6 +180,7 @@ May run **in parallel with Phase 5** — admin console and ingest-time translati
 - User wants a **simple backend** to configure Facebook Marketplace, Vinted, Wallapop, eBay, Subito — frequency, anti-block, auto-translation (Chinese + English)
 - Admin visual design will be produced in **Google Stitch** using generated PRD + prompt (not improvised in code)
 - Translation failure UX: don't block scrape; show pending translations in admin with bulk re-translate
+- Stitch admin prototypes: **8 screens** under `scraper-dashboard/`
 - Default URL templates: 3 per coming-soon source (FB/Vinted/Wallapop/eBay), operator can append more
 
 </specifics>
