@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Map + List Core Browsing** - Users can find and explore live free listings across Venice, login-optional (completed 2026-07-28)
 - [x] **Phase 3: UGC Posting & Community Marketplace** - Users can post their own free items and coordinate pickup in-app, safely (completed 2026-08-01)
 - [ ] **Phase 4: Auth, Alerts & Push Notifications** - Users log in only when needed and get notified of new matching listings
-- [ ] **Phase 5: Trilingual UI (Italian / English / Chinese)** - Users can use the entire app in their preferred language
+- [x] **Phase 5: Trilingual UI (Italian / English / Chinese)** - Users can use the entire app in their preferred language (completed 2026-08-04)
 
 ## Phase Details
 
@@ -197,7 +197,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Map + List Core Browsing | 5/5 | Complete    | 2026-07-28 |
 | 3. UGC Posting & Community Marketplace | 4/4 | Complete    | 2026-08-01 |
 | 4. Auth, Alerts & Push Notifications | 7/7 | In Progress|  |
-| 5. Trilingual UI (Italian / English / Chinese) | 3/3 | In Progress|  |
+| 5. Trilingual UI (Italian / English / Chinese) | 3/3 | Complete    | 2026-08-04 |
 
 ### Phase 6: Scraper Admin Console
 

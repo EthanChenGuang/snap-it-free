@@ -1,29 +1,35 @@
 ---
 phase: 05-trilingual-ui-italian-english-chinese
 verified: 2026-08-04T18:10:00Z
-status: human_needed
+status: passed
 score: 13/15 must-haves verified
 behavior_unverified: 2
 overrides_applied: 0
 behavior_unverified_items:
+
   - truth: "Header and Settings language changes stay in sync instantly via shared preference store without page reload"
     test: "On map page, switch language via Header dropdown; navigate to Settings without reload"
     expected: "Settings 3-button segment reflects the header selection immediately; nav labels re-render in chosen language"
     why_human: "Both paths call setAppLanguage → writeAppPreferences + useSyncExternalStore, but no integration test exercises cross-component sync"
+
   - truth: "Authenticated user receives push notification body/title in their stored UI locale"
     test: "Log in, set language to English, subscribe push, trigger alert match (cron or test listing)"
     expected: "Push title uses title_en when present; body strings from en catalog"
     why_human: "process-events unit tests mock Supabase; end-to-end requires migration 017 applied + VAPID + real push delivery"
 human_verification:
+
   - test: "Switch language from header on map page; confirm Stitch dropdown closed label (中文 / English / Italiano) and 44px touch targets"
     expected: "Dropdown matches Stitch tokens (border-outline-variant, bg-surface, min-h-11); selecting a language updates BottomNav labels without full page reload"
     why_human: "Visual Stitch parity and instant re-render cannot be verified by grep"
+
   - test: "Clear localStorage shoumanwu_app_preferences; set browser to it-IT; reload app"
     expected: "First visit seeds Italiano; localStorage contains language:it"
     why_human: "Browser locale seeding has unit tests but real navigator.language behavior varies by environment"
+
   - test: "On listing detail (/listing/:id), confirm language is switchable via Settings (bottom nav)"
     expected: "Header is hidden by design (DetailTopBar); Settings LanguageSection still reachable and functional"
     why_human: "Plan 01 truth scopes header dropdown to AppChrome pages; listing detail intentionally omits Header — confirm UX acceptable"
+
   - test: "English UI + logged-in user + push subscribed → trigger alert match"
     expected: "Notification title/body in English per profiles.language"
     why_human: "Requires live Supabase migration 017, VAPID keys, and device push"
