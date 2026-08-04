@@ -9,11 +9,12 @@ import {
   supabaseAdmin,
 } from './config.js';
 import { notifyOperator } from './alert/notify.js';
+import { loadSourceConfig } from './config-loader.js';
 import { persistBatch } from './shared/persist.js';
 import { validateBatch } from './shared/validate-run.js';
 import { loadZonePolygons, tagZone } from './shared/zone-tag.js';
 import { runSubitoCrawler } from './subito/crawler.js';
-import { SUBITO_CATEGORY_URLS } from './subito/categories.js';
+import { resolveSourceRun } from './worker-placeholder.js';
 
 type ScrapeRunRecord = {
   id: string;
@@ -46,11 +47,14 @@ export async function getTrailingMedians(supabase: SupabaseClient): Promise<numb
   return (data ?? []).map((row) => row.listings_found as number);
 }
 
-export async function startScrapeRun(supabase: SupabaseClient): Promise<ScrapeRunRecord> {
+export async function startScrapeRun(
+  supabase: SupabaseClient,
+  source: string,
+): Promise<ScrapeRunRecord> {
   const startedAt = new Date();
   const { data, error } = await supabase
     .from('scrape_runs')
-    .insert({ started_at: startedAt.toISOString(), status: 'partial' })
+    .insert({ started_at: startedAt.toISOString(), status: 'partial', source })
     .select('id')
     .single();
 
@@ -106,9 +110,33 @@ function computeMinCount(trailingMedians: number[]): number {
   return Math.floor(median * SCRAPE_MIN_COUNT_RATIO);
 }
 
-export async function runScrape(supabase: SupabaseClient = supabaseAdmin): Promise<void> {
-  const run = await startScrapeRun(supabase);
-  console.log(`Scrape run ${run.id} started at ${run.startedAt.toISOString()}`);
+/** DB-driven scrape for one source slug (D-18, D-32). */
+export async function runSourceScrape(
+  supabase: SupabaseClient,
+  sourceSlug: string,
+): Promise<void> {
+  const config = await loadSourceConfig(supabase, sourceSlug);
+  if (!config) {
+    throw new Error(`Unknown source: ${sourceSlug}`);
+  }
+
+  const decision = resolveSourceRun({
+    implementation_status: config.implementationStatus,
+    enabled: config.enabled,
+  });
+
+  if (decision.action === 'skipped') {
+    console.log(`Skipping ${sourceSlug}: ${decision.message}`);
+    return;
+  }
+
+  if (config.globalPause) {
+    console.log(`Global pause active — skipping ${sourceSlug}`);
+    return;
+  }
+
+  const run = await startScrapeRun(supabase, sourceSlug);
+  console.log(`Scrape run ${run.id} (${sourceSlug}) started at ${run.startedAt.toISOString()}`);
 
   try {
     const trailingMedians = await getTrailingMedians(supabase);
@@ -117,8 +145,19 @@ export async function runScrape(supabase: SupabaseClient = supabaseAdmin): Promi
       ? Math.round(trailingMedians.reduce((a, b) => a + b, 0) / trailingMedians.length)
       : 50;
 
-    console.log(`Crawling ${SUBITO_CATEGORY_URLS.length} category URL(s)`);
-    const { rawListings, selectorHitRate } = await runSubitoCrawler([...SUBITO_CATEGORY_URLS]);
+    console.log(`Crawling ${config.urls.length} URL(s) for ${sourceSlug}`);
+    let rawListings;
+    let selectorHitRate;
+
+    if (sourceSlug === 'subito') {
+      ({ rawListings, selectorHitRate } = await runSubitoCrawler(
+        config.urls,
+        config.preset,
+        config.proxyUrl,
+      ));
+    } else {
+      throw new Error(`No crawler implementation for source: ${sourceSlug}`);
+    }
 
     const zones = loadZonePolygons();
     const withCoords = rawListings.filter((l) => l.lat != null && l.lng != null);
@@ -209,34 +248,64 @@ export async function runScrape(supabase: SupabaseClient = supabaseAdmin): Promi
   }
 }
 
+/** @deprecated Use runSourceScrape(supabase, 'subito') — kept for backward compatibility. */
+export async function runScrape(supabase: SupabaseClient = supabaseAdmin): Promise<void> {
+  return runSourceScrape(supabase, 'subito');
+}
+
 let scrapeInProgress = false;
 
+type WorkerCliArgs = {
+  source: string;
+  once: boolean;
+};
+
+function parseWorkerArgs(argv: string[]): WorkerCliArgs {
+  let source = 'subito';
+  let once = false;
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--source' && argv[i + 1]) {
+      source = argv[++i]!;
+      continue;
+    }
+    if (arg === '--once') {
+      once = true;
+    }
+  }
+
+  return { source, once };
+}
+
 async function main(): Promise<void> {
-  if (CRON_ENABLED) {
-    const intervalMs = 90 * 60 * 1000;
-    console.log(`Cron enabled — scheduling scrape every ${intervalMs / 60_000} minutes`);
+  const { source, once } = parseWorkerArgs(process.argv.slice(2));
 
-    const tick = async () => {
-      if (scrapeInProgress) {
-        console.log('Previous scrape still in progress — skipping this tick');
-        return;
-      }
-      scrapeInProgress = true;
-      try {
-        await runScrape();
-      } catch (err) {
-        console.error(err);
-      } finally {
-        scrapeInProgress = false;
-      }
-    };
-
-    await tick();
-    setInterval(tick, intervalMs);
+  if (once || !CRON_ENABLED) {
+    await runSourceScrape(supabaseAdmin, source);
     return;
   }
 
-  await runScrape();
+  const intervalMs = 90 * 60 * 1000;
+  console.log(`Cron enabled — scheduling ${source} scrape every ${intervalMs / 60_000} minutes`);
+
+  const tick = async () => {
+    if (scrapeInProgress) {
+      console.log('Previous scrape still in progress — skipping this tick');
+      return;
+    }
+    scrapeInProgress = true;
+    try {
+      await runSourceScrape(supabaseAdmin, source);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      scrapeInProgress = false;
+    }
+  };
+
+  await tick();
+  setInterval(tick, intervalMs);
 }
 
 const isMain =
