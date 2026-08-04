@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 06
 current_phase_name: Scraper Admin Console
 status: executing
-stopped_at: Completed 06-03-PLAN.md
-last_updated: "2026-08-04T18:42:18.107Z"
+stopped_at: Completed 06-04-PLAN.md
+last_updated: "2026-08-04T18:45:29.336Z"
 last_activity: 2026-08-04
 last_activity_desc: Completed 06-02 tracer plan
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 32
-  completed_plans: 26
+  completed_plans: 27
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 ## Current Position
 
 Phase: 06 — Scraper Admin Console — EXECUTING
-Plan: 4 of 9
+Plan: 5 of 9
 Status: Ready to execute
 Last activity: 2026-08-04 — Completed 06-02 tracer plan
 
@@ -84,6 +84,7 @@ Progress: [████████░░] 81%
 | Phase 06-scraper-admin-console-configurable-sources-frequency-anti-bl P01 | 5min | 2 tasks | 23 files |
 | Phase 06-scraper-admin-console-configurable-sources-frequency-anti-bl P02 | 5min | 2 tasks | 11 files |
 | Phase 06 P03 | 4 | 3 tasks | 8 files |
+| Phase 06 P04 | 5min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -146,6 +147,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Minimal dashboard shell — full Stitch AdminShell deferred to Plan 03
 - [Phase ?]: Middleware uses operator_allowlist ilike select under authenticated RLS
 - [Phase ?]: AdminShell badge counts default to 0 until translation/rejects queries land
+- [Phase ?]: Footer stats fetched in admin layout and passed to AdminShell
+- [Phase ?]: Coming soon jobs insert as skipped with zh message per D-05
 
 ### Pending Todos
 
@@ -198,7 +201,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T18:42:18.094Z
-Stopped at: Completed 06-03-PLAN.md
+Last session: 2026-08-04T18:45:29.321Z
+Stopped at: Completed 06-04-PLAN.md
 Resume file: None
 Next: /gsd-execute-phase 5
