@@ -134,6 +134,25 @@ export const rejectsMessages = {
   hideJson: '收起 JSON',
 } as const;
 
+export const translationMessages = {
+  pageTitle: '翻译队列',
+  pageSubtitle: '监控待翻译与失败的 listing，支持单条或批量重试。',
+  pendingBanner: (n: number) => `${n} 条 listing 等待翻译`,
+  retry: '重试',
+  retryAll: '重新翻译',
+  retrying: '翻译中…',
+  retryAllPending: '重新翻译全部待处理',
+  tableListing: 'Listing',
+  tableStatus: '状态',
+  tableAttempts: '重试次数',
+  tableError: '错误信息',
+  tableActions: '操作',
+  statusPending: '待翻译',
+  statusFailed: '失败',
+  emptyHeading: '翻译队列为空',
+  emptyBody: '所有 listing 已完成翻译。',
+} as const;
+
 export type AdminNavKey = keyof typeof adminNav;
 
 export const adminNavItems: Array<{

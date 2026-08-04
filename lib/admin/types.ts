@@ -71,3 +71,15 @@ export type ScrapeRejectItem = {
   createdAt: string;
   source: string | null;
 };
+
+export type TranslationQueueItem = {
+  listingId: string;
+  externalId: string | null;
+  title: string;
+  source: string;
+  status: 'pending' | 'processing' | 'failed' | 'done';
+  statusLabel: string;
+  attempts: number;
+  lastError: string | null;
+  updatedAt: string;
+};

@@ -9,6 +9,7 @@ import type {
   ScrapeRunStatus,
   SourceDetail,
   SourceWithLastRun,
+  TranslationQueueItem,
 } from '@/lib/admin/types';
 
 type ScrapeRunRow = {
@@ -190,7 +191,7 @@ export async function getPendingTranslationCount(): Promise<number> {
     const { count, error } = await supabase
       .from('translation_queue')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending');
+      .in('status', ['pending', 'failed']);
 
     if (error) {
       return 0;
@@ -199,6 +200,76 @@ export async function getPendingTranslationCount(): Promise<number> {
     return count ?? 0;
   } catch {
     return 0;
+  }
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: '待翻译',
+  failed: '失败',
+  processing: '处理中',
+  done: '完成',
+};
+
+type TranslationQueueRow = {
+  listing_id: string;
+  status: 'pending' | 'processing' | 'failed' | 'done';
+  attempts: number;
+  last_error: string | null;
+  updated_at: string;
+  listings: {
+    title: string;
+    source: string;
+    external_id: string;
+  } | {
+    title: string;
+    source: string;
+    external_id: string;
+  }[] | null;
+};
+
+function resolveListingJoin(
+  row: TranslationQueueRow,
+): { title: string; source: string; external_id: string } | null {
+  const listing = row.listings;
+  if (!listing) return null;
+  if (Array.isArray(listing)) {
+    return listing[0] ?? null;
+  }
+  return listing;
+}
+
+export async function getTranslationQueue(): Promise<TranslationQueueItem[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('translation_queue')
+      .select(
+        'listing_id, status, attempts, last_error, updated_at, listings(title, source, external_id)',
+      )
+      .in('status', ['pending', 'failed'])
+      .order('updated_at', { ascending: false })
+      .limit(200);
+
+    if (error) {
+      return [];
+    }
+
+    return ((data ?? []) as TranslationQueueRow[]).map((row) => {
+      const listing = resolveListingJoin(row);
+      return {
+        listingId: row.listing_id,
+        externalId: listing?.external_id ?? null,
+        title: listing?.title ?? row.listing_id,
+        source: listing?.source ?? '—',
+        status: row.status,
+        statusLabel: STATUS_LABELS[row.status] ?? row.status,
+        attempts: row.attempts,
+        lastError: row.last_error,
+        updatedAt: row.updated_at,
+      };
+    });
+  } catch {
+    return [];
   }
 }
 

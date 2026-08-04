@@ -23,6 +23,15 @@ export const CreateJobSchema = z.object({
   source_slug: sourceSlugSchema,
 });
 
+export const TranslationRetrySchema = z
+  .object({
+    listing_ids: z.array(z.string().uuid()).optional(),
+    all_pending: z.boolean().optional(),
+  })
+  .refine((value) => Boolean(value.listing_ids?.length) || value.all_pending === true, {
+    message: 'Provide listing_ids or all_pending',
+  });
+
 export type UpdateSourceInput = z.infer<typeof UpdateSourceSchema>;
 export type UpdateGlobalConfigInput = z.infer<typeof UpdateGlobalConfigSchema>;
 export type CreateJobInput = z.infer<typeof CreateJobSchema>;
