@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type DetailActionCardProps = {
   isAvailable: boolean;
@@ -25,6 +25,8 @@ export function DetailActionCard({
   ownerSection,
   lifecycleActions,
 }: DetailActionCardProps) {
+  const { messages } = useMessages();
+
   return (
     <div className="sticky top-28 rounded-xl border border-outline-variant bg-surface-container-lowest p-space-lg">
       <div className="mb-space-lg flex items-center justify-between">

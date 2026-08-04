@@ -2,7 +2,7 @@
 
 import { ZoneFilterChips } from '@/components/map/ZoneFilterChips';
 import type { ZoneChip } from '@/lib/listings/types';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type FloatingMapSearchProps = {
   query: string;
@@ -18,6 +18,8 @@ export function FloatingMapSearch({
   selectedZone,
   onZoneChange,
 }: FloatingMapSearchProps) {
+  const { messages } = useMessages();
+
   return (
     <div className="pointer-events-auto absolute left-1/2 top-space-md z-40 flex w-full max-w-md -translate-x-1/2 flex-col gap-space-sm px-gutter">
       <div className="flex items-center rounded-lg border border-outline bg-surface px-space-md py-space-sm">

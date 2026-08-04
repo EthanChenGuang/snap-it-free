@@ -5,9 +5,11 @@ import { SettingsCard } from '@/components/settings/SettingsUi';
 import { resetLocalAppData } from '@/lib/settings/preferences';
 import { FAVORITES_CHANGE_EVENT } from '@/lib/favorites/storage';
 import { REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 export function AdvancedSection() {
+  const { messages } = useMessages();
+
   const [confirming, setConfirming] = useState(false);
 
   const handleReset = () => {

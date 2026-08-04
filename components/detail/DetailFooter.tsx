@@ -1,7 +1,11 @@
+'use client';
+
 import Link from 'next/link';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 export function DetailFooter() {
+  const { messages } = useMessages();
+
   return (
     <footer className="mx-auto mt-space-xl max-w-container-max border-t border-outline-variant px-gutter py-space-xl">
       <div className="flex flex-col items-start justify-between gap-space-md md:flex-row md:items-center">

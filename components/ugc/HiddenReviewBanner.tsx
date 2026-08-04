@@ -1,6 +1,10 @@
-import { messages } from '@/messages/it';
+'use client';
+
+import { useMessages } from '@/lib/i18n/useMessages';
 
 export function HiddenReviewBanner() {
+  const { messages } = useMessages();
+
   return (
     <div className="flex items-start gap-space-md rounded border border-outline-variant bg-error-container/30 p-space-md">
       <span className="material-symbols-outlined shrink-0 text-error">visibility_off</span>

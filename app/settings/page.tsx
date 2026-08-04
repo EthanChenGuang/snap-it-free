@@ -1,8 +1,10 @@
 import { Suspense } from 'react';
 import { SettingsPageClient } from '@/components/settings/SettingsPageClient';
-import { messages } from '@/messages/it';
+import { getMessages } from '@/messages';
 
 export default function SettingsPage() {
+  const messages = getMessages('zh');
+
   return (
     <Suspense
       fallback={

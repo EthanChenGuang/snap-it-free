@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/drawer';
 import { toast } from '@/components/ui/toaster';
 import { createClient } from '@/lib/supabase/client';
-import { formatRelativeTimeItalian, messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type DmMessage = {
   id: string;
@@ -37,11 +37,6 @@ type DmDrawerProps = {
 };
 
 const POLL_MS = 10_000;
-const QUICK_REPLIES = [
-  messages.dm.quickReply1,
-  messages.dm.quickReply2,
-  messages.dm.quickReply3,
-];
 
 function safetyAckKey(conversationId: string) {
   return `safety_ack_${conversationId}`;
@@ -55,6 +50,13 @@ export function DmDrawer({
   readOnly,
   onConversationReady,
 }: DmDrawerProps) {
+  const { messages, formatRelativeTime } = useMessages();
+  const QUICK_REPLIES = [
+    messages.dm.quickReply1,
+    messages.dm.quickReply2,
+    messages.dm.quickReply3,
+  ];
+
   const [messagesList, setMessagesList] = useState<DmMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
@@ -296,7 +298,7 @@ export function DmDrawer({
                             isUser ? 'text-surface/70' : 'text-on-surface-variant'
                           }`}
                         >
-                          {formatRelativeTimeItalian(msg.created_at)}
+                          {formatRelativeTime(msg.created_at)}
                         </p>
                       </div>
                     </div>

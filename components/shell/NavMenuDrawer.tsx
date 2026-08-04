@@ -3,17 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
-
-const menuItems = [
-  { href: '/', icon: 'map', label: messages.nav.map, exact: true },
-  { href: '/list', icon: 'format_list_bulleted', label: messages.nav.list },
-  { href: '/post', icon: 'add_box', label: messages.nav.post },
-  { href: '/favorites', icon: 'favorite', label: messages.header.favorites },
-  { href: '/post/manage', icon: 'inventory_2', label: messages.post.manageLink },
-  { href: '/settings', icon: 'settings', label: messages.nav.settings },
-] as const;
 
 type NavMenuDrawerProps = {
   open: boolean;
@@ -26,7 +17,17 @@ function isActive(pathname: string, href: string, exact?: boolean) {
 }
 
 export function NavMenuDrawer({ open, onOpenChange }: NavMenuDrawerProps) {
+  const { messages } = useMessages();
   const pathname = usePathname();
+
+  const menuItems = [
+    { href: '/', icon: 'map', label: messages.nav.map, exact: true as const },
+    { href: '/list', icon: 'format_list_bulleted', label: messages.nav.list },
+    { href: '/post', icon: 'add_box', label: messages.nav.post },
+    { href: '/favorites', icon: 'favorite', label: messages.header.favorites },
+    { href: '/post/manage', icon: 'inventory_2', label: messages.post.manageLink },
+    { href: '/settings', icon: 'settings', label: messages.nav.settings },
+  ];
 
   useEffect(() => {
     if (!open) return;

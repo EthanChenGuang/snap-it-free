@@ -9,9 +9,11 @@ import {
   toggleMapSearchOpen,
   useMapSearchOpen,
 } from '@/lib/ui/map-search-ui';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 export function Header() {
+  const { messages } = useMessages();
+
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);

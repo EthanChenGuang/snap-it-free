@@ -9,8 +9,11 @@ import { excludeReportedIds, filterByZone, filterMapListings } from '@/lib/listi
 import { useListingsPoll } from '@/lib/listings/useListingsPoll';
 import { readReportedIds, REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
 import { useMapSearchOpen } from '@/lib/ui/map-search-ui';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
+import { getMessages } from '@/messages';
 import type { ListingRow, ZoneChip } from '@/lib/listings/types';
+
+const mapLoadingLabel = getMessages('zh').post.mapLoading;
 
 const ListingMap = dynamic(
   () => import('./ListingMap').then((mod) => mod.ListingMap),
@@ -20,9 +23,9 @@ const ListingMap = dynamic(
       <div
         className="flex h-full w-full items-center justify-center bg-surface-container-low"
         aria-busy="true"
-        aria-label={messages.post.mapLoading}
+        aria-label={mapLoadingLabel}
       >
-        <p className="text-label-sm text-on-surface-variant">{messages.post.mapLoading}</p>
+        <p className="text-label-sm text-on-surface-variant">{mapLoadingLabel}</p>
       </div>
     ),
   },
@@ -33,6 +36,8 @@ type MapExplorerProps = {
 };
 
 export function MapExplorer({ initialListings }: MapExplorerProps) {
+  const { messages } = useMessages();
+
   const { listings } = useListingsPoll(initialListings, 300000);
   const searchOpen = useMapSearchOpen();
   const [selectedId, setSelectedId] = useState<string | null>(null);

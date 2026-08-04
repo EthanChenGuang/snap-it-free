@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type SafetyModalProps = {
   open: boolean;
@@ -16,6 +16,8 @@ type SafetyModalProps = {
 };
 
 export function SafetyModal({ open, onOpenChange, onAcknowledge }: SafetyModalProps) {
+  const { messages } = useMessages();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>

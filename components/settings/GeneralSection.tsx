@@ -16,10 +16,13 @@ import {
   type AppearanceMode,
 } from '@/lib/settings/preferences';
 import { createClient } from '@/lib/supabase/client';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import { useSyncExternalStore } from 'react';
 
-function appearanceLabel(mode: AppearanceMode): string {
+function appearanceLabel(
+  mode: AppearanceMode,
+  messages: ReturnType<typeof useMessages>['messages'],
+): string {
   return mode === 'dark' ? messages.settings.appearanceDark : messages.settings.appearanceLight;
 }
 
@@ -33,6 +36,8 @@ function emailInitials(email: string): string {
 }
 
 export function GeneralSection() {
+  const { messages } = useMessages();
+
   const { email, loading } = useAuthSession();
   const [authOpen, setAuthOpen] = useState(false);
   const preferences = useSyncExternalStore(
@@ -115,7 +120,7 @@ export function GeneralSection() {
               <span className="text-body-md text-on-surface">{messages.settings.appearance}</span>
             </div>
             <span className="text-label-sm text-secondary">
-              {appearanceLabel(preferences.appearance)}
+              {appearanceLabel(preferences.appearance, messages)}
             </span>
           </button>
         </SettingsCard>

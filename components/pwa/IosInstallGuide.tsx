@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { isStandalonePwa, setIosPushDismissed } from '@/lib/pwa/ios-detect';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type IosInstallGuideProps = {
   open: boolean;
@@ -18,13 +18,14 @@ type IosInstallGuideProps = {
   onInstalled?: () => void;
 };
 
-const STEPS = [
-  { icon: 'ios_share', text: messages.pwa.install.step1 },
-  { icon: 'add_box', text: messages.pwa.install.step2 },
-  { icon: 'home_app_logo', text: messages.pwa.install.step3 },
-] as const;
-
 export function IosInstallGuide({ open, onOpenChange, onDismiss, onInstalled }: IosInstallGuideProps) {
+  const { messages } = useMessages();
+  const steps = [
+    { icon: 'ios_share', text: messages.pwa.install.step1 },
+    { icon: 'add_box', text: messages.pwa.install.step2 },
+    { icon: 'home_app_logo', text: messages.pwa.install.step3 },
+  ] as const;
+
   const handleDismiss = () => {
     setIosPushDismissed();
     onDismiss?.();
@@ -47,7 +48,7 @@ export function IosInstallGuide({ open, onOpenChange, onDismiss, onInstalled }: 
         </DialogHeader>
 
         <ol className="mt-space-md space-y-space-md">
-          {STEPS.map((step, index) => (
+          {steps.map((step, index) => (
             <li
               key={step.icon}
               className="flex gap-space-md rounded border border-outline-variant bg-surface-container-lowest p-space-md"

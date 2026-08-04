@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { formatRelativeTimeItalian, messages, zoneLabel } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import type { ListingRow } from '@/lib/listings/types';
 
 type HeroMetadataProps = {
@@ -9,8 +9,10 @@ type HeroMetadataProps = {
 };
 
 export function HeroMetadata({ listing }: HeroMetadataProps) {
+  const { messages, zoneLabel, formatRelativeTime } = useMessages();
+
   const zoneText = listing.zone ? zoneLabel(listing.zone) : messages.listing.approximateZone;
-  const postedLabel = formatRelativeTimeItalian(listing.posted_at);
+  const postedLabel = formatRelativeTime(listing.posted_at);
 
   return (
     <div className="flex flex-col gap-space-lg">

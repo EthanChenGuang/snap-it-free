@@ -1,6 +1,6 @@
 'use client';
 
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import type { ListingRow } from '@/lib/listings/types';
 
 type DetailSourceIdentityProps = {
@@ -8,6 +8,8 @@ type DetailSourceIdentityProps = {
 };
 
 export function DetailSourceIdentity({ listing }: DetailSourceIdentityProps) {
+  const { messages } = useMessages();
+
   const isUgc = listing.source === 'ugc';
 
   return (

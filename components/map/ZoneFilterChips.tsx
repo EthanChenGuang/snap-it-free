@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { zoneLabel } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import type { ZoneChip } from '@/lib/listings/types';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +14,8 @@ type ZoneFilterChipsProps = {
 };
 
 export function ZoneFilterChips({ selectedZone, onZoneChange, className }: ZoneFilterChipsProps) {
+  const { zoneLabel } = useMessages();
+
   return (
     <div className={cn('flex gap-space-sm overflow-x-auto no-scrollbar py-space-xs', className)}>
       {ZONE_CHIPS.map((zone) => {

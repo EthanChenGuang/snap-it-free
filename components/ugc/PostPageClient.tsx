@@ -1,9 +1,11 @@
 'use client';
 
 import { PostForm } from '@/components/ugc/PostForm';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 export function PostPageClient() {
+  const { messages } = useMessages();
+
   return (
     <main className="mx-auto flex min-h-full max-w-[800px] flex-col px-gutter py-space-xl pb-32">
       <div className="flex flex-col gap-space-xl">

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toaster';
 import { shareListing } from '@/lib/listings/share';
 import type { ListingRow } from '@/lib/listings/types';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type DetailTopBarProps = {
   listing: ListingRow;
@@ -18,6 +18,8 @@ type DetailTopBarProps = {
 
 /** Stitch item_details nav: back + title … heart, share, more. */
 export function DetailTopBar({ listing }: DetailTopBarProps) {
+  const { messages } = useMessages();
+
   const router = useRouter();
   const [reportOpen, setReportOpen] = useState(false);
 

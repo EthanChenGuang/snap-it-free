@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import type { ListingRow } from '@/lib/listings/types';
 
 type ListingPopupProps = {
@@ -10,6 +10,8 @@ type ListingPopupProps = {
 };
 
 export function ListingPopup({ listing }: ListingPopupProps) {
+  const { messages } = useMessages();
+
   const isReserved = listing.status === 'claimed';
 
   return (

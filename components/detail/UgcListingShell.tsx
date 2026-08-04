@@ -25,7 +25,7 @@ import {
 import { toast } from '@/components/ui/toaster';
 import { createClient } from '@/lib/supabase/client';
 import type { ListingRow, OwnerListingRow } from '@/lib/listings/types';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type UgcListingShellProps = {
   listing: (ListingRow | OwnerListingRow) & {
@@ -42,6 +42,8 @@ export function UgcListingShell({
   isOwnerView = false,
   similarListings,
 }: UgcListingShellProps) {
+  const { messages } = useMessages();
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);

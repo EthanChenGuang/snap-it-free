@@ -26,10 +26,12 @@ import {
   subscribeAppPreferences,
   writeAppPreferences,
 } from '@/lib/settings/preferences';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import { useSyncExternalStore } from 'react';
 
 export function NotificationsSection() {
+  const { messages } = useMessages();
+
   const { user } = useAuthSession();
   const isLoggedIn = Boolean(user);
   const { openInstallGuide } = usePwaOnboarding();

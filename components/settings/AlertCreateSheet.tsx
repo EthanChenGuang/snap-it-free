@@ -12,7 +12,7 @@ import {
 import { ZoneChipSelector } from '@/components/settings/ZoneChipSelector';
 import { toast } from '@/components/ui/toaster';
 import type { VeniceZone } from '@/lib/listings/types';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type AlertCreateSheetProps = {
   open: boolean;
@@ -21,6 +21,8 @@ type AlertCreateSheetProps = {
 };
 
 export function AlertCreateSheet({ open, onOpenChange, onCreated }: AlertCreateSheetProps) {
+  const { messages } = useMessages();
+
   const [keyword, setKeyword] = useState('');
   const [zone, setZone] = useState<VeniceZone | null>(null);
   const [submitting, setSubmitting] = useState(false);

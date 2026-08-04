@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { zoneLabel } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import type { VeniceZone } from '@/lib/listings/types';
 import { cn } from '@/lib/utils';
 
@@ -18,12 +18,9 @@ type ZoneChipSelectorProps = {
   className?: string;
 };
 
-function chipLabel(zone: VeniceZone | null): string {
-  if (zone === null) return zoneLabel('All');
-  return zoneLabel(zone);
-}
-
 export function ZoneChipSelector({ value, onChange, className }: ZoneChipSelectorProps) {
+  const { zoneLabel } = useMessages();
+
   return (
     <div className={cn('flex flex-wrap gap-space-sm', className)}>
       {ZONE_OPTIONS.map((zone) => {
@@ -37,7 +34,7 @@ export function ZoneChipSelector({ value, onChange, className }: ZoneChipSelecto
             className="shrink-0 whitespace-nowrap"
             onClick={() => onChange(zone)}
           >
-            {chipLabel(zone)}
+            {zone === null ? zoneLabel('All') : zoneLabel(zone)}
           </Button>
         );
       })}

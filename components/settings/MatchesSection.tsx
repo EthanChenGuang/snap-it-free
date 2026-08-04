@@ -4,10 +4,14 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import type { MatchListItem } from '@/app/api/alerts/matches/route';
 import { isIOS, isIosPushDismissed, isStandalonePwa } from '@/lib/pwa/ios-detect';
-import { createClient } from '@/lib/supabase/client';
-import { messages, zoneLabel } from '@/messages/it';
+import { useAuthSession } from '@/lib/auth/useAuthSession';
+import { useMessages } from '@/lib/i18n/useMessages';
 
-function matchSummary(match: MatchListItem): string {
+function matchSummary(
+  match: MatchListItem,
+  messages: ReturnType<typeof useMessages>['messages'],
+  zoneLabel: ReturnType<typeof useMessages>['zoneLabel'],
+): string {
   const parts: string[] = [];
   if (match.keyword) parts.push(match.keyword);
   if (match.alertZone) {
@@ -25,7 +29,10 @@ async function markMatchRead(listingId: string): Promise<void> {
 }
 
 export function MatchesSection() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { messages, zoneLabel } = useMessages();
+
+  const { user, loading: authLoading } = useAuthSession();
+  const isLoggedIn = Boolean(user);
   const [loading, setLoading] = useState(true);
   const [matches, setMatches] = useState<MatchListItem[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -46,17 +53,14 @@ export function MatchesSection() {
   }, []);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      const loggedIn = Boolean(user);
-      setIsLoggedIn(loggedIn);
-      if (loggedIn) {
-        loadMatches().finally(() => setLoading(false));
-      } else {
-        setLoading(false);
-      }
-    });
-  }, [loadMatches]);
+    if (authLoading) return;
+
+    if (isLoggedIn) {
+      loadMatches().finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [authLoading, isLoggedIn, loadMatches]);
 
   const handleOpen = (listingId: string) => {
     void markMatchRead(listingId);
@@ -106,7 +110,7 @@ export function MatchesSection() {
                   <p className="text-label-sm text-secondary">
                     {match.zone ? zoneLabel(match.zone) : messages.settings.matches.zoneUnknown}
                     {' · '}
-                    {matchSummary(match)}
+                    {matchSummary(match, messages, zoneLabel)}
                   </p>
                 </Link>
               </li>

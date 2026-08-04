@@ -5,16 +5,20 @@ import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { AlertCreateSheet } from '@/components/settings/AlertCreateSheet';
 import { PushToggleSection } from '@/components/settings/PushToggleSection';
 import { Button } from '@/components/ui/button';
-import { createClient } from '@/lib/supabase/client';
+import { useAuthSession } from '@/lib/auth/useAuthSession';
 import type { AlertRow } from '@/lib/alerts/schemas';
-import { messages, zoneLabel } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
 type AlertsSectionProps = {
   autoOpenCreate?: boolean;
 };
 
-function alertSummary(alert: AlertRow): string {
+function alertSummary(
+  alert: AlertRow,
+  messages: ReturnType<typeof useMessages>['messages'],
+  zoneLabel: ReturnType<typeof useMessages>['zoneLabel'],
+): string {
   const parts: string[] = [];
   if (alert.keyword) parts.push(alert.keyword);
   if (alert.zone) {
@@ -36,6 +40,7 @@ function AlertToggle({
   disabled?: boolean;
   onChange: (enabled: boolean) => void;
 }) {
+  const { messages } = useMessages();
   return (
     <label className={cn('relative inline-flex cursor-pointer items-center', disabled && 'opacity-50')}>
       <input
@@ -52,7 +57,10 @@ function AlertToggle({
 }
 
 export function AlertsSection({ autoOpenCreate = false }: AlertsSectionProps) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { messages, zoneLabel } = useMessages();
+
+  const { user, loading: authLoading } = useAuthSession();
+  const isLoggedIn = Boolean(user);
   const [loading, setLoading] = useState(true);
   const [alerts, setAlerts] = useState<AlertRow[]>([]);
   const [authOpen, setAuthOpen] = useState(false);
@@ -75,17 +83,14 @@ export function AlertsSection({ autoOpenCreate = false }: AlertsSectionProps) {
   }, []);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      const loggedIn = Boolean(user);
-      setIsLoggedIn(loggedIn);
-      if (loggedIn) {
-        loadAlerts().finally(() => setLoading(false));
-      } else {
-        setLoading(false);
-      }
-    });
-  }, [loadAlerts]);
+    if (authLoading) return;
+
+    if (isLoggedIn) {
+      loadAlerts().finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [authLoading, isLoggedIn, loadAlerts]);
 
   useEffect(() => {
     if (autoOpenCreate && isLoggedIn && !loading) {
@@ -177,7 +182,7 @@ export function AlertsSection({ autoOpenCreate = false }: AlertsSectionProps) {
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-body-md font-medium text-on-surface">
-                      {alertSummary(alert)}
+                      {alertSummary(alert, messages, zoneLabel)}
                     </p>
                     <p className="text-label-sm text-secondary">
                       {alert.enabled

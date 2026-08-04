@@ -1,6 +1,6 @@
 'use client';
 
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type DetailArticleProps = {
   description?: string | null;
@@ -8,6 +8,8 @@ type DetailArticleProps = {
 };
 
 export function DetailArticle({ description, isUgc }: DetailArticleProps) {
+  const { messages } = useMessages();
+
   const body =
     description?.trim() ||
     (isUgc ? messages.detail.descriptionFallbackUgc : messages.detail.descriptionFallbackScraped);

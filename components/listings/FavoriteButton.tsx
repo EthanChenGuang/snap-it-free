@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toaster';
 import { useFavorites } from '@/lib/favorites/useFavorites';
 import { createClient } from '@/lib/supabase/client';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
 type FavoriteButtonProps = {
@@ -17,6 +17,8 @@ type FavoriteButtonProps = {
 };
 
 export function FavoriteButton({ listingId, className, size = 'default' }: FavoriteButtonProps) {
+  const { messages } = useMessages();
+
   const pathname = usePathname();
   const { isFavorite, toggle, hydrated } = useFavorites();
   const [authOpen, setAuthOpen] = useState(false);

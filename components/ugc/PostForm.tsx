@@ -9,7 +9,7 @@ import { toast } from '@/components/ui/toaster';
 import { createClient } from '@/lib/supabase/client';
 import { nearestVeniceZone } from '@/lib/geo/nearest-zone';
 import { ZONE_CENTERS } from '@/lib/geo/zone-centers';
-import { messages, zoneLabel } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type PostCategory =
   | 'furniture'
@@ -32,11 +32,17 @@ const POST_CATEGORIES: PostCategory[] = [
 
 const CONDITIONS: ItemCondition[] = ['new', 'good', 'fair'];
 
-function postCategoryLabel(category: PostCategory): string {
+function postCategoryLabel(
+  category: PostCategory,
+  messages: ReturnType<typeof useMessages>['messages'],
+): string {
   return messages.post.categories[category];
 }
 
-function conditionLabel(condition: ItemCondition): string {
+function conditionLabel(
+  condition: ItemCondition,
+  messages: ReturnType<typeof useMessages>['messages'],
+): string {
   return messages.post.conditions[condition];
 }
 
@@ -44,10 +50,11 @@ function buildDescription(
   userText: string,
   category: PostCategory,
   condition: ItemCondition,
+  messages: ReturnType<typeof useMessages>['messages'],
 ): string | undefined {
   const meta = [
-    `${messages.post.categoryMeta}: ${postCategoryLabel(category)}`,
-    `${messages.post.conditionMeta}: ${conditionLabel(condition)}`,
+    `${messages.post.categoryMeta}: ${postCategoryLabel(category, messages)}`,
+    `${messages.post.conditionMeta}: ${conditionLabel(condition, messages)}`,
   ].join('\n');
 
   const trimmed = userText.trim();
@@ -56,6 +63,8 @@ function buildDescription(
 }
 
 export function PostForm() {
+  const { messages, zoneLabel } = useMessages();
+
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -181,7 +190,7 @@ export function PostForm() {
           photoUrl,
           lat,
           lng,
-          description: buildDescription(description, category, condition),
+          description: buildDescription(description, category, condition, messages),
         }),
       });
 
@@ -305,7 +314,7 @@ export function PostForm() {
               >
                 {POST_CATEGORIES.map((value) => (
                   <option key={value} value={value}>
-                    {postCategoryLabel(value)}
+                    {postCategoryLabel(value, messages)}
                   </option>
                 ))}
               </select>
@@ -327,7 +336,7 @@ export function PostForm() {
                         : 'border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-high'
                     }`}
                   >
-                    {conditionLabel(value)}
+                    {conditionLabel(value, messages)}
                   </button>
                 ))}
               </div>

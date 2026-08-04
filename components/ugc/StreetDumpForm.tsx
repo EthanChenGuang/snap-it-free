@@ -9,7 +9,10 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toaster';
 import { createClient } from '@/lib/supabase/client';
 import { ZONE_CENTERS } from '@/lib/geo/zone-centers';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
+import { getMessages } from '@/messages';
+
+const mapLoadingLabel = getMessages('zh').post.mapLoading;
 
 const StreetDumpPinMap = dynamic(
   () => import('@/components/ugc/StreetDumpPinMap').then((mod) => mod.StreetDumpPinMap),
@@ -17,7 +20,7 @@ const StreetDumpPinMap = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex min-h-[240px] items-center justify-center rounded border border-outline-variant bg-surface-container-low text-label-sm text-on-surface-variant">
-        {messages.post.mapLoading}
+        {mapLoadingLabel}
       </div>
     ),
   },
@@ -38,6 +41,8 @@ export function StreetDumpForm({
   photoPreview,
   onPhotoChange,
 }: StreetDumpFormProps) {
+  const { messages } = useMessages();
+
   const router = useRouter();
   const [description, setDescription] = useState('');
   const [showDetails, setShowDetails] = useState(false);

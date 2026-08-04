@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { forwardRef } from 'react';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { ReservedBadge } from '@/components/listings/ReservedBadge';
-import { messages, formatRelativeTimeItalian, zoneLabel } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import type { ListingRow } from '@/lib/listings/types';
 import { cn } from '@/lib/utils';
 
@@ -14,15 +14,19 @@ type ListingCardProps = {
   isSelected?: boolean;
 };
 
-function sourceBadgeLabel(source: ListingRow['source']): string {
+function sourceBadgeLabel(
+  source: ListingRow['source'],
+  messages: ReturnType<typeof useMessages>['messages'],
+): string {
   if (source === 'ugc') return messages.listing.sourceCommunity;
   return messages.listing.sourceSubito;
 }
 
 export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
   function ListingCard({ listing, isSelected }, ref) {
+    const { messages, zoneLabel, formatRelativeTime } = useMessages();
     const zoneText = listing.zone ? zoneLabel(listing.zone) : messages.listing.approximateZone;
-    const postedLabel = formatRelativeTimeItalian(listing.posted_at);
+    const postedLabel = formatRelativeTime(listing.posted_at);
 
     return (
       <Link
@@ -52,7 +56,7 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
           )}
           <div className="absolute left-space-sm top-space-sm flex flex-wrap gap-space-xs">
             <span className="rounded-sm border border-outline-variant bg-surface px-space-sm py-space-xs text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-              {sourceBadgeLabel(listing.source)}
+              {sourceBadgeLabel(listing.source, messages)}
             </span>
             {listing.status === 'claimed' && <ReservedBadge />}
           </div>

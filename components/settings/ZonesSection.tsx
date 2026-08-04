@@ -7,14 +7,18 @@ import { SettingsCard, SettingsSectionTitle } from '@/components/settings/Settin
 import { Button } from '@/components/ui/button';
 import { useAuthSession } from '@/lib/auth/useAuthSession';
 import type { AlertRow } from '@/lib/alerts/schemas';
-import { messages, zoneLabel } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
 type ZonesSectionProps = {
   autoOpenCreate?: boolean;
 };
 
-function alertTitle(alert: AlertRow): string {
+function alertTitle(
+  alert: AlertRow,
+  messages: ReturnType<typeof useMessages>['messages'],
+  zoneLabel: ReturnType<typeof useMessages>['zoneLabel'],
+): string {
   if (alert.keyword && alert.zone) {
     return `${alert.keyword} · ${zoneLabel(alert.zone)}`;
   }
@@ -23,7 +27,11 @@ function alertTitle(alert: AlertRow): string {
   return messages.settings.zones.unnamed;
 }
 
-function alertDescription(alert: AlertRow): string {
+function alertDescription(
+  alert: AlertRow,
+  messages: ReturnType<typeof useMessages>['messages'],
+  zoneLabel: ReturnType<typeof useMessages>['zoneLabel'],
+): string {
   if (alert.keyword && alert.zone) {
     return messages.settings.zones.keywordInZone(alert.keyword, zoneLabel(alert.zone));
   }
@@ -40,7 +48,10 @@ function alertIcon(alert: AlertRow): string {
   return alert.keyword && !alert.zone ? 'search' : 'location_on';
 }
 
-function formatRelativeTime(iso: string): string {
+function formatZoneUpdatedAt(
+  iso: string,
+  messages: ReturnType<typeof useMessages>['messages'],
+): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const minutes = Math.floor(diffMs / 60_000);
   if (minutes < 1) return messages.settings.zones.updatedJustNow;
@@ -60,6 +71,7 @@ function ZoneCardMenu({
   onToggle: () => void;
   onDelete: () => void;
 }) {
+  const { messages } = useMessages();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -113,6 +125,8 @@ function ZoneCardMenu({
 }
 
 export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
+  const { messages, zoneLabel } = useMessages();
+
   const { user, loading: authLoading } = useAuthSession();
   const isLoggedIn = Boolean(user);
   const [loading, setLoading] = useState(true);
@@ -240,8 +254,8 @@ export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
                   />
                 </div>
                 <div>
-                  <h3 className="text-body-md font-bold text-on-surface">{alertTitle(alert)}</h3>
-                  <p className="text-label-sm text-secondary">{alertDescription(alert)}</p>
+                  <h3 className="text-body-md font-bold text-on-surface">{alertTitle(alert, messages, zoneLabel)}</h3>
+                  <p className="text-label-sm text-secondary">{alertDescription(alert, messages, zoneLabel)}</p>
                 </div>
                 <div className="mt-space-xs flex items-center gap-space-sm">
                   <span
@@ -256,7 +270,7 @@ export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
                   </span>
                   <span className="text-[10px] text-secondary">
                     {alert.enabled
-                      ? formatRelativeTime(alert.created_at)
+                      ? formatZoneUpdatedAt(alert.created_at, messages)
                       : messages.settings.zones.noRecentActivity}
                   </span>
                 </div>

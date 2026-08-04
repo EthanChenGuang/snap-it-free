@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { formatRelativeTimeItalian, messages, zoneLabel } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import type { ListingRow } from '@/lib/listings/types';
 
 type SimilarListingsProps = {
@@ -10,6 +10,8 @@ type SimilarListingsProps = {
 };
 
 export function SimilarListings({ listings }: SimilarListingsProps) {
+  const { messages, zoneLabel, formatRelativeTime } = useMessages();
+
   if (listings.length === 0) return null;
 
   return (
@@ -47,7 +49,7 @@ export function SimilarListings({ listings }: SimilarListingsProps) {
                   {item.title}
                 </p>
                 <p className="text-label-sm text-secondary">
-                  {zoneText} • {formatRelativeTimeItalian(item.posted_at)}
+                  {zoneText} • {formatRelativeTime(item.posted_at)}
                 </p>
               </div>
             </Link>

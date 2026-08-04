@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import type { ListingRow } from '@/lib/listings/types';
-import { messages, zoneLabel } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 const DetailLocationMap = dynamic(
   () => import('./DetailLocationMap').then((mod) => mod.DetailLocationMap),
@@ -19,6 +19,8 @@ type DetailLocationBlockProps = {
 };
 
 export function DetailLocationBlock({ listing }: DetailLocationBlockProps) {
+  const { messages, zoneLabel } = useMessages();
+
   const zoneText = listing.zone ? zoneLabel(listing.zone) : messages.listing.approximateZone;
 
   return (

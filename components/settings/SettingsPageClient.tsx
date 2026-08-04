@@ -6,9 +6,11 @@ import { GeneralSection } from '@/components/settings/GeneralSection';
 import { LanguageSection } from '@/components/settings/LanguageSection';
 import { NotificationsSection } from '@/components/settings/NotificationsSection';
 import { ZonesSection } from '@/components/settings/ZonesSection';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 export function SettingsPageClient() {
+  const { messages } = useMessages();
+
   const searchParams = useSearchParams();
   const tab = searchParams.get('tab');
   const autoOpenCreate = tab === 'alerts';

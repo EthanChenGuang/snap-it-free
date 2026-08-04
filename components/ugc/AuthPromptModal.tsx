@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { createClient } from '@/lib/supabase/client';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type AuthPromptModalProps = {
   open: boolean;
@@ -71,6 +71,8 @@ export function AuthPromptModal({
   redirectTo = '/post',
   modalTitle,
 }: AuthPromptModalProps) {
+  const { messages } = useMessages();
+
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [oauthStatus, setOauthStatus] = useState<'idle' | 'loading' | 'error'>('idle');

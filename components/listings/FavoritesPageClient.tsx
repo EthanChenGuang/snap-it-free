@@ -15,7 +15,7 @@ import { fetchListingsByIdsClient } from '@/lib/listings/client-queries';
 import { filterByZone } from '@/lib/listings/filters';
 import type { ListingRow, ZoneChip } from '@/lib/listings/types';
 import { createClient } from '@/lib/supabase/client';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 async function fetchFavoriteIds(isAuthed: boolean): Promise<string[]> {
   if (isAuthed) {
@@ -29,6 +29,8 @@ async function fetchFavoriteIds(isAuthed: boolean): Promise<string[]> {
 }
 
 export function FavoritesPageClient() {
+  const { messages } = useMessages();
+
   const [listings, setListings] = useState<ListingRow[]>([]);
   const [selectedZone, setSelectedZone] = useState<ZoneChip>('All');
   const [loaded, setLoaded] = useState(false);

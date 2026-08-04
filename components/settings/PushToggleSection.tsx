@@ -15,7 +15,7 @@ import {
   requestPushPermissionAndSubscribe,
   unsubscribePush,
 } from '@/lib/pwa/usePushSubscribe';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
 type PushToggleSectionProps = {
@@ -31,6 +31,7 @@ function PushToggle({
   disabled?: boolean;
   onChange: (enabled: boolean) => void;
 }) {
+  const { messages } = useMessages();
   return (
     <label className={cn('relative inline-flex cursor-pointer items-center', disabled && 'opacity-50')}>
       <input
@@ -49,6 +50,8 @@ function PushToggle({
 }
 
 export function PushToggleSection({ isLoggedIn }: PushToggleSectionProps) {
+  const { messages } = useMessages();
+
   const { openInstallGuide } = usePwaOnboarding();
   const [enabled, setEnabled] = useState(false);
   const [loading, setLoading] = useState(true);

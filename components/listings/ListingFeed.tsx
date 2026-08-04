@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import type { ListingRow } from '@/lib/listings/types';
 import { ListingCard } from './ListingCard';
 
@@ -11,6 +11,8 @@ type ListingFeedProps = {
 };
 
 export function ListingFeed({ listings, selectedId }: ListingFeedProps) {
+  const { messages } = useMessages();
+
   const cardRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
 
   useEffect(() => {

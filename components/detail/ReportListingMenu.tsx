@@ -13,7 +13,7 @@ import { toast } from '@/components/ui/toaster';
 import { REPORT_REASONS, type ReportReason } from '@/lib/reports/schemas';
 import { addReportedId } from '@/lib/reports/storage';
 import { createClient } from '@/lib/supabase/client';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type ReportListingMenuProps = {
   listingId: string;
@@ -21,13 +21,14 @@ type ReportListingMenuProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const REASON_LABELS: Record<ReportReason, string> = {
-  already_taken: messages.report.reasonAlreadyTaken,
-  not_free: messages.report.reasonNotFree,
-  spam_or_scam: messages.report.reasonSpam,
-};
-
 export function ReportListingMenu({ listingId, open, onOpenChange }: ReportListingMenuProps) {
+  const { messages } = useMessages();
+  const reasonLabels: Record<ReportReason, string> = {
+    already_taken: messages.report.reasonAlreadyTaken,
+    not_free: messages.report.reasonNotFree,
+    spam_or_scam: messages.report.reasonSpam,
+  };
+
   const [selectedReason, setSelectedReason] = useState<ReportReason | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -104,7 +105,7 @@ export function ReportListingMenu({ listingId, open, onOpenChange }: ReportListi
                   onChange={() => setSelectedReason(reason)}
                   className="h-4 w-4 accent-primary"
                 />
-                <span className="text-body-md text-on-surface">{REASON_LABELS[reason]}</span>
+                <span className="text-body-md text-on-surface">{reasonLabels[reason]}</span>
               </label>
             ))}
           </fieldset>

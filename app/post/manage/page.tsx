@@ -2,9 +2,10 @@ import { redirect } from 'next/navigation';
 import { ManageListingsClient } from '@/components/ugc/ManageListingsClient';
 import { getOwnerListings } from '@/lib/listings/queries';
 import { createClient } from '@/lib/supabase/server';
-import { messages } from '@/messages/it';
+import { getMessages } from '@/messages';
 
 export default async function ManageListingsPage() {
+  const messages = getMessages('zh');
   const supabase = await createClient();
   const {
     data: { user },

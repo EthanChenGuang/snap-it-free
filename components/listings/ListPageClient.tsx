@@ -11,13 +11,15 @@ import { excludeReportedIds } from '@/lib/listings/filters';
 import { useListingsPoll } from '@/lib/listings/useListingsPoll';
 import { readReportedIds, REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
 import type { ListingRow } from '@/lib/listings/types';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type ListPageClientProps = {
   initialListings: ListingRow[];
 };
 
 export function ListPageClient({ initialListings }: ListPageClientProps) {
+  const { messages } = useMessages();
+
   const { listings } = useListingsPoll(initialListings);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ListingCategory>('All');

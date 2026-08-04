@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 const SESSION_DISMISS_KEY = 'dm_safety_banner_dismissed';
 
@@ -10,6 +10,8 @@ type SafetyBannerProps = {
 };
 
 export function SafetyBanner({ conversationId }: SafetyBannerProps) {
+  const { messages } = useMessages();
+
   const dismissKey = `${SESSION_DISMISS_KEY}_${conversationId}`;
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === 'undefined') return false;

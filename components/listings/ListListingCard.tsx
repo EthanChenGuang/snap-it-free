@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { inferListingCategory } from '@/lib/listings/categories';
 import type { ListingRow } from '@/lib/listings/types';
-import { categoryLabel, formatRelativeTimeItalian, messages, zoneLabel } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
 type ListListingCardProps = {
@@ -13,10 +13,12 @@ type ListListingCardProps = {
 
 /** Stitch listing_feed Notion card — image, metadata, full-width Claim Item CTA. */
 export function ListListingCard({ listing }: ListListingCardProps) {
+  const { messages, zoneLabel, categoryLabel, formatRelativeTime } = useMessages();
+
   const router = useRouter();
   const isClaimed = listing.status === 'claimed';
   const zoneText = listing.zone ? zoneLabel(listing.zone) : messages.listing.approximateZone;
-  const postedLabel = formatRelativeTimeItalian(listing.posted_at);
+  const postedLabel = formatRelativeTime(listing.posted_at);
   const inferredCategory = inferListingCategory(listing.title);
 
   const handleClaimClick = (event: React.MouseEvent) => {

@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { LISTING_CATEGORIES, type ListingCategory } from '@/lib/listings/categories';
-import { categoryLabel } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
 type CategoryFilterChipsProps = {
@@ -17,6 +17,8 @@ export function CategoryFilterChips({
   onCategoryChange,
   className,
 }: CategoryFilterChipsProps) {
+  const { categoryLabel } = useMessages();
+
   return (
     <div className={cn('flex gap-space-sm overflow-x-auto no-scrollbar pb-space-xs', className)}>
       {LISTING_CATEGORIES.map((category) => {

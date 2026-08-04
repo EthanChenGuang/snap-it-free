@@ -1,28 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
+import { useAuthSession } from '@/lib/auth/useAuthSession';
 import { createClient } from '@/lib/supabase/client';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 export function ProfileSection() {
-  const [email, setEmail] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [authOpen, setAuthOpen] = useState(false);
+  const { messages } = useMessages();
 
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setEmail(user?.email ?? null);
-      setLoading(false);
-    });
-  }, []);
+  const { email, loading } = useAuthSession();
+  const [authOpen, setAuthOpen] = useState(false);
 
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    setEmail(null);
   };
 
   return (

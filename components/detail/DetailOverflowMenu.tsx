@@ -2,13 +2,15 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type DetailOverflowMenuProps = {
   onReport: () => void;
 };
 
 export function DetailOverflowMenu({ onReport }: DetailOverflowMenuProps) {
+  const { messages } = useMessages();
+
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 

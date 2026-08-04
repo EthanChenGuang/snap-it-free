@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/toaster';
 import type { OwnerListingRow } from '@/lib/listings/types';
-import { messages, formatRelativeTimeItalian } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 
 type ManageListingsClientProps = {
   listings: OwnerListingRow[];
@@ -31,6 +31,8 @@ async function patchListingStatus(listingId: string, action: 'reserved' | 'deliv
 }
 
 export function ManageListingsClient({ listings, userId }: ManageListingsClientProps) {
+  const { messages, formatRelativeTime } = useMessages();
+
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [deliverTarget, setDeliverTarget] = useState<OwnerListingRow | null>(null);
@@ -101,7 +103,7 @@ export function ManageListingsClient({ listings, userId }: ManageListingsClientP
                     {listing.title}
                   </Link>
                   <p className="mt-space-xs text-label-sm text-on-surface-variant">
-                    {formatRelativeTimeItalian(listing.posted_at)}
+                    {formatRelativeTime(listing.posted_at)}
                   </p>
                   {isReserved && (
                     <span className="mt-space-sm inline-flex rounded border border-outline-variant bg-surface-container-highest px-space-sm py-space-xs text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">
