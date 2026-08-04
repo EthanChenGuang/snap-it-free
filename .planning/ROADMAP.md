@@ -212,7 +212,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
   4. Ingest-time translation writes en/zh columns with Gemini primary + OpenRouter fallback; daily cap pauses translate only
   5. Operator views run history, rejects browser, translation queue, and manages allowlist in settings
 
-**Plans:** 8/9 plans executed
+**Plans:** 9/9 plans executed
 
 Plans:
 **Wave 0**
@@ -243,7 +243,7 @@ Plans:
 
 **Wave 6** *(blocked on Waves 3–5)*
 
-- [ ] 06-09-PLAN.md — Settings: proxy encryption, alerts, cap, operator allowlist
+- [x] 06-09-PLAN.md — Settings: proxy encryption, alerts, cap, operator allowlist
 
 **UI hint**: yes (scraper-dashboard/DESIGN.md)
 

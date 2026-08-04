@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 06
 current_phase_name: Scraper Admin Console
-status: executing
-stopped_at: Phase 07 context gathered
-last_updated: "2026-08-04T20:08:56.749Z"
+status: verifying
+stopped_at: Completed 06-09-PLAN.md
+last_updated: "2026-08-04T20:11:01.460Z"
 last_activity: 2026-08-04
 last_activity_desc: Completed 06-02 tracer plan
 progress:
   total_phases: 7
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 32
-  completed_plans: 31
+  completed_plans: 32
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 
 Phase: 06 — Scraper Admin Console — EXECUTING
 Plan: 9 of 9
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-04 — Completed 06-02 tracer plan
 
-Progress: [██████████] 97%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -89,6 +89,7 @@ Progress: [██████████] 97%
 | Phase 06-scraper-admin-console-configurable-sources-frequency-anti-bl P06 | 3 | 2 tasks | 6 files |
 | Phase 06 P07 | 8 | 3 tasks | 11 files |
 | Phase 06 P08 | 12 | 2 tasks | 16 files |
+| Phase 06-scraper-admin-console-configurable-sources-frequency-anti-bl P09 | 3 | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -160,6 +161,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Expandable inline JSON rows for rejects preview instead of side drawer
 - [Phase ?]: Export button disabled UI-only on rejects page per MVP scope
 - [Phase ?]: Ingest-time en+zh columns with scraper-local fetch engine (option-a)
+- [Phase ?]: Checkpoint option-a: App-level AES-256-GCM in proxy_enc (D-20)
+- [Phase ?]: Settings form ports scraper-admin SettingsView to admin_settings Stitch layout (D-53)
+- [Phase ?]: Allowlist add by email only — no invite flow (D-45)
 
 ### Pending Todos
 
@@ -213,7 +217,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T20:08:56.736Z
-Stopped at: Phase 07 context gathered
-Resume file: .planning/phases/07-deploy-it-to-vercel/07-CONTEXT.md
+Last session: 2026-08-04T20:11:01.438Z
+Stopped at: Completed 06-09-PLAN.md
+Resume file: None
 Next: /gsd-execute-phase 5
