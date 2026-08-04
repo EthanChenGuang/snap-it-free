@@ -212,7 +212,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
   4. Ingest-time translation writes en/zh columns with Gemini primary + OpenRouter fallback; daily cap pauses translate only
   5. Operator views run history, rejects browser, translation queue, and manages allowlist in settings
 
-**Plans:** 3/9 plans executed
+**Plans:** 5/9 plans executed
 
 Plans:
 **Wave 0**
@@ -229,8 +229,8 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 06-04-PLAN.md — Dashboard: global pause, Run now, alerts, footer stats
-- [ ] 06-05-PLAN.md — Sources list/detail + URL validation + anti-block presets
+- [x] 06-04-PLAN.md — Dashboard: global pause, Run now, alerts, footer stats
+- [x] 06-05-PLAN.md — Sources list/detail + URL validation + anti-block presets
 
 **Wave 4** *(blocked on Wave 1 + 3)*
 
