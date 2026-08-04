@@ -9,12 +9,20 @@ import {
   supabaseAdmin,
 } from './config.js';
 import { notifyOperator } from './alert/notify.js';
-import { loadSourceConfig } from './config-loader.js';
+import { loadSourceConfig, updateNextRunAt } from './config-loader.js';
 import { persistBatch } from './shared/persist.js';
 import { validateBatch } from './shared/validate-run.js';
 import { loadZonePolygons, tagZone } from './shared/zone-tag.js';
+import { runSchedulerTick, TICK_INTERVAL_MS } from './scheduler.js';
 import { runSubitoCrawler } from './subito/crawler.js';
 import { resolveSourceRun } from './worker-placeholder.js';
+
+const COMING_SOON_MESSAGE = '该数据源尚未接入';
+
+type ScrapeRunOptions = {
+  trigger?: 'cron' | 'manual';
+  jobId?: string;
+};
 
 type ScrapeRunRecord = {
   id: string;
@@ -22,7 +30,7 @@ type ScrapeRunRecord = {
 };
 
 type FinishScrapeRunParams = {
-  status: 'success' | 'failed';
+  status: 'success' | 'failed' | 'partial';
   listingsFound: number;
   inserted?: number;
   updated?: number;
@@ -31,6 +39,25 @@ type FinishScrapeRunParams = {
   failureReason?: string;
   selectorHitRate: number;
 };
+
+async function updateScrapeJob(
+  supabase: SupabaseClient,
+  jobId: string,
+  status: 'running' | 'completed' | 'failed' | 'skipped',
+  message?: string,
+): Promise<void> {
+  const patch: Record<string, string | null> = { status, message: message ?? null };
+  if (status === 'running') {
+    patch.started_at = new Date().toISOString();
+  } else {
+    patch.completed_at = new Date().toISOString();
+  }
+
+  const { error } = await supabase.from('scrape_jobs').update(patch).eq('id', jobId);
+  if (error) {
+    throw error;
+  }
+}
 
 export async function getTrailingMedians(supabase: SupabaseClient): Promise<number[]> {
   const { data, error } = await supabase
@@ -114,7 +141,14 @@ function computeMinCount(trailingMedians: number[]): number {
 export async function runSourceScrape(
   supabase: SupabaseClient,
   sourceSlug: string,
+  options: ScrapeRunOptions = {},
 ): Promise<void> {
+  const { trigger = 'cron', jobId } = options;
+
+  if (jobId) {
+    await updateScrapeJob(supabase, jobId, 'running');
+  }
+
   const config = await loadSourceConfig(supabase, sourceSlug);
   if (!config) {
     throw new Error(`Unknown source: ${sourceSlug}`);
@@ -126,12 +160,29 @@ export async function runSourceScrape(
   });
 
   if (decision.action === 'skipped') {
-    console.log(`Skipping ${sourceSlug}: ${decision.message}`);
+    const message =
+      config.implementationStatus === 'coming_soon' ? COMING_SOON_MESSAGE : decision.message;
+    console.log(`Skipping ${sourceSlug}: ${message}`);
+
+    const run = await startScrapeRun(supabase, sourceSlug);
+    await finishScrapeRun(supabase, run.id, {
+      status: 'partial',
+      listingsFound: 0,
+      failureReason: message,
+      selectorHitRate: 0,
+    });
+
+    if (jobId) {
+      await updateScrapeJob(supabase, jobId, 'skipped', message);
+    }
     return;
   }
 
   if (config.globalPause) {
     console.log(`Global pause active — skipping ${sourceSlug}`);
+    if (jobId) {
+      await updateScrapeJob(supabase, jobId, 'skipped', 'Global pause active');
+    }
     return;
   }
 
@@ -191,7 +242,7 @@ export async function runSourceScrape(
         selectorHitRate,
       });
 
-      await notifyOperator({
+      await notifyOperator(supabase, {
         runId: run.id,
         startedAt: run.startedAt,
         parsedCount: rawListings.length,
@@ -203,6 +254,9 @@ export async function runSourceScrape(
       });
 
       console.error(`Validation failed: ${validation.reason}`);
+      if (jobId) {
+        await updateScrapeJob(supabase, jobId, 'failed', validation.reason);
+      }
       return;
     }
 
@@ -216,6 +270,14 @@ export async function runSourceScrape(
       rejected: stats.rejected,
       selectorHitRate,
     });
+
+    if (jobId) {
+      await updateScrapeJob(supabase, jobId, 'completed');
+    }
+
+    if (trigger === 'cron') {
+      await updateNextRunAt(supabase, sourceSlug, config.intervalMinutes);
+    }
 
     console.log(
       `Run ${run.id} complete: inserted=${stats.inserted} updated=${stats.updated} skipped=${stats.skipped} rejected=${stats.rejected}`,
@@ -231,7 +293,7 @@ export async function runSourceScrape(
       console.error('Failed to finish scrape run after error:', finishErr);
     });
 
-    await notifyOperator({
+    await notifyOperator(supabase, {
       runId: run.id,
       startedAt: run.startedAt,
       parsedCount: 0,
@@ -244,6 +306,12 @@ export async function runSourceScrape(
       console.error('Failed to send operator alert:', notifyErr);
     });
 
+    if (jobId) {
+      await updateScrapeJob(supabase, jobId, 'failed', message).catch((jobErr) => {
+        console.error('Failed to update scrape job after error:', jobErr);
+      });
+    }
+
     throw err;
   }
 }
@@ -253,7 +321,25 @@ export async function runScrape(supabase: SupabaseClient = supabaseAdmin): Promi
   return runSourceScrape(supabase, 'subito');
 }
 
-let scrapeInProgress = false;
+const scrapeInProgressBySource = new Set<string>();
+
+async function guardedRunSourceScrape(
+  supabase: SupabaseClient,
+  sourceSlug: string,
+  options: { trigger: 'cron' | 'manual'; jobId?: string },
+): Promise<void> {
+  if (scrapeInProgressBySource.has(sourceSlug)) {
+    console.log(`Previous scrape still in progress for ${sourceSlug} — skipping`);
+    return;
+  }
+
+  scrapeInProgressBySource.add(sourceSlug);
+  try {
+    await runSourceScrape(supabase, sourceSlug, options);
+  } finally {
+    scrapeInProgressBySource.delete(sourceSlug);
+  }
+}
 
 type WorkerCliArgs = {
   source: string;
@@ -286,26 +372,14 @@ async function main(): Promise<void> {
     return;
   }
 
-  const intervalMs = 90 * 60 * 1000;
-  console.log(`Cron enabled — scheduling ${source} scrape every ${intervalMs / 60_000} minutes`);
+  console.log(
+    `Scheduler enabled — ticking every ${TICK_INTERVAL_MS / 1000}s (D-13, D-33)`,
+  );
 
-  const tick = async () => {
-    if (scrapeInProgress) {
-      console.log('Previous scrape still in progress — skipping this tick');
-      return;
-    }
-    scrapeInProgress = true;
-    try {
-      await runSourceScrape(supabaseAdmin, source);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      scrapeInProgress = false;
-    }
-  };
+  const tick = () => runSchedulerTick(supabaseAdmin, guardedRunSourceScrape);
 
   await tick();
-  setInterval(tick, intervalMs);
+  setInterval(tick, TICK_INTERVAL_MS);
 }
 
 const isMain =

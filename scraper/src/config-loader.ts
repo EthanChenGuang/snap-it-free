@@ -14,6 +14,7 @@ export type SourceConfig = {
   proxyUrl: string | undefined;
   enabled: boolean;
   implementationStatus: 'live' | 'coming_soon';
+  intervalMinutes: number;
 };
 
 /** Merge DB target URLs over env/category fallback when DB is empty (D-18). */
@@ -95,5 +96,23 @@ export async function loadSourceConfig(
     proxyUrl: resolveProxyUrl(global?.proxy_enc as EncryptedProxyPayload | null),
     enabled: Boolean(source.enabled),
     implementationStatus: source.implementation_status as 'live' | 'coming_soon',
+    intervalMinutes: (source.interval_minutes as number) ?? 90,
   };
+}
+
+/** Advance per-source schedule after a successful cron run (D-13, D-14). */
+export async function updateNextRunAt(
+  supabase: SupabaseClient,
+  slug: string,
+  intervalMinutes: number,
+): Promise<void> {
+  const nextRunAt = new Date(Date.now() + intervalMinutes * 60_000);
+  const { error } = await supabase
+    .from('scraper_sources')
+    .update({ next_run_at: nextRunAt.toISOString() })
+    .eq('slug', slug);
+
+  if (error) {
+    throw error;
+  }
 }
