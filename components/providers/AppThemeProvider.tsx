@@ -15,7 +15,7 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
   const preferences = useSyncExternalStore(
     subscribeAppPreferences,
     readAppPreferences,
-    () => ({ language: 'it', appearance: DEFAULT_APPEARANCE, soundAlerts: false }),
+    () => ({ language: 'zh', appearance: DEFAULT_APPEARANCE, soundAlerts: false }),
   );
 
   const forcedTheme = forcedThemeFromAppearance(preferences.appearance);

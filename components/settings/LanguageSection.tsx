@@ -7,7 +7,7 @@ import {
   writeAppPreferences,
   type AppLanguage,
 } from '@/lib/settings/preferences';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 import { useSyncExternalStore } from 'react';
 
@@ -18,6 +18,7 @@ const LANGUAGES: { id: AppLanguage; label: string; sublabel: string }[] = [
 ];
 
 export function LanguageSection() {
+  const { messages } = useMessages();
   const preferences = useSyncExternalStore(
     subscribeAppPreferences,
     readAppPreferences,
@@ -57,9 +58,6 @@ export function LanguageSection() {
           })}
         </div>
       </SettingsCard>
-      {preferences.language !== 'it' && (
-        <p className="mt-space-sm text-label-sm text-secondary">{messages.settings.languageNote}</p>
-      )}
     </section>
   );
 }

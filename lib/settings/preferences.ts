@@ -10,8 +10,8 @@ export type AppPreferences = {
 export const APP_PREFERENCES_KEY = 'shoumanwu_app_preferences';
 export const APP_PREFERENCES_CHANGE_EVENT = 'shoumanwu-app-preferences-change';
 
-const DEFAULT_PREFERENCES: AppPreferences = {
-  language: 'it',
+export const DEFAULT_PREFERENCES: AppPreferences = {
+  language: 'zh',
   appearance: 'light',
   soundAlerts: false,
 };

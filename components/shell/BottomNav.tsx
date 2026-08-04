@@ -3,15 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUnreadMatchCount } from '@/lib/alerts/useUnreadMatchCount';
-import { messages } from '@/messages/it';
+import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { href: '/', icon: 'map', label: messages.nav.map },
-  { href: '/list', icon: 'format_list_bulleted', label: messages.nav.list },
-  { href: '/post', icon: 'add_box', label: messages.nav.post },
-  { href: '/settings', icon: 'settings', label: messages.nav.settings, showBadge: true },
-] as const;
 
 function badgeLabel(count: number): string {
   return count > 9 ? '9+' : String(count);
@@ -20,6 +13,14 @@ function badgeLabel(count: number): string {
 export function BottomNav() {
   const pathname = usePathname();
   const { count: unreadMatchCount } = useUnreadMatchCount();
+  const { messages } = useMessages();
+
+  const navItems = [
+    { href: '/', icon: 'map', label: messages.nav.map },
+    { href: '/list', icon: 'format_list_bulleted', label: messages.nav.list },
+    { href: '/post', icon: 'add_box', label: messages.nav.post },
+    { href: '/settings', icon: 'settings', label: messages.nav.settings, showBadge: true },
+  ] as const;
 
   return (
     <nav className="relative z-[100] flex w-full shrink-0 items-center justify-around border-t border-outline-variant bg-surface px-gutter py-space-sm">

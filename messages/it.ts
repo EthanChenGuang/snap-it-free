@@ -137,7 +137,7 @@ export const messages = {
     profileLoading: 'Caricamento…',
     signIn: 'Accedi',
     signOut: 'Esci',
-    languageNote: 'Solo l\'italiano è completamente supportato al momento.',
+    languageNote: '',
     sound: {
       title: 'Avvisi sonori',
       description: 'Riproduci un segnale acustico per le zone prioritarie',
@@ -253,6 +253,14 @@ export const messages = {
     mestre_marghera: 'Mestre-Marghera',
     lido_murano: 'Lido-Murano',
   } satisfies Record<'all', string> & Record<VeniceZone, string>,
+  categories: {
+    All: 'Tutti',
+    furniture: 'Arredamento',
+    tech: 'Tech',
+    apparel: 'Abbigliamento',
+    books: 'Libri',
+    home_decor: 'Casa',
+  } satisfies Record<ListingCategory, string>,
   detail: {
     pageTitle: 'Dettaglio annuncio',
     back: 'Indietro',
@@ -389,25 +397,22 @@ export const messages = {
   empty: {
     noListings: 'Nessun annuncio attivo — collega Supabase e applica le migration 004.',
   },
-} as const;
+};
 
+export type Messages = typeof messages;
+
+/** @deprecated Prefer zoneLabel(zone, messages) from `@/messages` */
 export function zoneLabel(zone: VeniceZone | 'All'): string {
   if (zone === 'All') return messages.zones.all;
   return messages.zones[zone];
 }
 
+/** @deprecated Prefer categoryLabel(category, messages) from `@/messages` */
 export function categoryLabel(category: ListingCategory): string {
-  const labels: Record<ListingCategory, string> = {
-    All: 'Tutti',
-    furniture: 'Arredamento',
-    tech: 'Tech',
-    apparel: 'Abbigliamento',
-    books: 'Libri',
-    home_decor: 'Casa',
-  };
-  return labels[category];
+  return messages.categories[category];
 }
 
+/** @deprecated Prefer formatRelativeTime(iso, messages) from `@/messages` */
 export function formatRelativeTimeItalian(isoDate: string, now = new Date()): string {
   const posted = new Date(isoDate);
   const diffMs = now.getTime() - posted.getTime();
