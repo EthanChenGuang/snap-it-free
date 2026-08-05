@@ -10,11 +10,16 @@ import {
 } from './storage';
 
 async function fetchRemoteFavoriteIds(): Promise<string[] | null> {
-  const response = await fetch('/api/favorites');
-  if (response.status === 401) return null;
-  if (!response.ok) return null;
-  const data = (await response.json()) as { listingIds?: string[] };
-  return data.listingIds ?? [];
+  try {
+    const response = await fetch('/api/favorites');
+    if (response.status === 401) return null;
+    if (!response.ok) return null;
+    const data = (await response.json()) as { listingIds?: string[] };
+    return data.listingIds ?? [];
+  } catch {
+    // Network error (offline, dev-server hiccup, navigation abort) — fall back to local snapshot
+    return null;
+  }
 }
 
 function dispatchFavoritesChange(ids: string[]) {
