@@ -6,9 +6,9 @@ current_phase: 07
 current_phase_name: deploy it to Vercel
 status: executing
 stopped_at: Completed 06-09-PLAN.md
-last_updated: "2026-08-05T14:44:45.536Z"
+last_updated: "2026-08-05T14:58:00.239Z"
 last_activity: 2026-08-05
-last_activity_desc: "Completed quick task 260805-n1j: fix sidebar translation queue badge not refreshing after retry"
+last_activity_desc: "Completed quick task 260805-ne9: make translation retry faster (OpenRouter primary + timeout bound)"
 progress:
   total_phases: 7
   completed_phases: 6
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 07 — deploy it to Vercel
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-08-05 - Completed quick task 260805-n1j: fix sidebar translation queue badge not refreshing after retry
+Last activity: 2026-08-05 - Completed quick task 260805-ne9: make translation retry faster (OpenRouter primary + timeout bound)
 
 Progress: [██████████] 100%
 
@@ -196,6 +196,7 @@ None yet.
 | 260804-k9m | Map markers on land + Stitch pin styling | 2026-08-04 | — | [260804-k9m-map-markers-land-stitch](./quick/260804-k9m-map-markers-land-stitch/) |
 | 260805-jjb | Map stuck on loading — remove nested dynamic import, fix worker order | 2026-08-05 | — | [260805-jjb-the-map-is-not-loaded-and-the-homepage-h](./quick/260805-jjb-the-map-is-not-loaded-and-the-homepage-h/) |
 | 22 | show bottom-right notification on translation retry success | 2026-08-05 | bf7000a | — |
+| 260805-ne9 | make translation retry faster: prefer OpenRouter (cheaper), add timeout, avoid slow sequential double-provider calls | 2026-08-05 | 5e25f21 | [260805-ne9-make-translation-retry-faster-prefer-ope](./quick/260805-ne9-make-translation-retry-faster-prefer-ope/) |
 
 ### Blockers/Concerns
 
