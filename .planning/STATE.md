@@ -6,9 +6,9 @@ current_phase: 07
 current_phase_name: deploy it to Vercel
 status: executing
 stopped_at: Completed 06-09-PLAN.md
-last_updated: "2026-08-05T14:58:00.239Z"
+last_updated: "2026-08-05T15:22:04.717Z"
 last_activity: 2026-08-05
-last_activity_desc: "Completed quick task 260805-ne9: make translation retry faster (OpenRouter primary + timeout bound)"
+last_activity_desc: "Completed quick task 260805-r3k: split Supabase out of the root layout chunk (5.08 MB -> 2.39 MB) so the truncated chunk no longer strands the map on its loading fallback"
 progress:
   total_phases: 7
   completed_phases: 6
@@ -198,6 +198,7 @@ None yet.
 | 22 | show bottom-right notification on translation retry success | 2026-08-05 | bf7000a | — |
 | 260805-ne9 | make translation retry faster: prefer OpenRouter (cheaper), add timeout, avoid slow sequential double-provider calls | 2026-08-05 | 5e25f21 | [260805-ne9-make-translation-retry-faster-prefer-ope](./quick/260805-ne9-make-translation-retry-faster-prefer-ope/) |
 | 260805-r3k | map hangs on "地图加载中…": split Supabase out of the 5 MB root layout chunk the dev server was truncating | 2026-08-05 | dc3d60e | [260805-r3k-shrink-root-layout-chunk-lazy-supabase](./quick/260805-r3k-shrink-root-layout-chunk-lazy-supabase/) |
+| 25 | fix: catch network errors in fetchRemoteFavoriteIds (Elenco click threw unhandled TypeError) | 2026-08-05 | 6fc0415 | — |
 
 ### Blockers/Concerns
 
