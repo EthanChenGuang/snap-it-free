@@ -2,7 +2,11 @@ import type { ListingRow, VeniceZone, ZoneChip } from './types';
 
 export function filterByZone(listings: ListingRow[], zoneChip: ZoneChip): ListingRow[] {
   if (zoneChip === 'All') {
-    return listings.filter((listing) => listing.zone != null);
+    return listings.filter(
+      (listing) =>
+        listing.zone != null ||
+        (listing.zone == null && listing.lat != null && listing.lng != null),
+    );
   }
 
   return listings.filter((listing) => listing.zone === zoneChip);
