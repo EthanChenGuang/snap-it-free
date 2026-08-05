@@ -53,6 +53,8 @@ export function AdminShell({
   footerStats,
 }: AdminShellProps) {
   const pathname = usePathname();
+  const activeNavItem = adminNavItems.find((item) => isNavActive(pathname, item.href));
+  const pageTitle = activeNavItem ? adminNav[activeNavItem.key] : adminShellMessages.brandTitle;
 
   return (
     <div className="min-h-screen bg-background text-on-background">
@@ -71,6 +73,7 @@ export function AdminShell({
               <Link
                 key={item.key}
                 href={item.href}
+                prefetch={false}
                 className={cn(
                   'flex items-center justify-between gap-3 px-gutter py-3 text-label-md transition-colors duration-150',
                   active
@@ -111,15 +114,13 @@ export function AdminShell({
       <div className="flex min-h-screen flex-col md:ml-64">
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-outline-variant bg-surface px-gutter">
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-[20px] text-primary md:hidden" aria-hidden>
-              menu
-            </span>
-            <h2 className="text-h2 font-semibold text-primary">{adminShellMessages.topBarTitle}</h2>
+            <h2 className="text-h2 font-semibold text-primary">{pageTitle}</h2>
           </div>
           <div className="flex items-center gap-4">
             {pendingTranslationsCount > 0 && (
               <Link
                 href="/admin/translation"
+                prefetch={false}
                 className="hidden rounded-full border border-outline-variant bg-surface-container px-3 py-1 text-label-sm font-semibold text-primary hover:bg-surface-container-high sm:inline-flex"
               >
                 {adminNav.translation}: {pendingTranslationsCount}

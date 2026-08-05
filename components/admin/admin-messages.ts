@@ -10,7 +10,6 @@ export const adminNav = {
 export const adminShellMessages = {
   brandTitle: 'Scraper Worker',
   brandSubtitle: 'Admin Console',
-  topBarTitle: 'Scraper Admin',
   loadError: '无法加载配置。请刷新或检查网络。',
 } as const;
 
