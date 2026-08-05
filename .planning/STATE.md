@@ -6,9 +6,9 @@ current_phase: 07
 current_phase_name: deploy it to Vercel
 status: executing
 stopped_at: Completed 06-09-PLAN.md
-last_updated: "2026-08-05T15:22:04.717Z"
+last_updated: "2026-08-05T15:23:42.205Z"
 last_activity: 2026-08-05
-last_activity_desc: "Completed quick task 260805-r3k: split Supabase out of the root layout chunk (5.08 MB -> 2.39 MB) so the truncated chunk no longer strands the map on its loading fallback"
+last_activity_desc: "Completed quick task 260805-nx4: registered the app's custom text scale with tailwind-merge so cn() stops silently dropping text-on-primary/text-on-surface, fixing invisible black-on-black text on selected filter chips app-wide"
 progress:
   total_phases: 7
   completed_phases: 6
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 07 — deploy it to Vercel
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-08-05 - Completed quick task 260805-r3k: split Supabase out of the root layout chunk (5.08 MB -> 2.39 MB) so the truncated chunk no longer strands the map on its loading fallback
+Last activity: 2026-08-05 - Completed quick task 260805-nx4: registered the app's custom text scale with tailwind-merge so cn() stops silently dropping text-on-primary/text-on-surface, fixing invisible black-on-black text on selected filter chips app-wide
 
 Progress: [██████████] 100%
 
@@ -199,6 +199,7 @@ None yet.
 | 260805-ne9 | make translation retry faster: prefer OpenRouter (cheaper), add timeout, avoid slow sequential double-provider calls | 2026-08-05 | 5e25f21 | [260805-ne9-make-translation-retry-faster-prefer-ope](./quick/260805-ne9-make-translation-retry-faster-prefer-ope/) |
 | 260805-r3k | map hangs on "地图加载中…": split Supabase out of the 5 MB root layout chunk the dev server was truncating | 2026-08-05 | dc3d60e | [260805-r3k-shrink-root-layout-chunk-lazy-supabase](./quick/260805-r3k-shrink-root-layout-chunk-lazy-supabase/) |
 | 25 | fix: catch network errors in fetchRemoteFavoriteIds (Elenco click threw unhandled TypeError) | 2026-08-05 | 6fc0415 | — |
+| 260805-nx4 | fix invisible black-on-black text on selected filter chips (tailwind-merge custom text scale) | 2026-08-05 | 6faef7a | [260805-nx4-fix-invisible-black-on-black-text-on-sel](./quick/260805-nx4-fix-invisible-black-on-black-text-on-sel/) |
 
 ### Blockers/Concerns
 
