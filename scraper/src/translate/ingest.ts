@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { SUBITO_REGALO_CATALOG } from '../../../lib/admin/subito-regalo-catalog.js';
 import { translateListingFields } from './engine.js';
 
 export type ListingTranslationFields = {
@@ -76,6 +77,12 @@ async function checkAndIncrementUsage(
   return { allowed: !incrementError };
 }
 
+function categoryLabelForSlug(slug: string | null | undefined): string | null {
+  if (!slug) return null;
+  const entry = SUBITO_REGALO_CATALOG.find((item) => item.slug === slug);
+  return entry?.labelIt ?? slug;
+}
+
 async function queueTranslationFailure(
   supabase: SupabaseClient,
   listingId: string,
@@ -117,11 +124,18 @@ export async function translateAfterPersist(
     return;
   }
 
-  const result = await translateListingFields(fields, {
-    geminiApiKey: process.env.GEMINI_API_KEY?.trim(),
-    openRouterApiKey: process.env.OPENROUTER_API_KEY?.trim(),
-    openRouterModel: process.env.OPENROUTER_FALLBACK_MODEL?.trim(),
-  });
+  const result = await translateListingFields(
+    {
+      title: fields.title,
+      description: fields.description,
+      category: categoryLabelForSlug(fields.category),
+    },
+    {
+      geminiApiKey: process.env.GEMINI_API_KEY?.trim(),
+      openRouterApiKey: process.env.OPENROUTER_API_KEY?.trim(),
+      openRouterModel: process.env.OPENROUTER_FALLBACK_MODEL?.trim(),
+    },
+  );
 
   if (result.ok) {
     const { translations } = result;
