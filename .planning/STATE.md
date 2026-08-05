@@ -6,9 +6,9 @@ current_phase: 07
 current_phase_name: deploy it to Vercel
 status: executing
 stopped_at: Completed 06-09-PLAN.md
-last_updated: "2026-08-04T20:27:17.095Z"
-last_activity: 2026-08-04
-last_activity_desc: Phase 06 complete, transitioned to Phase 07
+last_updated: "2026-08-05T14:12:00.000Z"
+last_activity: 2026-08-05
+last_activity_desc: Completed quick task 260805-jjb — map stuck on loading fix
 progress:
   total_phases: 7
   completed_phases: 6
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 07 — deploy it to Vercel
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-08-04 — Phase 06 complete, transitioned to Phase 07
+Last activity: 2026-08-05 - Completed quick task 260805-n1j: fix sidebar translation queue badge not refreshing after retry
 
 Progress: [██████████] 100%
 
@@ -180,6 +180,7 @@ None yet.
 | 260803-us1 | Elenco list scroll region too small; Pubblica did not scroll | 2026-08-03 | c7023f6, 2524d90 | [260803-us1-list-post-scroll-regions](./quick/260803-us1-list-post-scroll-regions/) |
 | 260803-whr | fix Subito geo/zone pipeline so scraped free items surface in Elenco | 2026-08-03 | 8c6f24e, ca573b6, 9956629 | [260803-whr-fix-subito-geo-zone-pipeline-so-scraped-](./quick/260803-whr-fix-subito-geo-zone-pipeline-so-scraped-/) |
 | 260803-wi0 | Research Italian and European free-item source candidates beyond Subito | 2026-08-03 | 893d917 | [260803-wi0-free-item-source-candidates](./quick/260803-wi0-free-item-source-candidates/) |
+| 260805-n1j | fix sidebar translation queue badge not refreshing after retry | 2026-08-05 | 4a0aab1 | [260805-n1j-fix-sidebar-translation-queue-badge-not-](./quick/260805-n1j-fix-sidebar-translation-queue-badge-not-/) |
 | 260804-dn7 | Strict Stitch UI compliance: header search, floating chips, cards, bottom nav | 2026-08-04 | 97e2911, e4004b9, b117d7e | [260804-dn7-strict-ui-compliance-refactor-based-on-p](./quick/260804-dn7-strict-ui-compliance-refactor-based-on-p/) |
 | 260804-e2m | Strict Stitch UI compliance for Elenco list page | 2026-08-04 | dd5ba20 | [260804-e2m-strict-ui-compliance-refactor-for-elenco](./quick/260804-e2m-strict-ui-compliance-refactor-for-elenco/) |
 | 260804-f03 | Strict Stitch UI compliance for item detail page | 2026-08-04 | d3c60e5 | [260804-f03-strict-ui-compliance-refactor-for-item-d](./quick/260804-f03-strict-ui-compliance-refactor-for-item-d/) |
@@ -193,6 +194,7 @@ None yet.
 | 260804-ifm | 当前地图上没有物体的标记 — group collocated pins | 2026-08-04 | — | [260804-ifm-map-markers-not-visible](./quick/260804-ifm-map-markers-not-visible/) |
 | 260804-j8k | Fix marker overlapping and clustering on Mappa (spiderfy) | 2026-08-04 | — | [260804-j8k-map-marker-spiderfy](./quick/260804-j8k-map-marker-spiderfy/) |
 | 260804-k9m | Map markers on land + Stitch pin styling | 2026-08-04 | — | [260804-k9m-map-markers-land-stitch](./quick/260804-k9m-map-markers-land-stitch/) |
+| 260805-jjb | Map stuck on loading — remove nested dynamic import, fix worker order | 2026-08-05 | — | [260805-jjb-the-map-is-not-loaded-and-the-homepage-h](./quick/260805-jjb-the-map-is-not-loaded-and-the-homepage-h/) |
 
 ### Blockers/Concerns
 
