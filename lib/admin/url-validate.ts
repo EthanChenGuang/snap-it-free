@@ -1,3 +1,5 @@
+import { REGALO_CATEGORY_URL_REGEX } from './subito-regalo-catalog';
+
 const HOST_ALLOWLIST: Record<string, RegExp> = {
   subito: /(^|\.)subito\.it$/i,
   facebook: /(^|\.)facebook\.com$/i,
@@ -31,8 +33,8 @@ export function validateTargetUrl(
     return { ok: false, error: `Host not allowed for ${slug}` };
   }
 
-  if (slug === 'subito' && !parsed.pathname.includes('venezia')) {
-    return { ok: false, error: 'Subito URLs must be Venice-scoped (venezia path)' };
+  if (slug === 'subito' && !REGALO_CATEGORY_URL_REGEX.test(parsed.pathname)) {
+    return { ok: false, error: 'Subito URLs must match Veneto regalo city template' };
   }
 
   return { ok: true };

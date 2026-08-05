@@ -2,12 +2,31 @@ import { describe, expect, it } from 'vitest';
 import { validateTargetUrl, validateTargetUrls } from './url-validate';
 
 describe('validateTargetUrl', () => {
-  it('accepts subito.it Venice regalo URL (D-10)', () => {
+  it('accepts subito.it Venice regalo URL (D-03)', () => {
     const result = validateTargetUrl(
       'https://www.subito.it/annunci-veneto/regalo/arredamento-casalinghi/venezia/venezia/',
       'subito',
     );
     expect(result).toEqual({ ok: true });
+  });
+
+  it('accepts subito.it Padova regalo URL (D-03)', () => {
+    const result = validateTargetUrl(
+      'https://www.subito.it/annunci-veneto/regalo/informatica/padova/padova/',
+      'subito',
+    );
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('rejects non-Veneto regalo paths for subito', () => {
+    const result = validateTargetUrl(
+      'https://www.subito.it/annunci-lombardia/regalo/informatica/milano/milano/',
+      'subito',
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/Veneto regalo city template/i);
+    }
   });
 
   it('rejects evil.com (D-10)', () => {
@@ -20,10 +39,10 @@ describe('validateTargetUrl', () => {
 });
 
 describe('validateTargetUrls', () => {
-  it('accepts multiple valid subito URLs', () => {
+  it('accepts multiple valid subito URLs including Padova', () => {
     const result = validateTargetUrls('subito', [
       'https://www.subito.it/annunci-veneto/regalo/arredamento-casalinghi/venezia/venezia/',
-      'https://www.subito.it/annunci-veneto/regalo/elettrodomestici/venezia/venezia/',
+      'https://www.subito.it/annunci-veneto/regalo/elettrodomestici/padova/padova/',
     ]);
     expect(result).toEqual({ ok: true });
   });
