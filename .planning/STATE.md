@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 07 — deploy it to Vercel
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-08-05 - Completed quick task 260805-ne9: make translation retry faster (OpenRouter primary + timeout bound)
+Last activity: 2026-08-05 - Completed quick task 260805-r3k: split Supabase out of the root layout chunk (5.08 MB -> 2.39 MB) so the truncated chunk no longer strands the map on its loading fallback
 
 Progress: [██████████] 100%
 
@@ -197,6 +197,7 @@ None yet.
 | 260805-jjb | Map stuck on loading — remove nested dynamic import, fix worker order | 2026-08-05 | — | [260805-jjb-the-map-is-not-loaded-and-the-homepage-h](./quick/260805-jjb-the-map-is-not-loaded-and-the-homepage-h/) |
 | 22 | show bottom-right notification on translation retry success | 2026-08-05 | bf7000a | — |
 | 260805-ne9 | make translation retry faster: prefer OpenRouter (cheaper), add timeout, avoid slow sequential double-provider calls | 2026-08-05 | 5e25f21 | [260805-ne9-make-translation-retry-faster-prefer-ope](./quick/260805-ne9-make-translation-retry-faster-prefer-ope/) |
+| 260805-r3k | map hangs on "地图加载中…": split Supabase out of the 5 MB root layout chunk the dev server was truncating | 2026-08-05 | dc3d60e | [260805-r3k-shrink-root-layout-chunk-lazy-supabase](./quick/260805-r3k-shrink-root-layout-chunk-lazy-supabase/) |
 
 ### Blockers/Concerns
 
