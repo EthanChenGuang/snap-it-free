@@ -2,6 +2,7 @@ import type { Page } from 'playwright';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseRegaloCategoryUrl } from './url-context.js';
 
 export type RawListing = {
   external_id: string;
@@ -12,6 +13,8 @@ export type RawListing = {
   lng: number | null;
   posted_at: string;
   description?: string;
+  /** Category listing URL this listing was scraped from (D-20). */
+  source_category_url?: string;
 };
 
 export type SelectorHitRate = { hits: number; total: number };
@@ -47,6 +50,43 @@ const VENICE_LAT_MIN = 45.0;
 const VENICE_LAT_MAX = 45.7;
 const VENICE_LNG_MIN = 12.1;
 const VENICE_LNG_MAX = 12.6;
+
+/** Padova bbox from 08-PADOVA-SPIKE.md fallback (no sample coords in spike). */
+export const PADOVA_LAT_MIN = 45.3;
+export const PADOVA_LAT_MAX = 45.5;
+export const PADOVA_LNG_MIN = 11.7;
+export const PADOVA_LNG_MAX = 12.0;
+
+export type ScrapeCity = 'venezia' | 'padova';
+
+function cityFromSourceCategoryUrl(sourceCategoryUrl: string): ScrapeCity {
+  const parsed = parseRegaloCategoryUrl(sourceCategoryUrl);
+  if (parsed?.city === 'padova') return 'padova';
+  return 'venezia';
+}
+
+/** City-aware bounding box gate — replaces Venice-only inVeniceBbox (D-21). */
+export function inCityBbox(lat: number, lng: number, city: ScrapeCity): boolean {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
+  if (city === 'padova') {
+    return (
+      lat >= PADOVA_LAT_MIN &&
+      lat <= PADOVA_LAT_MAX &&
+      lng >= PADOVA_LNG_MIN &&
+      lng <= PADOVA_LNG_MAX
+    );
+  }
+  return (
+    lat >= VENICE_LAT_MIN &&
+    lat <= VENICE_LAT_MAX &&
+    lng >= VENICE_LNG_MIN &&
+    lng <= VENICE_LNG_MAX
+  );
+}
+
+function inVeniceBbox(lat: number, lng: number): boolean {
+  return inCityBbox(lat, lng, 'venezia');
+}
 
 const VENETO_PROVINCE_CODES = ['VE', 'PD', 'TV', 'VR', 'VI', 'RO', 'BL'] as const;
 const PROVINCE_RE = new RegExp(
@@ -93,17 +133,6 @@ export function parseItalianPostedAt(text: string, now = new Date()): Date {
   }
 
   return now;
-}
-
-function inVeniceBbox(lat: number, lng: number): boolean {
-  return (
-    Number.isFinite(lat) &&
-    Number.isFinite(lng) &&
-    lat >= VENICE_LAT_MIN &&
-    lat <= VENICE_LAT_MAX &&
-    lng >= VENICE_LNG_MIN &&
-    lng <= VENICE_LNG_MAX
-  );
 }
 
 function walkForCoords(node: unknown, depth = 0): { lat: number; lng: number } | null {
@@ -214,7 +243,10 @@ export function resolveCoords(
   html: string,
   municipalityText: string,
   externalUrl = '',
+  sourceCategoryUrl = '',
 ): ResolveCoordsResult {
+  const city = sourceCategoryUrl ? cityFromSourceCategoryUrl(sourceCategoryUrl) : 'venezia';
+
   const embedded: Array<{ source: CoordSource; hit: { lat: number; lng: number } | null }> = [
     { source: 'next-data', hit: fromNextData(html) },
     { source: 'ld-json', hit: fromLdJson(html) },
@@ -224,7 +256,7 @@ export function resolveCoords(
 
   for (const { source, hit } of embedded) {
     if (!hit) continue;
-    if (!inVeniceBbox(hit.lat, hit.lng)) {
+    if (!inCityBbox(hit.lat, hit.lng, city)) {
       return { lat: null, lng: null, source: 'out-of-bbox' };
     }
     return { lat: hit.lat, lng: hit.lng, source };
@@ -234,7 +266,7 @@ export function resolveCoords(
   const hintText = [locationHintsFromUrl(externalUrl), municipalityText].filter(Boolean).join(' | ');
   const centroid = lookupMunicipalityCentroid(hintText);
   if (centroid) {
-    if (!inVeniceBbox(centroid.lat, centroid.lng)) {
+    if (!inCityBbox(centroid.lat, centroid.lng, city)) {
       return { lat: null, lng: null, source: 'out-of-bbox', matchedName: centroid.matchedName };
     }
     return {
@@ -276,7 +308,10 @@ async function resolveDetailUrls(page: Page): Promise<string[]> {
   return detailUrls;
 }
 
-async function extractFromDetailPage(page: Page): Promise<{
+async function extractFromDetailPage(
+  page: Page,
+  sourceCategoryUrl = '',
+): Promise<{
   listing: RawListing | null;
   hitRate: SelectorHitRate;
 }> {
@@ -343,7 +378,12 @@ async function extractFromDetailPage(page: Page): Promise<{
     return { title, photo, postedText, description, locationText };
   }, PROVINCE_RE.source);
 
-  const { lat, lng } = resolveCoords(html, extracted.locationText, external_url);
+  const { lat, lng } = resolveCoords(
+    html,
+    extracted.locationText,
+    external_url,
+    sourceCategoryUrl,
+  );
   const posted_at = parseItalianPostedAt(extracted.postedText).toISOString();
 
   const fields = [
@@ -370,6 +410,7 @@ async function extractFromDetailPage(page: Page): Promise<{
       lng,
       posted_at,
       description: extracted.description || undefined,
+      source_category_url: sourceCategoryUrl || undefined,
     },
     hitRate: { hits, total: 6 },
   };
@@ -380,6 +421,8 @@ export async function extractListingsFromPage(page: Page): Promise<{
   hitRate: SelectorHitRate;
 }> {
   await dismissCookieBanner(page);
+
+  const sourceCategoryUrl = isRegaloCategoryUrl(page.url()) ? page.url() : '';
 
   const detailUrls = await resolveDetailUrls(page);
   if (detailUrls.length === 0) {
@@ -397,7 +440,7 @@ export async function extractListingsFromPage(page: Page): Promise<{
       await page.waitForTimeout(1500);
     }
 
-    const { listing, hitRate } = await extractFromDetailPage(page);
+    const { listing, hitRate } = await extractFromDetailPage(page, sourceCategoryUrl);
     selectorHits += hitRate.hits;
     selectorTotal += hitRate.total;
     if (listing) listings.push(listing);

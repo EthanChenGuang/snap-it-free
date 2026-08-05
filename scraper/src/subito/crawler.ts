@@ -1,7 +1,7 @@
 import { PlaywrightCrawler, ProxyConfiguration } from 'crawlee';
 import { presetToCrawleeOptions, type AntiBlockPreset } from '../admin/presets.js';
 import { getProxyUrl } from '../config.js';
-import { extractListingsFromPage, type RawListing } from './extract.js';
+import { extractListingsFromPage, isRegaloCategoryUrl, type RawListing } from './extract.js';
 
 export type CrawlResult = {
   rawListings: RawListing[];
@@ -35,7 +35,7 @@ export async function runSubitoCrawler(
         headless: true,
       },
     },
-    async requestHandler({ page, session }) {
+    async requestHandler({ page, session, request }) {
       const title = await page.title();
       if (title.toLowerCase().includes('blocked')) {
         session?.retire();
@@ -43,6 +43,11 @@ export async function runSubitoCrawler(
       }
 
       const { listings, hitRate } = await extractListingsFromPage(page);
+      for (const listing of listings) {
+        if (!listing.source_category_url && isRegaloCategoryUrl(request.url)) {
+          listing.source_category_url = request.url;
+        }
+      }
       rawListings.push(...listings);
       selectorHits += hitRate.hits;
       selectorTotal += hitRate.total;

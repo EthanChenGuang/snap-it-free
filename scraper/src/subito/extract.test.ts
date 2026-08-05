@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  inCityBbox,
   isRegaloCategoryUrl,
   locationHintsFromUrl,
   lookupMunicipalityCentroid,
   resolveCoords,
+  type RawListing,
 } from './extract.js';
 
 describe('isRegaloCategoryUrl', () => {
@@ -54,6 +56,17 @@ describe('locationHintsFromUrl', () => {
   });
 });
 
+describe('inCityBbox', () => {
+  it('accepts Padova coords that Venice bbox rejected (D-21)', () => {
+    expect(inCityBbox(45.41, 11.88, 'padova')).toBe(true);
+    expect(inCityBbox(45.41, 11.88, 'venezia')).toBe(false);
+  });
+
+  it('still accepts Venice coords for venezia key', () => {
+    expect(inCityBbox(45.434, 12.338, 'venezia')).toBe(true);
+  });
+});
+
 describe('resolveCoords', () => {
   it('returns coordinates from raw-html latitude/longitude keys', () => {
     const html = '{"latitude": 45.434, "longitude": 12.338}';
@@ -88,5 +101,32 @@ describe('resolveCoords', () => {
   it('returns none when neither HTML nor location yield coordinates', () => {
     const result = resolveCoords('<html></html>', 'Padova (PD)');
     expect(result).toEqual({ lat: null, lng: null, source: 'none' });
+  });
+
+  it('returns Padova embed coords when source category URL is Padova', () => {
+    const html = '{"latitude": 45.41, "longitude": 11.88}';
+    const padovaCategoryUrl =
+      'https://www.subito.it/annunci-veneto/regalo/informatica/padova/padova/';
+    const result = resolveCoords(html, 'Padova (PD)', '', padovaCategoryUrl);
+    expect(result.source).toBe('raw-html');
+    expect(result.lat).toBeCloseTo(45.41);
+    expect(result.lng).toBeCloseTo(11.88);
+  });
+});
+
+describe('RawListing', () => {
+  it('includes optional source_category_url', () => {
+    const listing: RawListing = {
+      external_id: '123',
+      title: 'Test',
+      photo_url: 'https://example.com/photo.jpg',
+      external_url: 'https://www.subito.it/informatica/test-123.htm',
+      lat: null,
+      lng: null,
+      posted_at: new Date().toISOString(),
+      source_category_url:
+        'https://www.subito.it/annunci-veneto/regalo/informatica/padova/padova/',
+    };
+    expect(listing.source_category_url).toContain('padova');
   });
 });
