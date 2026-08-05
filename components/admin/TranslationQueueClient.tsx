@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { translationMessages } from '@/components/admin/admin-messages';
 import { sourceDisplayNames } from '@/components/admin/admin-messages';
@@ -18,8 +18,18 @@ export function TranslationQueueClient({ initialItems }: TranslationQueueClientP
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [isBulkRetrying, setIsBulkRetrying] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [notification, setNotification] = useState<string | null>(null);
+  const notificationTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const pendingCount = items.length;
+
+  const showNotification = (message: string) => {
+    if (notificationTimeout.current) {
+      clearTimeout(notificationTimeout.current);
+    }
+    setNotification(message);
+    notificationTimeout.current = setTimeout(() => setNotification(null), 3000);
+  };
 
   const toggleSelectAll = () => {
     if (selectedIds.length === items.length) {
@@ -64,6 +74,9 @@ export function TranslationQueueClient({ initialItems }: TranslationQueueClientP
     try {
       const result = await postRetry({ listing_ids: [listingId] });
       refreshFromResponse(result.processed);
+      if (result.processed.length > 0) {
+        showNotification(translationMessages.translateSuccess(result.processed.length));
+      }
       router.refresh();
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : translationMessages.retrying);
@@ -82,6 +95,9 @@ export function TranslationQueueClient({ initialItems }: TranslationQueueClientP
           : { all_pending: true as const };
       const result = await postRetry(body);
       refreshFromResponse(result.processed);
+      if (result.processed.length > 0) {
+        showNotification(translationMessages.translateSuccess(result.processed.length));
+      }
       router.refresh();
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : translationMessages.retryAll);
@@ -258,6 +274,18 @@ export function TranslationQueueClient({ initialItems }: TranslationQueueClientP
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {notification && (
+        <div
+          role="status"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-high px-4 py-3 text-[14px] font-medium text-on-surface shadow-lg"
+        >
+          <span className="material-symbols-outlined text-[18px] text-primary" aria-hidden>
+            check_circle
+          </span>
+          {notification}
         </div>
       )}
     </div>

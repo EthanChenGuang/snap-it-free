@@ -151,6 +151,7 @@ export const translationMessages = {
   statusFailed: '失败',
   emptyHeading: '翻译队列为空',
   emptyBody: '所有 listing 已完成翻译。',
+  translateSuccess: (n: number) => (n === 1 ? '翻译成功' : `已成功翻译 ${n} 条`),
 } as const;
 
 export const settingsMessages = {
