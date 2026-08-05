@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { SourceCard } from '@/components/admin/SourceCard';
+import { MaintenanceCard } from '@/components/admin/MaintenanceCard';
 import { adminShellMessages } from '@/components/admin/admin-messages';
 import type { AdminAlert, GlobalAdminStatus, SourceWithLastRun } from '@/lib/admin/types';
 
@@ -144,6 +145,8 @@ export function DashboardClient({
           </Link>
         )}
       </section>
+
+      <MaintenanceCard initialPreview={null} />
 
       <section className="mb-space-xl">
         <h2 className="mb-space-md border-b border-outline-variant pb-2 text-h3 font-semibold">

@@ -38,6 +38,10 @@ export const TranslationRetrySchema = z
     message: 'Provide listing_ids or all_pending',
   });
 
+export const ExecuteCleanupSchema = z.object({
+  confirm: z.literal(true),
+});
+
 export type UpdateSourceInput = z.infer<typeof UpdateSourceSchema>;
 export type UpdateGlobalConfigInput = z.infer<typeof UpdateGlobalConfigSchema>;
 export type CreateJobInput = z.infer<typeof CreateJobSchema>;
