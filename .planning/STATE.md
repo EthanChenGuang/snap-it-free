@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 07
-current_phase_name: deploy it to Vercel
+current_phase: 08
+current_phase_name: subito-regalo-url-matrix-venice-padova-veneto-all-categories
 status: executing
-stopped_at: Phase 8 UI-SPEC approved
-last_updated: "2026-08-05T17:35:49.661Z"
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-08-05T17:47:25.855Z"
 last_activity: 2026-08-05
-last_activity_desc: "Completed quick task 260805-ots: admin cleanup for out-of-date scraper records"
+last_activity_desc: Phase 08 execution started
 progress:
   total_phases: 8
   completed_phases: 6
-  total_plans: 36
-  completed_plans: 32
+  total_plans: 41
+  completed_plans: 33
 ---
 
 # Project State
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-24)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
-**Current focus:** Phase 06 — Scraper Admin Console
+**Current focus:** Phase 08 — subito-regalo-url-matrix-venice-padova-veneto-all-categories
 
 ## Current Position
 
-Phase: 07 — deploy it to Vercel
-Plan: Not started
+Phase: 08 (subito-regalo-url-matrix-venice-padova-veneto-all-categories) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-08-05 - Completed quick task 260805-ots: admin cleanup for out-of-date scraper records
+Last activity: 2026-08-05 — Phase 08 execution started
 
-Progress: [██████████] 100%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -91,6 +91,7 @@ Progress: [██████████] 100%
 | Phase 06 P07 | 8 | 3 tasks | 11 files |
 | Phase 06 P08 | 12 | 2 tasks | 16 files |
 | Phase 06-scraper-admin-console-configurable-sources-frequency-anti-bl P09 | 3 | 2 tasks | 11 files |
+| Phase 08-subito-regalo-url-matrix-venice-padova-veneto-all-categories P01 | 8min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -165,6 +166,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Checkpoint option-a: App-level AES-256-GCM in proxy_enc (D-20)
 - [Phase ?]: Settings form ports scraper-admin SettingsView to admin_settings Stitch layout (D-53)
 - [Phase ?]: Allowlist add by email only — no invite flow (D-45)
+- [Phase ?]: Padova spike FAIL on detail coords — block Padova recommended seed until re-run passes (D-15)
+- [Phase ?]: Padova bbox uses fallback 45.3–45.5 / 11.7–12.0 (no spike sample coords)
 
 ### Pending Todos
 
@@ -224,7 +227,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T17:35:49.639Z
-Stopped at: Phase 8 UI-SPEC approved
-Resume file: .planning/phases/08-subito-regalo-url-matrix-venice-padova-veneto-all-categories/08-UI-SPEC.md
+Last session: 2026-08-05T17:47:25.837Z
+Stopped at: Completed 08-01-PLAN.md
+Resume file: None
 Next: /gsd-execute-phase 5

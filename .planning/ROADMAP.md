@@ -18,6 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: UGC Posting & Community Marketplace** - Users can post their own free items and coordinate pickup in-app, safely (completed 2026-08-01)
 - [ ] **Phase 4: Auth, Alerts & Push Notifications** - Users log in only when needed and get notified of new matching listings
 - [x] **Phase 5: Trilingual UI (Italian / English / Chinese)** - Users can use the entire app in their preferred language (completed 2026-08-04)
+- [ ] **Phase 8: Subito Regalo URL Matrix** - Operator configures Venice + Padova regalo URLs for all categories via admin; path to national coverage
 
 ## Phase Details
 
@@ -198,6 +199,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 3. UGC Posting & Community Marketplace | 4/4 | Complete    | 2026-08-01 |
 | 4. Auth, Alerts & Push Notifications | 7/7 | In Progress|  |
 | 5. Trilingual UI (Italian / English / Chinese) | 3/3 | Complete    | 2026-08-04 |
+| 8. Subito Regalo URL Matrix | 1/5 | In Progress|  |
 
 ### Phase 6: Scraper Admin Console
 
@@ -278,6 +280,44 @@ Plans:
 **Wave 3** *(blocked on Wave 2)*
 
 - [ ] 07-04-PLAN.md — D-19 smoke checklist + D-20 rollback checkpoint + DEPLOY-RUNBOOK.md
+
+### Phase 8: Subito Regalo URL Matrix
+
+**Goal:** As solo operator, I want to configure Subito *regalo* scrape targets by **city** (Venice + Padova first) and **category** (all object categories) from the admin dashboard — with a data model that can later expand to every Italian region — so scraped supply is diverse and operable without editing code or redeploying the worker.
+
+**Requirements**: SCRP-01 (extended), Phase 6 admin (D-18 target_urls)
+**Depends on:** Phase 6 (admin console + DB-driven URLs). May run in parallel with Phase 7.
+**Success Criteria** (what must be TRUE):
+
+  1. Operator selects **Venice** and **Padova** (Veneto) plus any combination of Subito regalo categories in `/admin/sources/subito` and saves without touching `scraper/.env`
+  2. Initial seed covers **all verified regalo object categories** for both cities (not just the current 3 hardcoded slugs)
+  3. Worker reads the expanded URL set from `scraper_sources.target_urls` and ingests listings from Padova as well as Venice
+  4. Stored listing `category` reflects Subito source category (fixed parser for detail-page URL shape)
+  5. Admin UI documents URL template (`/annunci-veneto/regalo/{slug}/{city}/{city}/`) and validates URLs before save
+  6. Design leaves a clear extension path for additional regions (`annunci-{region}/regalo/…`) without schema migration
+
+**Plans:** 1/5 plans executed
+
+Plans:
+
+**Wave 1**
+
+- [x] 08-01-PLAN.md — **tracer** Padova spike gate + scraper vertical slice (parser, bbox, Wave 0 tests)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 08-02-PLAN.md — Schema migration 020: city, region, listings_public view (D-25/D-26/D-28 checkpoint)
+- [ ] 08-04-PLAN.md — Admin Regalo URL matrix UI + validation + recommended 34-URL seed *(parallel with 08-02; requires 08-01 spike PASS for Padova seed)*
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 08-03-PLAN.md — Scraper ingest: city/region/category persist, Zod bbox, D-18 config load
+
+**Wave 4** *(blocked on Waves 2–3)*
+
+- [ ] 08-05-PLAN.md — Consumer category chips + zone All Padova + DB badges (map + Elenco)
+
+**Reference:** `.planning/phases/08-subito-regalo-url-matrix-venice-padova-veneto-all-categories/08-CONTEXT.md` — regalo category catalog + URL forms from live Subito recon (2026-08-05)
 
 ---
 *Roadmap created: 2026-07-26*

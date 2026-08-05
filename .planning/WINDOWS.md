@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 5
+open_count: 6
 waived_count: 0
 fixed_count: 0
-total_count: 5
-last_updated: 2026-08-04T18:39:30.035Z
+total_count: 6
+last_updated: 2026-08-05T17:47:25.725Z
 ---
 
 # Broken Windows Ledger
@@ -20,6 +20,7 @@ last_updated: 2026-08-04T18:39:30.035Z
 | 3 | 04 | stub | messages/it.ts |  | Map Crea avviso CTA string only — map wiring deferred (D-117 optional) | open |  | 2026-08-01T14:31:47.738Z |  |
 | 4 | 04 | unrun-verify | app/api/alerts/matches/route.ts |  | npx next build blocked by pre-existing maplibre-gl Turbopack error | open |  | 2026-08-01T14:35:17.427Z |  |
 | 5 | 06 | stub | app/admin/page.tsx | 8 | Auth gate TODO — Plan 03 middleware (D-48) | open |  | 2026-08-04T18:39:30.035Z |  |
+| 6 | 08 | deviation | .planning/phases/08-subito-regalo-url-matrix-venice-padova-veneto-all-categories/08-PADOVA-SPIKE.md |  | Padova spike coord gate FAIL — 0/2 detail pages with embed coords | open |  | 2026-08-05T17:47:25.725Z |  |
 
 ````json
 [
@@ -81,6 +82,18 @@ last_updated: 2026-08-04T18:39:30.035Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-04T18:39:30.035Z",
+    "resolved_at": null
+  },
+  {
+    "id": 6,
+    "kind": "deviation",
+    "phase": "08",
+    "file": ".planning/phases/08-subito-regalo-url-matrix-venice-padova-veneto-all-categories/08-PADOVA-SPIKE.md",
+    "line": null,
+    "description": "Padova spike coord gate FAIL — 0/2 detail pages with embed coords",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-05T17:47:25.725Z",
     "resolved_at": null
   }
 ]
