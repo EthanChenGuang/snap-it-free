@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { matchesSubitoCategory } from './subito-categories';
+import { getSubitoCategoryLabel, matchesSubitoCategory } from './subito-categories';
 
 describe('matchesSubitoCategory', () => {
   it('prefers listing.category DB slug over title inference (D-29)', () => {
@@ -21,5 +21,30 @@ describe('matchesSubitoCategory', () => {
     expect(
       matchesSubitoCategory({ title: 'Monitor 24 pollici', category: null }, 'informatica'),
     ).toBe(true);
+  });
+});
+
+describe('getSubitoCategoryLabel', () => {
+  it('returns Italian catalog label by default', () => {
+    expect(getSubitoCategoryLabel('informatica', 'it')).toBe('Informatica');
+    expect(getSubitoCategoryLabel('all', 'it')).toBe('Tutte');
+  });
+
+  it('returns category_en when locale is en and column populated (D-31)', () => {
+    expect(
+      getSubitoCategoryLabel('informatica', 'en', {
+        category_en: 'Computing',
+        category_zh: '电脑',
+      }),
+    ).toBe('Computing');
+  });
+
+  it('returns category_zh when locale is zh and column populated (D-31)', () => {
+    expect(
+      getSubitoCategoryLabel('informatica', 'zh', {
+        category_en: 'Computing',
+        category_zh: '电脑',
+      }),
+    ).toBe('电脑');
   });
 });

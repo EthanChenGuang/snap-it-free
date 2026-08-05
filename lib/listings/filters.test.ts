@@ -17,14 +17,24 @@ const baseListing: ListingRow = {
 };
 
 describe('filterByZone', () => {
-  it('returns all zoned listings when zone is All', () => {
+  it('returns zoned listings and zone-null rows with coords when zone is All (D-22)', () => {
+    const padovaNoZone: ListingRow = {
+      ...baseListing,
+      id: '33333333-3333-3333-3333-333333333333',
+      zone: null,
+      city: 'padova',
+      lat: 45.41,
+      lng: 11.88,
+    };
     const listings: ListingRow[] = [
       baseListing,
       { ...baseListing, id: '22222222-2222-2222-2222-222222222222', zone: 'lido_murano' },
-      { ...baseListing, id: '33333333-3333-3333-3333-333333333333', zone: null },
+      padovaNoZone,
+      { ...baseListing, id: '44444444-4444-4444-4444-444444444444', zone: null, lat: null, lng: null },
     ];
 
-    expect(filterByZone(listings, 'All')).toHaveLength(2);
+    expect(filterByZone(listings, 'All')).toHaveLength(3);
+    expect(filterByZone(listings, 'All')).toContainEqual(padovaNoZone);
   });
 
   it('excludes wrong zone', () => {
@@ -37,14 +47,28 @@ describe('filterByZone', () => {
     expect(filterByZone(listings, 'centro_storico')[0]?.zone).toBe('centro_storico');
   });
 
-  it('excludes zone-null rows from feed helpers', () => {
+  it('excludes zone-null Padova row from Venice zone chips (D-22)', () => {
+    const padovaNoZone: ListingRow = {
+      ...baseListing,
+      id: '33333333-3333-3333-3333-333333333333',
+      zone: null,
+      city: 'padova',
+      lat: 45.41,
+      lng: 11.88,
+    };
+    const listings: ListingRow[] = [baseListing, padovaNoZone];
+
+    expect(filterByZone(listings, 'centro_storico')).toEqual([baseListing]);
+    expect(filterByZone(listings, 'centro_storico')).not.toContainEqual(padovaNoZone);
+  });
+
+  it('excludes zone-null rows without coords from All', () => {
     const listings: ListingRow[] = [
       baseListing,
-      { ...baseListing, id: '33333333-3333-3333-3333-333333333333', zone: null },
+      { ...baseListing, id: '33333333-3333-3333-3333-333333333333', zone: null, lat: null, lng: null },
     ];
 
     expect(filterByZone(listings, 'All')).toEqual([baseListing]);
-    expect(filterByZone(listings, 'centro_storico')).toEqual([baseListing]);
   });
 });
 

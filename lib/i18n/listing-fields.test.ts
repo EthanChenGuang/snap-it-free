@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { resolveListingDescription, resolveListingTitle } from '@/lib/i18n/listing-fields';
+import {
+  resolveListingCategory,
+  resolveListingDescription,
+  resolveListingTitle,
+} from '@/lib/i18n/listing-fields';
 
 describe('resolveListingTitle', () => {
   it('returns title_en for English when present', () => {
@@ -64,5 +68,33 @@ describe('resolveListingDescription', () => {
 
   it('returns null when no description fields provided', () => {
     expect(resolveListingDescription({}, 'en')).toBeNull();
+  });
+});
+
+describe('resolveListingCategory', () => {
+  it('returns category_en when locale en and column populated (D-31)', () => {
+    expect(
+      resolveListingCategory(
+        { category: 'informatica', category_en: 'Computing', category_zh: '电脑' },
+        'en',
+      ),
+    ).toBe('Computing');
+  });
+
+  it('returns category_zh when locale zh and column populated (D-31)', () => {
+    expect(
+      resolveListingCategory(
+        { category: 'informatica', category_en: 'Computing', category_zh: '电脑' },
+        'zh',
+      ),
+    ).toBe('电脑');
+  });
+
+  it('falls back to Italian catalog label when translation absent', () => {
+    expect(resolveListingCategory({ category: 'informatica' }, 'en')).toBe('Informatica');
+  });
+
+  it('returns null when category and inference both absent', () => {
+    expect(resolveListingCategory({ category: null, title: 'Misc item' }, 'it')).toBeNull();
   });
 });
