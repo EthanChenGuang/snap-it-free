@@ -5,8 +5,8 @@ milestone_name: milestone
 current_phase: 07
 current_phase_name: deploy it to Vercel
 status: executing
-stopped_at: Completed 06-09-PLAN.md
-last_updated: "2026-08-05T14:58:00.239Z"
+stopped_at: Phase 8 context gathered
+last_updated: "2026-08-05T16:52:55.689Z"
 last_activity: 2026-08-05
 last_activity_desc: "Completed quick task 260805-ots: admin cleanup for out-of-date scraper records"
 progress:
@@ -224,7 +224,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-04T20:11:01.438Z
-Stopped at: Completed 06-09-PLAN.md
-Resume file: None
+Last session: 2026-08-05T16:52:55.670Z
+Stopped at: Phase 8 context gathered
+Resume file: .planning/phases/08-subito-regalo-url-matrix-venice-padova-veneto-all-categories/08-CONTEXT.md
 Next: /gsd-execute-phase 5
