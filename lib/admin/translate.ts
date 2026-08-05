@@ -27,6 +27,9 @@ export const TRANSLATION_SYSTEM_PROMPT =
 
 const MAX_INPUT_CHARS = 2000;
 
+export const OPENROUTER_TIMEOUT_MS = 8000;
+export const GEMINI_TIMEOUT_MS = 8000;
+
 export function truncateTranslationInput(value: string | null | undefined): string {
   if (!value) {
     return '';
@@ -69,23 +72,65 @@ function parseTranslationJson(raw: string): TranslationOutput | null {
   }
 }
 
+async function callOpenRouterProvider(
+  prompt: string,
+  options: { openRouterApiKey?: string; openRouterModel?: string; fetchFn?: typeof fetch },
+): Promise<string | null> {
+  if (!options.openRouterApiKey) return null;
+  const fetchFn = options.fetchFn ?? fetch;
+  try {
+    const response = await fetchFn('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${options.openRouterApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: options.openRouterModel ?? 'google/gemini-3.5-flash',
+        messages: [
+          { role: 'system', content: TRANSLATION_SYSTEM_PROMPT },
+          { role: 'user', content: prompt },
+        ],
+      }),
+      signal: AbortSignal.timeout(OPENROUTER_TIMEOUT_MS),
+    });
+    if (!response.ok) return null;
+    const body = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    return body.choices?.[0]?.message?.content ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function callGeminiProvider(
+  prompt: string,
+  options: { geminiApiKey?: string },
+): Promise<string | null> {
+  if (!options.geminiApiKey) return null;
+  try {
+    const { GoogleGenAI } = await import('@google/genai');
+    const ai = new GoogleGenAI({ apiKey: options.geminiApiKey });
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+      config: {
+        systemInstruction: TRANSLATION_SYSTEM_PROMPT,
+        temperature: 0.2,
+        httpOptions: { timeout: GEMINI_TIMEOUT_MS },
+      },
+    });
+    return response.text ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function translateListing(
   _input: TranslationInput,
   deps: TranslateDeps,
 ): Promise<TranslateResult> {
-  let geminiRaw: string | null = null;
-  try {
-    geminiRaw = await deps.geminiGenerate();
-  } catch {
-    geminiRaw = null;
-  }
-  if (geminiRaw != null) {
-    const parsed = parseTranslationJson(geminiRaw);
-    if (parsed) {
-      return { ok: true, translations: parsed };
-    }
-  }
-
   let openRouterRaw: string | null = null;
   try {
     openRouterRaw = await deps.openRouterGenerate();
@@ -99,10 +144,23 @@ export async function translateListing(
     }
   }
 
+  let geminiRaw: string | null = null;
+  try {
+    geminiRaw = await deps.geminiGenerate();
+  } catch {
+    geminiRaw = null;
+  }
+  if (geminiRaw != null) {
+    const parsed = parseTranslationJson(geminiRaw);
+    if (parsed) {
+      return { ok: true, translations: parsed };
+    }
+  }
+
   return { ok: false, queue: true, error: 'All translation providers failed' };
 }
 
-/** Production wrapper — Gemini primary, OpenRouter fallback (D-26, D-55) */
+/** Production wrapper — OpenRouter primary, Gemini fallback */
 export async function translateListingWithProviders(
   input: TranslationInput,
   options: {
@@ -112,54 +170,11 @@ export async function translateListingWithProviders(
     fetchFn?: typeof fetch;
   } = {},
 ): Promise<TranslateResult> {
-  const fetchFn = options.fetchFn ?? fetch;
   const prompt = buildPromptPayload(input);
 
   return translateListing(input, {
-    geminiGenerate: async () => {
-      if (!options.geminiApiKey) return null;
-      try {
-        const { GoogleGenAI } = await import('@google/genai');
-        const ai = new GoogleGenAI({ apiKey: options.geminiApiKey });
-        const response = await ai.models.generateContent({
-          model: 'gemini-2.0-flash',
-          contents: prompt,
-          config: {
-            systemInstruction: TRANSLATION_SYSTEM_PROMPT,
-            temperature: 0.2,
-          },
-        });
-        return response.text ?? null;
-      } catch {
-        return null;
-      }
-    },
-    openRouterGenerate: async () => {
-      if (!options.openRouterApiKey) return null;
-      try {
-        const response = await fetchFn('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${options.openRouterApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: options.openRouterModel ?? 'google/gemini-2.0-flash-001',
-            messages: [
-              { role: 'system', content: TRANSLATION_SYSTEM_PROMPT },
-              { role: 'user', content: prompt },
-            ],
-          }),
-        });
-        if (!response.ok) return null;
-        const body = (await response.json()) as {
-          choices?: Array<{ message?: { content?: string } }>;
-        };
-        return body.choices?.[0]?.message?.content ?? null;
-      } catch {
-        return null;
-      }
-    },
+    geminiGenerate: async () => callGeminiProvider(prompt, options),
+    openRouterGenerate: async () => callOpenRouterProvider(prompt, options),
   });
 }
 
@@ -175,36 +190,10 @@ export async function translateListingFields(
   } = {},
 ): Promise<TranslateResult> {
   if (provider === 'openrouter') {
+    const prompt = buildPromptPayload(input);
     return translateListing(input, {
       geminiGenerate: async () => null,
-      openRouterGenerate: async () => {
-        if (!options.openRouterApiKey) return null;
-        const fetchFn = options.fetchFn ?? fetch;
-        const prompt = buildPromptPayload(input);
-        try {
-          const response = await fetchFn('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${options.openRouterApiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: options.openRouterModel ?? 'google/gemini-2.0-flash-001',
-              messages: [
-                { role: 'system', content: TRANSLATION_SYSTEM_PROMPT },
-                { role: 'user', content: prompt },
-              ],
-            }),
-          });
-          if (!response.ok) return null;
-          const body = (await response.json()) as {
-            choices?: Array<{ message?: { content?: string } }>;
-          };
-          return body.choices?.[0]?.message?.content ?? null;
-        } catch {
-          return null;
-        }
-      },
+      openRouterGenerate: async () => callOpenRouterProvider(prompt, options),
     });
   }
 
