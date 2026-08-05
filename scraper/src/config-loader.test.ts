@@ -92,6 +92,25 @@ describe('loadSourceConfig', () => {
     expect(config!.enabled).toBe(false);
   });
 
+  it('merges Padova informatica URL from DB over 3-URL fallback (D-18)', async () => {
+    const padovaUrl =
+      'https://www.subito.it/annunci-veneto/regalo/informatica/padova/padova/';
+    const supabase = mockSupabase({
+      source: {
+        slug: 'subito',
+        target_urls: [padovaUrl],
+        anti_block_preset: 'standard',
+        enabled: true,
+        implementation_status: 'live',
+      },
+    });
+
+    const config = await loadSourceConfig(supabase, 'subito');
+    expect(config!.urls).toEqual([padovaUrl]);
+    expect(config!.urls[0]).toContain('/padova/padova/');
+    expect(config!.urls).not.toEqual([...SUBITO_CATEGORY_URLS]);
+  });
+
   it('defaults preset to standard when anti_block_preset is missing (D-21)', async () => {
     const supabase = mockSupabase({
       source: {
