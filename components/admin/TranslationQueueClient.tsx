@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { translationMessages } from '@/components/admin/admin-messages';
 import { sourceDisplayNames } from '@/components/admin/admin-messages';
 import type { TranslationQueueItem } from '@/lib/admin/types';
@@ -11,6 +12,7 @@ type TranslationQueueClientProps = {
 };
 
 export function TranslationQueueClient({ initialItems }: TranslationQueueClientProps) {
+  const router = useRouter();
   const [items, setItems] = useState(initialItems);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -62,6 +64,7 @@ export function TranslationQueueClient({ initialItems }: TranslationQueueClientP
     try {
       const result = await postRetry({ listing_ids: [listingId] });
       refreshFromResponse(result.processed);
+      router.refresh();
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : translationMessages.retrying);
     } finally {
@@ -79,6 +82,7 @@ export function TranslationQueueClient({ initialItems }: TranslationQueueClientP
           : { all_pending: true as const };
       const result = await postRetry(body);
       refreshFromResponse(result.processed);
+      router.refresh();
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : translationMessages.retryAll);
     } finally {
