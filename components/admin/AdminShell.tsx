@@ -53,8 +53,6 @@ export function AdminShell({
   footerStats,
 }: AdminShellProps) {
   const pathname = usePathname();
-  const activeNavItem = adminNavItems.find((item) => isNavActive(pathname, item.href));
-  const pageTitle = activeNavItem ? adminNav[activeNavItem.key] : adminShellMessages.brandTitle;
 
   return (
     <div className="min-h-screen bg-background text-on-background">
@@ -112,10 +110,7 @@ export function AdminShell({
       </aside>
 
       <div className="flex min-h-screen flex-col md:ml-64">
-        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-outline-variant bg-surface px-gutter">
-          <div className="flex items-center gap-3">
-            <h2 className="text-h2 font-semibold text-primary">{pageTitle}</h2>
-          </div>
+        <header className="sticky top-0 z-10 flex h-16 items-center justify-end border-b border-outline-variant bg-surface px-gutter">
           <div className="flex items-center gap-4">
             {pendingTranslationsCount > 0 && (
               <Link
