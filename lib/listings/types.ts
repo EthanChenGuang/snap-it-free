@@ -16,6 +16,13 @@ export type ListingRow = {
   lat: number | null;
   lng: number | null;
   zone: VeniceZone | null;
+  /** Phase 8 location columns — optional until migration 020 applied */
+  city?: string | null;
+  region?: string | null;
+  /** Phase 6/8 category columns — optional until migration applied */
+  category?: string | null;
+  category_en?: string | null;
+  category_zh?: string | null;
   posted_at: string;
   expires_at: string;
   status: ListingStatus;
