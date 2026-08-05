@@ -38,8 +38,8 @@ export const messages: Messages = {
   },
   list: {
     searchPlaceholder: 'Search free items near you…',
-    emptyTitle: 'No listings found',
-    emptyDescription: 'Try changing your search or category.',
+    emptyTitle: 'No listings match your filters',
+    emptyDescription: 'Try selecting the Tutte category or adjusting zone filters.',
     refreshing: 'Refreshing…',
   },
   post: {

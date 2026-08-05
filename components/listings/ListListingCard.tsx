@@ -2,9 +2,8 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { inferListingCategory } from '@/lib/listings/categories';
+import { resolveListingCategory, resolveListingTitle } from '@/lib/i18n/listing-fields';
 import type { ListingRow } from '@/lib/listings/types';
-import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
@@ -12,16 +11,30 @@ type ListListingCardProps = {
   listing: ListingRow;
 };
 
+function listingLocationLabel(
+  listing: ListingRow,
+  zoneLabel: ReturnType<typeof useMessages>['zoneLabel'],
+): string {
+  if (listing.zone) {
+    return zoneLabel(listing.zone);
+  }
+  if (listing.city) {
+    return listing.city.charAt(0).toUpperCase() + listing.city.slice(1);
+  }
+  return '';
+}
+
 /** Stitch listing_feed Notion card — image, metadata, full-width Claim Item CTA. */
 export function ListListingCard({ listing }: ListListingCardProps) {
-  const { language, messages, zoneLabel, categoryLabel, formatRelativeTime } = useMessages();
+  const { language, messages, zoneLabel, formatRelativeTime } = useMessages();
   const displayTitle = resolveListingTitle(listing, language);
+  const categoryLabel = resolveListingCategory(listing, language);
 
   const router = useRouter();
   const isClaimed = listing.status === 'claimed';
-  const zoneText = listing.zone ? zoneLabel(listing.zone) : messages.listing.approximateZone;
+  const locationText = listingLocationLabel(listing, zoneLabel);
   const postedLabel = formatRelativeTime(listing.posted_at);
-  const inferredCategory = inferListingCategory(listing.title);
+  const isVeniceZoned = listing.zone != null;
 
   const handleClaimClick = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -57,6 +70,18 @@ export function ListListingCard({ listing }: ListListingCardProps) {
             <span className="material-symbols-outlined">image</span>
           </div>
         )}
+        {categoryLabel && (
+          <span
+            className={cn(
+              'absolute left-space-sm top-space-sm rounded-sm px-space-sm py-space-xs text-[10px] font-bold uppercase tracking-wider',
+              isVeniceZoned
+                ? 'border border-outline-variant bg-[#f1f1f0] text-on-surface'
+                : 'border border-transparent bg-surface-container-high text-on-surface',
+            )}
+          >
+            {categoryLabel}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col">
@@ -70,18 +95,15 @@ export function ListListingCard({ listing }: ListListingCardProps) {
         </div>
 
         <div className="mb-space-md flex flex-wrap items-center gap-x-space-sm gap-y-space-xs text-label-sm text-on-surface-variant">
-          {inferredCategory && (
-            <span className="rounded-sm border border-outline-variant bg-surface px-space-sm py-space-xs text-[10px] font-bold uppercase tracking-wider">
-              {categoryLabel(inferredCategory)}
-            </span>
-          )}
           <span>{postedLabel}</span>
         </div>
 
-        <div className="mb-space-md flex items-center gap-1 text-label-sm text-on-surface-variant">
-          <span className="material-symbols-outlined text-[14px]">location_on</span>
-          <span className="truncate">{zoneText}</span>
-        </div>
+        {locationText && (
+          <div className="mb-space-md flex items-center gap-1 text-label-sm text-on-surface-variant">
+            <span className="material-symbols-outlined text-[14px]">location_on</span>
+            <span className="truncate">{locationText}</span>
+          </div>
+        )}
       </div>
 
       <button

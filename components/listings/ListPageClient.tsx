@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CategoryFilterChips } from '@/components/listings/CategoryFilterChips';
+import { SubitoCategoryFilterChips } from '@/components/listings/SubitoCategoryFilterChips';
 import { ListListingCard } from '@/components/listings/ListListingCard';
-import {
-  matchesListingCategory,
-  type ListingCategory,
-} from '@/lib/listings/categories';
 import { excludeReportedIds } from '@/lib/listings/filters';
+import {
+  matchesSubitoCategory,
+  type SubitoCategoryFilter,
+} from '@/lib/listings/subito-categories';
 import { useListingsPoll } from '@/lib/listings/useListingsPoll';
 import { readReportedIds, REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
 import type { ListingRow } from '@/lib/listings/types';
@@ -22,7 +22,7 @@ export function ListPageClient({ initialListings }: ListPageClientProps) {
 
   const { listings } = useListingsPoll(initialListings);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<ListingCategory>('All');
+  const [selectedCategory, setSelectedCategory] = useState<SubitoCategoryFilter>('all');
   const [reportedIds, setReportedIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export function ListPageClient({ initialListings }: ListPageClientProps) {
     const query = searchQuery.trim().toLowerCase();
 
     return visible.filter((listing) => {
-      if (!matchesListingCategory(listing.title, selectedCategory)) return false;
+      if (!matchesSubitoCategory(listing, selectedCategory)) return false;
       if (!query) return true;
       return listing.title.toLowerCase().includes(query);
     });
@@ -59,7 +59,7 @@ export function ListPageClient({ initialListings }: ListPageClientProps) {
             className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-3 pl-12 pr-4 text-body-md text-on-surface transition-all placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
-        <CategoryFilterChips
+        <SubitoCategoryFilterChips
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
         />

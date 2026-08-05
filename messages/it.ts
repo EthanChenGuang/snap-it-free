@@ -40,8 +40,8 @@ export const messages = {
   },
   list: {
     searchPlaceholder: 'Cerca oggetti vicino a te…',
-    emptyTitle: 'Nessun annuncio trovato',
-    emptyDescription: 'Prova a modificare la ricerca o la categoria.',
+    emptyTitle: 'Nessun annuncio corrisponde ai filtri',
+    emptyDescription: 'Prova a selezionare Tutte le categorie o modifica i filtri zona.',
     refreshing: 'Aggiornamento…',
   },
   post: {

@@ -38,8 +38,8 @@ export const messages: Messages = {
   },
   list: {
     searchPlaceholder: '搜索附近的免费物品…',
-    emptyTitle: '未找到相关物品',
-    emptyDescription: '试试修改搜索词或分类。',
+    emptyTitle: '暂无符合条件的物品',
+    emptyDescription: '尝试选择「Tutte」分类或调整区域筛选。',
     refreshing: '刷新中…',
   },
   post: {
