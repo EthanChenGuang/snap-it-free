@@ -6,9 +6,9 @@ current_phase: 07
 current_phase_name: deploy it to Vercel
 status: executing
 stopped_at: Completed 06-09-PLAN.md
-last_updated: "2026-08-05T14:12:00.000Z"
+last_updated: "2026-08-05T14:44:45.536Z"
 last_activity: 2026-08-05
-last_activity_desc: Completed quick task 260805-jjb — map stuck on loading fix
+last_activity_desc: "Completed quick task 260805-n1j: fix sidebar translation queue badge not refreshing after retry"
 progress:
   total_phases: 7
   completed_phases: 6
@@ -195,6 +195,7 @@ None yet.
 | 260804-j8k | Fix marker overlapping and clustering on Mappa (spiderfy) | 2026-08-04 | — | [260804-j8k-map-marker-spiderfy](./quick/260804-j8k-map-marker-spiderfy/) |
 | 260804-k9m | Map markers on land + Stitch pin styling | 2026-08-04 | — | [260804-k9m-map-markers-land-stitch](./quick/260804-k9m-map-markers-land-stitch/) |
 | 260805-jjb | Map stuck on loading — remove nested dynamic import, fix worker order | 2026-08-05 | — | [260805-jjb-the-map-is-not-loaded-and-the-homepage-h](./quick/260805-jjb-the-map-is-not-loaded-and-the-homepage-h/) |
+| 22 | show bottom-right notification on translation retry success | 2026-08-05 | bf7000a | — |
 
 ### Blockers/Concerns
 
