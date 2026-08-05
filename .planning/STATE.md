@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 08
 current_phase_name: subito-regalo-url-matrix-venice-padova-veneto-all-categories
-status: executing
-stopped_at: Completed 08-03-PLAN.md
-last_updated: "2026-08-05T17:53:01.619Z"
+status: verifying
+stopped_at: Completed 08-05-PLAN.md
+last_updated: "2026-08-05T17:55:51.670Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 08 execution started
 progress:
   total_phases: 8
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 41
-  completed_plans: 36
+  completed_plans: 37
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 
 Phase: 08 (subito-regalo-url-matrix-venice-padova-veneto-all-categories) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-05 — Phase 08 execution started
 
-Progress: [█████████░] 88%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
@@ -95,6 +95,7 @@ Progress: [█████████░] 88%
 | Phase 08 P02 | 3min | 3 tasks | 5 files |
 | Phase 08 P04 | 3 | 3 tasks | 9 files |
 | Phase 08 P03 | 3 | 3 tasks | 8 files |
+| Phase 08 P05 | 3 | 3 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -178,6 +179,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Schema city-keyed superRefine uses PADOVA bbox from extract.ts constants (D-24)
 - [Phase ?]: Category translate passes Italian catalog label, not slug, to translation provider (D-31)
 - [Phase ?]: Live Padova persist deferred — SUPABASE env missing; unit tests satisfy D-18 contract
+- [Phase ?]: SubitoCategoryFilterChips shared between map panel and Elenco inline variants
+- [Phase ?]: resolveListingCategory delegates to getSubitoCategoryLabel for i18n consistency
 
 ### Pending Todos
 
@@ -237,7 +240,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T17:53:01.603Z
-Stopped at: Completed 08-03-PLAN.md
+Last session: 2026-08-05T17:55:51.653Z
+Stopped at: Completed 08-05-PLAN.md
 Resume file: None
 Next: /gsd-execute-phase 5
