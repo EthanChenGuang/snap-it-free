@@ -4,6 +4,7 @@ import { CanonicalListingSchema, type CanonicalListing } from './schema.js';
 import { loadZonePolygons, tagZone } from './zone-tag.js';
 import type { RawListing } from '../subito/extract.js';
 import { extractCategoryFromSubitoUrl } from '../subito/normalize.js';
+import { parseRegaloCategoryUrl } from '../subito/url-context.js';
 
 export type NormalizeResult = CanonicalListing | { reject: string };
 
@@ -19,6 +20,10 @@ export function normalizeRawListing(raw: RawListing): NormalizeResult {
   const zone =
     raw.lat != null && raw.lng != null ? tagZone(raw.lat, raw.lng, zonePolygons) : null;
 
+  const urlContext = raw.source_category_url
+    ? parseRegaloCategoryUrl(raw.source_category_url)
+    : null;
+
   const candidate = {
     source: 'subito' as const,
     external_id: raw.external_id,
@@ -28,6 +33,8 @@ export function normalizeRawListing(raw: RawListing): NormalizeResult {
     lat: raw.lat,
     lng: raw.lng,
     zone,
+    city: urlContext?.city ?? null,
+    region: urlContext?.region ?? null,
     status: 'active' as const,
     posted_at: postedAt,
     expires_at: expiresAt,

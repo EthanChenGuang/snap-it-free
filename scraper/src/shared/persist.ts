@@ -68,6 +68,8 @@ export async function persistListing(
     lat: listing.lat,
     lng: listing.lng,
     zone: listing.zone,
+    city: listing.city ?? null,
+    region: listing.region ?? null,
     status: listing.status,
     posted_at: listing.posted_at.toISOString(),
     expires_at: listing.expires_at.toISOString(),
