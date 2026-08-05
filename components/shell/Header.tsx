@@ -1,16 +1,33 @@
 'use client';
 
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { NavMenuDrawer } from '@/components/shell/NavMenuDrawer';
-import { HeaderLanguageDropdown } from '@/components/shell/HeaderLanguageDropdown';
 import {
   setMapSearchOpen,
   toggleMapSearchOpen,
   useMapSearchOpen,
 } from '@/lib/ui/map-search-ui';
 import { useMessages } from '@/lib/i18n/useMessages';
+
+// Both pull the radix/vaul overlay stack, and both start closed. Keeping them out
+// of app/layout.js matters: the dev server truncates that chunk at exactly 2 MiB
+// while webpack rewrites it, so the browser gets an unparseable chunk, hydration
+// dies, and the map's dynamic import strands on its loading fallback forever.
+// A bare import() does not split in Next's dev webpack build; next/dynamic does.
+const NavMenuDrawer = dynamic(
+  () => import('@/components/shell/NavMenuDrawer').then((mod) => mod.NavMenuDrawer),
+  { ssr: false },
+);
+
+const HeaderLanguageDropdown = dynamic(
+  () =>
+    import('@/components/shell/HeaderLanguageDropdown').then(
+      (mod) => mod.HeaderLanguageDropdown,
+    ),
+  { ssr: false },
+);
 
 export function Header() {
   const { messages } = useMessages();
