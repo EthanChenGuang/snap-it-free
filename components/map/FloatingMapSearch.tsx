@@ -1,6 +1,8 @@
 'use client';
 
+import { SubitoCategoryFilterChips } from '@/components/listings/SubitoCategoryFilterChips';
 import { ZoneFilterChips } from '@/components/map/ZoneFilterChips';
+import type { SubitoCategoryFilter } from '@/lib/listings/subito-categories';
 import type { ZoneChip } from '@/lib/listings/types';
 import { useMessages } from '@/lib/i18n/useMessages';
 
@@ -9,19 +11,23 @@ type FloatingMapSearchProps = {
   onQueryChange: (query: string) => void;
   selectedZone: ZoneChip;
   onZoneChange: (zone: ZoneChip) => void;
+  selectedCategory: SubitoCategoryFilter;
+  onCategoryChange: (category: SubitoCategoryFilter) => void;
 };
 
-/** Stitch map_explorer `.floating-search` — input + zone chips over the map canvas. */
+/** Stitch map_explorer `.floating-search` — input + zone + category chips over the map canvas. */
 export function FloatingMapSearch({
   query,
   onQueryChange,
   selectedZone,
   onZoneChange,
+  selectedCategory,
+  onCategoryChange,
 }: FloatingMapSearchProps) {
   const { messages } = useMessages();
 
   return (
-    <div className="pointer-events-auto absolute left-1/2 top-space-md z-40 flex w-full max-w-md -translate-x-1/2 flex-col gap-space-sm px-gutter">
+    <div className="pointer-events-auto absolute left-1/2 top-space-md z-40 flex w-full max-w-2xl -translate-x-1/2 flex-col gap-space-md px-gutter">
       <div className="flex items-center rounded-lg border border-outline bg-surface px-space-md py-space-sm">
         <span className="material-symbols-outlined mr-space-sm text-on-surface-variant">
           search
@@ -36,6 +42,11 @@ export function FloatingMapSearch({
         />
       </div>
       <ZoneFilterChips selectedZone={selectedZone} onZoneChange={onZoneChange} />
+      <SubitoCategoryFilterChips
+        variant="panel"
+        selectedCategory={selectedCategory}
+        onCategoryChange={onCategoryChange}
+      />
     </div>
   );
 }

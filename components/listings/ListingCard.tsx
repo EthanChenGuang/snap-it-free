@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { forwardRef } from 'react';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { ReservedBadge } from '@/components/listings/ReservedBadge';
-import { resolveListingTitle } from '@/lib/i18n/listing-fields';
+import { resolveListingCategory, resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { useMessages } from '@/lib/i18n/useMessages';
 import type { ListingRow } from '@/lib/listings/types';
 import { cn } from '@/lib/utils';
@@ -23,12 +23,27 @@ function sourceBadgeLabel(
   return messages.listing.sourceSubito;
 }
 
+function listingLocationLabel(
+  listing: ListingRow,
+  zoneLabel: ReturnType<typeof useMessages>['zoneLabel'],
+): string {
+  if (listing.zone) {
+    return zoneLabel(listing.zone).toUpperCase();
+  }
+  if (listing.city) {
+    return listing.city.toUpperCase();
+  }
+  return '';
+}
+
 export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
   function ListingCard({ listing, isSelected }, ref) {
     const { language, messages, zoneLabel, formatRelativeTime } = useMessages();
     const displayTitle = resolveListingTitle(listing, language);
-    const zoneText = listing.zone ? zoneLabel(listing.zone) : messages.listing.approximateZone;
+    const categoryLabel = resolveListingCategory(listing, language);
+    const locationText = listingLocationLabel(listing, zoneLabel);
     const postedLabel = formatRelativeTime(listing.posted_at);
+    const isVeniceZoned = listing.zone != null;
 
     return (
       <Link
@@ -69,9 +84,25 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
 
         <div className="flex items-start justify-between gap-space-sm">
           <div className="min-w-0">
-            <p className="text-label-sm uppercase tracking-wider text-secondary">
-              {zoneText}
-            </p>
+            <div className="mb-1 flex flex-col gap-1">
+              {locationText && (
+                <p className="text-label-sm uppercase tracking-widest text-secondary">
+                  {locationText}
+                </p>
+              )}
+              {categoryLabel && (
+                <span
+                  className={cn(
+                    'w-max rounded-full px-2 py-1 text-label-sm',
+                    isVeniceZoned
+                      ? 'bg-[#f1f1f0] text-on-surface'
+                      : 'border border-transparent bg-surface-container-high text-on-surface',
+                  )}
+                >
+                  {categoryLabel}
+                </span>
+              )}
+            </div>
             <h3 className="text-body-lg font-semibold leading-snug text-on-surface group-hover:underline">
               {displayTitle}
             </h3>
