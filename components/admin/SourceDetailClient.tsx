@@ -2,8 +2,12 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { adminShellMessages, sourcesMessages } from '@/components/admin/admin-messages';
+import { RegaloUrlMatrix } from '@/components/admin/RegaloUrlMatrix';
+import { ReplaceUrlsConfirmDialog } from '@/components/admin/ReplaceUrlsConfirmDialog';
+import { dedupeUrls } from '@/lib/admin/subito-regalo-catalog';
+import { RECOMMENDED_SUBITO_SEED_URLS } from '@/lib/admin/subito-recommended-seed';
 import type { AntiBlockPreset, SourceDetail } from '@/lib/admin/types';
 import {
   formatThresholdPercent,
@@ -46,6 +50,32 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [seedConfirmOpen, setSeedConfirmOpen] = useState(false);
+  const [matrixResetToken, setMatrixResetToken] = useState(0);
+
+  const isSubito = initialSource.slug === 'subito';
+
+  const currentUrlCount = useMemo(
+    () =>
+      targetUrlsText
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean).length,
+    [targetUrlsText],
+  );
+
+  const applyRecommendedSeed = () => {
+    setTargetUrlsText(RECOMMENDED_SUBITO_SEED_URLS.join('\n'));
+    setMatrixResetToken((token) => token + 1);
+  };
+
+  const handleApplyRecommendedSeedClick = () => {
+    if (currentUrlCount === 0) {
+      applyRecommendedSeed();
+      return;
+    }
+    setSeedConfirmOpen(true);
+  };
 
   const decreaseInterval = () => {
     setInterval((prev) => Math.max(30, prev - 15));
@@ -64,10 +94,12 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
       return;
     }
 
-    const urls = targetUrlsText
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean);
+    const urls = dedupeUrls(
+      targetUrlsText
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean),
+    );
 
     setSaving(true);
     try {
@@ -228,15 +260,27 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
         </div>
 
         <div className="space-y-2 border-b border-outline-variant pb-4">
+          {isSubito ? (
+            <RegaloUrlMatrix
+              targetUrlsText={targetUrlsText}
+              onTargetUrlsChange={setTargetUrlsText}
+              onApplyRecommendedSeedClick={handleApplyRecommendedSeedClick}
+              resetToAllChecked={matrixResetToken}
+            />
+          ) : null}
           <div className="flex items-center justify-between gap-2">
-            <label className="block font-semibold">{sourcesMessages.urlsLabel}</label>
-            <span className="font-mono text-[14px] text-secondary">{sourcesMessages.urlsHelp}</span>
+            <label className="block font-semibold">
+              {isSubito ? '目标 URL' : sourcesMessages.urlsLabel}
+            </label>
+            <span className="font-mono text-[14px] text-secondary">
+              {isSubito ? '每行一个 URL。可手动编辑或使用上方矩阵生成。' : sourcesMessages.urlsHelp}
+            </span>
           </div>
           <textarea
             rows={5}
             value={targetUrlsText}
             onChange={(event) => setTargetUrlsText(event.target.value)}
-            className="max-h-48 w-full overflow-y-auto rounded border border-outline-variant bg-surface-container-low p-3 font-mono text-[14px] leading-relaxed focus:border-primary focus:outline-none"
+            className="max-h-48 w-full resize-y overflow-y-auto rounded border border-outline-variant bg-surface-container-low p-3 font-mono text-[14px] leading-relaxed focus:border-primary focus:outline-none"
             placeholder="https://www.subito.it/annunci-veneto/..."
           />
         </div>
@@ -302,6 +346,15 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
           </div>
         </div>
       </div>
+
+      {isSubito ? (
+        <ReplaceUrlsConfirmDialog
+          open={seedConfirmOpen}
+          onOpenChange={setSeedConfirmOpen}
+          currentCount={currentUrlCount}
+          onConfirmReplace={applyRecommendedSeed}
+        />
+      ) : null}
 
       <div className="sticky bottom-4 flex items-center justify-between rounded border border-outline-variant bg-surface p-4">
         <span className="text-[14px] text-secondary">{sourcesMessages.saveFooterNote}</span>
