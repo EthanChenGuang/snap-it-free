@@ -6,11 +6,11 @@ current_phase: 07
 current_phase_name: deploy it to Vercel
 status: executing
 stopped_at: Completed 06-09-PLAN.md
-last_updated: "2026-08-05T15:23:42.205Z"
+last_updated: "2026-08-05T14:58:00.239Z"
 last_activity: 2026-08-05
-last_activity_desc: "Completed quick task 260805-nx4: registered the app's custom text scale with tailwind-merge so cn() stops silently dropping text-on-primary/text-on-surface, fixing invisible black-on-black text on selected filter chips app-wide"
+last_activity_desc: "Completed quick task 260805-ots: admin cleanup for out-of-date scraper records"
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 6
   total_plans: 36
   completed_plans: 32
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 07 — deploy it to Vercel
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-08-05 - Completed quick task 260805-nx4: registered the app's custom text scale with tailwind-merge so cn() stops silently dropping text-on-primary/text-on-surface, fixing invisible black-on-black text on selected filter chips app-wide
+Last activity: 2026-08-05 - Completed quick task 260805-ots: admin cleanup for out-of-date scraper records
 
 Progress: [██████████] 100%
 
@@ -172,34 +172,32 @@ None yet.
 
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260803-ci1 | add a ngrok link so that I can access the page on mobile phone | 2026-08-03 | — | [260803-ci1-add-a-ngrok-link-so-that-i-can-access-th](./quick/260803-ci1-add-a-ngrok-link-so-that-i-can-access-th/) |
-| 260803-ci2 | map never loads on mobile — investigation & comparison | 2026-08-03 | — | [260803-ci2-map-never-loads-mobile-investigation](./quick/260803-ci2-map-never-loads-mobile-investigation/) |
-| 260803-us0 | map zoom throws center TypeError | 2026-08-03 | — | [260803-us0-map-zoom-throws-center-typeerror](./quick/260803-us0-map-zoom-throws-center-typeerror/) |
-| 260803-us1 | Elenco list scroll region too small; Pubblica did not scroll | 2026-08-03 | c7023f6, 2524d90 | [260803-us1-list-post-scroll-regions](./quick/260803-us1-list-post-scroll-regions/) |
-| 260803-whr | fix Subito geo/zone pipeline so scraped free items surface in Elenco | 2026-08-03 | 8c6f24e, ca573b6, 9956629 | [260803-whr-fix-subito-geo-zone-pipeline-so-scraped-](./quick/260803-whr-fix-subito-geo-zone-pipeline-so-scraped-/) |
-| 260803-wi0 | Research Italian and European free-item source candidates beyond Subito | 2026-08-03 | 893d917 | [260803-wi0-free-item-source-candidates](./quick/260803-wi0-free-item-source-candidates/) |
-| 260805-n1j | fix sidebar translation queue badge not refreshing after retry | 2026-08-05 | 4a0aab1 | [260805-n1j-fix-sidebar-translation-queue-badge-not-](./quick/260805-n1j-fix-sidebar-translation-queue-badge-not-/) |
-| 260804-dn7 | Strict Stitch UI compliance: header search, floating chips, cards, bottom nav | 2026-08-04 | 97e2911, e4004b9, b117d7e | [260804-dn7-strict-ui-compliance-refactor-based-on-p](./quick/260804-dn7-strict-ui-compliance-refactor-based-on-p/) |
-| 260804-e2m | Strict Stitch UI compliance for Elenco list page | 2026-08-04 | dd5ba20 | [260804-e2m-strict-ui-compliance-refactor-for-elenco](./quick/260804-e2m-strict-ui-compliance-refactor-for-elenco/) |
-| 260804-f03 | Strict Stitch UI compliance for item detail page | 2026-08-04 | d3c60e5 | [260804-f03-strict-ui-compliance-refactor-for-item-d](./quick/260804-f03-strict-ui-compliance-refactor-for-item-d/) |
-| 260804-f75 | Strict Stitch UI compliance for Pubblica (Post Free Item) page | 2026-08-04 | 2594ce2 | [260804-f75-strict-ui-compliance-refactor-for-pubbli](./quick/260804-f75-strict-ui-compliance-refactor-for-pubbli/) |
-| 260804-g12 | Strict Stitch UI compliance for Settings page | 2026-08-04 | bca8a16 | [260804-g12-strict-ui-compliance-refactor-for-settings](./quick/260804-g12-strict-ui-compliance-refactor-for-settings/) |
-| 260804-h34 | Settings GENERALE profile banner refactor | 2026-08-04 | 5ccff49 | [260804-h34-refactor-generale-profile-banner-and-setti](./quick/260804-h34-refactor-generale-profile-banner-and-setti/) |
-| 260804-h4c | Wire dark/light theme switching via next-themes and existing appearance preferences | 2026-08-04 | fb270c7 | [260804-h4c-wire-dark-light-theme-switching-via-next](./quick/260804-h4c-wire-dark-light-theme-switching-via-next/) |
-| 260804-h7l | Fix dark theme to strictly follow Stitch DESIGN.md palette | 2026-08-04 | 9efa1a9 | [260804-h7l-fix-dark-theme-to-strictly-follow-stitch](./quick/260804-h7l-fix-dark-theme-to-strictly-follow-stitch/) |
-| 15 | Remove system appearance option, keep Chiaro and Scuro only | 2026-08-04 | 702c4c8 | — |
-| 260804-hed | 中文 / English / Italiano UI language switching (default zh) | 2026-08-04 | c39ef46, decf18b, 467c4ee, 785964d | [260804-hed-english-italiano](./quick/260804-hed-english-italiano/) |
-| 260804-ifm | 当前地图上没有物体的标记 — group collocated pins | 2026-08-04 | — | [260804-ifm-map-markers-not-visible](./quick/260804-ifm-map-markers-not-visible/) |
-| 260804-j8k | Fix marker overlapping and clustering on Mappa (spiderfy) | 2026-08-04 | — | [260804-j8k-map-marker-spiderfy](./quick/260804-j8k-map-marker-spiderfy/) |
-| 260804-k9m | Map markers on land + Stitch pin styling | 2026-08-04 | — | [260804-k9m-map-markers-land-stitch](./quick/260804-k9m-map-markers-land-stitch/) |
-| 260805-jjb | Map stuck on loading — remove nested dynamic import, fix worker order | 2026-08-05 | — | [260805-jjb-the-map-is-not-loaded-and-the-homepage-h](./quick/260805-jjb-the-map-is-not-loaded-and-the-homepage-h/) |
-| 22 | show bottom-right notification on translation retry success | 2026-08-05 | bf7000a | — |
-| 260805-ne9 | make translation retry faster: prefer OpenRouter (cheaper), add timeout, avoid slow sequential double-provider calls | 2026-08-05 | 5e25f21 | [260805-ne9-make-translation-retry-faster-prefer-ope](./quick/260805-ne9-make-translation-retry-faster-prefer-ope/) |
-| 260805-r3k | map hangs on "地图加载中…": split Supabase out of the 5 MB root layout chunk the dev server was truncating | 2026-08-05 | dc3d60e | [260805-r3k-shrink-root-layout-chunk-lazy-supabase](./quick/260805-r3k-shrink-root-layout-chunk-lazy-supabase/) |
-| 25 | fix: catch network errors in fetchRemoteFavoriteIds (Elenco click threw unhandled TypeError) | 2026-08-05 | 6fc0415 | — |
-| 260805-nx4 | fix invisible black-on-black text on selected filter chips (tailwind-merge custom text scale) | 2026-08-05 | 6faef7a | [260805-nx4-fix-invisible-black-on-black-text-on-sel](./quick/260805-nx4-fix-invisible-black-on-black-text-on-sel/) |
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+| 260803-ci1 | add a ngrok link so that I can access the page on mobile phone | 2026-08-03 | — |  | [260803-ci1-add-a-ngrok-link-so-that-i-can-access-th](./quick/260803-ci1-add-a-ngrok-link-so-that-i-can-access-th/) |
+| 260803-ci2 | map never loads on mobile — investigation & comparison | 2026-08-03 | — |  | [260803-ci2-map-never-loads-mobile-investigation](./quick/260803-ci2-map-never-loads-mobile-investigation/) |
+| 260803-us0 | map zoom throws center TypeError | 2026-08-03 | — |  | [260803-us0-map-zoom-throws-center-typeerror](./quick/260803-us0-map-zoom-throws-center-typeerror/) |
+| 260803-us1 | Elenco list scroll region too small; Pubblica did not scroll | 2026-08-03 | c7023f6, 2524d90 |  | [260803-us1-list-post-scroll-regions](./quick/260803-us1-list-post-scroll-regions/) |
+| 260803-whr | fix Subito geo/zone pipeline so scraped free items surface in Elenco | 2026-08-03 | 8c6f24e, ca573b6, 9956629 |  | [260803-whr-fix-subito-geo-zone-pipeline-so-scraped-](./quick/260803-whr-fix-subito-geo-zone-pipeline-so-scraped-/) |
+| 260803-wi0 | Research Italian and European free-item source candidates beyond Subito | 2026-08-03 | 893d917 |  | [260803-wi0-free-item-source-candidates](./quick/260803-wi0-free-item-source-candidates/) |
+| 260805-n1j | fix sidebar translation queue badge not refreshing after retry | 2026-08-05 | 4a0aab1 |  | [260805-n1j-fix-sidebar-translation-queue-badge-not-](./quick/260805-n1j-fix-sidebar-translation-queue-badge-not-/) |
+| 260804-dn7 | Strict Stitch UI compliance: header search, floating chips, cards, bottom nav | 2026-08-04 | 97e2911, e4004b9, b117d7e |  | [260804-dn7-strict-ui-compliance-refactor-based-on-p](./quick/260804-dn7-strict-ui-compliance-refactor-based-on-p/) |
+| 260804-e2m | Strict Stitch UI compliance for Elenco list page | 2026-08-04 | dd5ba20 |  | [260804-e2m-strict-ui-compliance-refactor-for-elenco](./quick/260804-e2m-strict-ui-compliance-refactor-for-elenco/) |
+| 260804-f03 | Strict Stitch UI compliance for item detail page | 2026-08-04 | d3c60e5 |  | [260804-f03-strict-ui-compliance-refactor-for-item-d](./quick/260804-f03-strict-ui-compliance-refactor-for-item-d/) |
+| 260804-f75 | Strict Stitch UI compliance for Pubblica (Post Free Item) page | 2026-08-04 | 2594ce2 |  | [260804-f75-strict-ui-compliance-refactor-for-pubbli](./quick/260804-f75-strict-ui-compliance-refactor-for-pubbli/) |
+| 260804-g12 | Strict Stitch UI compliance for Settings page | 2026-08-04 | bca8a16 |  | [260804-g12-strict-ui-compliance-refactor-for-settings](./quick/260804-g12-strict-ui-compliance-refactor-for-settings/) |
+| 260804-h34 | Settings GENERALE profile banner refactor | 2026-08-04 | 5ccff49 |  | [260804-h34-refactor-generale-profile-banner-and-setti](./quick/260804-h34-refactor-generale-profile-banner-and-setti/) |
+| 260804-h4c | Wire dark/light theme switching via next-themes and existing appearance preferences | 2026-08-04 | fb270c7 |  | [260804-h4c-wire-dark-light-theme-switching-via-next](./quick/260804-h4c-wire-dark-light-theme-switching-via-next/) |
+| 260804-h7l | Fix dark theme to strictly follow Stitch DESIGN.md palette | 2026-08-04 | 9efa1a9 |  | [260804-h7l-fix-dark-theme-to-strictly-follow-stitch](./quick/260804-h7l-fix-dark-theme-to-strictly-follow-stitch/) |
+| 15 | Remove system appearance option, keep Chiaro and Scuro only | 2026-08-04 | 702c4c8 |  | — |
+| 260804-hed | 中文 / English / Italiano UI language switching (default zh) | 2026-08-04 | c39ef46, decf18b, 467c4ee, 785964d |  | [260804-hed-english-italiano](./quick/260804-hed-english-italiano/) |
+| 260804-ifm | 当前地图上没有物体的标记 — group collocated pins | 2026-08-04 | — |  | [260804-ifm-map-markers-not-visible](./quick/260804-ifm-map-markers-not-visible/) |
+| 260804-j8k | Fix marker overlapping and clustering on Mappa (spiderfy) | 2026-08-04 | — |  | [260804-j8k-map-marker-spiderfy](./quick/260804-j8k-map-marker-spiderfy/) |
+| 260804-k9m | Map markers on land + Stitch pin styling | 2026-08-04 | — |  | [260804-k9m-map-markers-land-stitch](./quick/260804-k9m-map-markers-land-stitch/) |
+| 260805-jjb | Map stuck on loading — remove nested dynamic import, fix worker order | 2026-08-05 | — |  | [260805-jjb-the-map-is-not-loaded-and-the-homepage-h](./quick/260805-jjb-the-map-is-not-loaded-and-the-homepage-h/) |
+| 22 | show bottom-right notification on translation retry success | 2026-08-05 | bf7000a |  | — |
+| 260805-ne9 | make translation retry faster: prefer OpenRouter (cheaper), add timeout, avoid slow sequential double-provider calls | 2026-08-05 | 5e25f21 |  | [260805-ne9-make-translation-retry-faster-prefer-ope](./quick/260805-ne9-make-translation-retry-faster-prefer-ope/) |
+| 260805-ots | Add admin action to delete out-of-date scraper records from the database | 2026-08-05 | 02e4dbf | Verified | [260805-ots-add-admin-action-to-delete-out-of-date-s](./quick/260805-ots-add-admin-action-to-delete-out-of-date-s/) |
 
 ### Blockers/Concerns
 
@@ -212,6 +210,7 @@ None yet.
 
 - Phase 6 added: Scraper Admin Console — configurable sources, frequency, anti-block, and auto-translation
 - Phase 7 added: deploy it to Vercel
+- Phase 8 added: Subito regalo URL matrix — Venice & Padova (Veneto), all categories, admin-configurable
 
 ## Deferred Items
 
