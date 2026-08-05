@@ -27,4 +27,28 @@ describe('CanonicalListingSchema', () => {
     const { external_id: _, ...missingId } = validFixture;
     expect(() => CanonicalListingSchema.parse(missingId)).toThrow();
   });
+
+  it('accepts Padova lat/lng when city is padova (D-24)', () => {
+    const result = CanonicalListingSchema.parse({
+      ...validFixture,
+      city: 'padova',
+      region: 'veneto',
+      lat: 45.41,
+      lng: 11.88,
+      zone: null,
+    });
+    expect(result.city).toBe('padova');
+    expect(result.lat).toBe(45.41);
+  });
+
+  it('rejects Padova coords when city is venezia (D-24)', () => {
+    expect(() =>
+      CanonicalListingSchema.parse({
+        ...validFixture,
+        city: 'venezia',
+        lat: 45.41,
+        lng: 11.88,
+      }),
+    ).toThrow();
+  });
 });

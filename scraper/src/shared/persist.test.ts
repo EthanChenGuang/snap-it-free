@@ -3,6 +3,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { persistListing } from './persist.js';
 import type { CanonicalListing } from './schema.js';
 
+vi.mock('../translate/ingest.js', () => ({
+  translateAfterPersist: vi.fn().mockResolvedValue(undefined),
+}));
+
 const baseListing: CanonicalListing = {
   source: 'subito',
   external_id: '655558887',
@@ -12,6 +16,9 @@ const baseListing: CanonicalListing = {
   lat: 45.434,
   lng: 12.338,
   zone: null,
+  city: 'padova',
+  region: 'veneto',
+  category: 'informatica',
   status: 'active',
   posted_at: new Date('2026-07-25T10:00:00Z'),
   expires_at: new Date('2026-07-27T10:00:00Z'),
@@ -20,11 +27,21 @@ const baseListing: CanonicalListing = {
 
 function createMockSupabase(options: {
   existingHash?: string | null;
+  existingId?: string;
   upsertError?: Error | null;
 }) {
-  const upsert = vi.fn().mockResolvedValue({ error: options.upsertError ?? null });
+  const upsertedId = options.existingId ?? 'listing-uuid-1';
+  const single = vi.fn().mockResolvedValue({
+    data: { id: upsertedId },
+    error: options.upsertError ?? null,
+  });
+  const selectAfterUpsert = vi.fn().mockReturnValue({ single });
+  const upsert = vi.fn().mockReturnValue({ select: selectAfterUpsert });
   const maybeSingle = vi.fn().mockResolvedValue({
-    data: options.existingHash != null ? { content_hash: options.existingHash } : null,
+    data:
+      options.existingHash != null
+        ? { id: upsertedId, content_hash: options.existingHash }
+        : null,
     error: null,
   });
 
@@ -62,7 +79,8 @@ describe('persistListing', () => {
 
     const result = await persistListing(supabase, baseListing);
 
-    expect(result).toBe('skipped');
+    expect(result.result).toBe('skipped');
+    expect(result.listingId).toBe('listing-uuid-1');
     expect(upsert).not.toHaveBeenCalled();
   });
 
@@ -71,11 +89,15 @@ describe('persistListing', () => {
 
     const result = await persistListing(supabase, baseListing);
 
-    expect(result).toBe('inserted');
+    expect(result.result).toBe('inserted');
+    expect(result.listingId).toBe('listing-uuid-1');
     expect(upsert).toHaveBeenCalledOnce();
     const [row, options] = upsert.mock.calls[0];
     expect(row.geom).toBe('SRID=4326;POINT(12.338 45.434)');
     expect(row.scraped_at).toBeDefined();
+    expect(row.city).toBe('padova');
+    expect(row.region).toBe('veneto');
+    expect(row.category).toBe('informatica');
     expect(options).toEqual({ onConflict: 'source,external_id' });
   });
 
@@ -85,7 +107,7 @@ describe('persistListing', () => {
 
     const result = await persistListing(supabase, noCoords);
 
-    expect(result).toBe('inserted');
+    expect(result.result).toBe('inserted');
     const [row] = upsert.mock.calls[0];
     expect(row.geom).toBeNull();
   });
@@ -95,7 +117,7 @@ describe('persistListing', () => {
 
     const result = await persistListing(supabase, baseListing);
 
-    expect(result).toBe('updated');
+    expect(result.result).toBe('updated');
     expect(upsert).toHaveBeenCalledOnce();
   });
 });

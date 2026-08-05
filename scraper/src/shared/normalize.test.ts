@@ -96,4 +96,34 @@ describe('normalizeRawListing', () => {
     if ('reject' in result) throw new Error('expected canonical listing');
     expect(result.zone).toBeNull();
   });
+
+  it('sets city and region from source_category_url (D-25, D-26)', () => {
+    const result = normalizeRawListing({
+      ...baseRaw,
+      source_category_url:
+        'https://www.subito.it/annunci-veneto/regalo/informatica/padova/padova/',
+      external_url: 'https://www.subito.it/informatica/monitor-padova-123.htm',
+      lat: 45.41,
+      lng: 11.88,
+    });
+
+    if ('reject' in result) throw new Error('expected canonical listing');
+    expect(result.city).toBe('padova');
+    expect(result.region).toBe('veneto');
+    expect(result.category).toBe('informatica');
+  });
+
+  it('keeps zone null for Padova coords outside Venice polygons (D-21)', () => {
+    const result = normalizeRawListing({
+      ...baseRaw,
+      source_category_url:
+        'https://www.subito.it/annunci-veneto/regalo/informatica/padova/padova/',
+      external_url: 'https://www.subito.it/informatica/monitor-padova-123.htm',
+      lat: 45.41,
+      lng: 11.88,
+    });
+
+    if ('reject' in result) throw new Error('expected canonical listing');
+    expect(result.zone).toBeNull();
+  });
 });
