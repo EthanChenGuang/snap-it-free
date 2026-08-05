@@ -139,19 +139,19 @@ Italian label = checkbox/chip display (D-08). Slug = tooltip `title` attribute o
 |---|----------------------|------|------------------------|
 | 1 | Arredamento e Casalinghi | `arredamento-casalinghi` | checked |
 | 2 | Elettrodomestici | `elettrodomestici` | checked |
-| 3 | Tutto per i bambini | `bambini` | checked |
+| 3 | Tutto per i bambini | `bambini-giocattoli` | checked |
 | 4 | Abbigliamento e Accessori | `abbigliamento-accessori` | checked |
 | 5 | Libri e Riviste | `libri-riviste` | checked |
 | 6 | Informatica | `informatica` | checked |
 | 7 | Giardino e Fai da te | `giardino-fai-da-te` | checked |
-| 8 | Sports | `sports` | checked |
-| 9 | Collezionismo | `collezionismo` | checked |
+| 8 | Sports | `sport` | checked |
+| 9 | Collezionismo | `hobby-collezionismo` | checked |
 | 10 | Biciclette | `biciclette` | checked |
 | 11 | Audio/Video | `audio-video` | checked |
 | 12 | Telefonia | `telefonia` | checked |
 | 13 | Musica e Film | `musica-film` | checked |
 | 14 | Fotografia | `fotografia` | checked |
-| 15 | Console e Videogiochi | `console-videogiochi` | checked |
+| 15 | Console e Videogiochi | `videogiochi` | checked |
 | 16 | Animali | `animali` | checked |
 | 17 | Tutte le categorie | `usato` | checked (`font-medium` on label per prototype) |
 
