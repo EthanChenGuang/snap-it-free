@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 08
 current_phase_name: subito-regalo-url-matrix-venice-padova-veneto-all-categories
 status: executing
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-08-05T17:47:25.855Z"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-08-05T17:49:33.056Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 08 execution started
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 41
-  completed_plans: 33
+  completed_plans: 34
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 ## Current Position
 
 Phase: 08 (subito-regalo-url-matrix-venice-padova-veneto-all-categories) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 08 execution started
 
-Progress: [████████░░] 80%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
@@ -92,6 +92,7 @@ Progress: [████████░░] 80%
 | Phase 06 P08 | 12 | 2 tasks | 16 files |
 | Phase 06-scraper-admin-console-configurable-sources-frequency-anti-bl P09 | 3 | 2 tasks | 11 files |
 | Phase 08-subito-regalo-url-matrix-venice-padova-veneto-all-categories P01 | 8min | 3 tasks | 12 files |
+| Phase 08 P02 | 3min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -168,6 +169,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Allowlist add by email only — no invite flow (D-45)
 - [Phase ?]: Padova spike FAIL on detail coords — block Padova recommended seed until re-run passes (D-15)
 - [Phase ?]: Padova bbox uses fallback 45.3–45.5 / 11.7–12.0 (no spike sample coords)
+- [Phase ?]: Checkpoint option-a: migration 020 full schema with city/region columns and D-28 view rewrite (D-25, D-26, D-28)
+- [Phase ?]: Remove zone-not-null filter from app queries — view predicate is sole gate per D-28
 
 ### Pending Todos
 
@@ -227,7 +230,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T17:47:25.837Z
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-08-05T17:49:33.041Z
+Stopped at: Completed 08-02-PLAN.md
 Resume file: None
 Next: /gsd-execute-phase 5

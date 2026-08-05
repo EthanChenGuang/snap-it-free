@@ -199,7 +199,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 3. UGC Posting & Community Marketplace | 4/4 | Complete    | 2026-08-01 |
 | 4. Auth, Alerts & Push Notifications | 7/7 | In Progress|  |
 | 5. Trilingual UI (Italian / English / Chinese) | 3/3 | Complete    | 2026-08-04 |
-| 8. Subito Regalo URL Matrix | 1/5 | In Progress|  |
+| 8. Subito Regalo URL Matrix | 2/5 | In Progress|  |
 
 ### Phase 6: Scraper Admin Console
 
@@ -296,7 +296,7 @@ Plans:
   5. Admin UI documents URL template (`/annunci-veneto/regalo/{slug}/{city}/{city}/`) and validates URLs before save
   6. Design leaves a clear extension path for additional regions (`annunci-{region}/regalo/…`) without schema migration
 
-**Plans:** 1/5 plans executed
+**Plans:** 2/5 plans executed
 
 Plans:
 
@@ -306,7 +306,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 08-02-PLAN.md — Schema migration 020: city, region, listings_public view (D-25/D-26/D-28 checkpoint)
+- [x] 08-02-PLAN.md — Schema migration 020: city, region, listings_public view (D-25/D-26/D-28 checkpoint)
 - [ ] 08-04-PLAN.md — Admin Regalo URL matrix UI + validation + recommended 34-URL seed *(parallel with 08-02; requires 08-01 spike PASS for Padova seed)*
 
 **Wave 3** *(blocked on Wave 2)*
