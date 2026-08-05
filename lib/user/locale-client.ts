@@ -2,7 +2,6 @@
 
 import type { AppLanguage } from '@/lib/settings/preferences';
 import { writeAppPreferences } from '@/lib/settings/preferences';
-import { createClient } from '@/lib/supabase/client';
 
 export function setAppLanguage(language: AppLanguage): void {
   writeAppPreferences({ language });
@@ -11,6 +10,9 @@ export function setAppLanguage(language: AppLanguage): void {
 
 async function syncLocaleToServer(language: AppLanguage): Promise<void> {
   try {
+    // Imported here rather than at module scope: the language dropdown lives in the
+    // root layout, and a static import would pull the Supabase SDK into app/layout.js.
+    const { createClient } = await import('@/lib/supabase/client');
     const supabase = createClient();
     const {
       data: { session },

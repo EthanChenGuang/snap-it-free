@@ -1,18 +1,20 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useUnreadMatchCount } from '@/lib/alerts/useUnreadMatchCount';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
-function badgeLabel(count: number): string {
-  return count > 9 ? '9+' : String(count);
-}
+// The badge pulls in the Supabase SDK. Loading it via next/dynamic keeps that out of
+// app/layout.js, which the dev server truncates once it grows past a few megabytes.
+const UnreadMatchBadge = dynamic(
+  () => import('./UnreadMatchBadge').then((mod) => mod.UnreadMatchBadge),
+  { ssr: false },
+);
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { count: unreadMatchCount } = useUnreadMatchCount();
   const { messages } = useMessages();
 
   const navItems = [
@@ -31,8 +33,7 @@ export function BottomNav() {
             : item.href === '/list'
               ? pathname === '/list'
               : pathname === item.href || pathname.startsWith(`${item.href}/`);
-        const showBadge =
-          'showBadge' in item && item.showBadge && unreadMatchCount > 0;
+        const showBadge = 'showBadge' in item && item.showBadge;
 
         return (
           <Link
@@ -52,14 +53,7 @@ export function BottomNav() {
               >
                 {item.icon}
               </span>
-              {showBadge && (
-                <span
-                  className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-[3px] text-[9px] font-bold leading-none text-on-primary"
-                  aria-label={messages.settings.matches.badgeLabel(unreadMatchCount)}
-                >
-                  {badgeLabel(unreadMatchCount)}
-                </span>
-              )}
+              {showBadge && <UnreadMatchBadge />}
             </span>
             <span className="mt-space-xs text-label-sm font-label-sm">{item.label}</span>
           </Link>

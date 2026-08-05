@@ -1,17 +1,17 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { createContext, useCallback, useContext, useMemo, useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { IosInstallGuide } from '@/components/pwa/IosInstallGuide';
-import { createClient } from '@/lib/supabase/client';
-import {
-  isIOS,
-  isIosPushDismissed,
-  isStandalonePwa,
-  markIosGuideShownThisSession,
-  needsIosInstallGuide,
-  wasIosGuideShownThisSession,
-} from '@/lib/pwa/ios-detect';
+import { isIosPushDismissed, needsIosInstallGuide } from '@/lib/pwa/ios-detect';
+
+// The context itself stays in the layout chunk — consumers call usePwaOnboarding()
+// and it throws when the provider is absent. Only the auth-dependent auto-open
+// effect is split out, which is what keeps the Supabase SDK out of app/layout.js.
+const IosGuideAutoOpen = dynamic(
+  () => import('@/components/pwa/IosGuideAutoOpen').then((mod) => mod.IosGuideAutoOpen),
+  { ssr: false },
+);
 
 type PwaOnboardingContextValue = {
   openInstallGuide: () => void;
@@ -30,9 +30,7 @@ export function usePwaOnboarding(): PwaOnboardingContextValue {
 }
 
 export function PwaOnboardingProvider({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
   const [guideOpen, setGuideOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   const needsInstall = needsIosInstallGuide();
@@ -41,41 +39,14 @@ export function PwaOnboardingProvider({ children }: { children: React.ReactNode 
     setDismissed(isIosPushDismissed());
   }, [guideOpen]);
 
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setIsLoggedIn(Boolean(user));
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(Boolean(session?.user));
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (
-      pathname !== '/settings' ||
-      !isLoggedIn ||
-      !isIOS() ||
-      isStandalonePwa() ||
-      isIosPushDismissed() ||
-      wasIosGuideShownThisSession()
-    ) {
-      return;
-    }
-
-    markIosGuideShownThisSession();
-    setGuideOpen(true);
-  }, [pathname, isLoggedIn]);
-
   const openInstallGuide = useCallback(() => {
     if (needsIosInstallGuide()) {
       setGuideOpen(true);
     }
+  }, []);
+
+  const handleAutoOpen = useCallback(() => {
+    setGuideOpen(true);
   }, []);
 
   const handleDismiss = useCallback(() => {
@@ -94,6 +65,7 @@ export function PwaOnboardingProvider({ children }: { children: React.ReactNode 
   return (
     <PwaOnboardingContext.Provider value={value}>
       {children}
+      <IosGuideAutoOpen onOpen={handleAutoOpen} />
       <IosInstallGuide
         open={guideOpen}
         onOpenChange={setGuideOpen}
