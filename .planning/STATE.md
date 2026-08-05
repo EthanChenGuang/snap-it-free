@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 08
 current_phase_name: subito-regalo-url-matrix-venice-padova-veneto-all-categories
 status: executing
-stopped_at: Completed 08-04-PLAN.md
-last_updated: "2026-08-05T17:50:36.041Z"
+stopped_at: Completed 08-03-PLAN.md
+last_updated: "2026-08-05T17:53:01.619Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 08 execution started
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 41
-  completed_plans: 35
+  completed_plans: 36
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 ## Current Position
 
 Phase: 08 (subito-regalo-url-matrix-venice-padova-veneto-all-categories) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 08 execution started
 
-Progress: [█████████░] 85%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
@@ -94,6 +94,7 @@ Progress: [█████████░] 85%
 | Phase 08-subito-regalo-url-matrix-venice-padova-veneto-all-categories P01 | 8min | 3 tasks | 12 files |
 | Phase 08 P02 | 3min | 3 tasks | 5 files |
 | Phase 08 P04 | 3 | 3 tasks | 9 files |
+| Phase 08 P03 | 3 | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -174,6 +175,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Remove zone-not-null filter from app queries — view predicate is sole gate per D-28
 - [Phase ?]: Recommended seed Venice-only (17 URLs) while Padova spike FAIL (D-15)
 - [Phase ?]: Modal overlay dismiss cancels seed replace without textarea mutation (UI-SPEC E2)
+- [Phase ?]: Schema city-keyed superRefine uses PADOVA bbox from extract.ts constants (D-24)
+- [Phase ?]: Category translate passes Italian catalog label, not slug, to translation provider (D-31)
+- [Phase ?]: Live Padova persist deferred — SUPABASE env missing; unit tests satisfy D-18 contract
 
 ### Pending Todos
 
@@ -233,7 +237,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T17:50:36.030Z
-Stopped at: Completed 08-04-PLAN.md
+Last session: 2026-08-05T17:53:01.603Z
+Stopped at: Completed 08-03-PLAN.md
 Resume file: None
 Next: /gsd-execute-phase 5
