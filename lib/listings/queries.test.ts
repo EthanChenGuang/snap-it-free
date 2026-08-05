@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+const ACTIVE_COLUMNS =
+  'id, source, title, title_en, title_zh, photo_url, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status';
+
 const mockSelect = vi.fn();
 const mockEq = vi.fn();
 const mockNot = vi.fn();
@@ -10,7 +13,7 @@ mockMaybeSingle.mockReturnValue({ data: null, error: null });
 mockOrder.mockReturnValue({ data: [], error: null });
 mockNot.mockReturnValue({ order: mockOrder, maybeSingle: mockMaybeSingle });
 mockEq.mockReturnValue({ eq: mockEq, not: mockNot });
-mockSelect.mockReturnValue({ eq: mockEq, not: mockNot });
+mockSelect.mockReturnValue({ eq: mockEq, not: mockNot, order: mockOrder });
 
 const mockFrom = vi.fn(() => ({ select: mockSelect }));
 
@@ -34,20 +37,18 @@ describe('getActiveListings', () => {
     mockOrder.mockReturnValue({ data: [], error: null });
     mockNot.mockReturnValue({ order: mockOrder, maybeSingle: mockMaybeSingle });
     mockEq.mockReturnValue({ eq: mockEq, not: mockNot });
-    mockSelect.mockReturnValue({ eq: mockEq, not: mockNot });
+    mockSelect.mockReturnValue({ eq: mockEq, not: mockNot, order: mockOrder });
     mockFrom.mockReturnValue({ select: mockSelect });
   });
 
-  it('queries listings_public with zone-not-null and posted_at order', async () => {
+  it('queries listings_public without zone filter — view handles D-28 visibility', async () => {
     const { getActiveListings } = await import('./queries');
 
     await getActiveListings();
 
     expect(mockFrom).toHaveBeenCalledWith('listings_public');
-    expect(mockSelect).toHaveBeenCalledWith(
-      'id, source, title, photo_url, external_url, lat, lng, zone, posted_at, expires_at, status',
-    );
-    expect(mockNot).toHaveBeenCalledWith('zone', 'is', null);
+    expect(mockSelect).toHaveBeenCalledWith(ACTIVE_COLUMNS);
+    expect(mockNot).not.toHaveBeenCalled();
     expect(mockOrder).toHaveBeenCalledWith('posted_at', { ascending: false });
   });
 });
@@ -57,7 +58,7 @@ describe('getListingById', () => {
     vi.clearAllMocks();
     mockMaybeSingle.mockReturnValue({ data: null, error: null });
     mockNot.mockReturnValue({ maybeSingle: mockMaybeSingle });
-    mockEq.mockReturnValue({ eq: mockEq, not: mockNot });
+    mockEq.mockReturnValue({ eq: mockEq, not: mockNot, maybeSingle: mockMaybeSingle });
     mockSelect.mockReturnValue({ eq: mockEq, not: mockNot });
     mockFrom.mockReturnValue({ select: mockSelect });
   });
@@ -71,7 +72,7 @@ describe('getListingById', () => {
     expect(result).toBeNull();
     expect(mockFrom).toHaveBeenCalledWith('listings_public');
     expect(mockEq).toHaveBeenCalledWith('id', '550e8400-e29b-41d4-a716-446655440000');
-    expect(mockNot).toHaveBeenCalledWith('zone', 'is', null);
+    expect(mockNot).not.toHaveBeenCalled();
     expect(mockMaybeSingle).toHaveBeenCalled();
   });
 });
