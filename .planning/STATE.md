@@ -4,11 +4,11 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 08
 current_phase_name: subito-regalo-url-matrix-venice-padova-veneto-all-categories
-status: verifying
-stopped_at: Completed 08-05-PLAN.md
-last_updated: "2026-08-05T17:55:51.670Z"
+status: gaps_found
+stopped_at: Phase 8 executed — 2 Padova gaps remain (spike FAIL)
+last_updated: "2026-08-05T18:00:00.000Z"
 last_activity: 2026-08-05
-last_activity_desc: Phase 08 execution started
+last_activity_desc: "Executed Phase 8 (5 plans); verification 4/6 — Padova coord spike FAIL"
 progress:
   total_phases: 8
   completed_phases: 7
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-24)
 Phase: 08 (subito-regalo-url-matrix-venice-padova-veneto-all-categories) — EXECUTING
 Plan: 5 of 5
 Status: Phase complete — ready for verification
-Last activity: 2026-08-05 — Phase 08 execution started
+Last activity: 2026-08-06 — Completed quick task 260806-s5f: map never loads / homepage hangs (unbounded land-pool slot probe)
 
 Progress: [█████████░] 90%
 
@@ -214,6 +214,8 @@ None yet.
 | 22 | show bottom-right notification on translation retry success | 2026-08-05 | bf7000a |  | — |
 | 260805-ne9 | make translation retry faster: prefer OpenRouter (cheaper), add timeout, avoid slow sequential double-provider calls | 2026-08-05 | 5e25f21 |  | [260805-ne9-make-translation-retry-faster-prefer-ope](./quick/260805-ne9-make-translation-retry-faster-prefer-ope/) |
 | 260805-ots | Add admin action to delete out-of-date scraper records from the database | 2026-08-05 | 02e4dbf | Verified | [260805-ots-add-admin-action-to-delete-out-of-date-s](./quick/260805-ots-add-admin-action-to-delete-out-of-date-s/) |
+| 260805-ws8 | Dev-server chunk truncation — map stuck loading, homepage hangs | 2026-08-05 | 97caa22 | Partial — map render unverified (no GPU browser) | [260805-ws8-fix-dev-server-chunk-truncation-that-lea](./quick/260805-ws8-fix-dev-server-chunk-truncation-that-lea/) |
+| 260806-s5f | Map never loads / homepage hangs — unbounded land-pool slot probe | 2026-08-06 | 1adefb2 | Verified — map renders on localhost:3003, 13 tests pass | [260806-s5f-map-hangs-bound-land-pool-slot-probe](./quick/260806-s5f-map-hangs-bound-land-pool-slot-probe/) |
 
 ### Blockers/Concerns
 
