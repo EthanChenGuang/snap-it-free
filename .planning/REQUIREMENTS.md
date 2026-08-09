@@ -1,145 +1,155 @@
-# Requirements: 手慢无 (ShouManWu) — Venice Free Finds
+# Requirements: 手慢无 (ShouManWu) — v2.0
 
-**Defined:** 2026-07-26
+**Defined:** 2026-08-09  
+**Milestone:** v2.0 — Snag-style Consumer UX + Production Deploy  
 **Core Value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
 
-## v1 Requirements
+## v2.0 Requirements
 
-### Discovery & Map
+Requirements for this milestone. Each maps to roadmap phases.
 
-- [x] **DISC-01**: User can browse a map-first home screen with pins for active free listings
-- [x] **DISC-02**: User can view listings in a draggable bottom-sheet list alongside the map
-- [x] **DISC-03**: User can filter listings by Venice zone (Centro Storico / Mestre-Marghera / Lido-Murano)
-- [x] **DISC-04**: User can open a scraped listing in an in-app WebView with favorite, share, and back-to-list controls
-- [x] **DISC-05**: User can deep-link from a scraped listing to the original source (Subito/FB) without in-app contact for scraped content
-- [x] **DISC-06**: User can favorite a listing without leaving the browsing flow
-- [x] **DISC-07**: User can browse listings without creating an account (login-optional browsing)
+### Navigation & Information Architecture
 
-### Scraped Supply
+- [ ] **NAV-01**: Bottom navigation is Home · Favorites · Settings (Stitch-styled; not a Snag red floating capsule clone)
+- [ ] **NAV-02**: Post (UGC) remains accessible via menu/drawer — not a primary bottom tab
+- [ ] **NAV-03**: Map is a secondary entry opened from the top-right location button (not the default home)
+- [ ] **NAV-04**: Default route `/` shows the grid feed home (replacing map-first home)
 
-- [x] **SCRP-01**: System ingests free listings from Subito.it (Veneto/Venice free-item category) on a 1–2 hour refresh cadence
-- [x] **SCRP-02**: System normalizes scraped listings into a canonical schema with source badge (`subito`, `facebook`, `ugc`)
-- [x] **SCRP-03**: System assigns zone tags to listings at ingestion via point-in-polygon (not live radius queries)
-- [x] **SCRP-04**: System auto-expires scraped listings after 48 hours
-- [x] **SCRP-05**: System filters out mislabeled "free" listings (price/negotiation language) at ingestion
-- [x] **SCRP-06**: System validates scraper output shape and alerts on soft-block / empty-feed failures
+### Home Feed & Search Bar
 
-### UGC Posting
+- [ ] **HOME-01**: Mobile two-column grid displays listings (image, truncated title, metadata row)
+- [ ] **HOME-02**: Top search row includes language control, search field, filter button, and location button
+- [ ] **HOME-03**: Legacy `/list` route merges into or redirects to the feed home without breaking bookmarks
 
-- [x] **UGC-01**: User can post a free item with photo, title, and zone tag in under 30 seconds
-- [x] **UGC-02**: User can use "Street Dump" quick-pin mode to drop a listing at their GPS location with manual confirm/adjust
-- [x] **UGC-03**: System strips EXIF metadata from uploaded UGC photos
-- [x] **UGC-04**: User must be logged in to post a listing
+### Search, Filters & Distance
 
-### UGC Contact & Claims
+- [ ] **FILT-01**: Filter bottom sheet exposes km radius slider (1–50 km, user preference persisted) and category multi-select mapped to existing Subito/UGC categories
+- [ ] **FILT-02**: Filter sheet has Apply and Reset actions; radius and categories compose with existing zone/city filters
+- [ ] **FILT-03**: Active filter pills appear below the search bar (e.g. category ×, radius, zone) and are dismissible
+- [ ] **FILT-04**: Venice zone chips (Centro / Mestre / Lido) and Padova city filter remain available alongside radius
+- [ ] **FILT-05**: Distance filtering uses client-side haversine on lat/lng; listings without coordinates are excluded from radius results or sorted last
 
-- [x] **CONT-01**: User can contact a UGC poster via in-app DM (UGC listings only)
-- [x] **CONT-02**: UGC poster can mark a listing as reserved
-- [x] **CONT-03**: UGC poster can mark a listing as sent/gone
-- [x] **CONT-04**: User must be logged in to initiate contact on a UGC listing
-- [x] **CONT-05**: System shows in-person meetup safety messaging at first contact and in DM threads
+### Listing Grid Cards
 
-### Moderation & Trust
+- [ ] **CARD-01**: Grid cards show listing image, truncated title, and relative posted time
+- [ ] **CARD-02**: When browser geolocation is granted, metadata shows `{distance} · {relative time}` via haversine to listing coordinates
+- [ ] **CARD-03**: FREE badge overlays scraped and UGC listing images on the grid
+- [ ] **CARD-04**: Favorite heart on each card reuses FavoriteButton with existing login gate
+- [ ] **CARD-05**: Grid cards omit Claim CTA; detail page retains deep-link (scraped) and claim/reserve (UGC)
 
-- [x] **MOD-01**: User can report a listing as claimed/expired or not actually free
-- [x] **MOD-02**: System auto-hides a listing after 2 community reports (with UGC vs scraped threshold distinction)
-- [x] **MOD-03**: UGC poster can see when their listing is hidden pending review
+### Favorites Organization
 
-### Auth
+- [ ] **FAV-01**: Favorites screen shows a category folder grid (Furniture, Electronics, Home & Garden, For Kids, Other) mapped from listing category
+- [ ] **FAV-02**: Tapping a folder drills into favorites filtered to that category
+- [ ] **FAV-03**: Empty folders display with 0-item count and appropriate empty state
 
-- [x] **AUTH-01**: User can sign in with Google, Apple, or email when an action requires login
-- [x] **AUTH-02**: User is prompted to log in only at contact-seller, enable-alerts, favorite, or post actions
+### Select Location
 
-### Notifications
+- [ ] **LOC-01**: Full-screen Select Location flow: MapLibre map, fixed center pin, locate-me FAB, address/label preview, Confirm action
+- [ ] **LOC-02**: Confirmed location can set filter center point and/or UGC post coordinates (reuse existing pin components)
+- [ ] **LOC-03**: Location button on home opens map view or select-location flow per context (browse center vs. post)
 
-- [x] **NOTF-01**: User can create keyword + zone match alerts
-- [x] **NOTF-02**: User receives push notifications when new listings match saved alerts (Web Push / VAPID)
-- [x] **NOTF-03**: User sees an in-app "new match" badge fallback when push is unavailable (e.g. iOS Safari tab)
-- [x] **NOTF-04**: User sees an explicit Add-to-Home-Screen onboarding flow for iOS PWA install
-- [x] **NOTF-05**: User must be logged in to create or manage alerts
+### Settings (Consumer)
+
+- [ ] **SET-01**: Push notifications toggle retained and restyled to Stitch settings layout
+- [ ] **SET-02**: Do Not Disturb: user-configurable quiet hours or silent-push window for notifications
+- [ ] **SET-03**: Language selection retained (zh / en / it)
+- [ ] **SET-04**: Delete account: Supabase account deletion with associated user data cleanup (auth-gated, destructive confirmation)
+- [ ] **SET-05**: Sign out retained
+- [ ] **SET-06**: Existing settings preserved: keyword alerts, zone preferences, appearance, iOS Add-to-Home-Screen shortcuts
+
+### Production Deploy
+
+- [ ] **DEPLOY-01**: Next.js PWA deployed to Vercel with production env and Serwist service worker
+- [ ] **DEPLOY-02**: Scraper worker deployed to Fly.io reading Supabase DB config
+- [ ] **DEPLOY-03**: Production OAuth redirect URLs configured (Google + existing providers)
+- [ ] **DEPLOY-04**: External cron runs alert matcher (cron-job.org or equivalent)
+- [ ] **DEPLOY-05**: D-19 smoke checklist passes; DEPLOY-RUNBOOK documents rollback
 
 ### Internationalization
 
-- [x] **I18N-01**: User can switch UI language between Chinese (default), English, and Italian from header or Settings; first visit seeds from browser locale with `zh` fallback
-- [x] **I18N-02**: All user-facing UI chrome is translated in all three languages
+- [ ] **I18N-01**: All new user-facing strings added to zh, en, and it locale files
 
-## v2 Requirements
+### Tech Debt (carry-forward, execute if low cost)
 
-Deferred to future release. Tracked but not in current roadmap.
+- [ ] **TD-01**: Phase 4 formal `04-VERIFICATION.md` completed
+- [ ] **TD-02**: Physical iPhone standalone push QA sign-off (v1 UAT test 12)
+- [ ] **TD-03**: Google OAuth production redirect URLs verified end-to-end
 
-### Scraped Supply
+## v3+ Requirements
 
-- **SCRP-07**: FB Marketplace scraper (best-effort, secondary source)
-- **SCRP-08**: Scraping specific closed Facebook groups (membership/login-walled)
+Deferred beyond v2.0. Tracked but not in current roadmap.
+
+### Scraping & Platform
+
+- **SCRP-07**: FB Marketplace scraper (best-effort secondary source)
+- **PLAT-01**: Native mobile app (App Store / Play Store)
+- **FAV-04**: Edit/reorder favorites folders
 
 ### Monetization
 
-- **MON-01**: Instant-alerts subscription tier (speed/priority only, never gating basic feed access)
-- **MON-02**: Local ad partnerships
-
-### Platform
-
-- **PLAT-01**: Native mobile app (iOS/Android)
+- **MON-01**: Subscription / instant alerts paywall
+- **MON-02**: Restore Purchase flow
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Paywalling the live feed / subscription-gated browsing | Deliberate divergence from Snag; undermines "free stuff" premise and MVP validation goal |
-| In-app contact/DM for scraped listings | Deep-link to source instead; avoids messaging infra for content we don't control |
-| Scraping closed Chinese community channels (WeChat, forums) | Not technically scrapable; served via Chinese UI over scraped inventory + manual seeding |
-| Native mobile app at launch | PWA validates faster; app store review deferred |
-| Real-time push for hourly-scraped data | Scraper cadence is 1–2hr; poll-based refresh sufficient |
-| Social graph (followers, public comments, gratitude posts) | Out of utility scope; adds moderation surface without core discovery value |
-| Payment/checkout flow | All listings are free by definition |
+| Subscription / Restore Purchase | v1/v2 principle: stay free unless explicitly opted in later |
+| Snag red theme / floating capsule nav verbatim | Must follow Google Stitch design system |
+| FB Marketplace scraper (SCRP-07) | v2+ backlog |
+| Native app store packages (PLAT-01) | PWA-first validation continues |
+| Rate App prompt | Not in v2.0 scope |
+| In-app DM for scraped listings | v1 decision retained — deep-link to source |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCRP-01 | Phase 1 | Complete |
-| SCRP-02 | Phase 1 | Complete |
-| SCRP-03 | Phase 1 | Complete |
-| SCRP-05 | Phase 1 | Complete |
-| SCRP-06 | Phase 1 | Complete |
-| DISC-01 | Phase 2 | Complete |
-| DISC-02 | Phase 2 | Complete |
-| DISC-03 | Phase 2 | Complete |
-| DISC-04 | Phase 2 | Complete |
-| DISC-05 | Phase 2 | Complete |
-| DISC-06 | Phase 2 | Complete |
-| DISC-07 | Phase 2 | Complete |
-| SCRP-04 | Phase 2 | Complete |
-| UGC-01 | Phase 3 | Complete |
-| UGC-02 | Phase 3 | Complete |
-| UGC-03 | Phase 3 | Complete |
-| UGC-04 | Phase 3 | Complete |
-| CONT-01 | Phase 3 | Complete |
-| CONT-02 | Phase 3 | Complete |
-| CONT-03 | Phase 3 | Complete |
-| CONT-04 | Phase 3 | Complete |
-| CONT-05 | Phase 3 | Complete |
-| MOD-01 | Phase 3 | Complete |
-| MOD-02 | Phase 3 | Complete |
-| MOD-03 | Phase 3 | Complete |
-| AUTH-01 | Phase 4 | Complete |
-| AUTH-02 | Phase 4 | Complete |
-| NOTF-01 | Phase 4 | Complete |
-| NOTF-02 | Phase 4 | Complete |
-| NOTF-03 | Phase 4 | Complete |
-| NOTF-04 | Phase 4 | Complete |
-| NOTF-05 | Phase 4 | Complete |
-| I18N-01 | Phase 5 | Complete |
-| I18N-02 | Phase 5 | Complete |
+| NAV-01 | Phase 9 | Pending |
+| NAV-02 | Phase 9 | Pending |
+| NAV-03 | Phase 9 | Pending |
+| NAV-04 | Phase 9 | Pending |
+| HOME-01 | Phase 9 | Pending |
+| HOME-02 | Phase 9 | Pending |
+| HOME-03 | Phase 9 | Pending |
+| FILT-01 | Phase 10 | Pending |
+| FILT-02 | Phase 10 | Pending |
+| FILT-03 | Phase 10 | Pending |
+| FILT-04 | Phase 10 | Pending |
+| FILT-05 | Phase 10 | Pending |
+| CARD-01 | Phase 11 | Pending |
+| CARD-02 | Phase 11 | Pending |
+| CARD-03 | Phase 11 | Pending |
+| CARD-04 | Phase 11 | Pending |
+| CARD-05 | Phase 11 | Pending |
+| FAV-01 | Phase 12 | Pending |
+| FAV-02 | Phase 12 | Pending |
+| FAV-03 | Phase 12 | Pending |
+| LOC-01 | Phase 13 | Pending |
+| LOC-02 | Phase 13 | Pending |
+| LOC-03 | Phase 13 | Pending |
+| SET-01 | Phase 14 | Pending |
+| SET-02 | Phase 14 | Pending |
+| SET-03 | Phase 14 | Pending |
+| SET-04 | Phase 14 | Pending |
+| SET-05 | Phase 14 | Pending |
+| SET-06 | Phase 14 | Pending |
+| I18N-01 | Phases 9–14 | Pending |
+| TD-01 | Phase 14 | Pending |
+| TD-02 | Phase 7 | Pending |
+| TD-03 | Phase 7 | Pending |
+| DEPLOY-01 | Phase 7 | Pending |
+| DEPLOY-02 | Phase 7 | Pending |
+| DEPLOY-03 | Phase 7 | Pending |
+| DEPLOY-04 | Phase 7 | Pending |
+| DEPLOY-05 | Phase 7 | Pending |
 
 **Coverage:**
-
-- v1 requirements: 34 total
-- Mapped to phases: 34
+- v2.0 requirements: 38 total
+- Mapped to phases: 38
 - Unmapped: 0 ✓
 
-*Note: corrected from an earlier preliminary count of 32 during roadmap finalization — the traceability table above always listed all 34 v1 requirement IDs; only the summary count was off.*
-
 ---
-*Requirements defined: 2026-07-26*
-*Last updated: 2026-07-26 after roadmap finalization*
+*Requirements defined: 2026-08-09*  
+*Last updated: 2026-08-09 after v2.0 milestone init*

@@ -1,18 +1,18 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.0
-milestone_name: production-deploy
-current_phase: 7
-current_phase_name: deploy it to Vercel
+milestone_name: Snag-style Consumer UX + Production Deploy
+current_phase: 9
+current_phase_name: Feed-First Home & Navigation IA
 status: planning
-stopped_at: Milestone v1.0 archived
-last_updated: "2026-08-09T09:40:00.000Z"
+stopped_at: Milestone v2.0 initialized — ready for /gsd-discuss-phase 9
+last_updated: "2026-08-09T10:50:00.000Z"
 last_activity: 2026-08-09
-last_activity_desc: Milestone v1.0 archived — planning v2.0
+last_activity_desc: v2.0 milestone requirements + roadmap created
 progress:
-  total_phases: 1
+  total_phases: 7
   completed_phases: 0
-  total_plans: 4
+  total_plans: 0
   completed_plans: 0
 ---
 
@@ -23,233 +23,48 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-09)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
-**Current focus:** Planning v2.0 — Production Deploy (Phase 7)
+
+**Current focus:** v2.0 planning complete — begin Phase 9 (Feed-First Home & Navigation IA)
 
 ## Current Position
 
-Milestone: v1.0 shipped 2026-08-09
-Next: `/gsd-new-milestone` to define v2.0 requirements and roadmap
-Phase 7 (deploy to Vercel) preserved in milestones/v1.0-phases/07-deploy-it-to-vercel/
+Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
+Phase: **9** — Feed-First Home & Navigation IA  
+Status: **planning** (requirements + roadmap defined)
 
-Progress: [░░░░░░░░░░] 0% v2.0
+Progress: [░░░░░░░░░░] 0% v2.0 (0/7 phases)
+
+## v2.0 Phase Queue
+
+| Order | Phase | Name | Status |
+|-------|-------|------|--------|
+| 1 | 9 | Feed-First Home & Navigation IA | Next |
+| 2 | 10 | Search, Filter Sheet & Distance | Planned |
+| 3 | 11 | Grid Listing Cards | Planned |
+| 4 | 12 | Favorites Category Folders | Planned |
+| 5 | 13 | Select Location Flow | Planned |
+| 6 | 14 | Settings Consumer Parity | Planned |
+| 7 | 7 | Production Deploy (Vercel + Fly.io) | Planned |
 
 ## Performance Metrics
 
-**Velocity:**
+**Velocity (v1.0):**
 
-- Total plans completed: 32
-- Average duration: - min
-- Total execution time: 0 hours
+- Total plans completed: 39
+- Milestone duration: 16 days (2026-07-24 → 2026-08-09)
 
-**By Phase:**
+## Deferred Items (from v1.0)
 
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 01 | 4 | - | - |
-| 02 | 5 | - | - |
-| 03 | 4 | - | - |
-| 05 | 3 | - | - |
-| 06 | 9 | - | - |
-| 8 | 7 | - | - |
+- Phase 4 formal `04-VERIFICATION.md` → TD-01 (Phase 14)
+- iPhone standalone push QA → TD-02 (Phase 7)
+- Google OAuth production redirects → TD-03 (Phase 7)
+- Production deploy → Phase 7 (after UX phases)
 
-**Recent Trend:**
+## Next Steps
 
-- Last 5 plans: -
-- Trend: -
+1. `/gsd-discuss-phase 9` — UI/IA decisions for feed home + nav
+2. `/gsd-plan-phase 9` — executable plans
+3. `/gsd-execute-phase 9` — implementation
 
-*Updated after each plan completion*
-**Per-Plan Metrics:**
-
-| Plan | Duration | Tasks | Files |
-|------|----------|-------|-------|
-| Phase 01-scraper-foundation-listing-data-model P01 | 45 | 3 tasks | 22 files |
-| Phase 01-scraper-foundation-listing-data-model P02 | 12 | 3 tasks | 14 files |
-| Phase 01-scraper-foundation-listing-data-model P03 | 8 | 3 tasks | 11 files |
-| Phase 01-scraper-foundation-listing-data-model P04 | 12 | 3 tasks | 11 files |
-| Phase 02-map-list-core-browsing P01 | 105 | 3 tasks | 22 files |
-| Phase 02 P02 | 45 | 3 tasks | 19 files |
-| Phase 02 P03 | 3min | 3 tasks | 13 files |
-| Phase 02-map-list-core-browsing P04 | 5min | 3 tasks | 22 files |
-| Phase 03-ugc-posting-community-marketplace P01 | 6 | 3 tasks | 37 files |
-| Phase 03-ugc-posting-community-marketplace P02 | 5min | 3 tasks | 12 files |
-| Phase 03-ugc-posting-community-marketplace P03 | 8min | 3 tasks | 17 files |
-| Phase 03-ugc-posting-community-marketplace P04 | 12min | 3 tasks | 18 files |
-| Phase 04-auth-alerts-push-notifications P02 | 5 min | 3 tasks | 4 files |
-| Phase 04-auth-alerts-push-notifications P04 | 8 min | 2 tasks | 11 files |
-| Phase 04-auth-alerts-push-notifications P03 | 8 min | 2 tasks | 9 files |
-| Phase 04 P05 | 18 min | 3 tasks | 11 files |
-| Phase 04 P06 | 8m | 3 tasks | 17 files |
-| Phase 04-auth-alerts-push-notifications P07 | 12m | 2 tasks | 9 files |
-| Phase 05-trilingual-ui-italian-english-chinese P03 | 4 | 3 tasks | 14 files |
-| Phase 05-trilingual-ui-italian-english-chinese P02 | 15min | 3 tasks | 12 files |
-| Phase 06-scraper-admin-console-configurable-sources-frequency-anti-bl P01 | 5min | 2 tasks | 23 files |
-| Phase 06-scraper-admin-console-configurable-sources-frequency-anti-bl P02 | 5min | 2 tasks | 11 files |
-| Phase 06 P03 | 4 | 3 tasks | 8 files |
-| Phase 06 P04 | 5min | 3 tasks | 12 files |
-| Phase 06 P05 | 4min | 3 tasks | 11 files |
-| Phase 06-scraper-admin-console-configurable-sources-frequency-anti-bl P06 | 3 | 2 tasks | 6 files |
-| Phase 06 P07 | 8 | 3 tasks | 11 files |
-| Phase 06 P08 | 12 | 2 tasks | 16 files |
-| Phase 06-scraper-admin-console-configurable-sources-frequency-anti-bl P09 | 3 | 2 tasks | 11 files |
-| Phase 08-subito-regalo-url-matrix-venice-padova-veneto-all-categories P01 | 8min | 3 tasks | 12 files |
-| Phase 08 P02 | 3min | 3 tasks | 5 files |
-| Phase 08 P04 | 3 | 3 tasks | 9 files |
-| Phase 08 P03 | 3 | 3 tasks | 8 files |
-| Phase 08 P05 | 3 | 3 tasks | 14 files |
-
-## Accumulated Context
-
-### Decisions
-
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
-
-- [Roadmap]: Subito.it scraper (Phase 1) must precede map UI (Phase 2) — a map with no pins is a broken first-run experience; hard sequencing dependency, not a preference
-- [Roadmap]: UGC posting (Phase 3) sequenced after core scraped browsing so the shared `listings` schema and zone taxonomy are proven against real data first
-- [Roadmap]: Auth/alerts (Phase 4) sequenced after both supply sources exist so alert-matching has a stable, populated schema to test against
-- [Roadmap]: i18n (Phase 5) placed last as additive/non-blocking, but can be pulled earlier if translation work happens in parallel
-- [01-01 Task 1]: D-06/D-08/D-09 locked — Supabase Pro + PostGIS geography column, single listings table (option-a)
-- [Phase ?]: D-06/D-08/D-09 locked — Supabase Pro + PostGIS geography column, single listings table (option-a)
-- [Phase ?]: npm package legitimacy verified for crawlee, playwright, @supabase/supabase-js, zod, @turf/boolean-point-in-polygon, vitest
-- [Phase ?]: Detail-page extraction for tracer — category cards lack reliable posted_at/photo
-- [Phase ?]: Null lat/lng when map embed absent on sampled Subito listing (D-16)
-- [Phase ?]: GeoJSON loaded via readFileSync for vitest compatibility
-- [Phase ?]: Municipality centroid fallback in extract resolveCoords before normalize (D-16)
-- [Phase ?]: scrape_run_id null until Plan 04 run tracking
-- [Phase ?]: Package legitimacy verified via npm registry for resend and node-telegram-bot-api
-- [Phase ?]: setInterval 90min cron instead of node-cron invalid */90 expression
-- [Phase ?]: Telegram alerting preferred when TELEGRAM_BOT_TOKEN set
-- [Phase ?]: Next build uses --webpack due to MapLibre/Turbopack incompatibility
-- [Phase ?]: Stitch map explorer header and surface tokens ported to app/globals.css per DESIGN.md
-- [Phase ?]: vaul modal=false with pointer-events auto workaround for map click-through
-- [Phase ?]: Italian chrome centralized in messages/it.ts; listing titles remain scraped Italian
-- [Phase ?]: Subito detail is metadata shell + external CTAs; iframe best-effort with timeout fallback
-- [Phase ?]: isAllowedExternalUrl restricts external links to https subito.it hosts only
-- [Phase ?]: Favorites key shoumanwu_favorites stable for Phase 4 migration
-- [Phase ?]: useListingsPoll 300000ms shared by map and list routes
-- [Phase ?]: npm run dev/build default to Next.js App Router
-- [Phase ?]: Option-a locked: magic link + migration 007 + RLS (D-54, D-66, D-87)
-- [Phase ?]: listing_reports uses reporter_user_id only — no fingerprint (03-REVIEWS)
-- [Phase ?]: CreateListingSchema uses scraper Venice bounds 45.0-45.7 / 12.1-12.6
-- [Phase ?]: FCFS via security-definer RPC listing_has_other_buyer_conversation (migration 008)
-- [Phase ?]: Duplicate conversation POST returns existing id for DM reopen (03-REVIEWS)
-- [Phase ?]: Option-a locked: authenticated reports with unique (listing_id, reporter_user_id) (D-82)
-- [Phase ?]: Migration 009 for report auto-hide trigger — 008 reserved for FCFS messaging
-- [Phase ?]: Auto-hide via AFTER INSERT trigger only — no GRANT EXECUTE RPCs (03-REVIEWS)
-- [Phase ?]: Street Dump pin confirm separate from GPS seed — never auto-publish (Pitfall 8)
-- [Phase ?]: Owner lifecycle uses OwnerListingRow.owner_user_id not listings_public (03-REVIEWS)
-- [Phase ?]: Rate limits: 3 UGC posts/24h and 5 DM starts/hour via DB counts (D-85)
-- [Phase ?]: Apple OAuth gated by NEXT_PUBLIC_APPLE_OAUTH_ENABLED until Supabase Apple provider configured
-- [Phase ?]: modalTitle prop for action-specific auth gates (D-93)
-- [Phase ?]: Alert CRUD via Route Handlers with max 5 enabled alerts and Settings Stitch UI (D-101, D-102, D-116)
-- [Phase ?]: Logged-out favorite tap opens AuthPromptModal; Supabase writes only when authed (D-97)
-- [Phase ?]: localStorage merge clears only after /api/favorites/merge 2xx (D-96)
-- [Phase ?]: Auto-selected option-a: locked outbox + Vercel Cron poller (D-106)
-- [Phase ?]: Delete-then-insert push_subscriptions due to RLS no UPDATE policy
-- [Phase ?]: Dedupe push fan-out to one notification per user per listing match
-- [Phase ?]: iOS guide auto-shows once per session on /settings; dismiss persists in localStorage
-- [Phase ?]: Queries unchanged until Phase 6 title_en/zh migration; resolver ready with optional ListingRow fields
-- [Phase ?]: SSR metadata uses getMessages(zh).app.description per D-131
-- [Phase ?]: D-129 option-a: profiles.language + push_subscriptions.locale for server locale storage
-- [Phase ?]: D-136 push fan-out uses per-user getMessages(locale) and resolveListingTitle for push titles
-- [Phase ?]: Checkpoint option-a: full migration with is_operator RLS and translation columns (D-02,D-28,D-32,D-44)
-- [Phase ?]: Migration numbered 018 because 017_user_locale.sql already exists
-- [Phase ?]: Tracer admin reads via service role; Plan 03 switches to operator RLS client
-- [Phase ?]: Minimal dashboard shell — full Stitch AdminShell deferred to Plan 03
-- [Phase ?]: Middleware uses operator_allowlist ilike select under authenticated RLS
-- [Phase ?]: AdminShell badge counts default to 0 until translation/rejects queries land
-- [Phase ?]: Footer stats fetched in admin layout and passed to AdminShell
-- [Phase ?]: Coming soon jobs insert as skipped with zh message per D-05
-- [Phase ?]: Reused getOperatorSession from 06-04 for all sources API routes
-- [Phase ?]: validation-thresholds.ts mirrors scraper config constants for read-only UI
-- [Phase ?]: Checkpoint option-a: 60s tick + DB next_run_at + scrape_jobs queue (D-13, D-33)
-- [Phase ?]: Manual jobs take precedence over cron due in mergeRunQueue dedupe
-- [Phase ?]: Expandable inline JSON rows for rejects preview instead of side drawer
-- [Phase ?]: Export button disabled UI-only on rejects page per MVP scope
-- [Phase ?]: Ingest-time en+zh columns with scraper-local fetch engine (option-a)
-- [Phase ?]: Checkpoint option-a: App-level AES-256-GCM in proxy_enc (D-20)
-- [Phase ?]: Settings form ports scraper-admin SettingsView to admin_settings Stitch layout (D-53)
-- [Phase ?]: Allowlist add by email only — no invite flow (D-45)
-- [Phase ?]: Padova spike FAIL on detail coords — block Padova recommended seed until re-run passes (D-15)
-- [Phase ?]: Padova bbox uses fallback 45.3–45.5 / 11.7–12.0 (no spike sample coords)
-- [Phase ?]: Checkpoint option-a: migration 020 full schema with city/region columns and D-28 view rewrite (D-25, D-26, D-28)
-- [Phase ?]: Remove zone-not-null filter from app queries — view predicate is sole gate per D-28
-- [Phase ?]: Recommended seed Venice-only (17 URLs) while Padova spike FAIL (D-15)
-- [Phase ?]: Modal overlay dismiss cancels seed replace without textarea mutation (UI-SPEC E2)
-- [Phase ?]: Schema city-keyed superRefine uses PADOVA bbox from extract.ts constants (D-24)
-- [Phase ?]: Category translate passes Italian catalog label, not slug, to translation provider (D-31)
-- [Phase ?]: Live Padova persist deferred — SUPABASE env missing; unit tests satisfy D-18 contract
-- [Phase ?]: SubitoCategoryFilterChips shared between map panel and Elenco inline variants
-- [Phase ?]: resolveListingCategory delegates to getSubitoCategoryLabel for i18n consistency
-
-### Pending Todos
-
-None yet.
-
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Status | Directory |
-|---|-------------|------|--------|--------|-----------|
-| 260803-ci1 | add a ngrok link so that I can access the page on mobile phone | 2026-08-03 | — |  | [260803-ci1-add-a-ngrok-link-so-that-i-can-access-th](./quick/260803-ci1-add-a-ngrok-link-so-that-i-can-access-th/) |
-| 260803-ci2 | map never loads on mobile — investigation & comparison | 2026-08-03 | — |  | [260803-ci2-map-never-loads-mobile-investigation](./quick/260803-ci2-map-never-loads-mobile-investigation/) |
-| 260803-us0 | map zoom throws center TypeError | 2026-08-03 | — |  | [260803-us0-map-zoom-throws-center-typeerror](./quick/260803-us0-map-zoom-throws-center-typeerror/) |
-| 260803-us1 | Elenco list scroll region too small; Pubblica did not scroll | 2026-08-03 | c7023f6, 2524d90 |  | [260803-us1-list-post-scroll-regions](./quick/260803-us1-list-post-scroll-regions/) |
-| 260803-whr | fix Subito geo/zone pipeline so scraped free items surface in Elenco | 2026-08-03 | 8c6f24e, ca573b6, 9956629 |  | [260803-whr-fix-subito-geo-zone-pipeline-so-scraped-](./quick/260803-whr-fix-subito-geo-zone-pipeline-so-scraped-/) |
-| 260803-wi0 | Research Italian and European free-item source candidates beyond Subito | 2026-08-03 | 893d917 |  | [260803-wi0-free-item-source-candidates](./quick/260803-wi0-free-item-source-candidates/) |
-| 260805-n1j | fix sidebar translation queue badge not refreshing after retry | 2026-08-05 | 4a0aab1 |  | [260805-n1j-fix-sidebar-translation-queue-badge-not-](./quick/260805-n1j-fix-sidebar-translation-queue-badge-not-/) |
-| 260804-dn7 | Strict Stitch UI compliance: header search, floating chips, cards, bottom nav | 2026-08-04 | 97e2911, e4004b9, b117d7e |  | [260804-dn7-strict-ui-compliance-refactor-based-on-p](./quick/260804-dn7-strict-ui-compliance-refactor-based-on-p/) |
-| 260804-e2m | Strict Stitch UI compliance for Elenco list page | 2026-08-04 | dd5ba20 |  | [260804-e2m-strict-ui-compliance-refactor-for-elenco](./quick/260804-e2m-strict-ui-compliance-refactor-for-elenco/) |
-| 260804-f03 | Strict Stitch UI compliance for item detail page | 2026-08-04 | d3c60e5 |  | [260804-f03-strict-ui-compliance-refactor-for-item-d](./quick/260804-f03-strict-ui-compliance-refactor-for-item-d/) |
-| 260804-f75 | Strict Stitch UI compliance for Pubblica (Post Free Item) page | 2026-08-04 | 2594ce2 |  | [260804-f75-strict-ui-compliance-refactor-for-pubbli](./quick/260804-f75-strict-ui-compliance-refactor-for-pubbli/) |
-| 260804-g12 | Strict Stitch UI compliance for Settings page | 2026-08-04 | bca8a16 |  | [260804-g12-strict-ui-compliance-refactor-for-settings](./quick/260804-g12-strict-ui-compliance-refactor-for-settings/) |
-| 260804-h34 | Settings GENERALE profile banner refactor | 2026-08-04 | 5ccff49 |  | [260804-h34-refactor-generale-profile-banner-and-setti](./quick/260804-h34-refactor-generale-profile-banner-and-setti/) |
-| 260804-h4c | Wire dark/light theme switching via next-themes and existing appearance preferences | 2026-08-04 | fb270c7 |  | [260804-h4c-wire-dark-light-theme-switching-via-next](./quick/260804-h4c-wire-dark-light-theme-switching-via-next/) |
-| 260804-h7l | Fix dark theme to strictly follow Stitch DESIGN.md palette | 2026-08-04 | 9efa1a9 |  | [260804-h7l-fix-dark-theme-to-strictly-follow-stitch](./quick/260804-h7l-fix-dark-theme-to-strictly-follow-stitch/) |
-| 15 | Remove system appearance option, keep Chiaro and Scuro only | 2026-08-04 | 702c4c8 |  | — |
-| 260804-hed | 中文 / English / Italiano UI language switching (default zh) | 2026-08-04 | c39ef46, decf18b, 467c4ee, 785964d |  | [260804-hed-english-italiano](./quick/260804-hed-english-italiano/) |
-| 260804-ifm | 当前地图上没有物体的标记 — group collocated pins | 2026-08-04 | — |  | [260804-ifm-map-markers-not-visible](./quick/260804-ifm-map-markers-not-visible/) |
-| 260804-j8k | Fix marker overlapping and clustering on Mappa (spiderfy) | 2026-08-04 | — |  | [260804-j8k-map-marker-spiderfy](./quick/260804-j8k-map-marker-spiderfy/) |
-| 260804-k9m | Map markers on land + Stitch pin styling | 2026-08-04 | — |  | [260804-k9m-map-markers-land-stitch](./quick/260804-k9m-map-markers-land-stitch/) |
-| 260805-jjb | Map stuck on loading — remove nested dynamic import, fix worker order | 2026-08-05 | — |  | [260805-jjb-the-map-is-not-loaded-and-the-homepage-h](./quick/260805-jjb-the-map-is-not-loaded-and-the-homepage-h/) |
-| 22 | show bottom-right notification on translation retry success | 2026-08-05 | bf7000a |  | — |
-| 260805-ne9 | make translation retry faster: prefer OpenRouter (cheaper), add timeout, avoid slow sequential double-provider calls | 2026-08-05 | 5e25f21 |  | [260805-ne9-make-translation-retry-faster-prefer-ope](./quick/260805-ne9-make-translation-retry-faster-prefer-ope/) |
-| 260805-ots | Add admin action to delete out-of-date scraper records from the database | 2026-08-05 | 02e4dbf | Verified | [260805-ots-add-admin-action-to-delete-out-of-date-s](./quick/260805-ots-add-admin-action-to-delete-out-of-date-s/) |
-| 260805-ws8 | Dev-server chunk truncation — map stuck loading, homepage hangs | 2026-08-05 | 97caa22 | Partial — map render unverified (no GPU browser) | [260805-ws8-fix-dev-server-chunk-truncation-that-lea](./quick/260805-ws8-fix-dev-server-chunk-truncation-that-lea/) |
-| 260806-s5f | Map never loads / homepage hangs — unbounded land-pool slot probe | 2026-08-06 | 1adefb2 | Verified — map renders on localhost:3003, 13 tests pass | [260806-s5f-map-hangs-bound-land-pool-slot-probe](./quick/260806-s5f-map-hangs-bound-land-pool-slot-probe/) |
-
-### Blockers/Concerns
-
-- Phase 1: Subito legal/production posture — `robots.txt` machine rules allow `/` but disallow `?o=` pagination; a prose `#` comment forbids automated access; commercial bot management 403s non-browser clients. Needs Italian IP/privacy counsel before production crawl, plus a supply hedge (UGC + partnerships). See quick task [260803-wi0](./quick/260803-wi0-free-item-source-candidates/260803-wi0-RESEARCH.md): no high-volume non-scraping Italian free feed exists; best next supply move is national Subito seeds after lifting Venice geo hardcoding.
-- Phase 1: Subito national free category structure verified live (~39.5k `regalo` results) — remaining risk is anti-bot durability and sui generis / GDPR exposure, not category existence
-- Phase 4: iOS PWA push behavior is fast-moving and regulatory-sensitive (EU DMA) — verify against WebKit's current official docs at implementation time, and test end-to-end on a real iPhone, not the Simulator
-- SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY not configured — worker persist blocked until operator sets env and applies migrations
-
-### Roadmap Evolution
-
-- Phase 6 added: Scraper Admin Console — configurable sources, frequency, anti-block, and auto-translation
-- Phase 7 added: deploy it to Vercel
-- Phase 8 added: Subito regalo URL matrix — Venice & Padova (Veneto), all categories, admin-configurable
-- Phase 7 deferred to v2.0 (2026-08-09): operator postpones production deploy; v1.0 closes after Phase 8 verification
-
-## Deferred Items
-
-Items acknowledged and deferred at milestone close on 2026-08-09:
-
-| Category | Item | Status | Deferred At |
-|----------|------|--------|-------------|
-| uat_gap | Phase 04 UAT partial — Test 12 iOS standalone push blocked (physical iPhone) | v2.0 QA | 2026-08-09 |
-| verification | Phase 04 missing formal 04-VERIFICATION.md (UAT 13/14 pass) | tech debt | 2026-08-09 |
-| integration | CONT-03 FCFS read-then-insert race under concurrent buyers | tech debt | 2026-08-09 |
-| auth | Google OAuth production redirect URLs in Supabase | v2.0 deploy | 2026-08-09 |
-| nyquist | All phases VALIDATION.md status draft — run validate-phase | backlog | 2026-08-09 |
-| Deployment | Phase 7: deploy it to Vercel (Vercel PWA + Fly.io worker + OAuth + cron) | v2.0 | 2026-08-09 |
-| Scraped Supply | FB Marketplace scraper (SCRP-07), closed FB group scraping (SCRP-08) | v2+ | Requirements definition |
-| Monetization | Instant-alerts subscription (MON-01), local ad partnerships (MON-02) | v2+ | Requirements definition |
-| Platform | Native mobile app (PLAT-01) | v2+ | Requirements definition |
-
-## Session Continuity
-
-Last session: 2026-08-05T17:55:51.653Z
-Stopped at: Completed 08-05-PLAN.md
-Resume file: None
-Next: /gsd-execute-phase 5
+---
+*State updated: 2026-08-09 after v2.0 milestone init*

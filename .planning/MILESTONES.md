@@ -52,4 +52,21 @@ Map-first PWA for Venice free-item discovery: Subito scraper with admin-configur
 
 ---
 
-*Next milestone: v2.0 — Production Deploy (Phase 7)*
+## v2.0 — Snag-style Consumer UX + Production Deploy
+
+**Started:** 2026-08-09  
+**Status:** Planning
+
+### Scope
+
+Feed-first grid home (Stitch visuals, Snag interaction patterns), filter sheet + distance, category-folder favorites, select-location flow, settings parity (DND, delete account), then production deploy (Phase 7).
+
+### Phases
+
+9 → 10 → 11 → 12 → 13 → 14 → 7 (deploy last)
+
+### Artifacts
+
+- [Requirements](../REQUIREMENTS.md)
+- [Roadmap](../ROADMAP.md)
+- Phase 7 plans preserved: [milestones/v1.0-phases/07-deploy-it-to-vercel/](milestones/v1.0-phases/07-deploy-it-to-vercel/)
