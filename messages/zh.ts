@@ -264,6 +264,7 @@ export const messages: Messages = {
     centro_storico: '历史中心',
     mestre_marghera: 'Mestre-Marghera',
     lido_murano: 'Lido-Murano',
+    padova: 'Padova',
   },
   categories: {
     All: '全部',

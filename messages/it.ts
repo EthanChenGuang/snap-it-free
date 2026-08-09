@@ -275,7 +275,8 @@ export const messages = {
     centro_storico: 'Centro Storico',
     mestre_marghera: 'Mestre-Marghera',
     lido_murano: 'Lido-Murano',
-  } satisfies Record<'all', string> & Record<VeniceZone, string>,
+    padova: 'Padova',
+  } satisfies Record<'all' | 'padova', string> & Record<VeniceZone, string>,
   categories: {
     All: 'Tutti',
     furniture: 'Arredamento',
