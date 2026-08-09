@@ -10,16 +10,16 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Navigation & Information Architecture
 
-- [ ] **NAV-01**: Bottom navigation is Home · Favorites · Settings (Stitch-styled; not a Snag red floating capsule clone)
-- [ ] **NAV-02**: Post (UGC) remains accessible via menu/drawer — not a primary bottom tab
+- [x] **NAV-01**: Bottom navigation is Home · Favorites · Settings (Stitch-styled; not a Snag red floating capsule clone)
+- [x] **NAV-02**: Post (UGC) remains accessible via menu/drawer — not a primary bottom tab
 - [ ] **NAV-03**: Map is a secondary entry opened from the top-right location button (not the default home)
-- [ ] **NAV-04**: Default route `/` shows the grid feed home (replacing map-first home)
+- [x] **NAV-04**: Default route `/` shows the grid feed home (replacing map-first home)
 
 ### Home Feed & Search Bar
 
-- [ ] **HOME-01**: Mobile two-column grid displays listings (image, truncated title, metadata row)
+- [x] **HOME-01**: Mobile two-column grid displays listings (image, truncated title, metadata row)
 - [ ] **HOME-02**: Top search row includes language control, search field, filter button, and location button
-- [ ] **HOME-03**: Legacy `/list` route merges into or redirects to the feed home without breaking bookmarks
+- [x] **HOME-03**: Legacy `/list` route merges into or redirects to the feed home without breaking bookmarks
 
 ### Search, Filters & Distance
 
@@ -68,7 +68,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Internationalization
 
-- [ ] **I18N-01**: All new user-facing strings added to zh, en, and it locale files
+- [x] **I18N-01**: All new user-facing strings added to zh, en, and it locale files
 
 ### Tech Debt (carry-forward, execute if low cost)
 
@@ -106,13 +106,13 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| NAV-01 | Phase 9 | Pending |
-| NAV-02 | Phase 9 | Pending |
+| NAV-01 | Phase 9 | Complete |
+| NAV-02 | Phase 9 | Complete |
 | NAV-03 | Phase 9 | Pending |
-| NAV-04 | Phase 9 | Pending |
-| HOME-01 | Phase 9 | Pending |
+| NAV-04 | Phase 9 | Complete |
+| HOME-01 | Phase 9 | Complete |
 | HOME-02 | Phase 9 | Pending |
-| HOME-03 | Phase 9 | Pending |
+| HOME-03 | Phase 9 | Complete |
 | FILT-01 | Phase 10 | Pending |
 | FILT-02 | Phase 10 | Pending |
 | FILT-03 | Phase 10 | Pending |
@@ -135,7 +135,7 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | SET-04 | Phase 14 | Pending |
 | SET-05 | Phase 14 | Pending |
 | SET-06 | Phase 14 | Pending |
-| I18N-01 | Phases 9–14 | Pending |
+| I18N-01 | Phases 9–14 | Complete |
 | TD-01 | Phase 14 | Pending |
 | TD-02 | Phase 7 | Pending |
 | TD-03 | Phase 7 | Pending |
@@ -146,6 +146,7 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | DEPLOY-05 | Phase 7 | Pending |
 
 **Coverage:**
+
 - v2.0 requirements: 38 total
 - Mapped to phases: 38
 - Unmapped: 0 ✓

@@ -2,17 +2,18 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
-current_phase_name: Feed-First Home & Navigation IA
-status: planning
-stopped_at: Phase 9 UI-SPEC approved
-last_updated: "2026-08-09T11:30:09.145Z"
+current_phase: 9
+current_phase_name: feed-first-home-navigation-ia
+current_plan: 2
+status: executing
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-08-09T11:56:20.229Z"
 progress:
   total_phases: 7
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 4
+  completed_plans: 1
   percent: 0
-current_phase: 9
 last_activity: 2026-08-09
 last_activity_desc: v2.0 milestone requirements + roadmap created
 ---
@@ -25,15 +26,17 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
 
-**Current focus:** v2.0 planning complete — begin Phase 9 (Feed-First Home & Navigation IA)
+**Current focus:** Phase 9 — feed-first-home-navigation-ia
 
 ## Current Position
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
-Phase: **9** — Feed-First Home & Navigation IA  
-Status: **planning** (requirements + roadmap defined)
+Phase: 9 (feed-first-home-navigation-ia) — EXECUTING  
+**Current Plan:** 2
+**Total Plans in Phase:** 4  
+Status: Ready to execute
 
-Progress: [░░░░░░░░░░] 0% v2.0 (0/7 phases)
+Progress: [███░░░░░░░] 25% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -54,6 +57,12 @@ Progress: [░░░░░░░░░░] 0% v2.0 (0/7 phases)
 - Total plans completed: 39
 - Milestone duration: 16 days (2026-07-24 → 2026-08-09)
 
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 9 P01 | 12min | 3 tasks | 10 files |
+
 ## Deferred Items (from v1.0)
 
 - Phase 4 formal `04-VERIFICATION.md` → TD-01 (Phase 14)
@@ -72,6 +81,10 @@ Progress: [░░░░░░░░░░] 0% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-09T11:30:09.139Z
-**Stopped at:** Phase 9 UI-SPEC approved
-**Resume file:** .planning/phases/09-feed-first-home-navigation-ia/09-UI-SPEC.md
+**Last session:** 2026-08-09T11:56:20.222Z
+**Stopped at:** Completed 09-01-PLAN.md
+**Resume file:** None
+
+## Decisions
+
+- [Phase ?]: D-01 locked: four-tab bottom nav supersedes NAV-02 drawer-only Post

@@ -36,12 +36,12 @@ See [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) for full phase deta
 
 **Requirements:** NAV-01–04, HOME-01–03, I18N-01 (partial)
 
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 09-01-PLAN.md — Tracer: feed at `/` + 4-tab nav + `/list` redirect (D-01 overrides NAV-02)
+- [x] 09-01-PLAN.md — Tracer: feed at `/` + 4-tab nav + `/list` redirect (D-01 overrides NAV-02)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -173,7 +173,7 @@ Plans:
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
 | 1–6, 8 | v1.0 | 39/39 | Shipped | 2026-08-09 |
-| 9. Feed-First Home & Nav | v2.0 | 0/4 | Planned | — |
+| 9. Feed-First Home & Nav | v2.0 | 0/4 | In Progress|  |
 | 10. Filter Sheet & Distance | v2.0 | 0/? | Planned | — |
 | 11. Grid Listing Cards | v2.0 | 0/? | Planned | — |
 | 12. Favorites Folders | v2.0 | 0/? | Planned | — |
