@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 9
 current_phase_name: feed-first-home-navigation-ia
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: Completed 09-01-PLAN.md
-last_updated: "2026-08-09T11:56:20.229Z"
+stopped_at: Completed 09-02-PLAN.md
+last_updated: "2026-08-09T11:59:26.449Z"
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 last_activity: 2026-08-09
 last_activity_desc: v2.0 milestone requirements + roadmap created
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 9 (feed-first-home-navigation-ia) — EXECUTING  
-**Current Plan:** 2
+**Current Plan:** 3
 **Total Plans in Phase:** 4  
 Status: Ready to execute
 
-Progress: [███░░░░░░░] 25% v2.0 (0/7 phases)
+Progress: [█████░░░░░] 50% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -62,6 +62,7 @@ Progress: [███░░░░░░░] 25% v2.0 (0/7 phases)
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 9 P01 | 12min | 3 tasks | 10 files |
+| Phase 09 P02 | 3min | 3 tasks | 15 files |
 
 ## Deferred Items (from v1.0)
 
@@ -81,10 +82,12 @@ Progress: [███░░░░░░░] 25% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-09T11:56:20.222Z
-**Stopped at:** Completed 09-01-PLAN.md
+**Last session:** 2026-08-09T11:59:26.442Z
+**Stopped at:** Completed 09-02-PLAN.md
 **Resume file:** None
 
 ## Decisions
 
 - [Phase ?]: D-01 locked: four-tab bottom nav supersedes NAV-02 drawer-only Post
+- [Phase ?]: CompactLocaleChip uses 中/EN/IT pill with inline Radix dropdown
+- [Phase ?]: Feed scroll-away attaches to FeedHomeClient inner scroller via FeedScrollContext

@@ -18,7 +18,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 ### Home Feed & Search Bar
 
 - [x] **HOME-01**: Mobile two-column grid displays listings (image, truncated title, metadata row)
-- [ ] **HOME-02**: Top search row includes language control, search field, filter button, and location button
+- [x] **HOME-02**: Top search row includes language control, search field, filter button, and location button
 - [x] **HOME-03**: Legacy `/list` route merges into or redirects to the feed home without breaking bookmarks
 
 ### Search, Filters & Distance
@@ -111,7 +111,7 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | NAV-03 | Phase 9 | Pending |
 | NAV-04 | Phase 9 | Complete |
 | HOME-01 | Phase 9 | Complete |
-| HOME-02 | Phase 9 | Pending |
+| HOME-02 | Phase 9 | Complete |
 | HOME-03 | Phase 9 | Complete |
 | FILT-01 | Phase 10 | Pending |
 | FILT-02 | Phase 10 | Pending |
