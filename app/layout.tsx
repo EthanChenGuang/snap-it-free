@@ -9,7 +9,10 @@ import { AppChrome } from '@/components/shell/AppChrome';
 import { DocumentLang } from '@/components/shell/DocumentLang';
 import { Toaster } from '@/components/ui/toaster';
 import { APPEARANCE_INIT_SCRIPT } from '@/lib/settings/resolve-appearance';
+import { DEV_UNREGISTER_SW_SCRIPT } from '@/lib/pwa/dev-unregister-sw-script';
 import './globals.css';
+
+const isDev = process.env.NODE_ENV === 'development';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -19,7 +22,7 @@ const inter = Inter({
 const defaultMessages = getMessages('zh');
 
 export const metadata: Metadata = {
-  title: `${defaultMessages.app.title} — Map Explorer`,
+  title: defaultMessages.app.title,
   description: defaultMessages.app.description,
 };
 
@@ -27,6 +30,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh" className={inter.variable} suppressHydrationWarning>
       <head>
+        {isDev ? (
+          <script dangerouslySetInnerHTML={{ __html: DEV_UNREGISTER_SW_SCRIPT }} />
+        ) : null}
         <script dangerouslySetInnerHTML={{ __html: APPEARANCE_INIT_SCRIPT }} />
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"

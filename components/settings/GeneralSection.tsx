@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import {
 import { useAuthSession } from '@/lib/auth/useAuthSession';
 import {
   cycleAppearance,
+  DEFAULT_PREFERENCES,
   readAppPreferences,
   subscribeAppPreferences,
   writeAppPreferences,
@@ -43,7 +45,7 @@ export function GeneralSection() {
   const preferences = useSyncExternalStore(
     subscribeAppPreferences,
     readAppPreferences,
-    readAppPreferences,
+    () => DEFAULT_PREFERENCES,
   );
 
   const handleSignOut = async () => {
@@ -123,6 +125,16 @@ export function GeneralSection() {
               {appearanceLabel(preferences.appearance, messages)}
             </span>
           </button>
+        </SettingsCard>
+
+        <SettingsCard className="mt-space-md">
+          <Link
+            href="/post/manage"
+            className="flex w-full items-center gap-space-md p-space-md transition-colors hover:bg-surface-container-low"
+          >
+            <span className="material-symbols-outlined text-secondary">inventory_2</span>
+            <span className="text-body-md text-on-surface">{messages.post.manageLink}</span>
+          </Link>
         </SettingsCard>
       </section>
 
