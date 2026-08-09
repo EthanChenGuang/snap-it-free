@@ -46,6 +46,21 @@ export const messages = {
     emptyDescription: 'Prova a selezionare Tutte le categorie o modifica i filtri zona.',
     refreshing: 'Aggiornamento…',
   },
+  feed: {
+    searchPlaceholder: 'Cerca oggetti gratis vicino a te…',
+    filterComingSoon: 'Filtri in arrivo',
+    openFilters: 'Filtri',
+    openSelectLocation: 'Scegli posizione di navigazione',
+    emptyTitle: 'Nessun annuncio attivo',
+    emptyDescription: 'Riprova più tardi o modifica la ricerca.',
+    emptySearchTitle: 'Nessun risultato',
+    emptySearchDescription: 'Prova altre parole chiave.',
+    browseFeed: 'Sfoglia feed',
+  },
+  selectLocation: {
+    confirm: 'Conferma posizione',
+    back: 'Indietro',
+  },
   post: {
     title: 'Pubblica oggetto gratis',
     subtitle:

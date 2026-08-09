@@ -2,12 +2,14 @@
 
 import { usePathname } from 'next/navigation';
 import { BottomNav } from '@/components/shell/BottomNav';
+import { FeedHeaderRow } from '@/components/shell/FeedHeaderRow';
 
-/** Consumer shell: bottom nav on main routes; no global Header (retired in Phase 9). */
+/** Consumer shell: route-conditional chrome; feed header on `/` only (Phase 9). */
 export function AppChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith('/admin');
   const isListingDetail = pathname.startsWith('/listing/');
+  const showFeedHeader = pathname === '/';
 
   if (isAdmin) {
     return (
@@ -19,6 +21,9 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-shell">
+      {showFeedHeader && (
+        <FeedHeaderRow searchQuery="" onSearchQueryChange={() => {}} />
+      )}
       <div className="app-main">{children}</div>
       {!isListingDetail && <BottomNav />}
     </div>

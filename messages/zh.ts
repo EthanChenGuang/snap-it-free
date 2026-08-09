@@ -44,6 +44,21 @@ export const messages: Messages = {
     emptyDescription: '尝试选择「Tutte」分类或调整区域筛选。',
     refreshing: '刷新中…',
   },
+  feed: {
+    searchPlaceholder: '搜索附近的免费物品…',
+    filterComingSoon: '筛选功能即将推出',
+    openFilters: '筛选',
+    openSelectLocation: '选择浏览位置',
+    emptyTitle: '暂无活跃物品',
+    emptyDescription: '稍后再来看看，或调整搜索关键词。',
+    emptySearchTitle: '未找到匹配物品',
+    emptySearchDescription: '试试其他关键词。',
+    browseFeed: '浏览首页',
+  },
+  selectLocation: {
+    confirm: '确认位置',
+    back: '返回',
+  },
   post: {
     title: '发布免费物品',
     subtitle: '把用不到的东西分享给社区。善意是免费的。',

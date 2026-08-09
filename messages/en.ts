@@ -44,6 +44,21 @@ export const messages: Messages = {
     emptyDescription: 'Try selecting the Tutte category or adjusting zone filters.',
     refreshing: 'Refreshing…',
   },
+  feed: {
+    searchPlaceholder: 'Search free items near you…',
+    filterComingSoon: 'Filters coming soon',
+    openFilters: 'Filters',
+    openSelectLocation: 'Choose browse location',
+    emptyTitle: 'No active listings',
+    emptyDescription: 'Check back later or try a different search.',
+    emptySearchTitle: 'No matching items',
+    emptySearchDescription: 'Try different keywords.',
+    browseFeed: 'Browse feed',
+  },
+  selectLocation: {
+    confirm: 'Confirm location',
+    back: 'Back',
+  },
   post: {
     title: 'Post a free item',
     subtitle: 'Share something you no longer need with the community. Kindness is free.',
