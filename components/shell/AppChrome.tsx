@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { BottomNav } from '@/components/shell/BottomNav';
 import { FeedHeaderRow } from '@/components/shell/FeedHeaderRow';
+import { FeedScrollProvider } from '@/components/shell/FeedScrollContext';
 
 /** Consumer shell: route-conditional chrome; feed header on `/` only (Phase 9). */
 export function AppChrome({ children }: { children: React.ReactNode }) {
@@ -19,11 +20,20 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
     );
   }
 
+  if (showFeedHeader) {
+    return (
+      <FeedScrollProvider>
+        <div className="app-shell">
+          <FeedHeaderRow />
+          <div className="app-main">{children}</div>
+          {!isListingDetail && <BottomNav />}
+        </div>
+      </FeedScrollProvider>
+    );
+  }
+
   return (
     <div className="app-shell">
-      {showFeedHeader && (
-        <FeedHeaderRow searchQuery="" onSearchQueryChange={() => {}} />
-      )}
       <div className="app-main">{children}</div>
       {!isListingDetail && <BottomNav />}
     </div>

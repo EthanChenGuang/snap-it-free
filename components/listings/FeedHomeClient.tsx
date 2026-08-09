@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ListListingCard } from '@/components/listings/ListListingCard';
+import { useFeedScroll } from '@/components/shell/FeedScrollContext';
+import { matchesFeedSearch } from '@/lib/listings/feed-search';
 import { excludeReportedIds } from '@/lib/listings/filters';
 import { useListingsPoll } from '@/lib/listings/useListingsPoll';
 import { readReportedIds, REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
@@ -13,10 +15,11 @@ type FeedHomeClientProps = {
 };
 
 export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
-  const { messages } = useMessages();
+  const { messages, language, zoneLabel } = useMessages();
+  const { searchQuery, registerScrollContainer } = useFeedScroll();
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const { listings, isRefreshing } = useListingsPoll(initialListings);
-  const [searchQuery, setSearchQuery] = useState('');
   const [reportedIds, setReportedIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -26,19 +29,26 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
     return () => window.removeEventListener(REPORTS_CHANGE_EVENT, handleReportsChange);
   }, []);
 
+  useEffect(() => {
+    registerScrollContainer(scrollRef.current);
+    return () => registerScrollContainer(null);
+  }, [registerScrollContainer]);
+
   const filteredListings = useMemo(() => {
     const visible = excludeReportedIds(listings, reportedIds);
-    const query = searchQuery.trim().toLowerCase();
+    return visible.filter((listing) =>
+      matchesFeedSearch(listing, searchQuery, language, zoneLabel),
+    );
+  }, [listings, reportedIds, searchQuery, language, zoneLabel]);
 
-    return visible.filter((listing) => {
-      if (!query) return true;
-      return listing.title.toLowerCase().includes(query);
-    });
-  }, [listings, reportedIds, searchQuery]);
+  const hasSearchQuery = searchQuery.trim().length > 0;
 
   return (
     <main className="flex h-full flex-col overflow-hidden bg-background">
-      <div className="no-scrollbar flex-1 overflow-y-auto px-gutter pb-space-lg pt-space-lg">
+      <div
+        ref={scrollRef}
+        className="no-scrollbar flex-1 overflow-y-auto px-gutter pb-space-xl pt-space-md"
+      >
         {filteredListings.length === 0 && isRefreshing ? (
           <div className="flex items-center justify-center p-space-xl text-label-sm text-on-surface-variant">
             {messages.list.refreshing}
@@ -49,10 +59,14 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
               inventory_2
             </span>
             <p className="text-body-md font-semibold text-on-surface">
-              {messages.list.emptyTitle}
+              {hasSearchQuery
+                ? messages.feed.emptySearchTitle
+                : messages.feed.emptyTitle}
             </p>
             <p className="mt-space-xs text-label-sm text-on-surface-variant">
-              {messages.list.emptyDescription}
+              {hasSearchQuery
+                ? messages.feed.emptySearchDescription
+                : messages.feed.emptyDescription}
             </p>
           </div>
         ) : (
