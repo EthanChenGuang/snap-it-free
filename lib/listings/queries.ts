@@ -6,7 +6,7 @@ const PUBLIC_LISTINGS = 'listings_public';
 const BASE_LISTINGS = 'listings';
 
 const ACTIVE_LISTING_COLUMNS =
-  'id, source, title, title_en, title_zh, photo_url, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status';
+  'id, source, title, title_en, title_zh, description, description_en, description_zh, photo_url, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status';
 
 const OWNER_LISTING_COLUMNS =
   'id, source, title, photo_url, external_url, lat, lng, zone, posted_at, expires_at, status, owner_user_id, hidden_reason, description';
