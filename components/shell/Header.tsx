@@ -1,5 +1,6 @@
 'use client';
 
+/** Retired from consumer shell in Phase 9 (D-07). Kept for reference until Settings absorbs manage-post link. */
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { usePathname, useRouter } from 'next/navigation';

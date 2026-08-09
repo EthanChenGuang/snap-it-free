@@ -21,8 +21,7 @@ export function NavMenuDrawer({ open, onOpenChange }: NavMenuDrawerProps) {
   const pathname = usePathname();
 
   const menuItems = [
-    { href: '/', icon: 'map', label: messages.nav.map, exact: true as const },
-    { href: '/list', icon: 'format_list_bulleted', label: messages.nav.list },
+    { href: '/', icon: 'grid_view', label: messages.nav.home, exact: true as const },
     { href: '/post', icon: 'add_box', label: messages.nav.post },
     { href: '/favorites', icon: 'favorite', label: messages.header.favorites },
     { href: '/post/manage', icon: 'inventory_2', label: messages.post.manageLink },
