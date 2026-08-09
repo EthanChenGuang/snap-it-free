@@ -13,12 +13,22 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
   const { messages } = useMessages();
   const isAdmin = pathname.startsWith('/admin');
   const isListingDetail = pathname.startsWith('/listing/');
+  const isSelectLocation = pathname === '/select-location';
   const showFeedHeader = pathname === '/';
   const showFavoritesTitle = pathname === '/favorites';
   const showSettingsTitle = pathname === '/settings';
   const showSimpleTitle = showFavoritesTitle || showSettingsTitle;
+  const showBottomNav = !isListingDetail && !isSelectLocation;
 
   if (isAdmin) {
+    return (
+      <div className="app-shell">
+        <div className="app-main">{children}</div>
+      </div>
+    );
+  }
+
+  if (isSelectLocation) {
     return (
       <div className="app-shell">
         <div className="app-main">{children}</div>
@@ -32,7 +42,7 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
         <div className="app-shell">
           <FeedHeaderRow />
           <div className="app-main">{children}</div>
-          {!isListingDetail && <BottomNav />}
+          {showBottomNav && <BottomNav />}
         </div>
       </FeedScrollProvider>
     );
@@ -48,7 +58,7 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
         />
       )}
       <div className="app-main">{children}</div>
-      {!isListingDetail && <BottomNav />}
+      {showBottomNav && <BottomNav />}
     </div>
   );
 }

@@ -37,6 +37,10 @@ export function BottomNav() {
   const { user, loading } = useAuthSession();
   const [authOpen, setAuthOpen] = useState(false);
 
+  if (pathname === '/select-location') {
+    return null;
+  }
+
   const navItems: NavItem[] = [
     { href: '/', icon: 'grid_view', label: messages.nav.home },
     { href: '/post', icon: 'add_box', label: messages.nav.post, authGate: true },
