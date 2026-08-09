@@ -39,12 +39,24 @@ See [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) for full phase deta
 **Plans:** 4 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 09-01-PLAN.md — Tracer: feed at `/` + 4-tab nav + `/list` redirect (D-01 overrides NAV-02)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 09-02-PLAN.md — Feed header row, scroll-away, search + description migration
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 09-03-PLAN.md — Select-location flow + browse-center persistence
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 09-04-PLAN.md — Favorites grid, Settings chrome, i18n completion
 
 **Success criteria:**
+
 1. `/` renders two-column listing grid on mobile (Stitch tokens)
 2. Bottom nav shows four tabs; active state uses Stitch filled icon + bold primary (not Snag red pill)
 3. Location button opens `/select-location`; Post is bottom tab with auth gate (D-01)
@@ -61,6 +73,7 @@ Plans:
 **Requirements:** FILT-01–05, I18N-01 (partial)
 
 **Success criteria:**
+
 1. Filter sheet: radius slider (km, persisted), category multi-select, Apply/Reset
 2. Pills reflect active category, radius, and zone filters; dismissible
 3. Listings filtered by haversine when radius set; no-coord listings handled consistently
@@ -77,6 +90,7 @@ Plans:
 **Requirements:** CARD-01–05, I18N-01 (partial)
 
 **Success criteria:**
+
 1. Cards show image, FREE badge, heart, truncated title, `{distance} · {time}` or time-only
 2. FavoriteButton + login gate works on grid
 3. Detail routes unchanged for deep-link / UGC claim
@@ -92,6 +106,7 @@ Plans:
 **Requirements:** FAV-01–03, I18N-01 (partial)
 
 **Success criteria:**
+
 1. Five folder tiles with counts (Furniture, Electronics, Home & Garden, For Kids, Other)
 2. Folder tap shows filtered favorites; empty folders show 0 items
 3. Category mapping documented for scraped + UGC listings
@@ -107,6 +122,7 @@ Plans:
 **Requirements:** LOC-01–03, I18N-01 (partial)
 
 **Success criteria:**
+
 1. Select Location screen matches Stitch prototype patterns
 2. Confirm persists lat/lng + label for filter or post context
 3. Reuses MapLibre and existing pin components
@@ -122,6 +138,7 @@ Plans:
 **Requirements:** SET-01–06, TD-01, I18N-01 (partial)
 
 **Success criteria:**
+
 1. Push toggle, language, sign out restyled to Stitch settings layout
 2. DND quiet hours suppress or defer push delivery
 3. Delete account removes Supabase user + associated rows with confirmation UX
@@ -138,6 +155,7 @@ Plans:
 **Requirements:** DEPLOY-01–05, TD-02, TD-03
 
 **Success criteria:**
+
 1. PWA accessible on production Vercel URL
 2. Fly.io worker ingests on schedule
 3. Alert cron runs externally; push smoke on production
