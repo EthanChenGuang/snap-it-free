@@ -25,21 +25,37 @@ function parseBrowseCenter(raw: string | null): BrowseCenter | null {
   }
 }
 
+let cachedRaw: string | null | undefined;
+let cachedCenter: BrowseCenter | null = null;
+
+function invalidateBrowseCenterCache(raw: string | null = null) {
+  cachedRaw = raw;
+  cachedCenter = parseBrowseCenter(raw);
+}
+
 export function readBrowseCenter(): BrowseCenter | null {
   if (typeof window === 'undefined') return null;
-  return parseBrowseCenter(localStorage.getItem(BROWSE_CENTER_STORAGE_KEY));
+  const raw = localStorage.getItem(BROWSE_CENTER_STORAGE_KEY);
+  if (raw === cachedRaw) return cachedCenter;
+  invalidateBrowseCenterCache(raw);
+  return cachedCenter;
 }
 
 export function writeBrowseCenter(center: BrowseCenter): BrowseCenter {
   if (typeof window === 'undefined') return center;
-  localStorage.setItem(BROWSE_CENTER_STORAGE_KEY, JSON.stringify(center));
+  const raw = JSON.stringify(center);
+  localStorage.setItem(BROWSE_CENTER_STORAGE_KEY, raw);
+  invalidateBrowseCenterCache(raw);
   window.dispatchEvent(new CustomEvent(BROWSE_CENTER_CHANGE_EVENT, { detail: center }));
   return center;
 }
 
 export function subscribeBrowseCenter(onStoreChange: () => void): () => void {
   if (typeof window === 'undefined') return () => {};
-  const handler = () => onStoreChange();
+  const handler = () => {
+    invalidateBrowseCenterCache(localStorage.getItem(BROWSE_CENTER_STORAGE_KEY));
+    onStoreChange();
+  };
   window.addEventListener(BROWSE_CENTER_CHANGE_EVENT, handler);
   window.addEventListener('storage', handler);
   return () => {

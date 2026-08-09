@@ -1,11 +1,12 @@
 'use client';
 
-import '@/lib/map/maplibreWorker';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import 'maplibre-gl/dist/maplibre-gl.css';
-import Map, { type MapRef } from 'react-map-gl/maplibre';
-import { LocateMeButton } from '@/components/map/LocateMeButton';
+import type { MapRef } from 'react-map-gl/maplibre';
+import {
+  SelectLocationMapPane,
+  type SelectLocationMapViewState,
+} from '@/components/map/SelectLocationMapPane';
 import {
   SelectLocationZoneChips,
   type SelectLocationZone,
@@ -16,7 +17,6 @@ import { nearestVeniceZone } from '@/lib/geo/nearest-zone';
 import { ZONE_CENTERS } from '@/lib/geo/zone-centers';
 import { useMessages } from '@/lib/i18n/useMessages';
 
-const OPENFREEMAP_LIBERTY = 'https://tiles.openfreemap.org/styles/liberty';
 const PADOVA_CENTER = { lat: 45.41, lng: 11.88 };
 const DEFAULT_CENTER = { lat: 45.44, lng: 12.33 };
 
@@ -24,22 +24,26 @@ function zoneCenter(zone: SelectLocationZone) {
   return zone === 'padova' ? PADOVA_CENTER : ZONE_CENTERS[zone];
 }
 
+function resolveInitialViewState(): SelectLocationMapViewState {
+  const saved = readBrowseCenter();
+  const center = saved ?? DEFAULT_CENTER;
+  return { longitude: center.lng, latitude: center.lat, zoom: 12 };
+}
+
 export function SelectLocationClient() {
   const router = useRouter();
   const { messages, zoneLabel } = useMessages();
   const mapRef = useRef<MapRef>(null);
-  const [center, setCenter] = useState(DEFAULT_CENTER);
-  const [selectedZone, setSelectedZone] = useState<SelectLocationZone | null>(null);
-
-  useEffect(() => {
+  const [initialViewState] = useState(resolveInitialViewState);
+  const [center, setCenter] = useState(() => {
     const saved = readBrowseCenter();
-    if (!saved) return;
-    setCenter(saved);
-    mapRef.current?.flyTo({
-      center: [saved.lng, saved.lat],
-      zoom: 12,
-      duration: 0,
-    });
+    return saved ?? DEFAULT_CENTER;
+  });
+  const [selectedZone, setSelectedZone] = useState<SelectLocationZone | null>(null);
+  const [mapReady, setMapReady] = useState(false);
+
+  const handleMapLoad = useCallback(() => {
+    setMapReady(true);
   }, []);
 
   const handleMoveEnd = useCallback(() => {
@@ -50,16 +54,20 @@ export function SelectLocationClient() {
     setSelectedZone(null);
   }, []);
 
-  const handleZoneChange = useCallback((zone: SelectLocationZone) => {
-    const target = zoneCenter(zone);
-    setSelectedZone(zone);
-    setCenter(target);
-    mapRef.current?.flyTo({
-      center: [target.lng, target.lat],
-      zoom: zone === 'padova' ? 12 : 13,
-      duration: 600,
-    });
-  }, []);
+  const handleZoneChange = useCallback(
+    (zone: SelectLocationZone) => {
+      const target = zoneCenter(zone);
+      setSelectedZone(zone);
+      setCenter(target);
+      if (!mapReady) return;
+      mapRef.current?.flyTo({
+        center: [target.lng, target.lat],
+        zoom: zone === 'padova' ? 12 : 13,
+        duration: 600,
+      });
+    },
+    [mapReady],
+  );
 
   const resolveLabel = useCallback((): string | undefined => {
     if (selectedZone === 'padova') return messages.zones.padova;
@@ -100,20 +108,12 @@ export function SelectLocationClient() {
       </div>
 
       <div className="relative min-h-0 flex-1">
-        <Map
+        <SelectLocationMapPane
           ref={mapRef}
-          initialViewState={{
-            longitude: DEFAULT_CENTER.lng,
-            latitude: DEFAULT_CENTER.lat,
-            zoom: 12,
-          }}
-          mapStyle={OPENFREEMAP_LIBERTY}
-          style={{ width: '100%', height: '100%' }}
-          attributionControl={{ compact: true }}
+          initialViewState={initialViewState}
           onMoveEnd={handleMoveEnd}
-        >
-          <LocateMeButton />
-        </Map>
+          onLoad={handleMapLoad}
+        />
 
         <div
           className="pointer-events-none absolute inset-0 flex items-center justify-center"

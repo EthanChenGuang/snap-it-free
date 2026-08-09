@@ -57,7 +57,7 @@ Plans:
 
 **Wave 5** *(gap closure G-09-7)*
 
-- [ ] 09-05-PLAN.md — Fix select-location dev chunk hydration + UAT test 7
+- [x] 09-05-PLAN.md — Fix select-location dev chunk hydration + UAT test 7
 
 **Success criteria:**
 
