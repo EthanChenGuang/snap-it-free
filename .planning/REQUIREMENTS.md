@@ -12,7 +12,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 - [x] **NAV-01**: Bottom navigation is Home · Favorites · Settings (Stitch-styled; not a Snag red floating capsule clone)
 - [x] **NAV-02**: Post (UGC) remains accessible via menu/drawer — not a primary bottom tab
-- [ ] **NAV-03**: Map is a secondary entry opened from the top-right location button (not the default home)
+- [x] **NAV-03**: Map is a secondary entry opened from the top-right location button (not the default home)
 - [x] **NAV-04**: Default route `/` shows the grid feed home (replacing map-first home)
 
 ### Home Feed & Search Bar
@@ -108,7 +108,7 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 |-------------|-------|--------|
 | NAV-01 | Phase 9 | Complete |
 | NAV-02 | Phase 9 | Complete |
-| NAV-03 | Phase 9 | Pending |
+| NAV-03 | Phase 9 | Complete |
 | NAV-04 | Phase 9 | Complete |
 | HOME-01 | Phase 9 | Complete |
 | HOME-02 | Phase 9 | Complete |

@@ -36,7 +36,7 @@ See [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) for full phase deta
 
 **Requirements:** NAV-01–04, HOME-01–03, I18N-01 (partial)
 
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans executed
 
 Plans:
 **Wave 1**
@@ -49,7 +49,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 09-03-PLAN.md — Select-location flow + browse-center persistence
+- [x] 09-03-PLAN.md — Select-location flow + browse-center persistence
 
 **Wave 4** *(blocked on Wave 3 completion)*
 

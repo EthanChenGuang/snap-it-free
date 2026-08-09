@@ -5,15 +5,15 @@ milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 9
 current_phase_name: feed-first-home-navigation-ia
 current_plan: 4
-status: executing
-stopped_at: Completed 09-04-PLAN.md
-last_updated: "2026-08-09T12:02:32.843Z"
+status: verifying
+stopped_at: Completed 09-03-PLAN.md
+last_updated: "2026-08-09T12:05:55.599Z"
 progress:
   total_phases: 7
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 0
+  completed_plans: 4
+  percent: 14
 last_activity: 2026-08-09
 last_activity_desc: v2.0 milestone requirements + roadmap created
 ---
@@ -34,9 +34,9 @@ Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy
 Phase: 9 (feed-first-home-navigation-ia) — EXECUTING  
 **Current Plan:** 4
 **Total Plans in Phase:** 4  
-Status: Ready to execute
+Status: Phase complete — ready for verification
 
-Progress: [████████░░] 75% v2.0 (0/7 phases)
+Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -64,6 +64,7 @@ Progress: [████████░░] 75% v2.0 (0/7 phases)
 | Phase 9 P01 | 12min | 3 tasks | 10 files |
 | Phase 09 P02 | 3min | 3 tasks | 15 files |
 | Phase 09-feed-first-home-navigation-ia P04 | 4min | 3 tasks | 5 files |
+| Phase 09-feed-first-home-navigation-ia P03 | 8min | 3 tasks | 11 files |
 
 ## Deferred Items (from v1.0)
 
@@ -83,8 +84,8 @@ Progress: [████████░░] 75% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-09T12:02:32.836Z
-**Stopped at:** Completed 09-04-PLAN.md
+**Last session:** 2026-08-09T12:05:55.591Z
+**Stopped at:** Completed 09-03-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -94,3 +95,5 @@ Progress: [████████░░] 75% v2.0 (0/7 phases)
 - [Phase ?]: Feed scroll-away attaches to FeedHomeClient inner scroller via FeedScrollContext
 - [Phase ?]: Favorites fetch errors fall back to empty state per E5 backstop
 - [Phase ?]: Manage my posts link moved from NavMenuDrawer to GeneralSection
+- [Phase ?]: SelectLocationZoneChips separate export keeps MapExplorer All chip unchanged
+- [Phase ?]: Confirm label derived from selected zone or nearest Venice vs Padova distance
