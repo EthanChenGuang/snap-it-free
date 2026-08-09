@@ -1,7 +1,7 @@
 'use client';
 
 import '@/lib/map/maplibreWorker';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import Map, { type MapRef } from 'react-map-gl/maplibre';
@@ -28,11 +28,19 @@ export function SelectLocationClient() {
   const router = useRouter();
   const { messages, zoneLabel } = useMessages();
   const mapRef = useRef<MapRef>(null);
-  const saved = readBrowseCenter();
-  const initialCenter = saved ?? DEFAULT_CENTER;
-
-  const [center, setCenter] = useState(initialCenter);
+  const [center, setCenter] = useState(DEFAULT_CENTER);
   const [selectedZone, setSelectedZone] = useState<SelectLocationZone | null>(null);
+
+  useEffect(() => {
+    const saved = readBrowseCenter();
+    if (!saved) return;
+    setCenter(saved);
+    mapRef.current?.flyTo({
+      center: [saved.lng, saved.lat],
+      zoom: 12,
+      duration: 0,
+    });
+  }, []);
 
   const handleMoveEnd = useCallback(() => {
     const map = mapRef.current?.getMap();
@@ -95,8 +103,8 @@ export function SelectLocationClient() {
         <Map
           ref={mapRef}
           initialViewState={{
-            longitude: initialCenter.lng,
-            latitude: initialCenter.lat,
+            longitude: DEFAULT_CENTER.lng,
+            latitude: DEFAULT_CENTER.lat,
             zoom: 12,
           }}
           mapStyle={OPENFREEMAP_LIBERTY}

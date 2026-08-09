@@ -1,22 +1,5 @@
-import dynamic from 'next/dynamic';
-import '@/lib/map/maplibreWorker';
-import { getMessages } from '@/messages';
-
-const mapLoadingLabel = getMessages('zh').post.mapLoading;
-
-const SelectLocationClient = dynamic(
-  () =>
-    import('@/components/map/SelectLocationClient').then((mod) => mod.SelectLocationClient),
-  {
-    ssr: false,
-    loading: () => (
-      <main className="map-container relative flex h-full w-full items-center justify-center overflow-hidden bg-surface-container-low">
-        <p className="text-label-sm text-on-surface-variant">{mapLoadingLabel}</p>
-      </main>
-    ),
-  },
-);
+import { SelectLocationPageClient } from '@/components/map/SelectLocationPageClient';
 
 export default function SelectLocationPage() {
-  return <SelectLocationClient />;
+  return <SelectLocationPageClient />;
 }
