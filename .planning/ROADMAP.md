@@ -36,7 +36,7 @@ See [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) for full phase deta
 
 **Requirements:** NAV-01–04, HOME-01–03, I18N-01 (partial)
 
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 **Wave 1**
@@ -53,7 +53,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 09-04-PLAN.md — Favorites grid, Settings chrome, i18n completion
+- [x] 09-04-PLAN.md — Favorites grid, Settings chrome, i18n completion
 
 **Success criteria:**
 

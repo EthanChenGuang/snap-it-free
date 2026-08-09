@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 9
 current_phase_name: feed-first-home-navigation-ia
-current_plan: 3
+current_plan: 4
 status: executing
-stopped_at: Completed 09-02-PLAN.md
-last_updated: "2026-08-09T11:59:26.449Z"
+stopped_at: Completed 09-04-PLAN.md
+last_updated: "2026-08-09T12:02:32.843Z"
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 last_activity: 2026-08-09
 last_activity_desc: v2.0 milestone requirements + roadmap created
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 9 (feed-first-home-navigation-ia) — EXECUTING  
-**Current Plan:** 3
+**Current Plan:** 4
 **Total Plans in Phase:** 4  
 Status: Ready to execute
 
-Progress: [█████░░░░░] 50% v2.0 (0/7 phases)
+Progress: [████████░░] 75% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -63,6 +63,7 @@ Progress: [█████░░░░░] 50% v2.0 (0/7 phases)
 |------|----------|-------|-------|
 | Phase 9 P01 | 12min | 3 tasks | 10 files |
 | Phase 09 P02 | 3min | 3 tasks | 15 files |
+| Phase 09-feed-first-home-navigation-ia P04 | 4min | 3 tasks | 5 files |
 
 ## Deferred Items (from v1.0)
 
@@ -82,8 +83,8 @@ Progress: [█████░░░░░] 50% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-09T11:59:26.442Z
-**Stopped at:** Completed 09-02-PLAN.md
+**Last session:** 2026-08-09T12:02:32.836Z
+**Stopped at:** Completed 09-04-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -91,3 +92,5 @@ Progress: [█████░░░░░] 50% v2.0 (0/7 phases)
 - [Phase ?]: D-01 locked: four-tab bottom nav supersedes NAV-02 drawer-only Post
 - [Phase ?]: CompactLocaleChip uses 中/EN/IT pill with inline Radix dropdown
 - [Phase ?]: Feed scroll-away attaches to FeedHomeClient inner scroller via FeedScrollContext
+- [Phase ?]: Favorites fetch errors fall back to empty state per E5 backstop
+- [Phase ?]: Manage my posts link moved from NavMenuDrawer to GeneralSection
