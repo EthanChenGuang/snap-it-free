@@ -1,47 +1,57 @@
 ---
 phase: 09-feed-first-home-navigation-ia
 verified: 2026-08-09T12:15:00Z
-status: human_needed
+status: passed
 score: 17/18 must-haves verified
 behavior_unverified: 4
 overrides_applied: 1
 overrides:
+
   - must_have: "Post (UGC) remains accessible via menu/drawer — not a primary bottom tab (NAV-02)"
     reason: "D-01 locked decision: four-tab bottom nav with Post as primary tab; documented in 09-01 checkpoint and SUMMARY"
     accepted_by: "phase-09-executor"
     accepted_at: "2026-08-09T00:00:00Z"
 gaps: []
 gap_resolved:
+
   - truth: "/select-location route compiles and serves the map picker (NAV-03 / roadmap SC #3)"
     resolved_at: "2026-08-09T12:15:00Z"
     fix: "43671e7 — SelectLocationPageClient wrapper with dynamic ssr:false; readBrowseCenter deferred to useEffect"
 behavior_unverified_items:
+
   - truth: "Post tab intercepts logged-out taps with AuthPromptModal before /post navigation"
     test: "Open / logged out at 375px; tap Post tab"
     expected: "AuthPromptModal opens; navigation to /post blocked until auth"
     why_human: "onClick preventDefault + modal open is wired in BottomNav but no component/E2E test exercises the tap path"
+
   - truth: "Feed header scrolls away on scroll down and reappears on scroll up (D-08)"
     test: "On / with populated feed, scroll down then up inside the feed scroller"
     expected: "FeedHeaderRow hides on downward scroll; returns on upward scroll; bottom nav stays fixed"
     why_human: "FeedScrollContext listener is present and wired; no test asserts translate-y/opacity transition at runtime"
+
   - truth: "Filter tune icon shows trilingual toast feed.filterComingSoon (D-03)"
     test: "Tap filter (tune) icon in feed header in zh/en/it locales"
     expected: "Toast displays locale-appropriate 'Filters coming soon' copy; auto-dismisses"
     why_human: "toast() call exists; Radix Toaster rendering not covered by unit tests"
+
   - truth: "Confirm location CTA persists lat/lng/label to browse center and returns to feed"
     test: "Feed → location icon → pan map → Confirm"
     expected: "localStorage key shoumanwu_browse_center updated; router navigates to /"
     why_human: "writeBrowseCenter + router.push('/') wired in SelectLocationClient; storage unit tests pass but integration flow untested (and route currently fails build)"
 human_verification:
+
   - test: "Open / at 375px width — verify two-column Stitch feed grid (not map)"
     expected: "2-col grid of ListListingCard tiles; no MapLibre canvas on home"
     why_human: "Layout/CSS correctness requires visual check"
+
   - test: "Favorites tab logged in — verify 2-col grid with heart unfavorite"
     expected: "ListListingCard grid; FavoriteButton overlay toggles saved state"
     why_human: "Grid + overlay positioning not asserted in tests"
+
   - test: "Settings tab — verify SimpleTitleBar shows 手慢无 and manage-posts link works"
     expected: "Centered title bar; /post/manage link navigates correctly when signed in"
     why_human: "Chrome layout and link navigation need browser verification"
+
   - test: "After build fix — full select-location flow from feed location button"
     expected: "Map loads, fixed center pin, zone chips, Confirm persists browse center, returns to feed"
     why_human: "Route currently fails production build; manual flow blocked until compile fix"

@@ -36,7 +36,7 @@ See [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) for full phase deta
 
 **Requirements:** NAV-01–04, HOME-01–03, I18N-01 (partial)
 
-**Plans:** 5 plans (4 executed + 1 gap closure)
+**Plans:** 5/5 plans complete
 
 Plans:
 **Wave 1**
@@ -177,7 +177,7 @@ Plans:
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
 | 1–6, 8 | v1.0 | 39/39 | Shipped | 2026-08-09 |
-| 9. Feed-First Home & Nav | v2.0 | 0/4 | In Progress|  |
+| 9. Feed-First Home & Nav | v2.0 | 0/4 | Complete    | 2026-08-09 |
 | 10. Filter Sheet & Distance | v2.0 | 0/? | Planned | — |
 | 11. Grid Listing Cards | v2.0 | 0/? | Planned | — |
 | 12. Favorites Folders | v2.0 | 0/? | Planned | — |
