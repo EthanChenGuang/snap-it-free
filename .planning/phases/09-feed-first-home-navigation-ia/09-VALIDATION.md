@@ -45,6 +45,9 @@ created: 2026-08-09
 | 09-03-01 | 03 | 2 | NAV-01 | — | N/A | manual | — | ❌ | ⬜ pending |
 | 09-03-02 | 03 | 2 | HOME-01 | — | N/A | manual | — | ❌ | ⬜ pending |
 | 09-04-01 | 04 | 2 | NAV-03/D-19 | — | N/A | manual | — | ❌ | ⬜ pending |
+| 09-05-01 | 05 | 5 | NAV-03/G-09-7 | T-09-10 | Bounds validation on browse center write | structural | `! rg -q 'dynamic\(' components/map/SelectLocationClient.tsx && test -f components/map/SelectLocationMapPane.tsx` | ❌ | ⬜ pending |
+| 09-05-02 | 05 | 5 | NAV-03/G-09-7 | T-09-11 | Local dev probe only | integration | `E2E_BASE_URL=http://localhost:3003 node scripts/verify-select-location-dev.mjs` | ❌ | ⬜ pending |
+| 09-05-03 | 05 | 5 | NAV-03/G-09-7 | T-09-10 | Finite lat/lng on Confirm write | e2e | `E2E_BASE_URL=http://localhost:3003 node scripts/verify-select-location-dev.mjs --browser` | ❌ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

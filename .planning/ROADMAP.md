@@ -36,7 +36,7 @@ See [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) for full phase deta
 
 **Requirements:** NAV-01–04, HOME-01–03, I18N-01 (partial)
 
-**Plans:** 4/4 plans executed
+**Plans:** 5 plans (4 executed + 1 gap closure)
 
 Plans:
 **Wave 1**
@@ -54,6 +54,10 @@ Plans:
 **Wave 4** *(blocked on Wave 3 completion)*
 
 - [x] 09-04-PLAN.md — Favorites grid, Settings chrome, i18n completion
+
+**Wave 5** *(gap closure G-09-7)*
+
+- [ ] 09-05-PLAN.md — Fix select-location dev chunk hydration + UAT test 7
 
 **Success criteria:**
 
