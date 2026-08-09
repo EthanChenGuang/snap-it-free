@@ -32,15 +32,23 @@ See [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) for full phase deta
 
 #### Phase 9: Feed-First Home & Navigation IA
 
-**Goal:** Grid feed becomes default home; bottom nav becomes Home · Favorites · Settings; map demoted to location button; Post via drawer.
+**Goal:** Grid feed becomes default home; four-tab bottom nav (Home · Post · Favorites · Settings); map demoted to select-location flow; unified feed header row.
 
 **Requirements:** NAV-01–04, HOME-01–03, I18N-01 (partial)
 
+**Plans:** 4 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — Tracer: feed at `/` + 4-tab nav + `/list` redirect (D-01 overrides NAV-02)
+- [ ] 09-02-PLAN.md — Feed header row, scroll-away, search + description migration
+- [ ] 09-03-PLAN.md — Select-location flow + browse-center persistence
+- [ ] 09-04-PLAN.md — Favorites grid, Settings chrome, i18n completion
+
 **Success criteria:**
 1. `/` renders two-column listing grid on mobile (Stitch tokens)
-2. Bottom nav shows three tabs; active state uses Stitch accent (not Snag red pill)
-3. Location button opens map secondary view; Post reachable from NavMenuDrawer
-4. `/list` redirects or aliases to feed without 404
+2. Bottom nav shows four tabs; active state uses Stitch filled icon + bold primary (not Snag red pill)
+3. Location button opens `/select-location`; Post is bottom tab with auth gate (D-01)
+4. `/list` permanent redirect to feed without 404
 
 **Depends on:** v1.0 Phase 2 (list/map components)
 
@@ -147,7 +155,7 @@ See [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) for full phase deta
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
 | 1–6, 8 | v1.0 | 39/39 | Shipped | 2026-08-09 |
-| 9. Feed-First Home & Nav | v2.0 | 0/? | Planned | — |
+| 9. Feed-First Home & Nav | v2.0 | 0/4 | Planned | — |
 | 10. Filter Sheet & Distance | v2.0 | 0/? | Planned | — |
 | 11. Grid Listing Cards | v2.0 | 0/? | Planned | — |
 | 12. Favorites Folders | v2.0 | 0/? | Planned | — |
