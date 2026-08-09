@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { getMessages } from '@/messages';
+import { BrowseCenterProvider } from '@/lib/browse-center/context';
 import { AppThemeProvider } from '@/components/providers/AppThemeProvider';
 import { AppSerwistProvider } from '@/components/providers/SerwistProvider';
 import { FavoritesMergeProvider } from '@/components/providers/FavoritesMergeProvider';
@@ -44,17 +45,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         suppressHydrationWarning
       >
         <AppThemeProvider>
-          <DocumentLang />
-          <AppSerwistProvider>
-            <FavoritesMergeProvider>
-              <PwaOnboardingProvider>
-                <AppChrome>
-                  {children}
-                </AppChrome>
-                <Toaster />
-              </PwaOnboardingProvider>
-            </FavoritesMergeProvider>
-          </AppSerwistProvider>
+          <BrowseCenterProvider>
+            <DocumentLang />
+            <AppSerwistProvider>
+              <FavoritesMergeProvider>
+                <PwaOnboardingProvider>
+                  <AppChrome>
+                    {children}
+                  </AppChrome>
+                  <Toaster />
+                </PwaOnboardingProvider>
+              </FavoritesMergeProvider>
+            </AppSerwistProvider>
+          </BrowseCenterProvider>
         </AppThemeProvider>
       </body>
     </html>
