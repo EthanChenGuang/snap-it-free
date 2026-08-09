@@ -9,7 +9,9 @@ export const messages = {
   nav: {
     map: 'Mappa',
     list: 'Elenco',
+    home: 'Home',
     post: 'Pubblica',
+    favorites: 'Preferiti',
     settings: 'Impostazioni',
   },
   header: {

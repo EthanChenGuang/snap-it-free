@@ -8,7 +8,9 @@ export const messages: Messages = {
   nav: {
     map: 'Map',
     list: 'List',
+    home: 'Home',
     post: 'Post',
+    favorites: 'Favorites',
     settings: 'Settings',
   },
   header: {

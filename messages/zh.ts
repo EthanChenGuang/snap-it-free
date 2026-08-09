@@ -8,7 +8,9 @@ export const messages: Messages = {
   nav: {
     map: '地图',
     list: '列表',
+    home: '首页',
     post: '发布',
+    favorites: '收藏',
     settings: '设置',
   },
   header: {

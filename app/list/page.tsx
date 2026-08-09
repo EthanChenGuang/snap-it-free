@@ -1,9 +1,5 @@
-import { ListPageClient } from '@/components/listings/ListPageClient';
-import { getActiveListings } from '@/lib/listings/queries';
+import { permanentRedirect } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
-
-export default async function ListPage() {
-  const listings = await getActiveListings();
-  return <ListPageClient initialListings={listings} />;
+export default function ListPage() {
+  permanentRedirect('/');
 }
