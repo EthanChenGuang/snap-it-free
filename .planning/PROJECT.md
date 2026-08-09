@@ -2,11 +2,33 @@
 
 ## What This Is
 
-A free-item discovery app for Venice (Centro Storico, Mestre/Marghera, Lido/outer islands) that aggregates free listings scraped from Subito.it (primary) and Facebook Marketplace (secondary/stretch) into one map-first browsing experience, and lets users post their own free items directly (UGC / "street dump"). Built for international students (Ca' Foscari, IUAV), local residents, and expats — Italian as primary UI language, with English and Chinese toggles. Modeled on the Snag app's aggregation/map/alert mechanics, but staying fully free in v1 rather than paywalling the feed.
+A map-first PWA for discovering free items in Venice and Padova (Veneto). Scrapes Subito.it *regalo* listings via a DB-configurable URL matrix, displays them on an interactive map with zone and category filters, and supplements thin scraped supply with user-generated posts ("street dump"). Users browse without an account; login is required only for favorites, alerts, posting, and UGC contact. Trilingual UI (Chinese default, English, Italian) targets international students, residents, and expats. Operator manages scrape sources, schedules, and translation from a Stitch-aligned `/admin` console.
 
 ## Core Value
 
 Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves — validated by supply flow-through rate and user activity (MAU/retention), not revenue.
+
+## Current State (v1.0 — shipped 2026-08-09)
+
+**Stack:** Next.js App Router PWA, Supabase (PostGIS), MapLibre, Crawlee/Playwright scraper worker, Serwist SW, Vercel-ready (not yet deployed).
+
+**Shipped capabilities:**
+- Subito scraper with zone tagging, free-filter, soft-block alerts, admin-configurable sources and 34-URL Regalo matrix (Venice + Padova)
+- Map-first browse, bottom sheet, zone/category filters, scraped detail + Subito deep-link, 48h expiry
+- UGC Quick Post + Street Dump, in-app DM, community reports, auto-hide moderation
+- Auth-gated favorites (Supabase-backed), keyword+zone alerts, push notifications + badge fallback, iOS A2HS onboarding
+- Trilingual UI with locale-aware push fan-out
+- Operator `/admin` console (sources, scheduler, run history, translation queue, allowlist)
+
+**Not yet shipped:** Production deploy (Phase 7 → v2.0), FB Marketplace scraper, native mobile app.
+
+## Next Milestone Goals (v2.0)
+
+- Deploy Next.js PWA to Vercel with production OAuth and Serwist SW
+- Deploy scraper worker to Fly.io with Supabase DB config
+- External cron for alert matcher (cron-job.org)
+- D-19 smoke checklist + rollback runbook
+- Physical iPhone push QA (UAT test 12 from v1.0)
 
 ## Business Context
 
@@ -16,75 +38,64 @@ Users can find and claim real free items near them in Venice faster than by manu
 
 ## Requirements
 
-### Validated
+### Validated (v1.0)
 
-(None yet — ship to validate)
+- ✓ Map-first home with zone filters and bottom sheet — v1.0 Phases 1–2
+- ✓ Subito.it scraper with admin-configurable URL matrix — v1.0 Phases 1, 6, 8
+- ✓ 48-hour auto-expiry of scraped listings — v1.0 Phase 2
+- ✓ Community report + auto-hide moderation — v1.0 Phase 3
+- ✓ In-app WebView for scraped listings with Subito deep-link — v1.0 Phase 2
+- ✓ UGC quick-post + Street Dump — v1.0 Phase 3
+- ✓ In-app DM + reserve/mark-sent for UGC — v1.0 Phase 3
+- ✓ Login-optional browsing with auth gates on favorite/alert/post/contact — v1.0 Phases 3–4
+- ✓ Push notifications + keyword/zone alerts — v1.0 Phase 4
+- ✓ Trilingual UI (zh/en/it) — v1.0 Phase 5
 
-### Active
+### Active (v2.0+)
 
-- [ ] Map-first home screen with GPS pins for free items across Venice zones (Centro Storico / Mestre-Marghera / Lido-Murano), draggable bottom sheet list
-- [ ] Subito.it scraper (Veneto/Venice free-item category), 1-2hr refresh cadence
-- [ ] FB Marketplace scraper (stretch/secondary — best-effort given anti-bot defenses, don't block launch on it)
-- [ ] 48-hour auto-expiry of scraped listings
-- [ ] Community "claimed/expired" report button, auto-hide after 2 reports
-- [ ] In-app WebView for scraped listings with top bar (favorite, share, back-to-list) — deep-links to source, no in-app contact for scraped listings
-- [ ] UGC quick-post flow (photo + title + zone tag, under 30 seconds)
-- [ ] "Street Dump" quick-pin posting mode
-- [ ] In-app contact/DM + first-come-first-served + seller reserve/mark-as-sent toggle — for UGC posts only
-- [ ] Login-optional browsing; login prompt only on contact-seller / enable-alerts / favorite / post actions (Google/Apple/email)
-- [ ] Push notifications: keyword + zone match alerts
-- [ ] i18n: Italian (primary), English, Chinese toggle
+- [ ] Production deploy: Vercel PWA + Fly.io worker + production OAuth (Phase 7)
+- [ ] FB Marketplace scraper (SCRP-07, best-effort secondary source)
+- [ ] Physical iPhone push QA sign-off (NOTF-04 operator follow-up from v1.0)
+- [ ] Google OAuth production redirect configuration
 
 ### Out of Scope
 
-- Paywalling the live feed / subscription-gated browsing — deliberate divergence from Snag's monetization model, which drew heavy user backlash ("pay to find free stuff")
-- In-app contact/DM for scraped (non-UGC) listings — deep-link to source instead; avoids building a parallel messaging system for content we don't control
-- Scraping closed/login-walled Chinese community channels (WeChat groups, forums like 奋斗在意大利) — not realistically scrapable; served instead via Chinese-language UI on top of scraped Subito/FB inventory, with manual community seeding as a growth tactic
-- Native mobile app (RN/Expo/Flutter) — deferred; v1 ships as a mobile-responsive web app (PWA) to skip app store review and validate faster
-- Scraping specific closed Facebook groups (e.g. "Compro Vendo Usato Mestre Venezia e Dintorni") — v2 candidate, harder to scrape than Marketplace (membership/login walls)
+- Paywalling the live feed — deliberate divergence from Snag's monetization model
+- In-app contact/DM for scraped listings — deep-link to source instead
+- Scraping closed/login-walled Chinese community channels — served via Chinese UI over scraped inventory
+- Native mobile app at launch — PWA validates faster; deferred to PLAT-01
+- Real-time push for hourly-scraped data — poll-based refresh sufficient
+- Social graph, payment/checkout — out of utility scope
 
 ## Context
 
-- Modeled on Snag App (US): aggregates free listings from Facebook Marketplace/Craigslist/community boards into a map-based feed with alerts. Its "Snag it" button deep-links out to the source listing with no in-app contact flow, and the entire live feed is paywalled behind a subscription ($5.99-9.99/wk). This project copies the aggregation/UX mechanics but stays free in v1 — reviews of Snag show heavy backlash on the paywall undermining its "free stuff" premise, so staying free is also a differentiator.
-- Facebook Marketplace scraping is legally contentious but not clearly illegal for logged-out public data (Meta v. Bright Data was decided in the scraper's favor on this point). Meta still actively cease-and-desists/sues, and FB Marketplace has strong technical anti-bot defenses (login walls, fingerprinting, rate limiting) that make sustained scraping operationally hard regardless of the legal question.
-- Subito.it also actively blocks scrapers — needs careful rate limiting/proxy rotation within budget.
-- Target users: Ca' Foscari/IUAV international students, local Venice/Mestre residents, expats — with a meaningful Chinese-student population driving the Chinese UI requirement.
-- Venice's geography (bridges, walking-only Centro Storico) makes precise GPS pins and zone-based filtering (Centro Storico / Mestre-Marghera / Lido-Murano) especially important vs. a generic city app.
+- **Codebase:** ~70k LOC added across 521 files (Jul–Aug 2026); 39 phase plans executed
+- **Supply:** Padova ingest verified (39 visible rows); Venice + Padova 34-URL seed operational
+- **Tech debt:** Phase 4 formal VERIFICATION.md absent (UAT 13/14 pass); FCFS DM race; Nyquist validation unreconciled
+- **Legal:** Subito robots.txt / anti-bot posture needs Italian counsel before sustained production crawl
 
 ## Constraints
 
-- **Budget**: $20-100/month for proxies, maps, hosting — must stay lean since there's no revenue in v1
-- **Team**: Solo builder (+ AI assistance) — the ~4-week timeline is aspirational, not a hard deadline; scope may compress or extend
-- **Tech/legal**: FB Marketplace and Subito.it both employ anti-scraping defenses — scraper reliability is a real risk to plan around, not assume away
-- **Platform**: Ships as a mobile-responsive web app (PWA) first — no app store review dependency for v1 launch
+- **Budget**: $20-100/month for proxies, maps, hosting
+- **Team**: Solo builder (+ AI assistance)
+- **Tech/legal**: Subito anti-scraping defenses — scraper reliability is a real operational risk
+- **Platform**: PWA first; native app deferred
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Stay free in v1 instead of copying Snag's paywall | MVP goal is validating MAU/retention/supply flow, not revenue; Snag's paywall model draws heavy user backlash | — Pending |
-| Keep UGC posting despite Snag being pure-aggregation | Venice is a small market; scraped supply alone may be too thin to sustain engagement | — Pending |
-| Scraped listings deep-link out (no in-app contact); UGC gets in-app DM/reserve flow | Matches Snag's proven pattern for content we don't control; avoids building messaging for listings we don't own | — Pending |
-| Subito.it as primary scraper target, FB Marketplace as stretch/secondary | Subito has a clearer free/regalo category and relatively fewer defenses than FB Marketplace; reduces v1 risk of scraper collapse before launch | — Pending |
-| Ship as PWA/web app before native mobile | App store review cycles conflict with the "validate fast" MVP goal; native mobile deferred to post-validation | — Pending |
-| Don't scrape closed Chinese community channels (WeChat/forums) | Not technically scrapable (login-walled, no API); served instead via Chinese-language UI over existing scraped inventory plus manual community seeding | — Pending |
+| Stay free in v1 instead of copying Snag's paywall | MVP validates MAU/retention, not revenue | ✓ Good — shipped free feed |
+| Keep UGC posting despite Snag being pure-aggregation | Venice market supply too thin for scrape-only | ✓ Good — UGC + scrape coexist |
+| Scraped listings deep-link out; UGC gets in-app DM | Matches Snag pattern for uncontrolled content | ✓ Good — implemented |
+| Subito as primary scraper; FB Marketplace deferred | Clearer regalo category, fewer defenses | ✓ Good — Subito + admin matrix shipped |
+| Ship as PWA before native mobile | Faster validation, no app store review | ✓ Good — PWA feature-complete |
+| Phase 7 deploy deferred to v2.0 | Focus v1.0 on supply matrix + features | ✓ Good — v1.0 closed without deploy |
+| DB-driven scrape config via `/admin` | Operator agility without redeploy | ✓ Good — admin console shipped |
 
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
 
-**After each phase transition** (via `/gsd-transition`):
-1. Requirements invalidated? → Move to Out of Scope with reason
-2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
-
-**After each milestone** (via `/gsd-complete-milestone`):
-1. Full review of all sections
-2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
-4. Update Context with current state
-
 ---
-*Last updated: 2026-07-24 after initialization*
+*Last updated: 2026-08-09 after v1.0 milestone*

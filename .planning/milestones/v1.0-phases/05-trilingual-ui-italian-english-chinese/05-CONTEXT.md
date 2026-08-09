@@ -1,20 +1,62 @@
 # Phase 5: Trilingual UI (Italian / English / Chinese) - Context
 
 **Gathered:** 2026-08-04
-**Status:** Ready for planning
+**Updated:** 2026-08-04 (codebase audit — gap-closure scope)
+**Status:** Ready for planning (gap-closure, not greenfield)
 
 <domain>
 ## Phase Boundary
 
-Phase 5 completes consumer-facing internationalization so users can use the entire app in Italian, English, or Chinese. It delivers: browser-locale-aware first visit with Chinese fallback, persistent language preference, quick language switching from header and Settings, full UI chrome translation in all three languages (I18N-01, I18N-02), locale-aware push notifications, and locale-aware display of scraped listing fields when Phase 6 translation columns exist.
+Phase 5 **closes remaining i18n gaps** so users can use the entire app in Italian, English, or Chinese. Quick task `260804-hed` (2026-08-04) already shipped ~70% of the work — catalogs, client hook, Settings switcher, and full UI chrome migration. Phase 5 delivers what is still missing: browser-locale first visit, header quick switch (I18N-01 “from anywhere”), server/push locale, listing-field locale bridge (Phase 6), doc alignment, and a light I18N-02 audit.
 
-Requirements in scope: I18N-01, I18N-02.
+Requirements in scope: I18N-01 (partial — finish), I18N-02 (partial — audit + close gaps).
 
-Out of scope: Ingest-time translation pipeline (Phase 6 D-24–D-27, D-43–D-44); admin console UI (Phase 6); auto-translating UGC user-authored titles; closed Chinese community scraping; native mobile app (v2).
-
-**Partial implementation note:** Quick task `260804-hed` already shipped zh/en/it message catalogs, `useMessages()` hook, client UI migration, and Settings language segment. Phase 5 planning should treat that work as foundation — not greenfield — and focus on gaps: default-locale policy alignment, header switcher, server/push locale storage, listing-field locale resolution (Phase 6 bridge), and I18N-02 coverage audit.
+Out of scope: Rebuilding catalogs or migrating components again; ingest-time translation (Phase 6); admin console UI; UGC auto-translate; next-intl / `[locale]` routing.
 
 </domain>
+
+<shipped>
+## Already Shipped (260804-hed — do NOT replan)
+
+Verified in codebase 2026-08-04:
+
+| Capability | Status | Location |
+|------------|--------|----------|
+| zh/en/it message catalogs (~390 lines each) | ✅ Shipped | `messages/{zh,en,it}.ts` |
+| `getMessages()` + `DEFAULT_LANGUAGE = 'zh'` | ✅ Shipped | `messages/index.ts` |
+| `useMessages()` client hook | ✅ Shipped | `lib/i18n/useMessages.ts` |
+| Settings 3-button language segment (Stitch) | ✅ Shipped | `components/settings/LanguageSection.tsx` |
+| Preference persistence (localStorage) | ✅ Shipped | `lib/settings/preferences.ts` |
+| Instant client re-render on language change | ✅ Shipped | `useMessages()` + preference store |
+| ~50 client components on `useMessages()` | ✅ Shipped | `components/**/*.tsx` |
+| `html[lang]` sync | ✅ Shipped | `components/shell/DocumentLang.tsx` |
+| Locale helpers (zone, category, relative time) | ✅ Shipped | `messages/index.ts` |
+| PWA manifest zh branding | ✅ Shipped | `app/manifest.ts` |
+| Resolver unit tests (7 passing) | ✅ Shipped | `lib/i18n/get-messages.test.ts` |
+| Default `zh` in code constants | ✅ Shipped | `preferences.ts`, `messages/index.ts` |
+
+**I18N-02:** Largely satisfied for UI chrome. Remaining audit items only (see gaps).
+
+**I18N-01 partial:** Settings switch works; header switch and browser first-visit do not.
+
+</shipped>
+
+<gaps>
+## Remaining Gaps (Phase 5 scope)
+
+| Gap | Decision IDs | Priority |
+|-----|--------------|----------|
+| Header language dropdown on all main pages | D-123–D-128 | P0 — closes I18N-01 |
+| Browser locale on first visit (no localStorage) | D-120, D-122 | P0 |
+| ROADMAP/REQUIREMENTS "Italian default" doc drift | D-119 | P1 |
+| Server-side language storage (profile / push) | D-129 | P1 |
+| Push notifications in user locale + translated title | D-136 | P1 |
+| Listing field resolver (title_en/zh fallback) | D-133 | P2 — bridge until Phase 6 columns |
+| Light I18N-02 audit (metadata, key parity) | D-138 | P2 |
+
+**Explicitly NOT gaps:** catalog creation, component migration, Settings segment, next-intl, cookie SSR locale.
+
+</gaps>
 
 <decisions>
 ## Implementation Decisions
@@ -46,8 +88,8 @@ Out of scope: Ingest-time translation pipeline (Phase 6 D-24–D-27, D-43–D-44
 - **D-136:** **Push notification title** uses **translated listing title** for user's stored locale when translation column available; fallback to original title — **Reversibility:** reversible.
 
 ### i18n Architecture (carry forward from quick task 260804-hed)
-- **D-137:** Continue **custom message catalogs** in `messages/{zh,en,it}.ts` + `getMessages()` / `useMessages()` — **no next-intl** (D-QL-03) — **Reversibility:** costly — framework switch would touch every component.
-- **D-138:** **I18N-02 completion bar:** all user-facing UI chrome (nav, forms, buttons, modals, onboarding, settings, empty states, toasts) translated in zh/en/it; audit and close any remaining hardcoded strings or SSR pages still importing `getMessages('zh')` at module scope without client hydration path — **Reversibility:** reversible.
+- **D-137:** Continue **custom message catalogs** in `messages/{zh,en,it}.ts` + `getMessages()` / `useMessages()` — **no next-intl** (D-QL-03) — **SHIPPED** by 260804-hed; Phase 5 extends only, does not replace — **Reversibility:** costly.
+- **D-138:** **I18N-02 audit (light):** chrome migration is **shipped** (~50 components on `useMessages()`); Phase 5 runs key-parity test + fixes stragglers (e.g. `app/layout.tsx` metadata description) — **not** a full re-migration — **Reversibility:** reversible.
 
 ### Claude's Discretion
 - Exact browser locale detection logic (`navigator.language` parsing, `zh-CN` vs `zh-TW` handling)
@@ -100,13 +142,13 @@ Out of scope: Ingest-time translation pipeline (Phase 6 D-24–D-27, D-43–D-44
 <code_context>
 ## Existing Code Insights
 
-### Reusable Assets
-- `messages/{zh,en,it}.ts` + `messages/index.ts` — full catalogs already populated (quick task 260804-hed)
-- `lib/i18n/useMessages.ts` — preference-subscribed hook; all client components migrated
-- `components/settings/LanguageSection.tsx` — working 3-button language switcher
-- `lib/settings/preferences.ts` — localStorage persistence + cross-tab sync events
-- `components/shell/DocumentLang.tsx` — maps zh→zh-CN, en→en, it→it on `<html lang>`
-- `lib/i18n/get-messages.test.ts` — test coverage for resolver and helpers
+### Reusable Assets (shipped — extend, do not rebuild)
+- `messages/{zh,en,it}.ts` + `messages/index.ts` — full catalogs (260804-hed)
+- `lib/i18n/useMessages.ts` — all client UI reads through this
+- `components/settings/LanguageSection.tsx` — **reuse `LANGUAGES` array** for header dropdown labels
+- `lib/settings/preferences.ts` — add browser detect on first visit only
+- `components/shell/DocumentLang.tsx` — already wired
+- `lib/i18n/get-messages.test.ts` — extend with browser-detect + key-parity tests
 
 ### Established Patterns
 - Client components call `useMessages()` inside render — never bake `messages.*` at module scope in client components
@@ -131,7 +173,8 @@ Out of scope: Ingest-time translation pipeline (Phase 6 D-24–D-27, D-43–D-44
 - Header quick switch + Settings segment — user wants both, not either/or
 - Listing translation is Phase 6 ingest work; Phase 5 only reads translated columns by locale (user confirmed: refer to Phase 6)
 - Push should show translated listing title when available — not always original Italian
-- Quick task 260804-hed is foundation; Phase 5 closes policy gaps and I18N-02 audit, not rebuild from scratch
+- ~70% shipped via 260804-hed; Phase 5 is gap-closure (header, browser detect, server push, audit)
+- UI design authority: `.planning/google-stitch-ui-design/` (user confirmed 2026-08-04)
 
 </specifics>
 

@@ -1,44 +1,43 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-current_phase: 08
-current_phase_name: subito-regalo-url-matrix-venice-padova-veneto-all-categories
-status: gaps_found
-stopped_at: Phase 8 executed — 2 Padova gaps remain (spike FAIL)
-last_updated: "2026-08-05T18:00:00.000Z"
-last_activity: 2026-08-05
-last_activity_desc: "Executed Phase 8 (5 plans); verification 4/6 — Padova coord spike FAIL"
+milestone: v2.0
+milestone_name: production-deploy
+current_phase: 7
+current_phase_name: deploy it to Vercel
+status: planning
+stopped_at: Milestone v1.0 archived
+last_updated: "2026-08-09T09:40:00.000Z"
+last_activity: 2026-08-09
+last_activity_desc: Milestone v1.0 archived — planning v2.0
 progress:
-  total_phases: 8
-  completed_phases: 7
-  total_plans: 41
-  completed_plans: 37
+  total_phases: 1
+  completed_phases: 0
+  total_plans: 4
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-24)
+See: .planning/PROJECT.md (updated 2026-08-09)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
-**Current focus:** Phase 08 — subito-regalo-url-matrix-venice-padova-veneto-all-categories
+**Current focus:** Planning v2.0 — Production Deploy (Phase 7)
 
 ## Current Position
 
-Phase: 08 (subito-regalo-url-matrix-venice-padova-veneto-all-categories) — EXECUTING
-Plan: 5 of 5
-Status: Phase complete — ready for verification
-Last activity: 2026-08-06 — Completed quick task 260806-s5f: map never loads / homepage hangs (unbounded land-pool slot probe)
+Milestone: v1.0 shipped 2026-08-09
+Next: `/gsd-new-milestone` to define v2.0 requirements and roadmap
+Phase 7 (deploy to Vercel) preserved in milestones/v1.0-phases/07-deploy-it-to-vercel/
 
-Progress: [█████████░] 90%
+Progress: [░░░░░░░░░░] 0% v2.0
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 25
+- Total plans completed: 32
 - Average duration: - min
 - Total execution time: 0 hours
 
@@ -51,6 +50,7 @@ Progress: [█████████░] 90%
 | 03 | 4 | - | - |
 | 05 | 3 | - | - |
 | 06 | 9 | - | - |
+| 8 | 7 | - | - |
 
 **Recent Trend:**
 
@@ -229,16 +229,23 @@ None yet.
 - Phase 6 added: Scraper Admin Console — configurable sources, frequency, anti-block, and auto-translation
 - Phase 7 added: deploy it to Vercel
 - Phase 8 added: Subito regalo URL matrix — Venice & Padova (Veneto), all categories, admin-configurable
+- Phase 7 deferred to v2.0 (2026-08-09): operator postpones production deploy; v1.0 closes after Phase 8 verification
 
 ## Deferred Items
 
-Items acknowledged and carried forward from previous milestone close:
+Items acknowledged and deferred at milestone close on 2026-08-09:
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| Scraped Supply | FB Marketplace scraper (SCRP-07), closed FB group scraping (SCRP-08) | v2 | Requirements definition |
-| Monetization | Instant-alerts subscription (MON-01), local ad partnerships (MON-02) | v2 | Requirements definition |
-| Platform | Native mobile app (PLAT-01) | v2 | Requirements definition |
+| uat_gap | Phase 04 UAT partial — Test 12 iOS standalone push blocked (physical iPhone) | v2.0 QA | 2026-08-09 |
+| verification | Phase 04 missing formal 04-VERIFICATION.md (UAT 13/14 pass) | tech debt | 2026-08-09 |
+| integration | CONT-03 FCFS read-then-insert race under concurrent buyers | tech debt | 2026-08-09 |
+| auth | Google OAuth production redirect URLs in Supabase | v2.0 deploy | 2026-08-09 |
+| nyquist | All phases VALIDATION.md status draft — run validate-phase | backlog | 2026-08-09 |
+| Deployment | Phase 7: deploy it to Vercel (Vercel PWA + Fly.io worker + OAuth + cron) | v2.0 | 2026-08-09 |
+| Scraped Supply | FB Marketplace scraper (SCRP-07), closed FB group scraping (SCRP-08) | v2+ | Requirements definition |
+| Monetization | Instant-alerts subscription (MON-01), local ad partnerships (MON-02) | v2+ | Requirements definition |
+| Platform | Native mobile app (PLAT-01) | v2+ | Requirements definition |
 
 ## Session Continuity
 

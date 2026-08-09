@@ -1,0 +1,147 @@
+{
+  "results": [
+    {
+      "name": "migration 018: operator_allowlist exists",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "migration 018: scraper_global_config exists",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "migration 018: scraper_sources exists",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "migration 018: scrape_jobs exists",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "migration 018: translation_queue exists",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "seeded 5 scraper sources",
+      "pass": true,
+      "detail": "count=5"
+    },
+    {
+      "name": "coming_soon sources seeded",
+      "pass": true,
+      "detail": "coming_soon=4"
+    },
+    {
+      "name": "unauthenticated /admin redirects to login",
+      "pass": true,
+      "detail": "307 → /post?next=%2Fadmin"
+    },
+    {
+      "name": "non-operator /admin redirects to /",
+      "pass": true,
+      "detail": "307 → /"
+    },
+    {
+      "name": "seed operator allowlist entry",
+      "pass": true,
+      "detail": "p6-uat-operator-1785874655736@snap-it-free.test"
+    },
+    {
+      "name": "operator /admin loads (200)",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "admin shell uses Material Symbols + zh chrome",
+      "pass": true,
+      "detail": "material-symbols + zh labels"
+    },
+    {
+      "name": "admin HTML has no lucide-react markers",
+      "pass": true,
+      "detail": "no lucide"
+    },
+    {
+      "name": "operator /admin/sources loads",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "operator /admin/runs loads",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "operator /admin/rejects loads",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "operator /admin/translation loads",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "operator /admin/settings loads",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "PATCH global_pause=true",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "DB global_pause persisted",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "scheduler skips when global_pause (unit contract)",
+      "pass": true,
+      "detail": "pickDueSources returns []"
+    },
+    {
+      "name": "PATCH global_pause=false restores",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "POST /api/admin/jobs enqueues manual run",
+      "pass": true,
+      "detail": "201"
+    },
+    {
+      "name": "admin jobs API requires auth",
+      "pass": true,
+      "detail": "403"
+    },
+    {
+      "name": "/admin/runs renders (empty or populated)",
+      "pass": true,
+      "detail": "bytes=20607"
+    },
+    {
+      "name": "Subito source enabled with Venice URLs",
+      "pass": true,
+      "detail": "urls=3"
+    },
+    {
+      "name": "scrape_runs has source column populated",
+      "pass": true,
+      "detail": "subito"
+    },
+    {
+      "name": "consumer shell has no /admin href",
+      "pass": true,
+      "detail": "D-50"
+    }
+  ],
+  "passed": 28,
+  "blocked": 0,
+  "failed": 0
+}

@@ -1,5 +1,7 @@
 # Phase 7: deploy it to Vercel - Context
 
+> **Deferred → v2.0 (2026-08-09):** Postponed to next milestone. Plans preserved; resume with `/gsd-execute-phase 7` when v2.0 starts.
+
 **Gathered:** 2026-08-04
 **Status:** Ready for planning
 **Mode:** Claude-selected best practices (user deferred all gray areas)
@@ -7,7 +9,9 @@
 <domain>
 ## Phase Boundary
 
-Phase 7 ships the ShouManWu **Next.js PWA** to production on **Vercel** with correct build settings, environment variables, OAuth/callback URLs, Vercel Cron for alert matching, and Serwist service worker — so real users can browse, auth, favorite, alert, and post against the live Supabase backend.
+Phase 7 ships the ShouManWu **Next.js PWA** to production on **Vercel (Hobby / free tier)** with correct build settings, environment variables, OAuth/callback URLs, alert-matcher scheduling, and Serwist service worker — so real users can browse, auth, favorite, alert, and post against the live Supabase backend.
+
+**Cost target (incremental deploy compute, excluding Supabase ~$25/mo already budgeted):** **~$3–6/mo** — not Vercel Pro + oversized worker.
 
 **Companion deploy (same phase, not on Vercel):** the **`scraper/` Docker worker** must also run in production so listings continue to ingest (Phase 6 D-53: worker is never Vercel serverless). Supabase remains the managed cloud database — no self-hosting.
 
@@ -21,8 +25,9 @@ Phase 7 ships the ShouManWu **Next.js PWA** to production on **Vercel** with cor
 ## Implementation Decisions
 
 ### Deployment Scope (What Ships Where)
-- **D-01:** **Vercel hosts the Next.js app only** — repo root, default framework preset, no monorepo subfolder — **Reversibility:** reversible.
-- **D-02:** **Scraper worker deploys separately** via existing `scraper/Dockerfile` on **Fly.io** (recommended for solo + budget: ~$5–7/mo always-on machine, native Docker, Italian egress-friendly regions) — **not** Vercel Serverless/Edge — **Reversibility:** costly — ops runbook + env duplication.
+- **D-01:** **Vercel Hobby (free) hosts the Next.js app only** — repo root, default framework preset, no monorepo subfolder — **Reversibility:** reversible.
+- **D-02:** **Scraper worker deploys separately** via existing `scraper/Dockerfile` on **Fly.io shared-cpu-1x 512MB** (~$3.19/mo always-on; bump to 1GB ~$5.70/mo only if Playwright OOMs in smoke test) — **not** Vercel Serverless — **Reversibility:** costly — ops runbook + env duplication.
+- **D-02b:** **Hetzner CX23 (~€3.99/mo, 4GB RAM)** is the **cheapest raw compute fallback** if Fly.io trial/credit limits block signup — accepts more Linux ops (Docker + systemd/Coolify) — **Reversibility:** costly.
 - **D-03:** **Supabase project stays cloud-hosted** (existing project); Phase 7 configures production redirect URLs and verifies migrations applied — no Supabase self-host — **Reversibility:** one-way — production data anchor.
 - **D-04:** **`scraper-admin/` Vite app is not deployed** — admin UI lives at `/admin` in Next.js per Phase 6 D-53 — **Reversibility:** reversible.
 
@@ -41,8 +46,12 @@ Phase 7 ships the ShouManWu **Next.js PWA** to production on **Vercel** with cor
 ### Vercel Build & Runtime
 - **D-13:** Build command **`npm run build`** (already runs `next build --webpack` for MapLibre compatibility) — do not switch to Turbopack in production — **Reversibility:** reversible.
 - **D-14:** Install command **`npm install`** — `postinstall` copies MapLibre worker (`scripts/copy-maplibre-worker.mjs`) — verify build succeeds on Vercel before marking deploy done — **Reversibility:** reversible.
-- **D-15:** **Vercel Pro plan** recommended for reliable **Cron Jobs** (`vercel.json` `*/3 * * * *` on `/api/cron/match-alerts` per D-106) within $20–100/mo budget — **Reversibility:** reversible — billing tier.
-- **D-16:** **`vercel.json` cron + `CRON_SECRET`** — production must set `CRON_SECRET`; route already accepts `vercel-cron` user-agent in production per `app/api/cron/match-alerts/route.ts` — **Reversibility:** reversible.
+- **D-15:** **Do NOT use Vercel Pro ($20/mo)** solely for cron — Hobby limits built-in cron to **once per day**, and current `vercel.json` `*/3 * * * *` **will fail Hobby deploy** — **Reversibility:** reversible.
+- **D-15b:** **Alert matcher scheduling (cost-optimized, pick one):**
+  - **Preferred:** Remove sub-daily entry from `vercel.json` crons; use **free external HTTP cron** (e.g. cron-job.org, GitHub Actions schedule, or Uptime Kuma) to `GET /api/cron/match-alerts` every 3 min with `Authorization: Bearer $CRON_SECRET` — route already supports this — **$0 extra**
+  - **Alternative:** Supabase **`pg_cron` + `pg_net`** HTTP call to production URL (same pattern as migration 005 expiry job; keeps scheduling in existing Supabase bill) — **$0 extra**
+  - **Last resort:** Vercel Pro only if external cron is unacceptable — **+$20/mo**
+- **D-16:** **`CRON_SECRET`** required in Vercel production env regardless of scheduler choice — **Reversibility:** reversible.
 - **D-17:** **Serwist service worker** builds in production (`disable` only in development per `next.config.ts`) — smoke-test push subscribe on deployed HTTPS URL — **Reversibility:** reversible.
 
 ### Deploy Workflow & Verification
@@ -50,8 +59,22 @@ Phase 7 ships the ShouManWu **Next.js PWA** to production on **Vercel** with cor
 - **D-19:** **First-deploy smoke checklist:** (1) `/` map loads pins, (2) Google login completes round-trip, (3) cron route returns 200 with auth, (4) `/admin` gates non-operators, (5) Fly worker logs show successful scrape run — **Reversibility:** reversible.
 - **D-20:** **Rollback** via Vercel instant rollback to previous deployment — no custom blue/green in v1 — **Reversibility:** reversible.
 
+### Cost Summary (locked for planning)
+- **D-21:** Incremental monthly deploy stack target:
+
+| Component | Choice | ~Cost/mo |
+|-----------|--------|----------|
+| Next.js PWA | Vercel Hobby | **$0** |
+| Alert cron | External HTTP ping or Supabase pg_cron | **$0** |
+| Scraper worker | Fly.io 512MB (or 1GB if needed) | **$3–6** |
+| Database/auth | Supabase Pro (already planned) | **~$25** (existing) |
+| Custom domain | Deferred | **$0** |
+| **Incremental deploy total** | | **~$3–6** |
+
+Avoid **Vercel Pro ($20)** and **Railway ($5 plan + usage)** unless free cron or Fly.io is blocked — saves **~$20/mo** vs prior CONTEXT draft.
+
 ### Claude's Discretion
-User requested best-practice defaults for all gray areas — decisions above are Claude-selected unless noted. Planner may choose Fly.io vs Railway for worker if Fly signup/region is blocked, but must keep Docker + separate from Vercel. Exact Vercel project name and Fly app name are implementation details.
+User requested **most cost-effective** solution — D-15b external cron + Vercel Hobby + right-sized Fly.io supersede earlier Vercel Pro recommendation. Planner validates Playwright RAM in smoke test before upsizing Fly machine.
 
 </decisions>
 
@@ -115,7 +138,7 @@ User requested best-practice defaults for all gray areas — decisions above are
 <specifics>
 ## Specific Ideas
 
-User deferred all deployment decisions to Claude best practices — no custom domain, no preview OAuth complexity, lean budget, separate Docker worker on Fly.io, Vercel Pro for cron reliability.
+User deferred all deployment decisions to Claude; revised for **most cost-effective** stack: Vercel Hobby + free external cron + Fly.io 512MB worker (~$3–6/mo incremental).
 
 </specifics>
 

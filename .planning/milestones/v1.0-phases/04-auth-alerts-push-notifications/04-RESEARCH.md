@@ -682,16 +682,16 @@ Ship end-to-end value in thin vertical slices; each slice is demoable before the
 | A3 | Service role key acceptable for matcher Route Handler | Migration | RLS bypass scope must stay server-only |
 | A4 | INSERT-only trigger sufficient for D-100 with scraper upsert | Pattern 3 | Duplicate events if upsert implementation changes to INSERT-on-conflict |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Service role vs SECURITY DEFINER matcher function**
    - What we know: Cron needs cross-user reads/writes.
    - What's unclear: Whether to use service role in Route Handler vs Postgres function.
-   - Recommendation: Route Handler + service role (matches Phase 3 server patterns); keep matcher SQL simple.
+   - **RESOLVED:** Route Handler + service role via `lib/supabase/service.ts` (matches Phase 3 server patterns); keep matcher SQL in TypeScript lib modules. Implemented in 04-01 (service client) and 04-05 (cron matcher).
 
 2. **Alert create: modal vs `/settings/alerts/new` route**
    - Discretion item D-117.
-   - Recommendation: Modal/sheet from Settings for v1 (less routing); map CTA opens same sheet.
+   - **RESOLVED:** Modal/sheet from Settings for v1 (less routing); map "Crea avviso" CTA opens same sheet. Implemented in 04-04-PLAN.md.
 
 ## Environment Availability
 
