@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sources - ShouManWu Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-dim": "#dadada",
+                      "inverse-on-surface": "#f1f1f1",
+                      "primary-container": "#1b1b1b",
+                      "surface-container-low": "#f3f3f3",
+                      "secondary-fixed-dim": "#cbc6bd",
+                      "background": "#f9f9f9",
+                      "surface-tint": "#5e5e5e",
+                      "tertiary-container": "#1b1b1b",
+                      "on-primary-fixed-variant": "#474747",
+                      "on-secondary-fixed-variant": "#494740",
+                      "outline-variant": "#cfc4c5",
+                      "on-tertiary": "#ffffff",
+                      "on-surface": "#1b1b1b",
+                      "surface-container-highest": "#e2e2e2",
+                      "on-secondary": "#ffffff",
+                      "surface-bright": "#f9f9f9",
+                      "secondary": "#615e57",
+                      "secondary-fixed": "#e7e2d9",
+                      "error-container": "#ffdad6",
+                      "on-primary": "#ffffff",
+                      "surface-container": "#EEEEED",
+                      "on-secondary-fixed": "#1d1b16",
+                      "surface-container-lowest": "#ffffff",
+                      "surface": "#F9F9F8",
+                      "primary-fixed-dim": "#c6c6c6",
+                      "on-tertiary-fixed-variant": "#474747",
+                      "on-background": "#1b1b1b",
+                      "on-primary-container": "#848484",
+                      "on-tertiary-container": "#848484",
+                      "tertiary-fixed-dim": "#c6c6c6",
+                      "tertiary": "#000000",
+                      "surface-container-high": "#e8e8e8",
+                      "on-error-container": "#93000a",
+                      "inverse-surface": "#303030",
+                      "outline": "#747878",
+                      "on-tertiary-fixed": "#1b1b1b",
+                      "primary": "#000000",
+                      "primary-fixed": "#e2e2e2",
+                      "on-secondary-container": "#65625b",
+                      "surface-variant": "#e2e2e2",
+                      "inverse-primary": "#c6c6c6",
+                      "on-primary-fixed": "#1b1b1b",
+                      "on-surface-variant": "#4c4546",
+                      "error": "#BA1A1A",
+                      "on-error": "#ffffff",
+                      "secondary-container": "#e4dfd6",
+                      "tertiary-fixed": "#e2e2e2"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "space-lg": "24px",
+                      "space-md": "16px",
+                      "space-xl": "48px",
+                      "space-sm": "8px",
+                      "container-max": "1200px",
+                      "space-xs": "4px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "h2": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "h3": [
+                              "Inter"
+                      ],
+                      "h1-mobile": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "h1": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "15px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "h2": [
+                              "30px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "30px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-sm": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "40px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "17px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "h3": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "h1-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "h1": [
+                              "40px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+        }
+        
+        .material-symbols-outlined.fill-icon {
+             font-variation-settings: 'FILL' 1;
+        }
+      </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="bg-surface dark:bg-surface font-headline-sm text-headline-sm for headers, font-label-md text-label-md for links docked h-screen w-64 left-0 top-0 border-r border-outline-variant dark:border-outline-variant flat no shadows cursor-pointer transition-all duration-150 flex flex-col h-full py-space-lg fixed">
+<div class="px-space-lg mb-space-xl flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm font-bold text-primary dark:text-on-surface">Scraper Worker</span>
+</div>
+<div class="flex flex-col gap-space-xs flex-grow px-space-sm">
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-DEFAULT text-secondary dark:text-on-secondary-fixed-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-secondary">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-DEFAULT text-primary dark:text-on-surface font-bold border-r-2 border-primary bg-surface-container-low" href="#">
+<span class="material-symbols-outlined text-primary fill-icon">source</span>
+<span class="font-label-md text-label-md">Sources</span>
+</a>
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-DEFAULT text-secondary dark:text-on-secondary-fixed-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-secondary">play_arrow</span>
+<span class="font-label-md text-label-md">Runs</span>
+</a>
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-DEFAULT text-secondary dark:text-on-secondary-fixed-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-secondary">translate</span>
+<span class="font-label-md text-label-md">Translation</span>
+</a>
+<a class="flex items-center gap-space-md px-space-md py-space-sm rounded-DEFAULT text-secondary dark:text-on-secondary-fixed-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-secondary">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-grow flex flex-col min-h-screen ml-64 bg-background">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface font-headline-md text-headline-md for titles, font-label-sm text-label-sm for chips docked full-width top-0 border-b border-outline-variant dark:border-outline-variant flat no shadows transition-colors duration-200 flex justify-between items-center h-16 px-gutter w-full sticky z-10">
+<div class="flex items-center gap-space-md">
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary dark:text-on-surface">Sources</h1>
+</div>
+<div class="flex items-center gap-space-lg">
+<div class="flex gap-space-sm text-secondary">
+<button class="hover:bg-surface-container dark:hover:bg-surface-container-high p-space-xs rounded-full transition-colors flex items-center justify-center h-8 w-8">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:bg-surface-container dark:hover:bg-surface-container-high p-space-xs rounded-full transition-colors flex items-center justify-center h-8 w-8">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+<div class="hidden md:flex items-center gap-space-sm bg-surface-container-low px-space-md py-space-xs rounded-full border border-outline-variant">
+<span class="font-label-sm text-label-sm text-on-surface">operator@system.local</span>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-grow p-gutter max-w-container-max mx-auto w-full">
+<div class="flex justify-between items-center mb-space-lg">
+<h2 class="font-h3 text-h3 text-on-surface">Integration Sources</h2>
+<button class="bg-primary text-on-primary font-label-md text-label-md px-space-md py-space-sm rounded-DEFAULT flex items-center gap-space-xs hover:bg-inverse-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    Add Source
+                </button>
+</div>
+<!-- Data Table -->
+<div class="w-full border border-outline-variant rounded-lg overflow-hidden bg-surface">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant bg-surface-container-low">
+<th class="font-label-sm text-label-sm text-secondary px-space-md py-space-sm font-medium w-1/4">Source</th>
+<th class="font-label-sm text-label-sm text-secondary px-space-md py-space-sm font-medium">Status</th>
+<th class="font-label-sm text-label-sm text-secondary px-space-md py-space-sm font-medium">Enabled</th>
+<th class="font-label-sm text-label-sm text-secondary px-space-md py-space-sm font-medium">Interval</th>
+<th class="font-label-sm text-label-sm text-secondary px-space-md py-space-sm font-medium hidden md:table-cell">Anti-block</th>
+<th class="font-label-sm text-label-sm text-secondary px-space-md py-space-sm font-medium hidden lg:table-cell">Last Run</th>
+<th class="font-label-sm text-label-sm text-secondary px-space-md py-space-sm font-medium text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-space-md py-space-md flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-sm bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A minimalist logo for a classified ads platform, simple geometric shapes, monochrome black and white, high contrast, clean vector style, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlAAqudB7aKsSKdMQC28y_JDwY-z-HnneX_MNNdgaXr_ng8Fdf2EW6Fsxv8pgI0kSB6DoZdiWgyP_aIpbalkHQBFFRmK8KSWE-HU4Bm4xz7rrGPcQ9wE9jqjBmVG0Ciwi0DKoHXevYJMrVk8DHD4DjyAu-afh385IHSzaqfro1TxyJw_JK3299OpzX5i-IFSfwTx06xKSJG3cwu5vF7pC_Hn-lxPkRop15vJqQGlxVkYboQ4lrLakeOw"/>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-medium">Subito</span>
+</td>
+<td class="px-space-md py-space-md">
+<span class="inline-flex items-center bg-[#f1f1f0] text-on-surface font-label-sm text-label-sm px-2 py-1 rounded-full border border-outline-variant">
+                                        Running
+                                    </span>
+</td>
+<td class="px-space-md py-space-md">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-9 h-5 bg-outline-variant rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface after:border-outline-variant after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-on-surface">90 min</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary hidden md:table-cell">Standard</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary hidden lg:table-cell">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-[#4caf50]">check_circle</span>
+                                        12 min ago
+                                    </div>
+</td>
+<td class="px-space-md py-space-md text-right">
+<button class="text-secondary hover:text-primary transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-end w-full gap-space-xs font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+                                        Edit
+                                    </button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-space-md py-space-md flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-sm bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A minimalist logo for a social media marketplace, simple geometric shapes, monochrome black and white, high contrast, clean vector style, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcmqCdD4c9vUEY_foNo1yzNj8PYzaIusQnjLslKLdKdW54JQNTtSvaFFsmiWoYqK2WQHZjvktJsEAX0e1ejyDgnO4O6-_RxVeK1oBvt7FPq2i5C9LjxL3lMWVc2Ajrs2Uh8kd8AXf0oKazCy0XcokPr_fmAfE-IMVDV_R3gy-1vCwPokmhAXFIBF3rnA7qucRyFQvqW9m3_id3GnFDX7lZhOLLucULXaJQVgFKakVAVWCwF-PzIRhXRA"/>
+</div>
+<span class="font-label-md text-label-md text-secondary font-medium">Facebook Marketplace</span>
+</td>
+<td class="px-space-md py-space-md">
+<span class="inline-flex items-center bg-surface text-secondary font-label-sm text-label-sm px-2 py-1 rounded-full border border-outline-variant">
+                                        Coming soon
+                                    </span>
+</td>
+<td class="px-space-md py-space-md">
+<label class="relative inline-flex items-center cursor-not-allowed opacity-50">
+<input class="sr-only peer" disabled="" type="checkbox" value=""/>
+<div class="w-9 h-5 bg-surface-container-high rounded-full border border-outline-variant peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-outline-variant after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary">--</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary hidden md:table-cell">--</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary hidden lg:table-cell">--</td>
+<td class="px-space-md py-space-md text-right">
+<button class="text-secondary hover:text-primary transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-end w-full gap-space-xs font-label-sm text-label-sm" disabled="">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-space-md py-space-md flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-sm bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A minimalist logo for a clothing resale platform, simple geometric shapes, monochrome black and white, high contrast, clean vector style, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDC3QRYl6yILJjxAUF-3lgfGkFiU68jRiRbOQwP4BkP9YRCLpxd5Zc1diKnvAohx2wg4j7zVsFYkP7Jcy5phJMO1qU1NMXNbUMu5pC-w2RkS7HmPawfuV2M5x46cqv-IGaJBI-E--tUx-uddihglYXbI1V-ejc1fBSbZnBtMeThHDpFN3EKH7vzphgass6OxIvZmjInkVEp98Xz69FbTrnG5FFaq-WUD8ZpydBExL8DLa1Jc80Dgehojw"/>
+</div>
+<span class="font-label-md text-label-md text-secondary font-medium">Vinted</span>
+</td>
+<td class="px-space-md py-space-md">
+<span class="inline-flex items-center bg-surface text-secondary font-label-sm text-label-sm px-2 py-1 rounded-full border border-outline-variant">
+                                        Coming soon
+                                    </span>
+</td>
+<td class="px-space-md py-space-md">
+<label class="relative inline-flex items-center cursor-not-allowed opacity-50">
+<input class="sr-only peer" disabled="" type="checkbox" value=""/>
+<div class="w-9 h-5 bg-surface-container-high rounded-full border border-outline-variant peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-outline-variant after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary">--</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary hidden md:table-cell">--</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary hidden lg:table-cell">--</td>
+<td class="px-space-md py-space-md text-right">
+<button class="text-secondary hover:text-primary transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-end w-full gap-space-xs font-label-sm text-label-sm" disabled="">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-space-md py-space-md flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-sm bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A minimalist logo for a local buying and selling app, simple geometric shapes, monochrome black and white, high contrast, clean vector style, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEzFDnhDlLAgheV2De0xn2vXjTwCw2_Zu4QgL5CLRRVhYH2jH3Dw5SFsT4ESIgON30YHtKFp8DqWt0IlvGolRTscqE2oDuVay08_plmlySdYDSI7Lj-0Ivfyo068LxwHxJCpgBtpVQO9nJSyd-0d-4DPwaSCDLT8WuRkJYK_a3nTwRBXDiU5HWVFfGmK8EhF13FkEUJXwO-SYsAFJAswPkLvUvZy_qCoqRE4h9jfl1djtFwhb-Z-YMKw"/>
+</div>
+<span class="font-label-md text-label-md text-secondary font-medium">Wallapop</span>
+</td>
+<td class="px-space-md py-space-md">
+<span class="inline-flex items-center bg-surface text-secondary font-label-sm text-label-sm px-2 py-1 rounded-full border border-outline-variant">
+                                        Coming soon
+                                    </span>
+</td>
+<td class="px-space-md py-space-md">
+<label class="relative inline-flex items-center cursor-not-allowed opacity-50">
+<input class="sr-only peer" disabled="" type="checkbox" value=""/>
+<div class="w-9 h-5 bg-surface-container-high rounded-full border border-outline-variant peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-outline-variant after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary">--</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary hidden md:table-cell">--</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary hidden lg:table-cell">--</td>
+<td class="px-space-md py-space-md text-right">
+<button class="text-secondary hover:text-primary transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-end w-full gap-space-xs font-label-sm text-label-sm" disabled="">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-space-md py-space-md flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-sm bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A minimalist logo for a global auction platform, simple geometric shapes, monochrome black and white, high contrast, clean vector style, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBM1Yf21iqeUo-O5P-280Mrnb8-aeMxQ0parSVqZLAcb6WLVSs0w25oYr3pbLHIsD24Fu2Nyu9JrDPqw9MYJxQunUjOLzzlQPmLMS9Ele8MFShZp1dBdXod-0d1xZW8mJKrMkwxx0ZFftyLPaZYzcZhdmFvIxZkl8N0vdLREo4RMrDeYpzXyI0ykPp8kYxEpNGKdC2rXjR-LTAwtIEuZFPfAd4vx5eruocfXng2kknBEMrhE3RMPE-ifw"/>
+</div>
+<span class="font-label-md text-label-md text-secondary font-medium">eBay</span>
+</td>
+<td class="px-space-md py-space-md">
+<span class="inline-flex items-center bg-surface text-secondary font-label-sm text-label-sm px-2 py-1 rounded-full border border-outline-variant">
+                                        Coming soon
+                                    </span>
+</td>
+<td class="px-space-md py-space-md">
+<label class="relative inline-flex items-center cursor-not-allowed opacity-50">
+<input class="sr-only peer" disabled="" type="checkbox" value=""/>
+<div class="w-9 h-5 bg-surface-container-high rounded-full border border-outline-variant peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-outline-variant after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary">--</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary hidden md:table-cell">--</td>
+<td class="px-space-md py-space-md font-body-md text-body-md text-secondary hidden lg:table-cell">--</td>
+<td class="px-space-md py-space-md text-right">
+<button class="text-secondary hover:text-primary transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-end w-full gap-space-xs font-label-sm text-label-sm" disabled="">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</div>
+</body></html>

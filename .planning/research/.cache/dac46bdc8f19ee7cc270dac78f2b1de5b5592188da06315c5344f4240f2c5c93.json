@@ -1,0 +1,1 @@
+{"content":"GitHub Actions schedule minimum interval is 5 minutes per official docs. */3 cron is not honored; sub-5-minute schedules are throttled/skipped. For 3-minute alert polling, use cron-job.org or Supabase pg_cron+pg_net instead.","source":"web","provider":"websearch","confidence":"HIGH","fetched_at":"2026-08-04T20:29:42.424Z","ttl":86400000,"kind":"docs"}

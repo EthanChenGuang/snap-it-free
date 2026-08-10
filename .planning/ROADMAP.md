@@ -151,7 +151,7 @@ Plans:
 
 **Requirements:** CAT-01–03, I18N-01 (partial)
 
-**Plans:** 4/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 **Wave 0**
@@ -180,6 +180,28 @@ Plans:
 **Depends on:** Phase 11
 
 ---
+
+### Phase 12.1: Category Names i18n (it/zh/en) (INSERTED)
+
+**Goal:** Trilingual UI labels for the 17 Subito regalo category slugs in filter/chip/pill surfaces and listing detail fallback.
+
+**Requirements:** I18N-01
+
+**Depends on:** Phase 12
+
+**Plans:** 2/2 complete
+
+Plans:
+
+- [x] 12.1-01-PLAN.md — Wave 0: messages.feed.subitoCategories maps + getSubitoCategoryLabel extension + tests
+- [x] 12.1-02-PLAN.md — Wave 1: wire UI callers, resolveListingCategory, UAT locale checks, ROADMAP sign-off
+
+**Success criteria:**
+
+1. FilterSheet category labels display in active locale (en/zh/it), not always Italian
+2. SubitoCategoryFilterChips and feed header pills match locale
+3. Listing detail: DB category_en/zh wins when set; else static messages map
+4. PostForm 6-category picker unchanged; FilterSheet layout unchanged (17 checkboxes)
 
 #### Phase 13: Select Location Flow
 

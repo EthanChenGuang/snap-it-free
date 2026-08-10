@@ -1,0 +1,1 @@
+{"content":"Soft-block detection: validate output shape not HTTP status; assert minimum listing count vs trailing median; verify selectors resolve on parsed items; fail loudly and do not persist bad batches.","source":"web","provider":"websearch","confidence":"LOW","fetched_at":"2026-07-26T13:08:38.354Z","ttl":86400000,"kind":"web"}

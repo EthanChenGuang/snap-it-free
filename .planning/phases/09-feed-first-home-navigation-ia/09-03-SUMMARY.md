@@ -129,7 +129,7 @@ Each task was committed atomically:
 2. **Task 2: SelectLocationClient — fixed pin map + zone chips + Confirm** - `16cbd68` (feat)
 3. **Task 3: AppChrome minimal chrome on select-location** - `d8de2e8` (feat)
 
-**Plan metadata:** pending (docs commit)
+**Plan metadata:** `c214c4c` (docs: complete plan)
 
 ## Files Created/Modified
 

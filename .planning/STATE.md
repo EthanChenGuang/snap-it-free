@@ -7,15 +7,15 @@ current_phase_name: Select Location Flow
 current_plan: Not started
 status: planning
 stopped_at: Phase 13 context gathered
-last_updated: "2026-08-10T18:56:44.403Z"
+last_updated: "2026-08-10T18:58:00.000Z"
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 20
-  completed_plans: 18
+  completed_plans: 20
   percent: 50
 last_activity: 2026-08-10
-last_activity_desc: "Completed quick task 260810-nfg: Feed header pills & badge indicators"
+last_activity_desc: "Executed Phase 12.1 — trilingual Subito category labels (2/2 plans)"
 ---
 
 # Project State
@@ -154,3 +154,4 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 ### Roadmap Evolution
 
 - Phase 12.1 inserted after Phase 12: add i18n support for the category names for it/zh/en (URGENT)
+- Phase 12.1 executed: trilingual messages.feed.subitoCategories + locale-aware filter/chip/pill labels; UAT 5/5, unit 36/36

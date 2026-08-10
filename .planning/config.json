@@ -46,7 +46,8 @@
     "post_planning_gaps": true,
     "security_enforcement": true,
     "security_asvs_level": 1,
-    "security_block_on": "high"
+    "security_block_on": "high",
+    "_auto_chain_active": false
   },
   "ship": {
     "pr_body_sections": [
@@ -80,7 +81,13 @@
   },
   "project_code": null,
   "phase_naming": "sequential",
-  "agent_skills": {},
+  "agent_skills": {
+    "gsd-planner": ".planning/google-stitch-ui-design",
+    "gsd-ui-researcher": ".planning/google-stitch-ui-design",
+    "gsd-ui-checker": ".planning/google-stitch-ui-design",
+    "gsd-ui-auditor": ".planning/google-stitch-ui-design",
+    "gsd-executor": ".planning/google-stitch-ui-design"
+  },
   "claude_md_path": "./.claude/.cursor/rules/",
   "plan_review": {
     "source_grounding": true,

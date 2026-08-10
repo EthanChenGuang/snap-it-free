@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>手慢无 - Item Details</title>
+<!-- Google Fonts: Inter for the UI, Material Symbols for Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Shared Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary": "#615e57",
+                    "secondary-fixed-dim": "#cbc6bd",
+                    "on-tertiary-fixed-variant": "#484645",
+                    "tertiary": "#000000",
+                    "surface": "#f9f9f8",
+                    "outline-variant": "#c4c7c7",
+                    "on-primary-fixed-variant": "#474746",
+                    "on-primary-container": "#858383",
+                    "on-secondary": "#ffffff",
+                    "secondary-fixed": "#e7e2d9",
+                    "surface-dim": "#dadad9",
+                    "secondary-container": "#e7e2d9",
+                    "on-surface": "#1a1c1c",
+                    "background": "#f9f9f8",
+                    "inverse-primary": "#c8c6c5",
+                    "error": "#ba1a1a",
+                    "on-secondary-container": "#67645d",
+                    "surface-container": "#eeeeed",
+                    "on-primary-fixed": "#1c1b1b",
+                    "primary-fixed-dim": "#c8c6c5",
+                    "tertiary-container": "#1c1b1a",
+                    "on-secondary-fixed": "#1d1c16",
+                    "inverse-surface": "#2f3130",
+                    "on-background": "#1a1c1c",
+                    "surface-bright": "#f9f9f8",
+                    "inverse-on-surface": "#f1f1f0",
+                    "primary-fixed": "#e5e2e1",
+                    "on-tertiary-fixed": "#1c1b1a",
+                    "on-surface-variant": "#444748",
+                    "error-container": "#ffdad6",
+                    "primary-container": "#1c1b1b",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed-variant": "#494740",
+                    "primary": "#000000",
+                    "surface-tint": "#5f5e5e",
+                    "tertiary-fixed": "#e6e2df",
+                    "surface-container-high": "#e8e8e7",
+                    "tertiary-fixed-dim": "#cac6c4",
+                    "surface-container-low": "#f4f4f3",
+                    "surface-variant": "#e2e2e1",
+                    "on-tertiary-container": "#868382",
+                    "surface-container-highest": "#e2e2e1",
+                    "on-tertiary": "#ffffff",
+                    "outline": "#747878"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "container-max": "1200px",
+                    "space-sm": "8px",
+                    "space-md": "16px",
+                    "gutter": "24px",
+                    "space-xs": "4px",
+                    "space-lg": "24px",
+                    "space-xl": "48px"
+            },
+            "fontFamily": {
+                    "h3": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "h1": ["Inter"],
+                    "h2": ["Inter"],
+                    "h1-mobile": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "h3": ["24px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-lg": ["17px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "1.4", "fontWeight": "500"}],
+                    "h1": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "h2": ["30px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "h1-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "body-md": ["15px", {"lineHeight": "1.6", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9f9f8;
+            color: #1a1c1c;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 1;
+        }
+        /* Custom scrollbar for Notion-feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e2e2e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d1d1d0;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface">
+<!-- Top Navigation Bar (Shared Component Style) -->
+<nav class="w-full top-0 sticky z-40 bg-surface border-b border-outline-variant flex justify-between items-center px-gutter py-space-md max-w-container-max mx-auto">
+<div class="flex items-center gap-space-md">
+<button class="p-space-xs hover:bg-surface-container transition-colors rounded" onclick="window.history.back()">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-h3 text-h3 font-bold text-primary">手慢无</h1>
+</div>
+<div class="flex items-center gap-space-md">
+<button class="p-space-xs hover:bg-surface-container transition-colors rounded">
+<span class="material-symbols-outlined text-primary">share</span>
+</button>
+<button class="p-space-xs hover:bg-surface-container transition-colors rounded">
+<span class="material-symbols-outlined text-primary">more_horiz</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="max-w-container-max mx-auto px-gutter py-space-xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl">
+<!-- Left Column: Media & Primary Details -->
+<div class="lg:col-span-8 flex flex-col gap-space-lg">
+<!-- Primary Image Container -->
+<div class="relative w-full aspect-[16/9] overflow-hidden rounded-xl border border-outline-variant bg-surface-container-low group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A professional high-resolution photograph of a vintage Eames-style lounge chair in a minimalist white-walled loft apartment. The lighting is soft morning sunlight streaming through large industrial windows, highlighting the grain of the dark wood and the soft texture of the black leather. The aesthetic is clean, architectural, and serene, following a high-end light-mode design language with monochrome tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxPseG0Q-GjbVC2jwnIiy_cgXzecC_CY046Zn4cVd-Dh3ArWSCPnDxqkfzUqlG0zAE7Ek5DExUb6FSGVAP4Vr0V2aj0gKLta21WTfSOwWHXDfqCT4aGqOwfMnzBZ8Rbdtc4LRY9MTZNEtIV3NwOu3tKSgGD-eiGmq6Za3fnTzBz00z63F-OHPXNO4ernZ9PCsXRMwPt8cNfVVQ3CrvcADdLK8NpD3PMlJCwTb9i0Pu-BNEJHvz8LJ8cA"/>
+<div class="absolute top-space-md left-space-md flex gap-space-sm">
+<span class="bg-primary text-on-primary px-space-sm py-1 font-label-sm text-label-sm rounded uppercase tracking-wider">Verified Free</span>
+<span class="bg-surface-container-highest text-on-surface-variant px-space-sm py-1 font-label-sm text-label-sm rounded">2h ago</span>
+</div>
+</div>
+<!-- Title Section -->
+<div class="border-b border-outline-variant pb-space-lg">
+<h2 class="font-h1 text-h1-mobile md:text-h1 mb-space-xs leading-tight">Vintage Lounge Chair &amp; Ottoman</h2>
+<p class="font-body-lg text-secondary flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-sm">location_on</span> Jing'an District, Shanghai
+                    </p>
+</div>
+<!-- Document Style Content -->
+<article class="prose prose-neutral max-w-none flex flex-col gap-space-md">
+<section>
+<h4 class="font-h3 text-h3 mb-space-sm">Description</h4>
+<p class="font-body-md text-on-surface-variant leading-relaxed">
+                            Moving out sale, but actually it's free for whoever can pick it up first. This is a high-quality replica of the classic mid-century lounge chair. The leather has some minor patina which adds to its character. Structure is perfectly solid.
+                        </p>
+</section>
+<section class="bg-surface-container-low p-space-lg rounded-xl border border-outline-variant">
+<h4 class="font-label-md text-label-md font-bold uppercase tracking-widest text-secondary mb-space-md">Item Condition</h4>
+<ul class="space-y-space-sm">
+<li class="flex items-start gap-space-sm font-body-md text-on-surface-variant">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Used - Like New: No significant scratches or tears.</span>
+</li>
+<li class="flex items-start gap-space-sm font-body-md text-on-surface-variant">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Smoke-free and pet-free home environment.</span>
+</li>
+<li class="flex items-start gap-space-sm font-body-md text-on-surface-variant">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">info</span>
+<span>Dimensions: 84cm x 84cm x 84cm. Heavy lifting required.</span>
+</li>
+</ul>
+</section>
+<section class="mt-space-md">
+<h4 class="font-h3 text-h3 mb-space-sm">Pick-up Logistics</h4>
+<p class="font-body-md text-on-surface-variant">
+                            Available for pickup this weekend only (Saturday or Sunday between 10 AM and 4 PM). Please bring a friend as I cannot assist with moving the item down the stairs. Elevator is functional.
+                        </p>
+</section>
+</article>
+</div>
+<!-- Right Column: Sidebar / Action Cards -->
+<aside class="lg:col-span-4 flex flex-col gap-space-lg">
+<!-- Main Action Card -->
+<div class="bg-white border border-outline-variant rounded-xl p-space-lg sticky top-28 shadow-sm">
+<div class="flex justify-between items-center mb-space-lg">
+<div>
+<span class="font-label-sm text-secondary uppercase tracking-widest block mb-1">Status</span>
+<span class="flex items-center gap-space-xs text-green-600 font-bold font-label-md">
+<span class="w-2 h-2 rounded-full bg-green-600 animate-pulse"></span>
+                                Available Now
+                            </span>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-secondary uppercase tracking-widest block mb-1">Cost</span>
+<span class="font-h3 text-h3 text-primary">¥0.00</span>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary py-space-md rounded-lg font-label-md hover:opacity-90 transition-all flex items-center justify-center gap-space-sm active:scale-[0.98]">
+<span class="material-symbols-outlined">bolt</span>
+                        Claim This Item
+                    </button>
+<button class="w-full mt-space-sm bg-white border border-outline text-primary py-space-md rounded-lg font-label-md hover:bg-surface-container transition-all flex items-center justify-center gap-space-sm">
+<span class="material-symbols-outlined">chat_bubble</span>
+                        Message Owner
+                    </button>
+<div class="mt-space-lg pt-space-md border-t border-outline-variant">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional minimalist headshot of a friendly young urban professional. Soft studio lighting, neutral grey background, clean and trustworthy aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIlJnj6OhkmhV3ytRzkS1O5K8rUXYaZZOqYq-D5ujtFO0p_0JGVb41dZMlMidYiIrCQjHvIXRt_E7lSzqXBiA9nyCErPLX4Xwr5-10RKM0OmjTBajCeJWbvBi0pG0iH6qWGb387Ufq3DsO8mhpxy3Q2N8b1TIBrv4h3dT0yN_b0wMOD5q_4u9UlRrdx05nbF070h6JwtW0GPwjL3oD5Zw2bW72LNSd_jqQTqYjWZvsL3ets2DLxUt7_A"/>
+</div>
+<div>
+<p class="font-label-md text-primary font-bold">Alex Chen</p>
+<p class="font-label-sm text-secondary">Member since 2021 • 12 Items Given</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Info Block: Source & Location -->
+<div class="grid grid-cols-1 gap-space-md">
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-space-md flex items-center gap-space-md">
+<div class="p-space-sm bg-white rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined text-primary">verified</span>
+</div>
+<div>
+<p class="font-label-sm text-secondary uppercase tracking-tighter">Source Identity</p>
+<p class="font-label-md text-primary">Verified Community Member</p>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant rounded-xl overflow-hidden">
+<div class="p-space-md flex items-center gap-space-md">
+<div class="p-space-sm bg-white rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined text-primary">map</span>
+</div>
+<div>
+<p class="font-label-sm text-secondary uppercase tracking-tighter">Location</p>
+<p class="font-label-md text-primary">Jing'an District • 1.2km away</p>
+</div>
+</div>
+<div class="w-full h-32 bg-surface-variant relative">
+<img class="w-full h-full object-cover opacity-80 grayscale" data-alt="A clean, minimalist map snippet of a city district with high-contrast monochrome styling. Thin lines, soft grays, and clear typography. Modern cartography aesthetic." data-location="Jing'an District, Shanghai" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCU8BB8aMW4s8iftRQOGGiFAQtGfvj_PlbjBF85RSXx6S2jD8nmwi81Y9ZaO-QFZo-V90DULoigmvYq_w0XDM18MTdmJOK8RIdEoKDF4MsFodCHPXnlFVZfx1OGeSsnxC7OcYSIfrksK88VZwE7Ch9wwFOCw9XfC7srIjkLcMIlqUHOnlf2YXJphhseeQJXaukKMOa-Le77q4UL8seip7EdU6ZcSbylG1jrt92Tyl9Q8lS2Aj-Lzf-Wvg"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-4 h-4 bg-primary rounded-full ring-4 ring-white shadow-lg"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Related Items / Suggested -->
+<div class="mt-space-md">
+<h5 class="font-label-sm text-secondary uppercase tracking-widest mb-space-md">Similar Near You</h5>
+<div class="flex flex-col gap-space-sm">
+<a class="group flex gap-space-sm items-center p-space-xs hover:bg-surface-container transition-all rounded-lg" href="#">
+<div class="w-16 h-16 rounded bg-surface-variant overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A minimalist side table made of light oak wood. High-end product photography on a white background, soft shadows, airy and clean aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDr5o91ESkhqlDRW6Uh-6RQISrgZ5jea-L6q2Bboh0F470pM3hDDqCrUOZoCQSODi3lNP-BYhc3dIx2dPyLYlGUwMoQXFaN7qhpzQLX7aaZaErUQ52B9tU7VaswXzLd8fmYb41bTOZCiCpxr8yXN4xVSydqYQY_Fs89ipDTtzwVYKYSnfjYe70N7HNTSNOK3UK_kOxhodOgsVozhNmut8bbL8cpi1ZGyV51jeOSBa9nyJ0zLZwLZYSEbA"/>
+</div>
+<div>
+<p class="font-label-md text-primary group-hover:underline decoration-1">Minimalist Side Table</p>
+<p class="font-label-sm text-secondary">0.4km • Just Posted</p>
+</div>
+</a>
+<a class="group flex gap-space-sm items-center p-space-xs hover:bg-surface-container transition-all rounded-lg" href="#">
+<div class="w-16 h-16 rounded bg-surface-variant overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A modern desk lamp with a matte black finish and a sleek, thin neck. Professional studio lighting on a neutral grey background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEgKQE92H-r4EMkrbBlsGHBAd3JNNCUkAYp0UNJS6BnQ4xuVADewiAUX45iWT3tpsbRNuT59AihRSWkI5VSficaBjZQvshAXNUZhdZXHFTBXc51gkqBvoTtCJH7u88Us8pb8f25TG2wWgAXIblON3m3CYznABCq8jVv6bQ6md38_c2uDAdrd47IdhmUAS6jsGjPZjgsgN9AFjkWOW83jqwNycSH3GQ9vfGZ8RR42V8k2u_dKe-aYzO-Q"/>
+</div>
+<div>
+<p class="font-label-md text-primary group-hover:underline decoration-1">Designer Desk Lamp</p>
+<p class="font-label-sm text-secondary">2.1km • 4h ago</p>
+</div>
+</a>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Footer Space -->
+<footer class="max-w-container-max mx-auto px-gutter py-space-xl border-t border-outline-variant mt-space-xl">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-space-md">
+<div>
+<p class="font-h3 text-h3 font-bold text-primary mb-1">手慢无</p>
+<p class="font-label-sm text-secondary">Sustainable living through community sharing.</p>
+</div>
+<div class="flex gap-space-lg font-label-md text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">Privacy</a>
+<a class="hover:text-primary transition-colors" href="#">Safety Guide</a>
+<a class="hover:text-primary transition-colors" href="#">Contact</a>
+</div>
+</div>
+</footer>
+<!-- Bottom Navigation Shell (Only for Mobile) -->
+<div class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface border-t border-outline-variant px-space-md py-space-sm">
+<button class="flex flex-col items-center justify-center text-secondary font-label-sm">
+<span class="material-symbols-outlined">map</span>
+<span>Map</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary font-bold font-label-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">format_list_bulleted</span>
+<span>List</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary font-label-sm">
+<span class="material-symbols-outlined">add_box</span>
+<span>Post</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary font-label-sm">
+<span class="material-symbols-outlined">settings</span>
+<span>Setting</span>
+</button>
+</div>
+<!-- Micro-interaction Script -->
+<script>
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const ripple = document.createElement('div');
+                ripple.classList.add('ripple');
+                this.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+    </script>
+</body></html>

@@ -1,45 +1,21 @@
 ---
 phase: 10-search-filter-sheet-distance
-verified: 2026-08-10T13:20:00Z
-status: human_needed
-score: 28/32 must-haves verified
-behavior_unverified: 4
+verified: 2026-08-10T15:18:00Z
+status: passed
+score: 32/32 must-haves verified
+behavior_unverified: 0
 overrides_applied: 1
 overrides:
   - must_have: "FILT-04 Venice zone chips (Centro / Mestre / Lido) remain available"
     reason: "D-01 locked decision — city-only All · Venice · Padova consumer filter supersedes zone-chip UX; data layer retains zone enum"
     accepted_by: "phase-context D-01"
     accepted_at: "2026-08-10"
-behavior_unverified_items:
-  - truth: "Draft filter edits discarded on swipe/overlay close without Apply (D-53)"
-    test: "Open filter sheet, change city to Padova, swipe down or tap overlay to close without Apply; reopen sheet"
-    expected: "Draft reverts to previously applied filters; feed unchanged until Apply"
-    why_human: "Vaul drawer dismiss gesture and draft/applied state transition not covered by unit tests"
-  - truth: "Confirm location on /select-location immediately re-filters feed (D-07/D-20)"
-    test: "Note feed order/distances, open /select-location, pan map, tap Confirm"
-    expected: "Browse center saved, feed re-sorts by distance from new pin without opening filter sheet"
-    why_human: "BrowseCenterProvider → useDistanceCenter → composeFeedListings chain requires runtime navigation"
-  - truth: "Center pill dismiss clears browse center → GPS → Venice default chain (D-12)"
-    test: "With saved browse center pill visible, tap × on center pill"
-    expected: "Browse center cleared, pill shows My location (GPS) or disappears; distances recompute from fallback center"
-    why_human: "Geolocation permission and clearBrowseCenter + requestGps refetch ordering not unit-tested in browser"
-  - truth: "Card distances recompute immediately when center changes (D-64)"
-    test: "With coord listings visible, confirm new location or dismiss center pill"
-    expected: "ListListingCard metadata line updates distance values without page reload"
-    why_human: "useMemo wiring present but React re-render timing with geolocation async not exercised by tests"
-human_verification:
-  - test: "Filter sheet draft/Apply/Reset flow (FILT-02)"
-    expected: "Change radius in sheet, close without Apply → no feed change; Apply → pills update and prefs persist; Reset → radius off, city All, categories cleared (browse center and search unchanged)"
-    why_human: "Vaul drawer interaction and draft/applied semantics require DOM"
-  - test: "Active filter pills dismiss in order (FILT-03)"
-    expected: "Pills appear Search → Center → Radius → City → Categories; each × dismiss updates feed immediately; flex-wrap on narrow viewport"
-    why_human: "Pill DOM interaction and i18n label rendering"
-  - test: "Center pill + GPS fallback (FILT-05)"
-    expected: "Clear center → one-shot GPS or Venice default; confirm location → immediate re-filter and center pill label"
-    why_human: "Browser geolocation permission API"
-  - test: "Drawer height vs bottom nav (FILT-01)"
-    expected: "Filter sheet max-h ~85vh; sticky footer visible; bottom nav capsule not fully obscured"
-    why_human: "Visual layout QA"
+behavior_unverified_items: []
+human_verification: []
+gap_resolved:
+  - truth: "Filter sheet draft/Apply/Reset, pills dismiss, map pin mode, drawer layout"
+    resolved_at: "2026-08-10T15:18:00Z"
+    fix: "10-UAT.md autonomous Playwright — scripts/phase10-uat-automation.mjs 4/4 pass"
 ---
 
 # Phase 10: Search, Filter Sheet & Distance Verification Report

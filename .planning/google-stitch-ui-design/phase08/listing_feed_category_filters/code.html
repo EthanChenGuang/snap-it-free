@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Listing View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#1b1b1b",
+                        "primary-container": "#1b1b1b",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#474747",
+                        "on-secondary-fixed-variant": "#494740",
+                        "tertiary": "#000000",
+                        "tertiary-fixed-dim": "#c6c6c6",
+                        "on-primary-fixed": "#1b1b1b",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#EEEEED",
+                        "secondary-fixed": "#e7e2d9",
+                        "secondary": "#615e57",
+                        "surface-container-high": "#e8e8e8",
+                        "inverse-surface": "#303030",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "on-surface-variant": "#4c4546",
+                        "surface-container-highest": "#e2e2e2",
+                        "surface-tint": "#5e5e5e",
+                        "secondary-container": "#e4dfd6",
+                        "surface": "#F9F9F8",
+                        "on-tertiary-container": "#848484",
+                        "inverse-on-surface": "#f1f1f1",
+                        "tertiary-container": "#1b1b1b",
+                        "surface-container-low": "#f3f3f3",
+                        "error": "#BA1A1A",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-container": "#65625b",
+                        "outline": "#747878",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#f9f9f9",
+                        "inverse-primary": "#c6c6c6",
+                        "error-container": "#ffdad6",
+                        "background": "#f9f9f9",
+                        "outline-variant": "#cfc4c5",
+                        "on-secondary-fixed": "#1d1b16",
+                        "surface-dim": "#dadada",
+                        "on-background": "#1b1b1b",
+                        "tertiary-fixed": "#e2e2e2",
+                        "surface-variant": "#e2e2e2",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "primary-fixed": "#e2e2e2",
+                        "on-tertiary-fixed": "#1b1b1b",
+                        "secondary-fixed-dim": "#cbc6bd",
+                        "on-primary-container": "#848484",
+                        "on-primary": "#ffffff",
+                        "primary": "#000000"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "space-md": "16px",
+                        "space-lg": "24px",
+                        "space-xl": "48px",
+                        "space-sm": "8px",
+                        "space-xs": "4px",
+                        "container-max": "1200px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "h1-mobile": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "h2": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "h3": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "h1": ["Inter"]
+                    },
+                    "fontSize": {
+                        "h1-mobile": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-lg": ["40px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["17px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-md": ["15px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-md": ["30px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "1.2", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "h2": ["30px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-sm": ["24px", { "lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "h3": ["24px", { "lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "h1": ["40px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Placeholder -->
+<header class="sticky top-0 z-50 bg-surface border-b border-outline-variant h-16 flex items-center px-gutter justify-between">
+<div class="flex items-center gap-space-md">
+<span class="font-headline-sm text-headline-sm font-bold text-primary tracking-tight">Marketplace</span>
+</div>
+<div class="flex items-center gap-space-md">
+<button aria-label="Search" class="p-2 hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-secondary">search</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A small, professional avatar portrait of a user in a clean, brightly lit environment. Minimalist styling, sharp focus, monochrome outfit to match the UI aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDs8TUO9YvB2MkJ3sjJLPbeHYFK2DVyjr34RoIaJKTVXIuhGkOSGANOXxEUmiGiyECiQ---T2AX67WT3JbTi6FR7b6VFPPy1PDdlEiEbHesUEtxh480pPazbHMLvwvyRkkd7NxKllfEuJeY_bmTvIa64XkEy1TfnKeUnVC7GImrKkmcfhyuuVspKr2m6PKGNHNflBEMUom8eHN_oFZkzyTnPEwgduDB5S_uKgbMzEIkU6uolVfCKAdllQ"/>
+</div>
+</div>
+</header>
+<main class="max-w-container-max mx-auto px-gutter py-space-xl">
+<!-- Header Section -->
+<div class="mb-space-lg flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div>
+<h1 class="font-h1 text-h1 text-primary mb-space-xs">Explore Listings</h1>
+<p class="font-body-lg text-body-lg text-secondary">Discover items available in your area.</p>
+</div>
+<button class="inline-flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md text-label-md hover:bg-inverse-surface transition-colors w-fit">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Listing
+            </button>
+</div>
+<!-- Filters Section -->
+<div class="space-y-space-md mb-space-xl pb-space-lg border-b border-outline-variant">
+<!-- Category Filters -->
+<div class="flex items-center gap-space-sm overflow-x-auto pb-2 scrollbar-hide">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest mr-2 shrink-0">Categories</span>
+<button class="shrink-0 px-3 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm border border-primary transition-colors">
+                    All
+                </button>
+<button class="shrink-0 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm border border-transparent transition-colors">
+                    Informatica
+                </button>
+<button class="shrink-0 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm border border-transparent transition-colors">
+                    Animali
+                </button>
+<button class="shrink-0 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm border border-transparent transition-colors">
+                    Arredamento
+                </button>
+<button class="shrink-0 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm border border-transparent transition-colors">
+                    Elettrodomestici
+                </button>
+</div>
+<!-- Zone Filters -->
+<div class="flex items-center gap-space-sm overflow-x-auto pb-2 scrollbar-hide">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest mr-2 shrink-0">Locations</span>
+<button class="shrink-0 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm border border-transparent transition-colors">
+                    Mestre
+                </button>
+<button class="shrink-0 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm border border-transparent transition-colors">
+                    Venezia Centro
+                </button>
+<button class="shrink-0 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm border border-transparent transition-colors">
+                    Padova
+                </button>
+<button class="shrink-0 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm border border-transparent transition-colors">
+                    Treviso
+                </button>
+</div>
+</div>
+<!-- Grid of Listings -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-space-lg">
+<!-- Card 1 -->
+<div class="group flex flex-col border border-outline-variant rounded-lg overflow-hidden bg-surface transition-colors hover:border-secondary">
+<div class="relative w-full aspect-[4/3] bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A clean, minimalist shot of a vintage mechanical keyboard sitting on a matte white desk. Natural soft lighting, stark shadows, high resolution, monochrome tones with slight gray accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyXFyrXwhb5K8rISl5IJEFe3643ceXhFskTtpe8yqYiTJPLaUJTSJrQhcKwnNj9YsqWuknTWVdcPzGBgHz5OTwntS5-WfLakbuwRC2Hk6YBYH4Sce7H_w2pk_RD4PeG5UsJp_cXag0MsAY51UQ3dS8XRKdJXHARBr2j5o5raRdCdlDqZr3ZsOPiSxxhW9btSoghZybLs-r3MTaKVU3ZGFWxbXEDXuGj-2UdYWlHal_k7IH3dw81UZRxg"/>
+<div class="absolute top-2 left-2 px-2 py-1 bg-[#f1f1f0] text-primary font-label-sm text-label-sm rounded-md shadow-sm border border-outline-variant/20 backdrop-blur-sm bg-opacity-90">
+                        Informatica
+                    </div>
+</div>
+<div class="p-space-md flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-space-xs">
+<h3 class="font-h3 text-h3 text-primary line-clamp-2">Tastiera Meccanica Vintage</h3>
+<span class="shrink-0 bg-surface-container-high text-on-surface px-2 py-0.5 rounded font-label-sm text-label-sm ml-2">Free</span>
+</div>
+<div class="mt-auto pt-space-md flex items-center text-secondary font-label-md text-label-md gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>Mestre</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group flex flex-col border border-outline-variant rounded-lg overflow-hidden bg-surface transition-colors hover:border-secondary">
+<div class="relative w-full aspect-[4/3] bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A small, sleek modern pet carrier resting on a polished concrete floor. Minimalist design, neutral beige and gray tones, soft diffuse studio lighting, high structural clarity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzT-ynNtf8NqYFvIVdVjWQdOv2u7Ya9sMk8dwyh4W_fM1Hsxv6j5c3cODklQRnkuo3smIsOEP1BOCJ4I8rT-TO2RRnGqskF-3Wo4njYl8-i04RjxGm6B-juT9j2IPNW7K-eDdxIOskSXvuiOuFITnXGHkbQ4Gn-CiaUNJ10hdbJLZ9h-6UK559rABYyta6vCvIeD0fgff7QFDWdWpLhOuliwI8gVDJ2QZGGPcmOXtJcUmaWuyQKqZ_cQ"/>
+<div class="absolute top-2 left-2 px-2 py-1 bg-[#f1f1f0] text-primary font-label-sm text-label-sm rounded-md shadow-sm border border-outline-variant/20 backdrop-blur-sm bg-opacity-90">
+                        Animali
+                    </div>
+</div>
+<div class="p-space-md flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-space-xs">
+<h3 class="font-h3 text-h3 text-primary line-clamp-2">Trasportino per Gatti</h3>
+<span class="shrink-0 bg-surface-container-high text-on-surface px-2 py-0.5 rounded font-label-sm text-label-sm ml-2">Free</span>
+</div>
+<div class="mt-auto pt-space-md flex items-center text-secondary font-label-md text-label-md gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>Padova</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group flex flex-col border border-outline-variant rounded-lg overflow-hidden bg-surface transition-colors hover:border-secondary">
+<div class="relative w-full aspect-[4/3] bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A minimalist, mid-century modern wooden dining chair against a stark white background. Focus on the clean lines and joinery. Monochromatic setting, sharp editorial lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFwGoiK6GGSkaXBbtWTOPqysUyZx5zdva3K7FgYs_UsyZmAWZ2FntuWV0TaDYjYVVn74gcBT0lQXkcCdFAXfwc8i2IgtLM33j2q-89dDYgZ4A45NuBgiyGJ5Lz4MkPMfblHHiHJRgbau62dis91FKbvkU626jANxrzzcY-kFv9cDO81PiRNpu-n1HZziCmfZUlcknybcrbVnuMIT-OloCc5y3DO9sVBSOv3k4gfbXbsQm8NhT8H9VWMA"/>
+<div class="absolute top-2 left-2 px-2 py-1 bg-[#f1f1f0] text-primary font-label-sm text-label-sm rounded-md shadow-sm border border-outline-variant/20 backdrop-blur-sm bg-opacity-90">
+                        Arredamento
+                    </div>
+</div>
+<div class="p-space-md flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-space-xs">
+<h3 class="font-h3 text-h3 text-primary line-clamp-2">Sedia in Legno Design</h3>
+<span class="shrink-0 bg-surface-container-high text-on-surface px-2 py-0.5 rounded font-label-sm text-label-sm ml-2">Free</span>
+</div>
+<div class="mt-auto pt-space-md flex items-center text-secondary font-label-md text-label-md gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>Venezia Centro</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group flex flex-col border border-outline-variant rounded-lg overflow-hidden bg-surface transition-colors hover:border-secondary">
+<div class="relative w-full aspect-[4/3] bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Two stark white ceramic coffee mugs stacked neatly on a pale gray counter. Minimalist, high contrast, clean shapes, no distractions in the background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGfUggpal8kGqpkYtLHuyOop_bMn4_RncHeeUJUWJQqyhuyP3DTyb9y-Pu5Y3kNAHnns3M-FNEbfSRdy-fjQjm-VSn9gijP5Vhr_zMzir8DTtNW8v5fbdEv66qRCLcrtxkVeg_97RBO-QpNVRMB1QbV-jqt69IO-NhwyYWguyjLxSt6Mb4J8coNI6PP2yk9j1H5JgUP3PbVJZV31HdqoHXKvcQ8QWVFUwStN8lwCw4EL5DOEMhIJAOyg"/>
+<div class="absolute top-2 left-2 px-2 py-1 bg-[#f1f1f0] text-primary font-label-sm text-label-sm rounded-md shadow-sm border border-outline-variant/20 backdrop-blur-sm bg-opacity-90">
+                        Casa
+                    </div>
+</div>
+<div class="p-space-md flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-space-xs">
+<h3 class="font-h3 text-h3 text-primary line-clamp-2">Set Tazze Ceramica</h3>
+<span class="shrink-0 bg-surface-container-high text-on-surface px-2 py-0.5 rounded font-label-sm text-label-sm ml-2">Free</span>
+</div>
+<div class="mt-auto pt-space-md flex items-center text-secondary font-label-md text-label-md gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>Padova</span>
+</div>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="group flex flex-col border border-outline-variant rounded-lg overflow-hidden bg-surface transition-colors hover:border-secondary">
+<div class="relative w-full aspect-[4/3] bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A clean, flat-lay photo of an old but well-maintained macbook pro on a light gray surface. Minimalist composition, sharp focus, monochromatic palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2qMQsEtj7153JnXBXAHikae1iKdmSh6XxKEs0YgtBJNzQL9DB7sUrhPDtPYhlqtyuqFkWSUL0aRcND8X5LiQq9WhGy_hDzvhBCl81NJ5lhflq9y1z4szJqmQDmrGoVtdPUjJiyJNaFfZzojosfgC81TuyZnbe0HXCjWQsoQUlX-_SBnRO0ayMTulNces8SCNEWWFolRiqeGfKRiDLiOvoMf6etJ-Y6dfb_0TViLkSGyetotDnIP4ipg"/>
+<div class="absolute top-2 left-2 px-2 py-1 bg-[#f1f1f0] text-primary font-label-sm text-label-sm rounded-md shadow-sm border border-outline-variant/20 backdrop-blur-sm bg-opacity-90">
+                        Informatica
+                    </div>
+</div>
+<div class="p-space-md flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-space-xs">
+<h3 class="font-h3 text-h3 text-primary line-clamp-2">MacBook Pro 2015 (Parts)</h3>
+<span class="shrink-0 bg-surface-container-high text-on-surface px-2 py-0.5 rounded font-label-sm text-label-sm ml-2">Free</span>
+</div>
+<div class="mt-auto pt-space-md flex items-center text-secondary font-label-md text-label-md gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>Marghera</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

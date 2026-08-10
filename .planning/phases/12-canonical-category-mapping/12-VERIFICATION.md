@@ -1,17 +1,20 @@
 ---
 phase: 12-canonical-category-mapping
 verified: 2026-08-10T18:44:30Z
-status: human_needed
+status: passed
 score: 14/14 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
 human_verification:
+
   - test: "Open FilterSheet from feed; inspect category checklist"
     expected: "17 Subito category labels/checkboxes unchanged from pre-Phase-12 behavior (D-14)"
     why_human: "Grep confirms SUBITO_CATEGORY_SLUGS wiring; visual label text and layout require browser inspection"
+
   - test: "Navigate to /favorites"
     expected: "Flat two-column ListListingCard grid; no folder tiles, no drill-down routes (D-01/D-15)"
     why_human: "Grep confirms no folder IA patterns; grid layout and absence of folder UI requires visual confirmation"
+
   - test: "Open UGC post flow; inspect category picker"
     expected: "Six friendly PostCategory labels via messages.post.categories (D-12); no raw slug exposure"
     why_human: "Grep confirms i18n wiring; translated label strings require locale-aware browser check"

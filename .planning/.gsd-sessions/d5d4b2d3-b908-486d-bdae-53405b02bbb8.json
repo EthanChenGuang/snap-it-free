@@ -1,0 +1,12 @@
+{
+  "session_id": "d5d4b2d3-b908-486d-bdae-53405b02bbb8",
+  "command": null,
+  "phase": "08",
+  "phase_name": "subito-regalo-url-matrix-venice-padova-veneto-all-categories",
+  "status": "gaps_found",
+  "milestone": "v1.0",
+  "progress": null,
+  "stopped_at": "Phase 8 executed — 2 Padova gaps remain (spike FAIL)",
+  "updated_at": "2026-08-05T22:26:11.564Z",
+  "cwd": "/home/guang/Projects/Experiments/snap-it-free"
+}

@@ -1,0 +1,12 @@
+{
+  "session_id": "2460786b-3344-46c9-926f-1bc1f206f0e9",
+  "command": null,
+  "phase": null,
+  "phase_name": null,
+  "status": "planning",
+  "milestone": "v2.0",
+  "progress": null,
+  "stopped_at": "Phase 13 context gathered",
+  "updated_at": "2026-08-10T19:16:44.777Z",
+  "cwd": "/home/guang/Projects/Experiments/snap-it-free"
+}

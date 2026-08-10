@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>手慢无 - Minimalist Listing Feed</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary": "#615e57",
+                    "secondary-fixed-dim": "#cbc6bd",
+                    "on-tertiary-fixed-variant": "#484645",
+                    "tertiary": "#000000",
+                    "surface": "#f9f9f8",
+                    "outline-variant": "#c4c7c7",
+                    "on-primary-fixed-variant": "#474746",
+                    "on-primary-container": "#858383",
+                    "on-secondary": "#ffffff",
+                    "secondary-fixed": "#e7e2d9",
+                    "surface-dim": "#dadad9",
+                    "secondary-container": "#e7e2d9",
+                    "on-surface": "#1a1c1c",
+                    "background": "#f9f9f8",
+                    "inverse-primary": "#c8c6c5",
+                    "error": "#ba1a1a",
+                    "on-secondary-container": "#67645d",
+                    "surface-container": "#eeeeed",
+                    "on-primary-fixed": "#1c1b1b",
+                    "primary-fixed-dim": "#c8c6c5",
+                    "tertiary-container": "#1c1b1a",
+                    "on-secondary-fixed": "#1d1c16",
+                    "inverse-surface": "#2f3130",
+                    "on-background": "#1a1c1c",
+                    "surface-bright": "#f9f9f8",
+                    "inverse-on-surface": "#f1f1f0",
+                    "primary-fixed": "#e5e2e1",
+                    "on-tertiary-fixed": "#1c1b1a",
+                    "on-surface-variant": "#444748",
+                    "error-container": "#ffdad6",
+                    "primary-container": "#1c1b1b",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed-variant": "#494740",
+                    "primary": "#000000",
+                    "surface-tint": "#5f5e5e",
+                    "tertiary-fixed": "#e6e2df",
+                    "surface-container-high": "#e8e8e7",
+                    "tertiary-fixed-dim": "#cac6c4",
+                    "surface-container-low": "#f4f4f3",
+                    "surface-variant": "#e2e2e1",
+                    "on-tertiary-container": "#868382",
+                    "surface-container-highest": "#e2e2e1",
+                    "on-tertiary": "#ffffff",
+                    "outline": "#747878"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "container-max": "1200px",
+                    "space-sm": "8px",
+                    "space-md": "16px",
+                    "gutter": "24px",
+                    "space-xs": "4px",
+                    "space-lg": "24px",
+                    "space-xl": "48px"
+            },
+            "fontFamily": {
+                    "h3": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "h1": ["Inter"],
+                    "h2": ["Inter"],
+                    "h1-mobile": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "h3": ["24px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-lg": ["17px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "1.4", "fontWeight": "500"}],
+                    "h1": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "h2": ["30px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "h1-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "body-md": ["15px", {"lineHeight": "1.6", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f9f9f8;
+            color: #1a1c1c;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom thin border for Notion-style feel */
+        .notion-border {
+            border: 1px solid #e5e5e5;
+        }
+        /* Hide scrollbar for category list */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col pb-24">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-50 bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant">
+<div class="flex justify-between items-center px-gutter py-space-md max-w-container-max mx-auto">
+<div class="flex items-center gap-space-md">
+<button class="hover:bg-surface-container transition-colors p-2 rounded">
+<span class="material-symbols-outlined text-primary">menu</span>
+</button>
+<h1 class="font-h3 text-h3 font-bold text-primary dark:text-primary tracking-tight">手慢无</h1>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="hover:bg-surface-container transition-colors p-2 rounded">
+<span class="material-symbols-outlined text-primary">search</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-grow max-w-container-max mx-auto w-full px-gutter pt-space-lg">
+<!-- Search & Filter Section -->
+<section class="mb-space-xl">
+<div class="relative w-full mb-space-lg">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-12 pr-4 py-3 bg-white notion-border rounded-lg focus:ring-1 focus:ring-primary focus:outline-none font-body-md transition-all" placeholder="Search items nearby..." type="text"/>
+</div>
+<div class="flex gap-space-sm overflow-x-auto no-scrollbar pb-2">
+<button class="px-space-md py-1.5 bg-primary text-white font-label-md rounded-full transition-all">All</button>
+<button class="px-space-md py-1.5 bg-white notion-border text-on-surface-variant font-label-md rounded-full hover:bg-surface-container transition-all">Furniture</button>
+<button class="px-space-md py-1.5 bg-white notion-border text-on-surface-variant font-label-md rounded-full hover:bg-surface-container transition-all">Tech</button>
+<button class="px-space-md py-1.5 bg-white notion-border text-on-surface-variant font-label-md rounded-full hover:bg-surface-container transition-all">Apparel</button>
+<button class="px-space-md py-1.5 bg-white notion-border text-on-surface-variant font-label-md rounded-full hover:bg-surface-container transition-all">Books</button>
+<button class="px-space-md py-1.5 bg-white notion-border text-on-surface-variant font-label-md rounded-full hover:bg-surface-container transition-all">Home Decor</button>
+</div>
+</section>
+<!-- Bento-inspired Listing Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Listing Item 1 -->
+<div class="bg-white notion-border p-4 flex flex-col group cursor-pointer hover:border-primary transition-colors">
+<div class="relative overflow-hidden aspect-video mb-4 rounded-sm">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A professional studio photograph of a minimalist mid-century modern wooden chair placed in a bright, sunlit room with clean white walls and polished concrete floors. The lighting is soft and natural, emphasizing the grain of the light oak wood and the clean architectural lines of the furniture. The overall aesthetic is calm, high-end, and document-first, following a monochrome and minimalist visual language." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcupVbbWscYznxkWbvTxRrnQ9NtmECu5vFo8-VmuTY6T43bYDrty9PZiIbSbbqPhFhKGU9-mqDUhxscDbqOtcJDYkBVKDut9wax39nhxVhoiNqjbMCV24nBBPf4dIDuF-vI4-aPxZNAOfVIIUbB8hSn9wAfc-t7nZG4N8TKoILXIn_zAc1CmiaYpHAz14njB6j4LAD7na8BIViNYRgZ3ING95gqu_3UwRWt13vFbX84Jko3rkQtU4XdA"/>
+<div class="absolute top-2 left-2 bg-white/90 px-2 py-1 text-[10px] font-bold uppercase tracking-widest notion-border">New Arrival</div>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-body-lg font-semibold leading-tight">Modern Oak Lounge Chair</h3>
+<span class="font-body-md font-bold">Free</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm mb-4">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span data-location="Berlin">Prenzlauer Berg, Berlin</span>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-white font-label-md hover:opacity-90 active:scale-95 transition-all">Claim Item</button>
+</div>
+<!-- Listing Item 2 -->
+<div class="bg-white notion-border p-4 flex flex-col group cursor-pointer hover:border-primary transition-colors">
+<div class="relative overflow-hidden aspect-video mb-4 rounded-sm">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A sleek, black high-performance mechanical keyboard with subtle RGB lighting, photographed from a high angle on a dark walnut desk. The composition is clean and organized, surrounded by minimal desk accessories like a single ceramic cup and a grey felt mousepad. The lighting is focused and moody, highlighting the texture of the keycaps and the matte finish of the device, adhering to a professional and utilitarian digital workspace aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3qv75a2oglcYz9DKVuvS1X4WH7uRbgylomH6iK1-SSfhcs_GGHIYiBDBzZMQrBcr-24j7Ynp1JJdxLeKFudhzGUv0-5GPqc4yKkiJVNsyRZRNWqiXvPdonCUgSpCqt3C8GLqXOh5AJnckoVLmJ2j5ctf97vErJ8_kItTQVs4exTnvWfUMJgYjniLfCo1ecmmub29lgMtjc-dG_knaFXKwEf0f6croVaCHDurPIwSpEFoy-8qAo5lXGw"/>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-body-lg font-semibold leading-tight">Mechanical Keyboard (Brown Switches)</h3>
+<span class="font-body-md font-bold">Free</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm mb-4">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span data-location="Tokyo">Shibuya, Tokyo</span>
+</div>
+</div>
+<button class="w-full py-2 notion-border border-primary text-primary font-label-md hover:bg-surface-container transition-all">Claim Item</button>
+</div>
+<!-- Listing Item 3 -->
+<div class="bg-white notion-border p-4 flex flex-col group cursor-pointer hover:border-primary transition-colors">
+<div class="relative overflow-hidden aspect-video mb-4 rounded-sm">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="An assortment of designer art books and architectural journals stacked neatly on a white marble surface. The covers feature bold, minimalist typography and high-contrast black and white photography. The scene is shot with a shallow depth of field in a bright, airy environment, creating a sophisticated and intellectual mood that complements the document-first design philosophy of the UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBA1rSA3n34hku4MiAUz6srDAKkqepfhktvU-xumGeHAVqLjkJgf8sdpD405XA-yu7tj8YfIn_-WfyWXr89mqbQCNXbvgkQaM5z9UKlAKMBAPjtiOLR8vmO4me4RR8BpYmzmZlLYuT13iyP__FUVjg-lvEPrWttSVf9k_ymnO1OS2V8dFwzLNyLOzc2NHDQFc8YXRrRm-KDN_D706u1vJq12hfkx4_HHlledlNVXOlizmqUr1AymQvjGg"/>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-body-lg font-semibold leading-tight">Collection of Architectural Journals</h3>
+<span class="font-body-md font-bold">Free</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm mb-4">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span data-location="London">Shoreditch, London</span>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-white font-label-md hover:opacity-90 active:scale-95 transition-all">Claim Item</button>
+</div>
+<!-- Listing Item 4 -->
+<div class="bg-white notion-border p-4 flex flex-col group cursor-pointer hover:border-primary transition-colors">
+<div class="relative overflow-hidden aspect-video mb-4 rounded-sm">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A minimalist matte black ceramic vase with a single dried eucalyptus branch, sitting on a floating shelf against a neutral grey wall. The lighting creates subtle, long shadows that emphasize the organic shape of the vase. The visual style is rooted in architectural minimalism, using a monochromatic palette to convey order and calm, perfectly fitting the professional knowledge worker target audience." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1x7z-ZCrhMX2EV4Qi3vmQyqOY3Crm5l2ntbUtyf9KslTFtUpRvGbcJYS01nuGFd8NQ4PwPr-x372jIT6uLB3C0hmlVLem3EDMX79Jg-76JVxGkX8QGQkblO-xS-TzLtAEd8Yd-AQ47vvavLvEgPRWcZGcx2EJuTdaJDxq5hIke7dljRkcckpsBKATJiQ_mRqYbrN-54X58nQkhupxqqVK5yykPS0LEaQUzNPnNKqVPAcfL9SU0CPLnA"/>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-body-lg font-semibold leading-tight">Matte Black Ceramic Vase</h3>
+<span class="font-body-md font-bold">Free</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm mb-4">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span data-location="New York">Brooklyn, NY</span>
+</div>
+</div>
+<button class="w-full py-2 notion-border border-primary text-primary font-label-md hover:bg-surface-container transition-all">Claim Item</button>
+</div>
+<!-- Listing Item 5 -->
+<div class="bg-white notion-border p-4 flex flex-col group cursor-pointer hover:border-primary transition-colors">
+<div class="relative overflow-hidden aspect-video mb-4 rounded-sm">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A vintage silver film camera resting on a clean white desk next to a leather-bound notebook and a thin black pen. The scene is illuminated by crisp, directional morning light coming from a nearby window, creating a high-contrast and sharp image. The aesthetic is timeless and focused on clarity and utility, echoing the structural integrity of a well-organized digital canvas." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWLfaZ8Wt-xwu-fMb4dF7XUo-KZeXwL-klLhQ2abbkJ0L58JFImXT9fYtlYRHTJYEGlxH5aU11d_5yFqDDOF9xlzyw_tdtwaeJorMui85j80Zio_tA9bI7ttX-a58j83xuL0o6Sur4JC5iJZFfpz-V74dcQ9XKT476VhaUoxC-RfkuqNJ38hQ5QNG6i9M-1NZZdwUIw8ZKTEummAo3WtQ70CkX8n_DKdhsRQTqb3RMnefQOcfaFp85ZQ"/>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-body-lg font-semibold leading-tight">Vintage 35mm Film Camera</h3>
+<span class="font-body-md font-bold">Free</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm mb-4">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span data-location="Paris">Le Marais, Paris</span>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-white font-label-md hover:opacity-90 active:scale-95 transition-all">Claim Item</button>
+</div>
+<!-- Listing Item 6 -->
+<div class="bg-white notion-border p-4 flex flex-col group cursor-pointer hover:border-primary transition-colors">
+<div class="relative overflow-hidden aspect-video mb-4 rounded-sm">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A minimal white desktop monitor and stand set against a clean white wall, featuring a very thin bezel and an elegant design. The workspace around it is completely clear of clutter, embodying the 'infinite canvas' feel of the design system. The lighting is exceptionally even and bright, emphasizing a sense of high-tech purity and extreme minimalism." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdpWgRSOevjmiyfn5ePi1cOVAdNWpDz3_VZ2YcNi3s-G-fcbQiIef_mZIvlEm1SV3ZfkTDl2fP0VHHujh5-EZaXCobgrDDfAmWw1LJFI8HwNZVLxUzThcRvuUDmJ0Mz1msvlwXvx8XMU8-oqUObXa4ijYsmJhYMNqUZRhfgsOs2RqtMmfO-_fIGRWQmRjePzwz4RUxZo0ErW2PzjBAoJQ6IKi7XXbpzedwXQvd1tcpnQJpOU35HbhOvw"/>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-body-lg font-semibold leading-tight">27-inch Minimal Monitor Stand</h3>
+<span class="font-body-md font-bold">Free</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm mb-4">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span data-location="Seoul">Gangnam, Seoul</span>
+</div>
+</div>
+<button class="w-full py-2 notion-border border-primary text-primary font-label-md hover:bg-surface-container transition-all">Claim Item</button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface dark:bg-surface px-space-md py-space-sm border-t border-outline-variant dark:border-outline-variant">
+<!-- List Tab (Active) -->
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary font-bold active:scale-95 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">format_list_bulleted</span>
+<span class="font-label-sm text-label-sm">List</span>
+</a>
+<!-- Map Tab -->
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors px-4 py-1 rounded active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="font-label-sm text-label-sm">Map</span>
+</a>
+<!-- Post Tab -->
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors px-4 py-1 rounded active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">add_box</span>
+<span class="font-label-sm text-label-sm">Post</span>
+</a>
+<!-- Setting Tab -->
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors px-4 py-1 rounded active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm">Setting</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for claiming items
+        document.querySelectorAll('button').forEach(button => {
+            if (button.innerText === 'Claim Item') {
+                button.addEventListener('click', (e) => {
+                    const originalText = button.innerText;
+                    button.innerText = 'Claiming...';
+                    button.classList.add('opacity-50');
+                    button.disabled = true;
+                    
+                    setTimeout(() => {
+                        button.innerText = 'Success!';
+                        button.classList.remove('bg-primary');
+                        button.classList.add('bg-green-600', 'text-white');
+                    }, 1000);
+                });
+            }
+        });
+
+        // Filter button active state toggle
+        const filterButtons = document.querySelectorAll('section .flex button');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => {
+                    b.classList.remove('bg-primary', 'text-white');
+                    b.classList.add('bg-white', 'notion-border', 'text-on-surface-variant');
+                });
+                btn.classList.remove('bg-white', 'notion-border', 'text-on-surface-variant');
+                btn.classList.add('bg-primary', 'text-white');
+            });
+        });
+    </script>
+</body></html>
