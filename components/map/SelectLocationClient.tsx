@@ -250,7 +250,10 @@ export function SelectLocationClient() {
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 px-gutter pb-[max(1rem,env(safe-area-inset-bottom))]">
           <div className="pointer-events-auto rounded-xl border border-outline-variant bg-surface-container-lowest p-space-md shadow-[0_4px_24px_rgba(0,0,0,0.08)]">
-            <div className="mb-space-md flex items-center gap-space-sm rounded-lg border border-outline-variant bg-surface-container-low px-space-md py-space-sm">
+            <div
+              className="mb-space-md flex items-center gap-space-sm rounded-lg border border-outline-variant bg-surface-container-low px-space-md py-space-sm"
+              aria-live="polite"
+            >
               <span
                 className="material-symbols-outlined shrink-0 text-[20px] text-on-surface-variant"
                 aria-hidden
@@ -258,13 +261,19 @@ export function SelectLocationClient() {
                 location_on
               </span>
               <span className="text-body-md text-on-surface-variant">
-                {messages.selectLocation.selectedLocationLabel}
+                {ready
+                  ? resolveCityLabel(markerPosition.lat, markerPosition.lng, {
+                      venice: messages.feed.cityVenice,
+                      padova: messages.feed.cityPadova,
+                    })
+                  : null}
               </span>
             </div>
             <button
               type="button"
               onClick={handleConfirm}
-              className="min-h-11 w-full rounded-lg bg-primary px-space-md py-space-sm text-label-sm font-semibold text-on-primary transition-opacity active:opacity-90"
+              disabled={!ready}
+              className="min-h-11 w-full rounded-lg bg-primary px-space-md py-space-sm text-label-sm font-semibold text-on-primary transition-opacity active:opacity-90 disabled:pointer-events-none disabled:opacity-50"
             >
               {context === 'post'
                 ? messages.selectLocation.confirmPickup
