@@ -23,6 +23,15 @@ describe('matchesSubitoCategory', () => {
     ).toBe(true);
   });
 
+  it('returns false for facebook source with null category (D-09)', () => {
+    expect(
+      matchesSubitoCategory(
+        { source: 'facebook', title: 'Monitor 24 pollici', category: null },
+        'informatica',
+      ),
+    ).toBe(false);
+  });
+
   it('falls back to title inference when DB slug is unknown (D-18)', () => {
     expect(
       matchesSubitoCategory(
