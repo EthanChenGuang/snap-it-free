@@ -76,7 +76,7 @@ Plans:
 
 **Requirements:** FILT-01–05, I18N-01 (partial)
 
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans executed
 
 Plans:
 **Wave 0**
@@ -97,7 +97,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3)*
 
-- [ ] 10-05-PLAN.md — i18n completion, stub removal, phase gate verification
+- [x] 10-05-PLAN.md — i18n completion, stub removal, phase gate verification
 
 **Success criteria:**
 
