@@ -31,8 +31,8 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Listing Grid Cards
 
-- [ ] **CARD-01**: Grid cards show listing image, truncated title, and relative posted time
-- [ ] **CARD-02**: When browser geolocation is granted, metadata shows `{distance} · {relative time}` via haversine to listing coordinates
+- [x] **CARD-01**: Grid cards show listing image, truncated title, and relative posted time
+- [x] **CARD-02**: When browser geolocation is granted, metadata shows `{distance} · {relative time}` via haversine to listing coordinates
 - [ ] **CARD-03**: FREE badge overlays scraped and UGC listing images on the grid
 - [ ] **CARD-04**: Favorite heart on each card reuses FavoriteButton with existing login gate
 - [ ] **CARD-05**: Grid cards omit Claim CTA; detail page retains deep-link (scraped) and claim/reserve (UGC)
@@ -118,8 +118,8 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | FILT-03 | Phase 10 | Complete |
 | FILT-04 | Phase 10 | Complete |
 | FILT-05 | Phase 10 | Complete |
-| CARD-01 | Phase 11 | Pending |
-| CARD-02 | Phase 11 | Pending |
+| CARD-01 | Phase 11 | Complete |
+| CARD-02 | Phase 11 | Complete |
 | CARD-03 | Phase 11 | Pending |
 | CARD-04 | Phase 11 | Pending |
 | CARD-05 | Phase 11 | Pending |
