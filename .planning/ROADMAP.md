@@ -76,7 +76,7 @@ Plans:
 
 **Requirements:** FILT-01–05, I18N-01 (partial)
 
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 **Wave 0**
@@ -93,7 +93,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 10-04-PLAN.md — Card distance metadata, select-location cleanup, center pill
+- [x] 10-04-PLAN.md — Card distance metadata, select-location cleanup, center pill
 
 **Wave 4** *(blocked on Wave 3)*
 

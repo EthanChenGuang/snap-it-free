@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 10
 current_phase_name: search-filter-sheet-distance
-current_plan: 4
+current_plan: 5
 status: executing
-stopped_at: Completed 10-03-PLAN.md
-last_updated: "2026-08-10T13:10:26.592Z"
+stopped_at: Completed 10-04-PLAN.md
+last_updated: "2026-08-10T13:13:48.023Z"
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
   percent: 14
 last_activity: 2026-08-09
 last_activity_desc: v2.0 milestone requirements + roadmap created
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 10 (search-filter-sheet-distance) — EXECUTING
-**Current Plan:** 4
+**Current Plan:** 5
 **Total Plans in Phase:** 5
 Status: Ready to execute
 
-Progress: [████████░░] 80% v2.0 (0/7 phases)
+Progress: [█████████░] 90% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -68,6 +68,7 @@ Progress: [████████░░] 80% v2.0 (0/7 phases)
 | Phase 10-search-filter-sheet-distance P01 | 4min | 3 tasks | 12 files |
 | Phase 10-search-filter-sheet-distance P02 | 8min | 3 tasks | 12 files |
 | Phase 10-search-filter-sheet-distance P03 | 12min | 3 tasks | 11 files |
+| Phase 10-search-filter-sheet-distance P04 | 8min | 3 tasks | 7 files |
 
 ## Deferred Items (from v1.0)
 
@@ -87,8 +88,8 @@ Progress: [████████░░] 80% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T13:10:26.583Z
-**Stopped at:** Completed 10-03-PLAN.md
+**Last session:** 2026-08-10T13:13:48.011Z
+**Stopped at:** Completed 10-04-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -107,6 +108,9 @@ Progress: [████████░░] 80% v2.0 (0/7 phases)
 - [Phase ?]: Categories migrated to FeedFilterContext multi-select array per D-50
 - [Phase ?]: composeFeedListings exported from useDistanceCenter for testable D-29 pipeline
 - [Phase ?]: Center pill shown only for browse or GPS sources; Venice default has no pill
+- [Phase ?]: Card metadata uses consumer city keys when distance unavailable; never zone subdivisions
+- [Phase ?]: Select-location confirm label derived from nearest city Venice vs Padova
+- [Phase ?]: matchesFeedSearch accepts ConsumerCityLabels instead of zoneLabel
 
 ## Quick Tasks Completed
 
