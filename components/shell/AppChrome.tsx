@@ -6,6 +6,7 @@ import { FeedHeaderRow } from '@/components/shell/FeedHeaderRow';
 import { FeedScrollProvider } from '@/components/shell/FeedScrollContext';
 import { SimpleTitleBar } from '@/components/shell/SimpleTitleBar';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { cn } from '@/lib/utils';
 
 /** Consumer shell: route-conditional chrome; feed header on `/` only (Phase 9). */
 export function AppChrome({ children }: { children: React.ReactNode }) {
@@ -41,9 +42,9 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
       <FeedScrollProvider>
         <div className="app-shell">
           <FeedHeaderRow />
-          <div className="app-main">{children}</div>
-          {showBottomNav && <BottomNav />}
+          <div className="app-main min-h-0">{children}</div>
         </div>
+        {showBottomNav && <BottomNav />}
       </FeedScrollProvider>
     );
   }
@@ -57,7 +58,14 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
           }
         />
       )}
-      <div className="app-main">{children}</div>
+      <div
+        className={cn(
+          'app-main',
+          showBottomNav && 'pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))]',
+        )}
+      >
+        {children}
+      </div>
       {showBottomNav && <BottomNav />}
     </div>
   );

@@ -14,9 +14,15 @@ type FavoriteButtonProps = {
   listingId: string;
   className?: string;
   size?: 'sm' | 'default';
+  tone?: 'default' | 'overlay';
 };
 
-export function FavoriteButton({ listingId, className, size = 'default' }: FavoriteButtonProps) {
+export function FavoriteButton({
+  listingId,
+  className,
+  size = 'default',
+  tone = 'default',
+}: FavoriteButtonProps) {
   const { messages } = useMessages();
 
   const pathname = usePathname();
@@ -74,11 +80,17 @@ export function FavoriteButton({ listingId, className, size = 'default' }: Favor
       >
         <span
           className={cn(
-            'material-symbols-outlined',
-            favorited ? 'text-accent-orange' : 'text-on-surface-variant',
+            'material-symbols-outlined text-[22px]',
+            favorited
+              ? 'text-accent-orange'
+              : tone === 'overlay'
+                ? 'text-white'
+                : 'text-on-surface-variant',
           )}
           style={{
-            fontVariationSettings: favorited ? "'FILL' 1, 'wght' 600" : "'FILL' 0, 'wght' 400",
+            fontVariationSettings: favorited
+              ? "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24"
+              : "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24",
           }}
         >
           favorite

@@ -52,8 +52,9 @@ export function FeedHeaderRow() {
         <CompactLocaleChip />
         <div className="relative min-w-0 flex-1">
           <span
-            className="material-symbols-outlined pointer-events-none absolute left-space-md top-1/2 -translate-y-1/2 text-[20px] text-on-surface-variant"
+            className="material-symbols-outlined pointer-events-none absolute left-space-md top-1/2 -translate-y-1/2 text-[22px] text-on-surface-variant"
             aria-hidden
+            style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24" }}
           >
             search
           </span>
@@ -72,14 +73,24 @@ export function FeedHeaderRow() {
           className="flex h-10 w-10 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full bg-surface-container-lowest text-on-surface shadow-sm transition-opacity active:opacity-80"
           aria-label={messages.feed.openFilters}
         >
-          <span className="material-symbols-outlined text-[22px]">category_search</span>
+          <span
+            className="material-symbols-outlined text-[22px]"
+            style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24" }}
+          >
+            discover_tune
+          </span>
         </button>
         <Link
           href="/select-location"
           className="flex h-10 w-10 shrink-0 touch-manipulation items-center justify-center rounded-full bg-surface-container-lowest text-error shadow-sm transition-opacity active:opacity-80"
           aria-label={messages.feed.openSelectLocation}
         >
-          <span className="material-symbols-outlined text-[22px]">pin_drop</span>
+          <span
+            className="material-symbols-outlined text-[22px]"
+            style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24" }}
+          >
+            pin_drop
+          </span>
         </Link>
       </div>
       <FeedActiveFilterPills />

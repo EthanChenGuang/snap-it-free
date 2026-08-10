@@ -10,6 +10,9 @@ import { useAuthSession } from '@/lib/auth/useAuthSession';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
+const ICON_STYLE_OUTLINE = "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24";
+const ICON_STYLE_ACTIVE = "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24";
+
 // The badge pulls in the Supabase SDK. Loading it via next/dynamic keeps that out of
 // app/layout.js, which the dev server truncates once it grows past a few megabytes.
 const UnreadMatchBadge = dynamic(
@@ -64,14 +67,13 @@ export function BottomNav() {
 
   return (
     <>
-      <div className="h-[72px] shrink-0" aria-hidden />
       <nav
         className={cn(
-          'fixed bottom-space-md left-1/2 z-[100] -translate-x-1/2 transition-all duration-200 ease-out',
-          navHidden && 'pointer-events-none translate-y-[calc(100%+24px)] opacity-0',
+          'pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-gutter pb-[env(safe-area-inset-bottom,0px)] transition-all duration-200 ease-out',
+          navHidden && 'translate-y-[calc(100%+2rem)] opacity-0',
         )}
       >
-        <div className="flex items-center gap-space-lg rounded-full bg-white/80 px-space-lg py-space-sm shadow-lg backdrop-blur-md">
+        <div className="pointer-events-auto flex items-center gap-space-lg rounded-full border border-white/20 bg-white/70 px-space-lg py-space-sm shadow-lg backdrop-blur-md">
           {navItems.map((item) => {
             const isActive = isNavActive(pathname, item.href);
 
@@ -83,17 +85,15 @@ export function BottomNav() {
                 aria-label={item.label}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'relative flex items-center justify-center p-space-xs transition-transform duration-200 active:scale-95',
+                  'relative flex h-10 w-10 items-center justify-center transition-transform duration-200 active:scale-95',
                   isActive ? 'text-error' : 'text-on-surface-variant',
                 )}
               >
                 <span className="relative">
                   <span
-                    className="material-symbols-outlined text-[24px]"
+                    className="material-symbols-outlined text-[22px]"
                     style={{
-                      fontVariationSettings: isActive
-                        ? "'FILL' 1, 'wght' 400"
-                        : "'FILL' 0, 'wght' 400",
+                      fontVariationSettings: isActive ? ICON_STYLE_ACTIVE : ICON_STYLE_OUTLINE,
                     }}
                   >
                     {item.icon}
