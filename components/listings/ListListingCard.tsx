@@ -3,11 +3,12 @@
 import { useRouter } from 'next/navigation';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
-import { formatDistance } from '@/lib/geo/format-distance';
 import { resolveListingTitle } from '@/lib/i18n/listing-fields';
+import { buildCardMetadata } from '@/lib/listings/card-metadata';
 import { listingConsumerCityLabel } from '@/lib/listings/feed-search';
 import type { ListingRow } from '@/lib/listings/types';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { cn } from '@/lib/utils';
 
 type ListListingCardProps = {
   listing: ListingRow;
@@ -15,28 +16,24 @@ type ListListingCardProps = {
   distanceMeters?: number | null;
 };
 
-function buildCardMetadata(
-  distanceMeters: number | null | undefined,
-  cityLabel: string,
-  postedLabel: string,
-): string {
-  if (distanceMeters != null) {
-    return `${formatDistance(distanceMeters)} · ${postedLabel}`;
-  }
-  return [cityLabel, postedLabel].filter(Boolean).join(' · ');
-}
-
 /** Minimalist feed card — image, FREE badge, favorite, compact metadata. */
 export function ListListingCard({ listing, distanceMeters }: ListListingCardProps) {
   const { language, messages, formatRelativeTime } = useMessages();
   const displayTitle = resolveListingTitle(listing, language);
   const router = useRouter();
+  const isClaimed = listing.status === 'claimed';
   const cityLabel = listingConsumerCityLabel(listing, {
     venice: messages.feed.cityVenice,
     padova: messages.feed.cityPadova,
   });
   const postedLabel = formatRelativeTime(listing.posted_at);
-  const metadata = buildCardMetadata(distanceMeters, cityLabel, postedLabel);
+  const metadata = buildCardMetadata({
+    distanceMeters,
+    cityLabel,
+    postedLabel,
+    isClaimed,
+    reservedLabel: messages.listing.reserved,
+  });
 
   return (
     <article
@@ -55,7 +52,10 @@ export function ListListingCard({ listing, distanceMeters }: ListListingCardProp
         <ListingPhoto
           src={listing.photo_url}
           alt={displayTitle}
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className={cn(
+            'object-cover transition-transform duration-500 group-hover:scale-105',
+            isClaimed && 'opacity-60',
+          )}
           sizes="(max-width: 768px) 50vw, 400px"
         />
         <span className="absolute left-space-sm top-space-sm rounded-full bg-emerald-500/80 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
