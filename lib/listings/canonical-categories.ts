@@ -36,6 +36,9 @@ export const POST_CATEGORY_TO_SLUG: Record<PostCategory, SubitoRegaloSlug> = {
   others: 'usato',
 };
 
+/** Ordered PostCategory values for zod enum and UI pickers (D-11). */
+export const POST_CATEGORIES = Object.keys(POST_CATEGORY_TO_SLUG) as PostCategory[];
+
 /**
  * Title-inference bucket → canonical Subito slug (D-07 fallback chain).
  * Consolidates legacySlugFromInferred and listing-fields slugMap.

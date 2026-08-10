@@ -1,4 +1,9 @@
 import { z } from 'zod';
+import { POST_CATEGORIES, type PostCategory } from '@/lib/listings/canonical-categories';
+
+const postCategoryEnum = z.enum(
+  POST_CATEGORIES as [PostCategory, ...PostCategory[]],
+);
 
 export const CreateListingSchema = z.object({
   title: z.string().trim().min(1).max(500),
@@ -6,6 +11,7 @@ export const CreateListingSchema = z.object({
   lat: z.number().min(45.0).max(45.7),
   lng: z.number().min(12.1).max(12.6),
   description: z.string().max(2000).optional(),
+  postCategory: postCategoryEnum,
 });
 
 export function createListingSchemaForUser(userId: string) {
