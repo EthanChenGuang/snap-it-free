@@ -248,7 +248,7 @@ Plans:
 
 **Requirements:** SET-01–06, TD-01, I18N-01 (partial)
 
-**Plans:** 7/8 plans executed (1 gap closure pending)
+**Plans:** 8/8 plans executed
 
 Plans:
 **Wave 0**
@@ -269,7 +269,7 @@ Plans:
 
 **Wave 3** *(gap closure from 14-VERIFICATION.md)*
 
-- [ ] 14-08-PLAN.md — Close D-14 event-order mismatch + full suite/lint green (test debt alignment)
+- [x] 14-08-PLAN.md — Close D-14 event-order mismatch + full suite/lint green (test debt alignment)
 
 **Success criteria:**
 
