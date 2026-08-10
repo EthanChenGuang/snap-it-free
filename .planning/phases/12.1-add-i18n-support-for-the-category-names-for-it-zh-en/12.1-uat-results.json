@@ -1,24 +1,24 @@
 {
   "base": "http://localhost:3003",
-  "ranAt": "2026-08-10T19:12:24.881Z",
+  "ranAt": "2026-08-10T19:26:08.532Z",
   "results": [
     {
       "id": 1,
       "name": "FilterSheet category checklist — Italian (D-14 / 12.1)",
       "pass": true,
-      "detail": "checkboxes=17 labelsMatch=true noSlugs=true"
+      "detail": "chips=17 labelsMatch=true noSlugs=true"
     },
     {
       "id": 4,
       "name": "FilterSheet category checklist — English locale (12.1 D-16)",
       "pass": true,
-      "detail": "checkboxes=17 enMatch=true differsFromIt=true"
+      "detail": "chips=17 enMatch=true differsFromIt=true"
     },
     {
       "id": 5,
       "name": "FilterSheet category checklist — Chinese spot-check (12.1)",
       "pass": true,
-      "detail": "checkboxes=17 firstLabel=家居用品"
+      "detail": "chips=17 firstLabel=家居用品"
     },
     {
       "id": 2,
