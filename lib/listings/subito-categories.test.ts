@@ -57,8 +57,10 @@ describe('getSubitoCategoryLabel', () => {
   it('returns category_en when locale is en and column populated (D-31)', () => {
     expect(
       getSubitoCategoryLabel('informatica', 'en', {
-        category_en: 'Computing',
-        category_zh: '电脑',
+        translations: {
+          category_en: 'Computing',
+          category_zh: '电脑',
+        },
       }),
     ).toBe('Computing');
   });
@@ -66,8 +68,10 @@ describe('getSubitoCategoryLabel', () => {
   it('returns category_zh when locale is zh and column populated (D-31)', () => {
     expect(
       getSubitoCategoryLabel('informatica', 'zh', {
-        category_en: 'Computing',
-        category_zh: '电脑',
+        translations: {
+          category_en: 'Computing',
+          category_zh: '电脑',
+        },
       }),
     ).toBe('电脑');
   });

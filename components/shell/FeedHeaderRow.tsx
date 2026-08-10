@@ -61,7 +61,7 @@ function FeedActiveFilterPills() {
       )}
 
       {applied.categories.map((slug) => {
-        const categoryLabel = getSubitoCategoryLabel(slug, language);
+        const categoryLabel = getSubitoCategoryLabel(slug, language, { messages }) ?? slug;
         return (
           <FilterPill
             key={slug}

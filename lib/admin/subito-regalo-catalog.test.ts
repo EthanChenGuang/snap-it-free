@@ -15,7 +15,7 @@ function spikeVerdictIsPass(): boolean {
   try {
     const spikePath = join(
       process.cwd(),
-      '.planning/phases/08-subito-regalo-url-matrix-venice-padova-veneto-all-categories/08-PADOVA-SPIKE.md',
+      '.planning/milestones/v1.0-phases/08-subito-regalo-url-matrix-venice-padova-veneto-all-categories/08-PADOVA-SPIKE.md',
     );
     const content = readFileSync(spikePath, 'utf-8');
     return /\*\*Verdict:\*\*\s*PASS/i.test(content);
