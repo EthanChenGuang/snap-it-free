@@ -209,6 +209,25 @@ Plans:
 
 **Requirements:** LOC-01–03, I18N-01 (partial)
 
+**Plans:** 4 plans
+
+Plans:
+**Wave 0**
+
+- [ ] 13-01-PLAN.md — Lib foundation: resolveCityLabel promotion + shoumanwu_post_draft storage (TDD)
+
+**Wave 1** *(blocked on Wave 0)*
+
+- [ ] 13-02-PLAN.md — Tracer: post-context picker context branching + PostForm pickup-location row
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 13-03-PLAN.md — Live preview + aria-live + ready-gated Confirm + Stitch flat-card corrections
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 13-04-PLAN.md — Phase gate: integration audit, full lib suite, VALIDATION.md sign-off
+
 **Success criteria:**
 
 1. Select Location screen matches Stitch prototype patterns
@@ -265,7 +284,7 @@ Plans:
 | 10. Filter Sheet & Distance | v2.0 | 0/5 | In Progress|  |
 | 11. Grid Listing Cards | v2.0 | 0/4 | Complete    | 2026-08-10 |
 | 12. Canonical Category Mapping | v2.0 | 4/4 | Complete    | 2026-08-10 |
-| 13. Select Location | v2.0 | 0/? | Planned | — |
+| 13. Select Location | v2.0 | 0/4 | Planned | — |
 | 14. Settings Parity | v2.0 | 0/? | Planned | — |
 | 7. Production Deploy | v2.0 | 0/4 | Planned | — |
 
