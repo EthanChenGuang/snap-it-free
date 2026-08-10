@@ -110,11 +110,13 @@ export function FilterSheet() {
               {messages.feed.radiusLabel}
             </h3>
             <div className="flex items-center justify-between gap-space-md">
-              <span className="text-body-md text-on-surface">{messages.feed.radiusLabel}</span>
+              <span className="text-body-md text-on-surface">
+                {draft.radiusEnabled ? messages.feed.withinKm(draft.radiusKm) : messages.feed.radiusOff}
+              </span>
               <SettingsToggle
                 checked={draft.radiusEnabled}
                 onChange={handleRadiusToggle}
-                ariaLabel={messages.feed.radiusEnable}
+                ariaLabel={messages.feed.radiusEnabledLabel}
               />
             </div>
             {draft.radiusEnabled && (

@@ -51,14 +51,16 @@ function CenterFilterPill({
   label,
   onDismiss,
   dismissLabel,
+  linkAriaLabel,
 }: {
   label: string;
   onDismiss: () => void;
   dismissLabel: string;
+  linkAriaLabel: string;
 }) {
   return (
     <span className={PILL_CLASS}>
-      <Link href="/select-location" className="min-w-0 truncate">
+      <Link href="/select-location" className="min-w-0 truncate" aria-label={linkAriaLabel}>
         {label}
       </Link>
       <button
@@ -123,6 +125,7 @@ function FeedActiveFilterPills() {
           label={centerLabel}
           onDismiss={handleClearCenter}
           dismissLabel={messages.feed.removeCenterFilter}
+          linkAriaLabel={messages.feed.centerPillAriaLabel(centerLabel)}
         />
       )}
 
@@ -138,18 +141,21 @@ function FeedActiveFilterPills() {
         <FilterPill
           label={cityPillLabel(applied.city, messages)}
           onDismiss={dismissCity}
-          dismissLabel={`Remove ${cityPillLabel(applied.city, messages)} filter`}
+          dismissLabel={messages.feed.removeFilterAriaLabel(cityPillLabel(applied.city, messages))}
         />
       )}
 
-      {applied.categories.map((slug) => (
+      {applied.categories.map((slug) => {
+        const categoryLabel = getSubitoCategoryLabel(slug, language);
+        return (
         <FilterPill
           key={slug}
-          label={getSubitoCategoryLabel(slug, language)}
+          label={categoryLabel}
           onDismiss={() => dismissCategory(slug)}
-          dismissLabel={`Remove ${getSubitoCategoryLabel(slug, language)} filter`}
+          dismissLabel={messages.feed.removeFilterAriaLabel(categoryLabel)}
         />
-      ))}
+        );
+      })}
     </div>
   );
 }
