@@ -1,4 +1,5 @@
 import type { Messages } from './it';
+import { subitoCategoriesEn } from './subito-category-labels';
 
 export const messages: Messages = {
   app: {
@@ -60,6 +61,7 @@ export const messages: Messages = {
     cityPadova: 'Padova',
     cityFilterMapHint: 'To search by radius, use the pin button on the home feed.',
     categoriesLabel: 'Categories',
+    subitoCategories: subitoCategoriesEn,
     clearSelection: 'Clear selection',
     withinKm: (km: number) => `Within ${km} km`,
     myLocation: 'My location',
@@ -82,6 +84,8 @@ export const messages: Messages = {
     locateMe: 'Go to my location',
     radiusLabel: 'Search radius',
     radiusOption: (km: number) => `${km} km`,
+    postTitle: 'Set pickup location',
+    confirmPickup: 'Confirm pickup location',
   },
   post: {
     title: 'Post a free item',

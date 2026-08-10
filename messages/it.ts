@@ -1,5 +1,6 @@
 import type { ListingCategory } from '@/lib/listings/categories';
 import type { VeniceZone } from '@/lib/listings/types';
+import { subitoCategoriesIt } from './subito-category-labels';
 
 export const messages = {
   app: {
@@ -62,6 +63,7 @@ export const messages = {
     cityPadova: 'Padova',
     cityFilterMapHint: 'Per cercare nel raggio usa il pulsante pin sulla home.',
     categoriesLabel: 'Categorie',
+    subitoCategories: subitoCategoriesIt,
     clearSelection: 'Cancella selezione',
     withinKm: (km: number) => `Entro ${km} km`,
     myLocation: 'La mia posizione',
@@ -84,6 +86,8 @@ export const messages = {
     locateMe: 'Vai alla mia posizione',
     radiusLabel: 'Raggio di ricerca',
     radiusOption: (km: number) => `${km} km`,
+    postTitle: 'Imposta il luogo di ritiro',
+    confirmPickup: 'Conferma luogo di ritiro',
   },
   post: {
     title: 'Pubblica oggetto gratis',

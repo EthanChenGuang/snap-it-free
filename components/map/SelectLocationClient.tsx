@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import type { MapRef } from 'react-map-gl/maplibre';
 import {
   fitMapToRadius,
@@ -14,25 +14,12 @@ import {
   SELECT_LOCATION_RADIUS_OPTIONS,
 } from '@/lib/filter-prefs/storage';
 import { readBrowseCenter } from '@/lib/browse-center/storage';
+import { resolveCityLabel, VENICE_CENTER } from '@/lib/geo/resolve-city-label';
+import { readPostDraft, writePostDraft } from '@/lib/post-draft/storage';
 import { useMessages } from '@/lib/i18n/useMessages';
-import { cn } from '@/lib/utils';
 
-const VENICE_CENTER = { lat: 45.44, lng: 12.33 };
 const DEFAULT_ZOOM = 14;
 const GEO_OPTIONS: PositionOptions = { enableHighAccuracy: true, timeout: 10000 };
-
-function resolveCityLabel(
-  lat: number,
-  lng: number,
-  cityLabels: { venice: string; padova: string },
-): string {
-  const padovaCenter = { lat: 45.41, lng: 11.88 };
-  const padovaDist =
-    (lat - padovaCenter.lat) ** 2 + (lng - padovaCenter.lng) ** 2;
-  const veniceDist =
-    (lat - VENICE_CENTER.lat) ** 2 + (lng - VENICE_CENTER.lng) ** 2;
-  return padovaDist < veniceDist ? cityLabels.padova : cityLabels.venice;
-}
 
 function buildViewState(
   lat: number,
@@ -50,8 +37,22 @@ function resolveInitialRadiusKm(): number {
   return 10;
 }
 
+function flyToPin(
+  mapRef: MapRef | null,
+  coords: { lat: number; lng: number },
+): void {
+  mapRef?.getMap()?.flyTo({
+    center: [coords.lng, coords.lat],
+    zoom: DEFAULT_ZOOM,
+    duration: 650,
+  });
+}
+
 export function SelectLocationClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const context: 'browse' | 'post' =
+    searchParams.get('context') === 'post' ? 'post' : 'browse';
   const { messages } = useMessages();
   const mapRef = useRef<MapRef>(null);
   const gpsRequested = useRef(false);
@@ -62,10 +63,16 @@ export function SelectLocationClient() {
     buildViewState(VENICE_CENTER.lat, VENICE_CENTER.lng),
   );
   const [pinAnimating, setPinAnimating] = useState(false);
+  const radiusKmRef = useRef(radiusKm);
+  radiusKmRef.current = radiusKm;
 
   const fitToRadius = useCallback(() => {
     fitMapToRadius(mapRef.current, markerPosition, radiusKm);
   }, [markerPosition, radiusKm]);
+
+  const handleRadiusChange = useCallback((km: number) => {
+    setRadiusKm(km);
+  }, []);
 
   const triggerPinDrop = useCallback(() => {
     setPinAnimating(true);
@@ -77,16 +84,21 @@ export function SelectLocationClient() {
       setMarkerPosition(coords);
       setInitialViewState(buildViewState(coords.lat, coords.lng));
       if (fly) {
-        fitMapToRadius(mapRef.current, coords, radiusKm);
+        if (context === 'post') {
+          flyToPin(mapRef.current, coords);
+        } else {
+          fitMapToRadius(mapRef.current, coords, radiusKmRef.current);
+        }
       }
     },
-    [radiusKm],
+    [context],
   );
 
   useEffect(() => {
     setRadiusKm(resolveInitialRadiusKm());
 
-    const saved = readBrowseCenter();
+    const saved =
+      context === 'post' ? readPostDraft() : readBrowseCenter();
     if (saved) {
       applyMarkerPosition({ lat: saved.lat, lng: saved.lng });
       setReady(true);
@@ -119,7 +131,9 @@ export function SelectLocationClient() {
       },
       GEO_OPTIONS,
     );
-  }, [applyMarkerPosition]);
+    // One-time bootstrap only — must not re-run when radiusKm changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {
@@ -139,19 +153,32 @@ export function SelectLocationClient() {
           lng: position.coords.longitude,
         };
         setMarkerPosition(coords);
-        fitMapToRadius(mapRef.current, coords, radiusKm);
+        if (context === 'post') {
+          flyToPin(mapRef.current, coords);
+        } else {
+          fitMapToRadius(mapRef.current, coords, radiusKm);
+        }
         triggerPinDrop();
       },
       () => {},
       GEO_OPTIONS,
     );
-  }, [radiusKm, triggerPinDrop]);
+  }, [context, radiusKm, triggerPinDrop]);
 
   const handleConfirm = () => {
     const label = resolveCityLabel(markerPosition.lat, markerPosition.lng, {
       venice: messages.feed.cityVenice,
       padova: messages.feed.cityPadova,
     });
+    if (context === 'post') {
+      writePostDraft({
+        lat: markerPosition.lat,
+        lng: markerPosition.lng,
+        label,
+      });
+      router.push('/post');
+      return;
+    }
     applyMapFilterPrefs(
       {
         lat: markerPosition.lat,
@@ -176,7 +203,9 @@ export function SelectLocationClient() {
             <span className="material-symbols-outlined text-[24px]">arrow_back</span>
           </button>
           <h1 className="text-label-md font-semibold text-on-surface">
-            {messages.selectLocation.title}
+            {context === 'post'
+              ? messages.selectLocation.postTitle
+              : messages.selectLocation.title}
           </h1>
         </div>
       </header>
@@ -189,46 +218,27 @@ export function SelectLocationClient() {
               initialViewState={initialViewState}
               markerPosition={markerPosition}
               radiusKm={radiusKm}
+              radiusOptions={SELECT_LOCATION_RADIUS_OPTIONS}
+              radiusLabel={messages.selectLocation.radiusLabel}
+              radiusOptionLabel={messages.selectLocation.radiusOption}
+              onRadiusChange={handleRadiusChange}
               pinAnimating={pinAnimating}
               onMapClick={handleMapClick}
               onLocateMe={handleLocateMe}
               locateMeAriaLabel={messages.selectLocation.locateMe}
-              onFitBounds={fitToRadius}
+              showRadiusControls={context !== 'post'}
+              onFitBounds={context === 'post' ? undefined : fitToRadius}
               onLoad={() => {
                 mapRef.current
                   ?.getMap()
                   ?.setPadding({ top: 56, bottom: 160, left: 24, right: 24 });
-                fitMapToRadius(mapRef.current, markerPosition, radiusKm);
+                if (context === 'post') {
+                  flyToPin(mapRef.current, markerPosition);
+                } else {
+                  fitMapToRadius(mapRef.current, markerPosition, radiusKm);
+                }
               }}
             />
-
-            <div className="pointer-events-none absolute inset-x-0 top-3 z-30 flex justify-center px-gutter">
-              <div
-                className="pointer-events-auto flex gap-1 rounded-full border border-outline-variant bg-surface-container-lowest/95 p-1 shadow-[0_2px_12px_rgba(0,0,0,0.08)] backdrop-blur-sm"
-                role="group"
-                aria-label={messages.selectLocation.radiusLabel}
-              >
-                {SELECT_LOCATION_RADIUS_OPTIONS.map((km) => {
-                  const active = radiusKm === km;
-                  return (
-                    <button
-                      key={km}
-                      type="button"
-                      onClick={() => setRadiusKm(km)}
-                      className={cn(
-                        'min-h-9 touch-manipulation rounded-full px-space-md py-space-xs text-label-sm font-medium transition-colors',
-                        active
-                          ? 'bg-primary text-on-primary'
-                          : 'text-on-surface hover:bg-surface-container-low',
-                      )}
-                      aria-pressed={active}
-                    >
-                      {messages.selectLocation.radiusOption(km)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
           </>
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-surface-container-low">
@@ -256,7 +266,9 @@ export function SelectLocationClient() {
               onClick={handleConfirm}
               className="min-h-11 w-full rounded-lg bg-primary px-space-md py-space-sm text-label-sm font-semibold text-on-primary transition-opacity active:opacity-90"
             >
-              {messages.selectLocation.confirm}
+              {context === 'post'
+                ? messages.selectLocation.confirmPickup
+                : messages.selectLocation.confirm}
             </button>
           </div>
         </div>

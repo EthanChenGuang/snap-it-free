@@ -1,4 +1,5 @@
 import type { Messages } from './it';
+import { subitoCategoriesZh } from './subito-category-labels';
 
 export const messages: Messages = {
   app: {
@@ -60,6 +61,7 @@ export const messages: Messages = {
     cityPadova: '帕多瓦',
     cityFilterMapHint: '按距离搜索请使用首页的图钉按钮。',
     categoriesLabel: '分类',
+    subitoCategories: subitoCategoriesZh,
     clearSelection: '清除选择',
     withinKm: (km: number) => `${km}公里内`,
     myLocation: '我的位置',
@@ -82,6 +84,8 @@ export const messages: Messages = {
     locateMe: '定位到我的位置',
     radiusLabel: '搜索半径',
     radiusOption: (km: number) => `${km}公里`,
+    postTitle: '设置取货地点',
+    confirmPickup: '确认取货地点',
   },
   post: {
     title: '发布免费物品',
