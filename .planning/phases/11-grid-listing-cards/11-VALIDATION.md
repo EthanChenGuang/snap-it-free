@@ -42,7 +42,7 @@ created: 2026-08-10
 | 11-02-01 | 02 | 1 | CARD-01–05 | — | Tracer card polish E2E | manual | Human verify at `/` grid | — | ⬜ pending |
 | 11-03-01 | 03 | 2 | CARD-04/D-11 | — | Single heart on favorites | grep | `rg 'FavoriteButton' components/listings/FavoritesPageClient.tsx` expects 0 | ❌ W0 | ⬜ pending |
 | 11-03-02 | 03 | 2 | CARD-02/D-23 | — | Favorites distance wiring | manual | Human verify `/favorites` with center active | — | ⬜ pending |
-| 11-04-01 | 04 | 3 | I18N-01 | — | Key parity zh/en/it | unit | `npm run test:lib -- messages/key-parity.test.ts -x` | ✅ | ⬜ pending |
+| 11-04-01 | 04 | 3 | I18N-01 | — | Key parity zh/en/it | unit | `npx vitest run messages/key-parity.test.ts` | ✅ | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
