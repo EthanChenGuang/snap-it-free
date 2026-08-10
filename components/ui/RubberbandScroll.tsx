@@ -24,6 +24,10 @@ function prefersNativeOverscroll(): boolean {
   );
 }
 
+function clampOffset(value: number): number {
+  return Math.max(-MAX_STRETCH_PX, Math.min(MAX_STRETCH_PX, value));
+}
+
 type RubberbandScrollProps = ComponentPropsWithoutRef<'div'> & {
   children: ReactNode;
 };
@@ -33,9 +37,12 @@ export const RubberbandScroll = forwardRef<HTMLDivElement, RubberbandScrollProps
     const scrollRef = useRef<HTMLDivElement>(null);
     const offsetY = useMotionValue(0);
     const animationRef = useRef<ReturnType<typeof animate> | null>(null);
-    const isStretchingRef = useRef(false);
-    const isAnimatingRef = useRef(false);
     const startYRef = useRef(0);
+    const stretchBaseRef = useRef(0);
+    const isDraggingRef = useRef(false);
+    const isAtTopRef = useRef(false);
+    const isAtBottomRef = useRef(false);
+    const isAnimatingRef = useRef(false);
     const [springEnabled, setSpringEnabled] = useState(false);
 
     useImperativeHandle(ref, () => scrollRef.current as HTMLDivElement);
@@ -48,21 +55,43 @@ export const RubberbandScroll = forwardRef<HTMLDivElement, RubberbandScrollProps
       const el = scrollRef.current;
       if (!el || !springEnabled) return;
 
+      const readBoundaries = () => {
+        const { scrollTop, scrollHeight, clientHeight } = el;
+        const atTop = scrollTop === 0;
+        const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
+        isAtTopRef.current = atTop;
+        isAtBottomRef.current = atBottom;
+        return { atTop, atBottom };
+      };
+
+      const resetGestureState = () => {
+        isDraggingRef.current = false;
+        isAtTopRef.current = false;
+        isAtBottomRef.current = false;
+      };
+
       const stopAnimation = () => {
         animationRef.current?.stop();
         animationRef.current = null;
+        offsetY.stop();
         isAnimatingRef.current = false;
       };
 
       const resetToNeutral = () => {
         stopAnimation();
         offsetY.set(0);
-        isStretchingRef.current = false;
+        resetGestureState();
       };
 
       const springBack = () => {
+        const current = offsetY.get();
+        if (Math.abs(current) < 0.5) {
+          resetToNeutral();
+          return;
+        }
+
         stopAnimation();
-        isStretchingRef.current = false;
+        resetGestureState();
         isAnimatingRef.current = true;
 
         animationRef.current = animate(offsetY, 0, {
@@ -71,6 +100,7 @@ export const RubberbandScroll = forwardRef<HTMLDivElement, RubberbandScrollProps
             offsetY.set(0);
             isAnimatingRef.current = false;
             animationRef.current = null;
+            resetGestureState();
           },
         });
       };
@@ -79,8 +109,12 @@ export const RubberbandScroll = forwardRef<HTMLDivElement, RubberbandScrollProps
         if (event.touches.length !== 1) return;
 
         stopAnimation();
-        isStretchingRef.current = false;
-        startYRef.current = event.touches[0].clientY;
+
+        const clientY = event.touches[0].clientY;
+        startYRef.current = clientY;
+        stretchBaseRef.current = offsetY.get();
+        isDraggingRef.current = false;
+        readBoundaries();
       };
 
       const onTouchMove = (event: TouchEvent) => {
@@ -90,39 +124,42 @@ export const RubberbandScroll = forwardRef<HTMLDivElement, RubberbandScrollProps
           stopAnimation();
         }
 
-        const { scrollTop, scrollHeight, clientHeight } = el;
-        const atTop = scrollTop <= 0;
-        const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
+        const { atTop, atBottom } = readBoundaries();
         const clientY = event.touches[0].clientY;
         const deltaY = clientY - startYRef.current;
 
-        const pullTop = atTop && deltaY > 0;
-        const pullBottom = atBottom && deltaY < 0;
+        const pullTop =
+          atTop && (deltaY > 0 || offsetY.get() > 0 || stretchBaseRef.current > 0);
+        const pullBottom =
+          atBottom && (deltaY < 0 || offsetY.get() < 0 || stretchBaseRef.current < 0);
 
         if (pullTop || pullBottom) {
-          if (!isStretchingRef.current) {
+          if (!isDraggingRef.current) {
+            stretchBaseRef.current = offsetY.get();
             startYRef.current = clientY;
-            isStretchingRef.current = true;
+            isDraggingRef.current = true;
           }
 
-          const raw = (clientY - startYRef.current) * PULL_RESISTANCE;
-          const clamped = Math.max(-MAX_STRETCH_PX, Math.min(MAX_STRETCH_PX, raw));
+          const raw = stretchBaseRef.current + (clientY - startYRef.current) * PULL_RESISTANCE;
+          const clamped = clampOffset(raw);
           offsetY.set(clamped);
 
-          if (Math.abs(clamped) > 2) {
+          if (clamped !== 0) {
             event.preventDefault();
           }
           return;
         }
 
-        if (isStretchingRef.current) {
+        if (isDraggingRef.current) {
           offsetY.set(0);
-          isStretchingRef.current = false;
+          isDraggingRef.current = false;
+          stretchBaseRef.current = 0;
         }
       };
 
       const onTouchEnd = () => {
-        if (isStretchingRef.current || offsetY.get() !== 0) {
+        if (isDraggingRef.current || Math.abs(offsetY.get()) >= 0.5) {
+          isDraggingRef.current = false;
           springBack();
           return;
         }
@@ -139,8 +176,7 @@ export const RubberbandScroll = forwardRef<HTMLDivElement, RubberbandScrollProps
         el.removeEventListener('touchmove', onTouchMove);
         el.removeEventListener('touchend', onTouchEnd);
         el.removeEventListener('touchcancel', onTouchEnd);
-        stopAnimation();
-        offsetY.set(0);
+        resetToNeutral();
       };
     }, [offsetY, springEnabled]);
 

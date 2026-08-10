@@ -130,6 +130,7 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 
 | Date | Slug | Summary |
 |------|------|---------|
+| 2026-08-10 | interruptible-rubberband-spring | Interruptible spring overscroll with stretch-base tracking and full gesture reset |
 | 2026-08-10 | rubberband-scroll-lock-fix | Fix repeat pull lock by stopping Motion animations and resetting gesture state |
 | 2026-08-10 | ios-rubberband-scroll | iOS rubberband overscroll on feed + favorites via RubberbandScroll + Motion spring fallback |
 | 2026-08-10 | feed-ui-polish | Feed header icons, short search placeholder, floating nav capsule w/ scroll-hide |
