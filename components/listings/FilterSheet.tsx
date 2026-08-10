@@ -113,7 +113,7 @@ export function FilterSheet() {
             />
           </section>
 
-          <section className="px-gutter py-space-md">
+          <section className="px-gutter py-space-md pb-space-md">
             <div className="mb-space-sm flex items-center justify-between gap-space-sm">
               <h3 className="text-label-md font-medium text-on-surface-variant">
                 {messages.feed.categoriesLabel}
@@ -128,30 +128,28 @@ export function FilterSheet() {
                 </button>
               )}
             </div>
-            <ul className="flex flex-col gap-space-xs">
+            <div className="grid grid-cols-3 gap-2.5">
               {SUBITO_CATEGORY_SLUGS.map((slug) => {
                 const checked = draft.categories.includes(slug);
                 const label = getSubitoCategoryLabel(slug, language, { messages }) ?? slug;
                 return (
-                  <li key={slug}>
-                    <label
-                      className={cn(
-                        'flex cursor-pointer items-center gap-space-sm rounded border border-outline-variant px-space-sm py-space-sm',
-                        checked && 'border-primary bg-surface-container-lowest',
-                      )}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleCategory(slug)}
-                        className="h-4 w-4 accent-primary"
-                      />
-                      <span className="text-body-md text-on-surface">{label}</span>
-                    </label>
-                  </li>
+                  <button
+                    key={slug}
+                    type="button"
+                    aria-pressed={checked}
+                    onClick={() => toggleCategory(slug)}
+                    className={cn(
+                      'flex min-h-11 items-center justify-center break-words rounded-xl border px-3 py-2.5 text-center text-xs font-medium leading-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline',
+                      checked
+                        ? 'border-primary bg-primary text-on-primary shadow-sm'
+                        : 'border-outline-variant/60 bg-surface-container-low text-on-surface-variant hover:bg-surface-container',
+                    )}
+                  >
+                    {label}
+                  </button>
                 );
               })}
-            </ul>
+            </div>
           </section>
         </div>
 
