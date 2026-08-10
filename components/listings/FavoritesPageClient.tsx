@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
-import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { ListListingCard } from '@/components/listings/ListListingCard';
 import {
   FAVORITES_CHANGE_EVENT,
@@ -162,16 +161,7 @@ export function FavoritesPageClient() {
           {syncBanner}
           <section className="grid grid-cols-2 gap-space-md">
             {listings.map((listing) => (
-              <div key={listing.id} className="relative">
-                <div className="absolute right-space-sm top-space-sm z-10">
-                  <FavoriteButton
-                    listingId={listing.id}
-                    size="sm"
-                    className="rounded-full bg-surface/90 backdrop-blur-sm"
-                  />
-                </div>
-                <ListListingCard listing={listing} />
-              </div>
+              <ListListingCard key={listing.id} listing={listing} />
             ))}
           </section>
         </div>
