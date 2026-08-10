@@ -10,25 +10,9 @@ import { createClient } from '@/lib/supabase/client';
 import { nearestVeniceZone } from '@/lib/geo/nearest-zone';
 import { ZONE_CENTERS } from '@/lib/geo/zone-centers';
 import { useMessages } from '@/lib/i18n/useMessages';
-
-type PostCategory =
-  | 'furniture'
-  | 'tech'
-  | 'books'
-  | 'apparel'
-  | 'kitchenware'
-  | 'others';
+import { POST_CATEGORIES, type PostCategory } from '@/lib/listings/canonical-categories';
 
 type ItemCondition = 'new' | 'good' | 'fair';
-
-const POST_CATEGORIES: PostCategory[] = [
-  'furniture',
-  'tech',
-  'books',
-  'apparel',
-  'kitchenware',
-  'others',
-];
 
 const CONDITIONS: ItemCondition[] = ['new', 'good', 'fair'];
 
@@ -190,6 +174,7 @@ export function PostForm() {
           photoUrl,
           lat,
           lng,
+          postCategory: category,
           description: buildDescription(description, category, condition, messages),
         }),
       });
