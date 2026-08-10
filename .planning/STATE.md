@@ -14,8 +14,8 @@ progress:
   total_plans: 10
   completed_plans: 10
   percent: 29
-last_activity: 2026-08-09
-last_activity_desc: v2.0 milestone requirements + roadmap created
+last_activity: 2026-08-10
+last_activity_desc: Completed quick task 260810-nfg: Feed header pills & badge indicators
 ---
 
 # Project State
@@ -121,3 +121,5 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 |------|------|---------|
 | 2026-08-10 | feed-ui-polish | Feed header icons, short search placeholder, floating nav capsule w/ scroll-hide |
 | 2026-08-10 | waterfall-feed-polish | Full-bleed scroll under glass nav, icon/card aesthetic polish |
+| 2026-08-10 | select-location-radius-pin-radar | Radius pill clicks, pin overlay, minimalist radar/circle styling |
+| 2026-08-10 | refine-feed-list-page-header-filtering-p | Remove city/radius pills; split filter vs map badge indicators |
