@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
-current_phase: 12
-current_phase_name: canonical-category-mapping
-current_plan: 4
-status: verifying
-stopped_at: Completed 12-04-PLAN.md
-last_updated: "2026-08-10T18:42:10.006Z"
+current_phase: 13
+current_phase_name: Select Location Flow
+current_plan: Not started
+status: planning
+stopped_at: Phase 13 context gathered
+last_updated: "2026-08-10T18:56:44.403Z"
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 4
-  total_plans: 18
+  total_plans: 20
   completed_plans: 18
-  percent: 57
+  percent: 50
 last_activity: 2026-08-10
 last_activity_desc: "Completed quick task 260810-nfg: Feed header pills & badge indicators"
 ---
@@ -31,10 +31,10 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 ## Current Position
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
-Phase: 12 (canonical-category-mapping) — EXECUTING
-**Current Plan:** 4
+Phase: 13 — Select Location Flow
+**Current Plan:** Not started
 **Total Plans in Phase:** 4
-Status: Phase complete — ready for verification
+Status: Ready to plan
 
 Progress: [██████████] 100% v2.0 (0/7 phases)
 
@@ -97,9 +97,9 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T18:42:09.996Z
-**Stopped at:** Completed 12-04-PLAN.md
-**Resume file:** None
+**Last session:** 2026-08-10T18:56:44.386Z
+**Stopped at:** Phase 13 context gathered
+**Resume file:** .planning/phases/13-select-location-flow/13-CONTEXT.md
 
 ## Decisions
 
@@ -148,3 +148,9 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | 2026-08-10 | waterfall-feed-polish | Full-bleed scroll under glass nav, icon/card aesthetic polish |
 | 2026-08-10 | select-location-radius-pin-radar | Radius pill clicks, pin overlay, minimalist radar/circle styling |
 | 2026-08-10 | refine-feed-list-page-header-filtering-p | Remove city/radius pills; split filter vs map badge indicators |
+
+## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 12.1 inserted after Phase 12: add i18n support for the category names for it/zh/en (URGENT)
