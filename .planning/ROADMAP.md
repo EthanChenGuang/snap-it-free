@@ -209,12 +209,12 @@ Plans:
 
 **Requirements:** LOC-01–03, I18N-01 (partial)
 
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 **Wave 0**
 
-- [ ] 13-01-PLAN.md — Lib foundation: resolveCityLabel promotion + shoumanwu_post_draft storage (TDD)
+- [x] 13-01-PLAN.md — Lib foundation: resolveCityLabel promotion + shoumanwu_post_draft storage (TDD)
 
 **Wave 1** *(blocked on Wave 0)*
 
@@ -284,7 +284,7 @@ Plans:
 | 10. Filter Sheet & Distance | v2.0 | 0/5 | In Progress|  |
 | 11. Grid Listing Cards | v2.0 | 0/4 | Complete    | 2026-08-10 |
 | 12. Canonical Category Mapping | v2.0 | 4/4 | Complete    | 2026-08-10 |
-| 13. Select Location | v2.0 | 0/4 | Planned | — |
+| 13. Select Location | v2.0 | 0/4 | In Progress|  |
 | 14. Settings Parity | v2.0 | 0/? | Planned | — |
 | 7. Production Deploy | v2.0 | 0/4 | Planned | — |
 

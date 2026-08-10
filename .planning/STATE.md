@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 13
-current_phase_name: Select Location Flow
-current_plan: Not started
+current_phase_name: select-location-flow
+current_plan: 2
 status: executing
-stopped_at: Phase 13 UI-SPEC approved
-last_updated: "2026-08-10T21:07:07.657Z"
+stopped_at: Completed 13-01-PLAN.md
+last_updated: "2026-08-10T21:10:25.032Z"
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 24
-  completed_plans: 20
+  completed_plans: 21
   percent: 63
 last_activity: 2026-08-10
 last_activity_desc: "Phase 12.1 verified complete: self-run UAT (5/5), security review (0 threats open), goal-backward verification (11/11, 1 gap found+fixed — stale FilterSheet UAT selector)"
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
 
-**Current focus:** Phase 12 — canonical-category-mapping
+**Current focus:** Phase 13 — select-location-flow
 
 ## Current Position
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
-Phase: 13 — Select Location Flow
-**Current Plan:** Not started
+Phase: 13 (select-location-flow) — EXECUTING
+**Current Plan:** 2
 **Total Plans in Phase:** 4
 Status: Ready to execute
 
-Progress: [██████████] 100% v2.0 (0/7 phases)
+Progress: [█████████░] 88% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -78,6 +78,7 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | Phase 12-canonical-category-mapping P02 | 8min | 3 tasks | 5 files |
 | Phase 12-canonical-category-mapping P03 | 5min | 3 tasks | 5 files |
 | Phase 12-canonical-category-mapping P04 | 3 min | 3 tasks | 2 files |
+| Phase 13-select-location-flow P01 | 2min | 2 tasks | 4 files |
 
 ## Deferred Items (from v1.0)
 
@@ -97,9 +98,9 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T20:05:03.680Z
-**Stopped at:** Phase 13 UI-SPEC approved
-**Resume file:** /home/guang/Projects/Experiments/snap-it-free/.planning/phases/13-select-location-flow/13-UI-SPEC.md
+**Last session:** 2026-08-10T21:10:25.022Z
+**Stopped at:** Completed 13-01-PLAN.md
+**Resume file:** None
 
 ## Decisions
 
@@ -136,6 +137,9 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 - [Phase ?]: POST_CATEGORIES derived from POST_CATEGORY_TO_SLUG for zod enum and PostForm picker
 - [Phase ?]: UGC create accepts postCategory enum only; server maps slug at insert (V5)
 - [Phase ?]: Phase 12 Nyquist sign-off uses phase-scoped vitest; pre-existing admin test/build debt documented not blocking CAT gates
+- [Phase ?]: Partial post draft with valid lat/lng but missing locationConfirmed returns locationConfirmed false not null — preloads pin, blocks submit
+- [Phase ?]: writePostDraft always persists locationConfirmed true regardless of caller input (D-36)
+- [Phase ?]: Wave 0 lib-only TDD foundation — Plan 02 imports resolveCityLabel and post-draft storage
 
 ## Quick Tasks Completed
 

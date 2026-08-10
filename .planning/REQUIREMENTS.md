@@ -45,8 +45,8 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Select Location
 
-- [ ] **LOC-01**: Full-screen Select Location flow: MapLibre map, fixed center pin, locate-me FAB, address/label preview, Confirm action
-- [ ] **LOC-02**: Confirmed location can set filter center point and/or UGC post coordinates (reuse existing pin components)
+- [x] **LOC-01**: Full-screen Select Location flow: MapLibre map, fixed center pin, locate-me FAB, address/label preview, Confirm action
+- [x] **LOC-02**: Confirmed location can set filter center point and/or UGC post coordinates (reuse existing pin components)
 - [ ] **LOC-03**: Location button on home opens map view or select-location flow per context (browse center vs. post)
 
 ### Settings (Consumer)
@@ -135,8 +135,8 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | FAV-01 | v3+ | Deferred |
 | FAV-02 | v3+ | Deferred |
 | FAV-03 | v3+ | Deferred |
-| LOC-01 | Phase 13 | Pending |
-| LOC-02 | Phase 13 | Pending |
+| LOC-01 | Phase 13 | Complete |
+| LOC-02 | Phase 13 | Complete |
 | LOC-03 | Phase 13 | Pending |
 | SET-01 | Phase 14 | Pending |
 | SET-02 | Phase 14 | Pending |
