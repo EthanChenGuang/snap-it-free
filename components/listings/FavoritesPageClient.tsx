@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
 import { ListListingCard } from '@/components/listings/ListListingCard';
+import { useDistanceCenter } from '@/hooks/useDistanceCenter';
 import {
   FAVORITES_CHANGE_EVENT,
   pruneMissingFavoriteIds,
@@ -12,6 +13,7 @@ import {
 } from '@/lib/favorites/storage';
 import { fetchListingsByIdsClient } from '@/lib/listings/client-queries';
 import type { ListingRow } from '@/lib/listings/types';
+import { haversineKm } from '@/lib/geo/haversine';
 import { createClient } from '@/lib/supabase/client';
 import { useMessages } from '@/lib/i18n/useMessages';
 
@@ -28,6 +30,7 @@ async function fetchFavoriteIds(isAuthed: boolean): Promise<string[]> {
 
 export function FavoritesPageClient() {
   const { messages } = useMessages();
+  const { center } = useDistanceCenter(false);
 
   const [listings, setListings] = useState<ListingRow[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -160,9 +163,19 @@ export function FavoritesPageClient() {
         <div className="no-scrollbar flex-1 overflow-y-auto px-gutter pb-space-xl pt-space-md">
           {syncBanner}
           <section className="grid grid-cols-2 gap-space-md">
-            {listings.map((listing) => (
-              <ListListingCard key={listing.id} listing={listing} />
-            ))}
+            {listings.map((listing) => {
+              const distanceMeters =
+                listing.lat != null && listing.lng != null && center
+                  ? haversineKm(center, { lat: listing.lat, lng: listing.lng }) * 1000
+                  : null;
+              return (
+                <ListListingCard
+                  key={listing.id}
+                  listing={listing}
+                  distanceMeters={distanceMeters}
+                />
+              );
+            })}
           </section>
         </div>
       </main>
