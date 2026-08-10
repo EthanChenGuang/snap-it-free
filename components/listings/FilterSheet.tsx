@@ -8,8 +8,10 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
+import { SettingsToggle } from '@/components/settings/SettingsUi';
 import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import type { FilterPrefs } from '@/lib/filter-prefs/storage';
+import { DEFAULT_FILTER_PREFS } from '@/lib/filter-prefs/storage';
 import { useMessages } from '@/lib/i18n/useMessages';
 import {
   getSubitoCategoryLabel,
@@ -88,6 +90,13 @@ export function FilterSheet() {
     setDraft({ categories: next });
   };
 
+  const handleRadiusToggle = (enabled: boolean) => {
+    setDraft({
+      radiusEnabled: enabled,
+      radiusKm: enabled ? draft.radiusKm || DEFAULT_FILTER_PREFS.radiusKm : draft.radiusKm,
+    });
+  };
+
   return (
     <Drawer open={sheetOpen} onOpenChange={handleOpenChange}>
       <DrawerContent className="max-h-[85vh] pb-space-xl">
@@ -100,9 +109,36 @@ export function FilterSheet() {
             <h3 className="mb-space-sm text-label-md font-medium text-on-surface-variant">
               {messages.feed.radiusLabel}
             </h3>
-            <p className="text-label-sm text-on-surface-variant">
-              {messages.feed.radiusComingSoon}
-            </p>
+            <div className="flex items-center justify-between gap-space-md">
+              <span className="text-body-md text-on-surface">{messages.feed.radiusLabel}</span>
+              <SettingsToggle
+                checked={draft.radiusEnabled}
+                onChange={handleRadiusToggle}
+                ariaLabel={messages.feed.radiusEnable}
+              />
+            </div>
+            {draft.radiusEnabled && (
+              <div className="mt-space-md flex flex-col gap-space-sm">
+                <input
+                  type="range"
+                  min={1}
+                  max={50}
+                  step={1}
+                  value={draft.radiusKm}
+                  onChange={(event) =>
+                    setDraft({ radiusKm: Number.parseInt(event.target.value, 10) })
+                  }
+                  className="w-full accent-primary"
+                  aria-valuemin={1}
+                  aria-valuemax={50}
+                  aria-valuenow={draft.radiusKm}
+                  aria-label={messages.feed.radiusLabel}
+                />
+                <span className="text-label-sm text-on-surface-variant">
+                  {messages.feed.withinKm(draft.radiusKm)}
+                </span>
+              </div>
+            )}
           </section>
 
           <section className="border-b border-outline-variant px-gutter py-space-md">
@@ -116,9 +152,20 @@ export function FilterSheet() {
           </section>
 
           <section className="px-gutter py-space-md">
-            <h3 className="mb-space-sm text-label-md font-medium text-on-surface-variant">
-              {messages.feed.categoriesLabel}
-            </h3>
+            <div className="mb-space-sm flex items-center justify-between gap-space-sm">
+              <h3 className="text-label-md font-medium text-on-surface-variant">
+                {messages.feed.categoriesLabel}
+              </h3>
+              {draft.categories.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setDraft({ categories: [] })}
+                  className="text-label-sm text-on-surface-variant underline-offset-2 hover:underline"
+                >
+                  {messages.feed.clearSelection}
+                </button>
+              )}
+            </div>
             <ul className="flex flex-col gap-space-xs">
               {SUBITO_CATEGORY_SLUGS.map((slug) => {
                 const checked = draft.categories.includes(slug);

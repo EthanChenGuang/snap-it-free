@@ -28,6 +28,8 @@ type FeedFilterContextValue = {
   resetFilters: () => void;
   hasActiveFilters: boolean;
   dismissCity: () => void;
+  dismissCategory: (slug: string) => void;
+  dismissRadius: () => void;
 };
 
 const FeedFilterContext = createContext<FeedFilterContextValue | null>(null);
@@ -73,6 +75,18 @@ export function FeedFilterProvider({ children }: { children: ReactNode }) {
     writeFilterPrefs({ ...applied, city: 'all' });
   }, [applied]);
 
+  const dismissCategory = useCallback(
+    (slug: string) => {
+      const next = applied.categories.filter((item) => item !== slug);
+      writeFilterPrefs({ ...applied, categories: next });
+    },
+    [applied],
+  );
+
+  const dismissRadius = useCallback(() => {
+    writeFilterPrefs({ ...applied, radiusEnabled: false });
+  }, [applied]);
+
   const setSheetOpen = useCallback(
     (open: boolean) => {
       if (open) {
@@ -102,6 +116,8 @@ export function FeedFilterProvider({ children }: { children: ReactNode }) {
       resetFilters,
       hasActiveFilters,
       dismissCity,
+      dismissCategory,
+      dismissRadius,
     }),
     [
       applied,
@@ -114,6 +130,8 @@ export function FeedFilterProvider({ children }: { children: ReactNode }) {
       resetFilters,
       hasActiveFilters,
       dismissCity,
+      dismissCategory,
+      dismissRadius,
     ],
   );
 
