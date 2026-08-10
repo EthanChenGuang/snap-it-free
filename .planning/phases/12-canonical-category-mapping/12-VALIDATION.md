@@ -41,9 +41,9 @@ created: 2026-08-10
 | 12-01-01 | 01 | 0 | CAT-01, CAT-03 | unit | `npm run test:lib -- lib/listings/canonical-categories.test.ts lib/listings/subito-categories.test.ts -x` | ✅ | ✅ green |
 | 12-01-02 | 01 | 0 | D-19–D-24 | grep | ROADMAP/REQUIREMENTS/PROJECT doc gates | ✅ | ✅ green |
 | 12-01-03 | 01 | 0 | Nyquist | file | `test -f .planning/phases/12-canonical-category-mapping/12-VALIDATION.md` | ✅ | ✅ green |
-| 12-02-01 | 02 | 1 | CAT-01 | unit | `npm run test:lib -- lib/listings/subito-categories.test.ts -x` | ⬜ | ⬜ pending |
-| 12-02-02 | 02 | 1 | CAT-01 | unit | `npm run test:lib -- lib/i18n/listing-fields.test.ts -x` | ⬜ | ⬜ pending |
-| 12-02-03 | 02 | 1 | CAT-01 | unit | `npm run test:lib -- hooks/useDistanceCenter.test.ts -x` | ⬜ | ⬜ pending |
+| 12-02-01 | 02 | 1 | CAT-01 | unit | `npm run test:lib -- lib/listings/subito-categories.test.ts -x` | ✅ | ✅ green |
+| 12-02-02 | 02 | 1 | CAT-01 | unit | `npm run test:lib -- lib/i18n/listing-fields.test.ts -x` | ✅ | ✅ green |
+| 12-02-03 | 02 | 1 | CAT-01 | unit | `npm run test:lib -- hooks/useDistanceCenter.test.ts -x` | ✅ | ✅ green |
 | 12-03-01 | 03 | 2 | CAT-02 | unit | `npm run test:lib -- lib/ugc/schemas.test.ts -x` | ✅ | ⬜ pending |
 | 12-03-02 | 03 | 2 | CAT-02 | grep | `grep mapPostCategoryToSlug app/api/ugc/listings/route.ts` | ⬜ | ⬜ pending |
 | 12-03-03 | 03 | 2 | D-12 | grep | `grep postCategory components/ugc/PostForm.tsx` | ⬜ | ⬜ pending |

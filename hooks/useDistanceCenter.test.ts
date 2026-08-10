@@ -193,6 +193,47 @@ describe('composeFeedListings pipeline', () => {
     expect(listings[0]?.id).toBe(newer.id);
   });
 
+  it('includes uncategorized listing when categories filter empty (D-44)', () => {
+    const uncategorized: ListingRow = {
+      ...baseListing,
+      id: 'cccccccc-cccc-cccc-cccc-cccccccccccc',
+      category: null,
+      title: 'Oggetto generico',
+    };
+    const applied = { ...DEFAULT_FILTER_PREFS, categories: [] as string[] };
+    const { listings } = composeFeedListings({
+      listings: [uncategorized],
+      applied,
+      center: null,
+      searchQuery: '',
+      language: 'en',
+      cityLabels,
+    });
+    expect(listings).toHaveLength(1);
+  });
+
+  it('excludes uncategorized listing when categories filter active (D-44)', () => {
+    const uncategorized: ListingRow = {
+      ...baseListing,
+      id: 'dddddddd-dddd-dddd-dddd-dddddddddddd',
+      category: null,
+      title: 'Oggetto generico',
+    };
+    const applied = {
+      ...DEFAULT_FILTER_PREFS,
+      categories: ['informatica'],
+    };
+    const { listings } = composeFeedListings({
+      listings: [uncategorized],
+      applied,
+      center: null,
+      searchQuery: '',
+      language: 'en',
+      cityLabels,
+    });
+    expect(listings).toHaveLength(0);
+  });
+
   it('matchesAnySubitoCategories OR filters correctly', () => {
     const furniture: ListingRow = {
       ...baseListing,
