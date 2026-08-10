@@ -41,3 +41,13 @@ export function pruneFavoriteIds(validIds: string[]): string[] {
   const next = readFavoriteIds().filter((id) => valid.has(id));
   return writeFavoriteIds(next);
 }
+
+/** Only drop requested IDs absent from the fetch response — never wipe on empty/error fetch (G-02-8). */
+export function pruneMissingFavoriteIds(requestedIds: string[], returnedIds: string[]): string[] {
+  if (requestedIds.length === 0) return readFavoriteIds();
+  const returned = new Set(returnedIds);
+  const missing = new Set(requestedIds.filter((id) => !returned.has(id)));
+  if (missing.size === 0) return readFavoriteIds();
+  const next = readFavoriteIds().filter((id) => !missing.has(id));
+  return writeFavoriteIds(next);
+}

@@ -34,6 +34,9 @@ const DrawerContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
     /** When true (map sheet with modal={false}), don't block taps on header/map above the sheet. */
     nonModal?: boolean;
+    handleAriaLabel?: string;
+    onHandleClick?: () => void;
+    handleHintActive?: boolean;
   }
 >(({ className, children, nonModal, ...props }, ref) => {
   useUnlockBodyPointerEvents(Boolean(nonModal));

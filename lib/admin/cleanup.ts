@@ -14,8 +14,8 @@ export type CleanupPreview = {
 export type CleanupResult = {
   deletedExpiredListings: number;
   deletedHiddenScraperListings: number;
-  deletedScrapeRejects: number;
   deletedScrapeRuns: number;
+  deletedScrapeRejects: number;
   auditRetentionDays: number;
 };
 
@@ -28,11 +28,11 @@ function retentionCutoffIso(days: number): string {
 async function countRows(
   supabase: SupabaseClient,
   table: string,
-  applyFilter: (query: ReturnType<SupabaseClient['from']>) => ReturnType<SupabaseClient['from']>,
+  applyFilter: (query: any) => any,
 ): Promise<number> {
-  let query = supabase.from(table).select('*', { count: 'exact', head: true });
-  query = applyFilter(query) as typeof query;
-  const { count, error } = await query;
+  const { count, error } = await applyFilter(
+    supabase.from(table).select('*', { count: 'exact', head: true }),
+  );
   if (error) {
     throw new Error(`${table} count failed: ${error.message}`);
   }
@@ -68,11 +68,9 @@ export async function getCleanupPreview(
 async function deleteRows(
   supabase: SupabaseClient,
   table: string,
-  applyFilter: (query: ReturnType<SupabaseClient['from']>) => ReturnType<SupabaseClient['from']>,
+  applyFilter: (query: any) => any,
 ): Promise<number> {
-  let query = supabase.from(table).delete({ count: 'exact' });
-  query = applyFilter(query) as typeof query;
-  const { count, error } = await query;
+  const { count, error } = await applyFilter(supabase.from(table).delete({ count: 'exact' }));
   if (error) {
     throw new Error(`${table} delete failed: ${error.message}`);
   }

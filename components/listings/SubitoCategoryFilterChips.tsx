@@ -26,7 +26,7 @@ export function SubitoCategoryFilterChips({
   className,
   variant = 'inline',
 }: SubitoCategoryFilterChipsProps) {
-  const { language } = useMessages();
+  const { language, messages } = useMessages();
 
   const chipRow = (
     <div
@@ -51,7 +51,7 @@ export function SubitoCategoryFilterChips({
             )}
             onClick={() => onCategoryChange(slug)}
           >
-            {getSubitoCategoryLabel(slug, language)}
+            {getSubitoCategoryLabel(slug, language, { messages }) ?? slug}
           </Button>
         );
       })}
