@@ -162,7 +162,7 @@ export function FavoritesPageClient() {
       <main className="flex h-full flex-col overflow-hidden">
         <div className="no-scrollbar flex-1 overflow-y-auto px-gutter pb-space-xl pt-space-md">
           {syncBanner}
-          <section className="grid grid-cols-2 gap-space-md">
+          <section className="grid grid-cols-2 gap-3">
             {listings.map((listing) => {
               const distanceMeters =
                 listing.lat != null && listing.lng != null && center
