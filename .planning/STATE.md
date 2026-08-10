@@ -4,7 +4,7 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 14
 current_phase_name: settings-consumer-parity
-current_plan: 6
+current_plan: 7
 status: ready_to_execute
 stopped_at: Completed 14-05-PLAN.md
 last_updated: "2026-08-10T22:52:00.000Z"
@@ -32,9 +32,9 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 14 (settings-consumer-parity) — READY TO EXECUTE
-**Current Plan:** 6
+**Current Plan:** 7
 **Total Plans in Phase:** 7
-Status: Plan 14-05 complete — ready to execute Plan 14-06
+Status: Plan 14-05 complete — ready to execute Plan 14-07
 
 Progress: [██████████] 97% v2.0 (0/7 phases)
 
