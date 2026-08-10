@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { excludeReportedIds, filterByZone, filterMapListings } from './filters';
+import {
+  excludeReportedIds,
+  filterByRadiusKm,
+  filterByZone,
+  filterMapListings,
+  hasValidCoords,
+  listingConsumerCity,
+  matchesConsumerCity,
+  sortByDistance,
+  sortByPostedAtDesc,
+} from './filters';
 import type { ListingRow } from './types';
 
 const baseListing: ListingRow = {
@@ -99,5 +109,139 @@ describe('filterMapListings', () => {
     ];
 
     expect(filterMapListings(listings)).toEqual([baseListing]);
+  });
+});
+
+describe('listingConsumerCity', () => {
+  it('maps Venice zones to venice (D-02, D-34)', () => {
+    expect(listingConsumerCity({ ...baseListing, zone: 'centro_storico' })).toBe('venice');
+    expect(listingConsumerCity({ ...baseListing, zone: 'mestre_marghera' })).toBe('venice');
+    expect(listingConsumerCity({ ...baseListing, zone: 'lido_murano' })).toBe('venice');
+  });
+
+  it('maps padova city to padova', () => {
+    expect(
+      listingConsumerCity({
+        ...baseListing,
+        zone: null,
+        city: 'padova',
+        lat: 45.41,
+        lng: 11.88,
+      }),
+    ).toBe('padova');
+  });
+
+  it('returns null for zone-null non-Padova rows', () => {
+    expect(
+      listingConsumerCity({
+        ...baseListing,
+        zone: null,
+        city: null,
+        lat: 45.44,
+        lng: 12.33,
+      }),
+    ).toBeNull();
+  });
+});
+
+describe('matchesConsumerCity', () => {
+  const padovaListing: ListingRow = {
+    ...baseListing,
+    id: '33333333-3333-3333-3333-333333333333',
+    zone: null,
+    city: 'padova',
+    lat: 45.41,
+    lng: 11.88,
+  };
+
+  it('passes all listings when city is all', () => {
+    expect(matchesConsumerCity(baseListing, 'all')).toBe(true);
+    expect(matchesConsumerCity(padovaListing, 'all')).toBe(true);
+  });
+
+  it('excludes padova rows when venice selected (D-35)', () => {
+    expect(matchesConsumerCity(baseListing, 'venice')).toBe(true);
+    expect(matchesConsumerCity(padovaListing, 'venice')).toBe(false);
+  });
+
+  it('excludes venice zone rows when padova selected', () => {
+    expect(matchesConsumerCity(baseListing, 'padova')).toBe(false);
+    expect(matchesConsumerCity(padovaListing, 'padova')).toBe(true);
+  });
+});
+
+describe('hasValidCoords', () => {
+  it('requires both lat and lng (D-27)', () => {
+    expect(hasValidCoords(baseListing)).toBe(true);
+    expect(hasValidCoords({ ...baseListing, lat: null })).toBe(false);
+    expect(hasValidCoords({ ...baseListing, lng: null })).toBe(false);
+  });
+});
+
+describe('filterByRadiusKm', () => {
+  const center = { lat: 45.4371, lng: 12.3326 };
+  const nearListing: ListingRow = {
+    ...baseListing,
+    id: '22222222-2222-2222-2222-222222222222',
+    lat: 45.482,
+    lng: 12.3326,
+  };
+  const farListing: ListingRow = {
+    ...baseListing,
+    id: '33333333-3333-3333-3333-333333333333',
+    lat: 45.572,
+    lng: 12.3326,
+  };
+  const noCoordListing: ListingRow = {
+    ...baseListing,
+    id: '44444444-4444-4444-4444-444444444444',
+    lat: null,
+    lng: null,
+  };
+
+  it('includes listings within radius and excludes beyond (D-21, D-23)', () => {
+    const listings = [nearListing, farListing];
+    const result = filterByRadiusKm(listings, center, 10);
+    expect(result).toContainEqual(nearListing);
+    expect(result).not.toContainEqual(farListing);
+  });
+
+  it('excludes listings without coordinates', () => {
+    expect(filterByRadiusKm([noCoordListing], center, 10)).toEqual([]);
+  });
+});
+
+describe('sortByDistance', () => {
+  const center = { lat: 45.4371, lng: 12.3326 };
+  const near: ListingRow = {
+    ...baseListing,
+    id: '22222222-2222-2222-2222-222222222222',
+    lat: 45.45,
+    lng: 12.33,
+  };
+  const far: ListingRow = {
+    ...baseListing,
+    id: '33333333-3333-3333-3333-333333333333',
+    lat: 45.55,
+    lng: 12.33,
+  };
+
+  it('orders nearest first (D-11)', () => {
+    expect(sortByDistance([far, near], center).map((l) => l.id)).toEqual([
+      near.id,
+      far.id,
+    ]);
+  });
+});
+
+describe('sortByPostedAtDesc', () => {
+  it('orders by posted_at descending', () => {
+    const older: ListingRow = { ...baseListing, posted_at: '2026-07-28T10:00:00.000Z' };
+    const newer: ListingRow = {
+      ...baseListing,
+      id: '22222222-2222-2222-2222-222222222222',
+      posted_at: '2026-07-29T10:00:00.000Z',
+    };
+    expect(sortByPostedAtDesc([older, newer]).map((l) => l.id)).toEqual([newer.id, older.id]);
   });
 });

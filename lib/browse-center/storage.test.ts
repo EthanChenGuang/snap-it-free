@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   BROWSE_CENTER_STORAGE_KEY,
+  clearBrowseCenter,
   readBrowseCenter,
   writeBrowseCenter,
 } from './storage';
@@ -49,6 +50,28 @@ describe('writeBrowseCenter', () => {
     const handler = vi.fn();
     window.addEventListener('shoumanwu-browse-center-change', handler);
     writeBrowseCenter({ lat: 45.41, lng: 11.88, label: 'Padova' });
+    expect(handler).toHaveBeenCalledTimes(1);
+    window.removeEventListener('shoumanwu-browse-center-change', handler);
+  });
+});
+
+describe('clearBrowseCenter', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('removes storage key and readBrowseCenter returns null (D-12)', () => {
+    writeBrowseCenter({ lat: 45.434, lng: 12.338, label: 'Historic Center' });
+    clearBrowseCenter();
+    expect(localStorage.getItem(BROWSE_CENTER_STORAGE_KEY)).toBeNull();
+    expect(readBrowseCenter()).toBeNull();
+  });
+
+  it('dispatches change event on clear', () => {
+    writeBrowseCenter({ lat: 45.434, lng: 12.338 });
+    const handler = vi.fn();
+    window.addEventListener('shoumanwu-browse-center-change', handler);
+    clearBrowseCenter();
     expect(handler).toHaveBeenCalledTimes(1);
     window.removeEventListener('shoumanwu-browse-center-change', handler);
   });

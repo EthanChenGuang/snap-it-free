@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getSubitoCategoryLabel, matchesSubitoCategory } from './subito-categories';
+import { getSubitoCategoryLabel, matchesAnySubitoCategories, matchesSubitoCategory } from './subito-categories';
 
 describe('matchesSubitoCategory', () => {
   it('prefers listing.category DB slug over title inference (D-29)', () => {
@@ -46,5 +46,27 @@ describe('getSubitoCategoryLabel', () => {
         category_zh: '电脑',
       }),
     ).toBe('电脑');
+  });
+});
+
+describe('matchesAnySubitoCategories', () => {
+  const uncategorizedListing = { title: 'Oggetto generico', category: null };
+
+  it('returns true when no categories selected (D-44)', () => {
+    expect(matchesAnySubitoCategories(uncategorizedListing, [])).toBe(true);
+  });
+
+  it('matches any selected slug with OR logic (D-40)', () => {
+    const listing = { title: 'Monitor 24 pollici', category: 'informatica' };
+    expect(matchesAnySubitoCategories(listing, ['informatica', 'arredamento-casalinghi'])).toBe(
+      true,
+    );
+    expect(matchesAnySubitoCategories(listing, ['arredamento-casalinghi', 'abbigliamento-accessori'])).toBe(
+      false,
+    );
+  });
+
+  it('returns false for uncategorized listing when filter active (D-44)', () => {
+    expect(matchesAnySubitoCategories(uncategorizedListing, ['informatica'])).toBe(false);
   });
 });
