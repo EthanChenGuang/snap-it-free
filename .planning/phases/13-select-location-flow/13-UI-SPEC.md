@@ -1,7 +1,7 @@
 ---
 phase: 13
 slug: select-location-flow
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-08-10
@@ -154,6 +154,20 @@ Applicable state considerations resolved: 6 covered, 2 backstop, 2 unresolved
 | overflow / long-text | Preview row, header title, PostForm location row | ✅ covered | All text on this screen is short, fixed-vocabulary content — city names (Venice/Padova) and static labels/titles, never user-generated or variable-length strings. No truncation/wrap handling is needed |
 | zero-one-many | — | not applicable | No list-collection element exists in this phase's UI; the map/pin is a single-position picker, not a list |
 
+**Probe reconciliation (deterministic engine cross-check, Step 9.5):** running the compiled `ui-consideration-probe.cjs` engine against all 8 elements above surfaced 32 raw category×element candidates — a superset of the table above, since the engine's category set assumes list/form-shaped elements by default. The 8 candidates matching an already-resolved row (loading/empty/populated on the map+preview, error on the FAB and post-submit, partial on the draft, overflow/long-text on preview+header+location-row) are covered by that row and not repeated here. The remaining 24 are dismissed as not applicable to this screen's actual shape — no list/collection, no variable-length or user-generated text, no extra async operations beyond geolocation and submit (already covered above):
+
+| Category | Element(s) | Status | Reason (dismissed) |
+|----------|------------|--------|---------------------|
+| overflow, zero-one-many, long-text, error, partial | Map canvas + pin (E1) | dismissed — not applicable | Full-viewport single-position picker, not a list/form; no pluralization or variable-length text; failure states belong to the locate-me FAB, not the canvas itself |
+| error, partial | Live location preview row (E2) | dismissed — not applicable | Pure client-side derivation from pin coordinates (`resolveCityLabel`), no network/async call that can fail independently of the map; single derived string, not multi-field |
+| zero-one-many | Live location preview row (E2) | dismissed — not applicable | Single text value (city name), not a list — no plural/singular variation |
+| long-text | Confirm button (E3) | dismissed — not applicable | Fixed short CTA copy (2–4 words), not user-generated or variable-length |
+| zero-one-many | Radius preset chip group (E4) | dismissed — not applicable | Fixed set of exactly 4 hardcoded presets (5/10/50/100 km), never a variable-count list |
+| empty, loading, populated, overflow, long-text | Locate-me FAB (E5) | dismissed — not applicable | Icon-only single-action button, no variable/loading/collection content — the only meaningful state axis is failure handling, already flagged unresolved above |
+| zero-one-many | PostForm location row (E7) | dismissed — not applicable | Single row with two copy states (pending/confirmed), not a list |
+| loading | PostForm location row (E7) | dismissed — not applicable | Reads synchronously from `sessionStorage` draft on mount; no async loading state |
+| empty, loading, partial, long-text | Post submit validation (E8) | dismissed — not applicable | Synchronous boolean check (`locationConfirmed` flag) at submit time; only pass/fail branches — the failure branch is the backstop item above |
+
 <!-- Status vocabulary (locked by probe-core projectTruths):
      ✅ covered   → a plain truth string lifted into must_haves.truths
      🧪 backstop  → a flat scalar { statement, verification: backstop }; at verify time, no explicit
@@ -191,13 +205,13 @@ Net-new (if not already present):
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved (round 2, after 1 revision on Dimension 4 Typography)
 </content>
 </invoke>
