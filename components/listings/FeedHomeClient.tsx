@@ -4,9 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ListListingCard } from '@/components/listings/ListListingCard';
 import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import { useFeedScroll } from '@/components/shell/FeedScrollContext';
-import { matchesFeedSearch } from '@/lib/listings/feed-search';
-import { excludeReportedIds, matchesConsumerCity } from '@/lib/listings/filters';
-import { matchesAnySubitoCategories } from '@/lib/listings/subito-categories';
+import { composeFeedListings, useDistanceCenter } from '@/hooks/useDistanceCenter';
+import { excludeReportedIds } from '@/lib/listings/filters';
 import { useListingsPoll } from '@/lib/listings/useListingsPoll';
 import { readReportedIds, REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
 import type { ListingRow } from '@/lib/listings/types';
@@ -20,6 +19,7 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
   const { messages, language, zoneLabel } = useMessages();
   const { searchQuery, registerScrollContainer } = useFeedScroll();
   const { applied } = useFeedFilter();
+  const { center } = useDistanceCenter(applied.radiusEnabled);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { listings, isRefreshing } = useListingsPoll(initialListings);
@@ -37,19 +37,25 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
     return () => registerScrollContainer(null);
   }, [registerScrollContainer]);
 
-  const filteredListings = useMemo(() => {
+  const { filteredListings, distanceMap } = useMemo(() => {
     const visible = excludeReportedIds(listings, reportedIds);
-    return visible.filter((listing) => {
-      if (!matchesAnySubitoCategories(listing, applied.categories)) return false;
-      if (!matchesConsumerCity(listing, applied.city)) return false;
-      return matchesFeedSearch(listing, searchQuery, language, zoneLabel);
+    const { listings: filtered, distanceMap: distances } = composeFeedListings({
+      listings: visible,
+      applied,
+      center,
+      searchQuery,
+      language,
+      zoneLabel,
     });
-  }, [listings, reportedIds, searchQuery, applied, language, zoneLabel]);
+    return { filteredListings: filtered, distanceMap: distances };
+  }, [listings, reportedIds, searchQuery, applied, center, language, zoneLabel]);
 
   const hasSearchQuery = searchQuery.trim().length > 0;
   const hasCategoryFilter = applied.categories.length > 0;
   const hasCityFilter = applied.city !== 'all';
-  const hasActiveFilter = hasSearchQuery || hasCategoryFilter || hasCityFilter;
+  const hasRadiusFilter = applied.radiusEnabled;
+  const hasActiveFilter =
+    hasSearchQuery || hasRadiusFilter || hasCityFilter || hasCategoryFilter;
 
   return (
     <main className="flex h-full min-h-0 flex-col overflow-hidden bg-background">
@@ -78,7 +84,11 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
         ) : (
           <section className="grid grid-cols-2 gap-3">
             {filteredListings.map((listing) => (
-              <ListListingCard key={listing.id} listing={listing} />
+              <ListListingCard
+                key={listing.id}
+                listing={listing}
+                distanceMeters={distanceMap.get(listing.id)}
+              />
             ))}
           </section>
         )}

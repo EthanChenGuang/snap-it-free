@@ -9,6 +9,8 @@ import { useMessages } from '@/lib/i18n/useMessages';
 
 type ListListingCardProps = {
   listing: ListingRow;
+  /** Distance in meters from active center; wired to metadata in Plan 10-04. */
+  distanceMeters?: number;
 };
 
 function listingLocationLabel(
@@ -25,7 +27,7 @@ function listingLocationLabel(
 }
 
 /** Minimalist feed card — image, FREE badge, favorite, compact metadata. */
-export function ListListingCard({ listing }: ListListingCardProps) {
+export function ListListingCard({ listing, distanceMeters: _distanceMeters }: ListListingCardProps) {
   const { language, messages, zoneLabel, formatRelativeTime } = useMessages();
   const displayTitle = resolveListingTitle(listing, language);
   const router = useRouter();
