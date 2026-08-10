@@ -97,4 +97,19 @@ describe('resolveListingCategory', () => {
   it('returns null when category and inference both absent', () => {
     expect(resolveListingCategory({ category: null, title: 'Misc item' }, 'it')).toBeNull();
   });
+
+  it('returns Italian catalog label via inference when category null (D-07)', () => {
+    expect(
+      resolveListingCategory({ category: null, title: 'Monitor 24 pollici' }, 'it'),
+    ).toBe('Informatica');
+  });
+
+  it('returns label for inferred slug when DB slug unknown (D-18 display)', () => {
+    expect(
+      resolveListingCategory(
+        { category: 'bogus-slug', title: 'Monitor 24 pollici' },
+        'it',
+      ),
+    ).toBe('Informatica');
+  });
 });

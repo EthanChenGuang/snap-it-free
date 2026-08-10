@@ -1,6 +1,7 @@
 import type { AppLanguage } from '@/lib/settings/preferences';
+import { resolveCanonicalCategorySlug } from '@/lib/listings/canonical-categories';
 import { getSubitoCategoryLabel } from '@/lib/listings/subito-categories';
-import { inferListingCategory } from '@/lib/listings/categories';
+import type { ListingSource } from '@/lib/listings/types';
 
 /** Listing row fields used for locale-aware title/description display (D-133). */
 export type ListingFieldRow = {
@@ -13,6 +14,8 @@ export type ListingFieldRow = {
 };
 
 export type ListingCategoryFieldRow = ListingFieldRow & {
+  /** Pass source when available (ListingRow); defaults to subito for legacy callers. */
+  source?: ListingSource;
   category?: string | null;
   category_en?: string | null;
   category_zh?: string | null;
@@ -59,27 +62,21 @@ export function resolveListingDescription(
 
 /**
  * Resolve listing category badge label for display by active locale (D-31).
- * DB slug → category_en/category_zh when populated; Italian catalog fallback.
- * Title keyword inference only when category column is null.
+ * Delegates slug resolution to resolveCanonicalCategorySlug (D-16); unknown DB
+ * slugs fall through to title inference (D-18). Callers with ListingRow should pass source.
  */
 export function resolveListingCategory(
   row: ListingCategoryFieldRow,
   locale: AppLanguage,
 ): string | null {
-  if (nonEmpty(row.category)) {
-    return getSubitoCategoryLabel(row.category, locale, {
-      category_en: row.category_en,
-      category_zh: row.category_zh,
-    });
-  }
-  const inferred = inferListingCategory(row.title);
-  if (!inferred) return null;
-  const slugMap: Record<Exclude<import('@/lib/listings/categories').ListingCategory, 'All'>, string> = {
-    furniture: 'arredamento-casalinghi',
-    tech: 'informatica',
-    apparel: 'abbigliamento-accessori',
-    books: 'libri-riviste',
-    home_decor: 'arredamento-casalinghi',
-  };
-  return getSubitoCategoryLabel(slugMap[inferred], locale);
+  const slug = resolveCanonicalCategorySlug({
+    source: row.source ?? 'subito',
+    title: row.title,
+    category: row.category,
+  });
+  if (!slug) return null;
+  return getSubitoCategoryLabel(slug, locale, {
+    category_en: row.category_en,
+    category_zh: row.category_zh,
+  });
 }
