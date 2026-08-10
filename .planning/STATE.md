@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 10
 current_phase_name: search-filter-sheet-distance
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: Completed 10-01-PLAN.md
-last_updated: "2026-08-10T13:03:44.331Z"
+stopped_at: Completed 10-02-PLAN.md
+last_updated: "2026-08-10T13:06:43.897Z"
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 10
-  completed_plans: 6
+  completed_plans: 7
   percent: 14
 last_activity: 2026-08-09
 last_activity_desc: v2.0 milestone requirements + roadmap created
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 10 (search-filter-sheet-distance) — EXECUTING
-**Current Plan:** 2
+**Current Plan:** 3
 **Total Plans in Phase:** 5
 Status: Ready to execute
 
-Progress: [██████░░░░] 60% v2.0 (0/7 phases)
+Progress: [███████░░░] 70% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -66,6 +66,7 @@ Progress: [██████░░░░] 60% v2.0 (0/7 phases)
 | Phase 09-feed-first-home-navigation-ia P04 | 4min | 3 tasks | 5 files |
 | Phase 09-feed-first-home-navigation-ia P03 | 8min | 3 tasks | 11 files |
 | Phase 10-search-filter-sheet-distance P01 | 4min | 3 tasks | 12 files |
+| Phase 10-search-filter-sheet-distance P02 | 8min | 3 tasks | 12 files |
 
 ## Deferred Items (from v1.0)
 
@@ -85,8 +86,8 @@ Progress: [██████░░░░] 60% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T13:03:44.323Z
-**Stopped at:** Completed 10-01-PLAN.md
+**Last session:** 2026-08-10T13:06:43.889Z
+**Stopped at:** Completed 10-02-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -100,6 +101,9 @@ Progress: [██████░░░░] 60% v2.0 (0/7 phases)
 - [Phase ?]: Confirm label derived from selected zone or nearest Venice vs Padova distance
 - [Phase ?]: Wave 0 lib-only TDD foundation — Plans 02–05 import tested helpers without reimplementing
 - [Phase ?]: matchesAnySubitoCategories uses (listing, selected[]) matching FeedHomeClient pipeline
+- [Phase ?]: D-01 proceed-city-only: consumer UI shows All · Venice · Padova only — zone names retired
+- [Phase ?]: Filter stub toast replaced with Vaul FilterSheet per D-59
+- [Phase ?]: Categories migrated to FeedFilterContext multi-select array per D-50
 
 ## Quick Tasks Completed
 

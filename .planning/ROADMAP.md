@@ -76,7 +76,7 @@ Plans:
 
 **Requirements:** FILT-01–05, I18N-01 (partial)
 
-**Plans:** 1/5 plans executed
+**Plans:** 2/5 plans executed
 
 Plans:
 **Wave 0**
@@ -85,7 +85,7 @@ Plans:
 
 **Wave 1** *(blocked on Wave 0)*
 
-- [ ] 10-02-PLAN.md — Tracer: FilterSheet + city filter E2E; D-01 city-only checkpoint
+- [x] 10-02-PLAN.md — Tracer: FilterSheet + city filter E2E; D-01 city-only checkpoint
 
 **Wave 2** *(blocked on Wave 1)*
 
