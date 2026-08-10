@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
-current_phase: 13
-current_phase_name: select-location-flow
-current_plan: 4
-status: verifying
-stopped_at: Completed 13-04-PLAN.md
-last_updated: "2026-08-10T21:17:24.236Z"
+current_phase: 14
+current_phase_name: settings-consumer-parity
+current_plan: 0
+status: ready_to_plan
+stopped_at: Completed /gsd-verify-work 13
+last_updated: "2026-08-10T21:51:00Z"
 progress:
   total_phases: 8
-  completed_phases: 6
-  total_plans: 24
-  completed_plans: 24
-  percent: 75
+  completed_phases: 7
+  total_plans: 25
+  completed_plans: 25
+  percent: 88
 last_activity: 2026-08-10
-last_activity_desc: "Phase 12.1 verified complete: self-run UAT (5/5), security review (0 threats open), goal-backward verification (11/11, 1 gap found+fixed — stale FilterSheet UAT selector)"
+last_activity_desc: "Phase 13 verified: goal-backward verification 20/20 automated must-haves, Plan 05 gap closure green test:lib (287/287) + build, 4 human UAT items + D-12 open"
 ---
 
 # Project State
@@ -26,15 +26,15 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
 
-**Current focus:** Phase 13 — select-location-flow
+**Current focus:** Phase 14 — settings-consumer-parity
 
 ## Current Position
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
-Phase: 13 (select-location-flow) — EXECUTING
-**Current Plan:** 4
-**Total Plans in Phase:** 4
-Status: Phase complete — ready for verification
+Phase: 14 (settings-consumer-parity) — NEXT
+**Current Plan:** 0
+**Total Plans in Phase:** TBD
+Status: Phase 13 verified — human UAT items documented; ready to plan Phase 14
 
 Progress: [██████████] 100% v2.0 (0/7 phases)
 
@@ -46,8 +46,8 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | 2 | 10 | Search, Filter Sheet & Distance | Planned |
 | 3 | 11 | Grid Listing Cards | Planned |
 | 4 | 12 | Favorites Category Folders | Planned |
-| 5 | 13 | Select Location Flow | Planned |
-| 6 | 14 | Settings Consumer Parity | Planned |
+| 5 | 13 | Select Location Flow | Verified |
+| 6 | 14 | Settings Consumer Parity | Next |
 | 7 | 7 | Production Deploy (Vercel + Fly.io) | Planned |
 
 ## Performance Metrics
@@ -82,6 +82,7 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | Phase 13-select-location-flow P02 | 2min | 2 tasks | 6 files |
 | Phase 13-select-location-flow P03 | 2 min | 2 tasks | 2 files |
 | Phase 13-select-location-flow P04 | 110s | 2 tasks | 1 files |
+| Phase 13-select-location-flow P05 | 15min | 5 tasks | 23 files |
 
 ## Deferred Items (from v1.0)
 
@@ -168,3 +169,4 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 - Phase 12.1 inserted after Phase 12: add i18n support for the category names for it/zh/en (URGENT)
 - Phase 12.1 executed: trilingual messages.feed.subitoCategories + locale-aware filter/chip/pill labels; UAT 5/5, unit 36/36
 - Phase 12.1 verified (self-tested, no human in the loop per user request): UAT 5/5, security review 6/6 threats closed (retroactive STRIDE, no threat model authored at plan time), goal-backward verification 11/11 after fixing one gap — `scripts/phase12-uat-automation.mjs`'s selector had gone stale when an unrelated quick task (260810-tb5, commit 47d5259) swapped FilterSheet's checkbox list for a button chip grid 2 min after the UAT commit. Fixed and re-confirmed 5/5 against current HEAD. Phase marked complete in ROADMAP/STATE.
+- Phase 13 verified: `/gsd-verify-work 13` — 20/20 automated must-haves, Plan 05 gap closure (cherry-pick 9d7dfae) green test:lib 287/287 + build; 13-VERIFICATION.md created; 4 human UAT items + D-12 PostForm field-loss documented open
