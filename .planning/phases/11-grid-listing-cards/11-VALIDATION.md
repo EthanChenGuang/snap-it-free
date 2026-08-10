@@ -2,8 +2,8 @@
 phase: 11
 slug: grid-listing-cards
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-08-10
 ---
 
@@ -38,7 +38,7 @@ created: 2026-08-10
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 11-01-01 | 01 | 0 | CARD-01/02 | — | Metadata builder unit tests | unit | `npm run test:lib -- lib/listings/card-metadata.test.ts -x` | ❌ W0 | ⬜ pending |
+| 11-01-01 | 01 | 0 | CARD-01/02 | — | Metadata builder unit tests | unit | `npm run test:lib -- lib/listings/card-metadata.test.ts -x` | ✅ | ✅ green |
 | 11-02-01 | 02 | 1 | CARD-01–05 | — | Tracer card polish E2E | manual | Human verify at `/` grid | — | ⬜ pending |
 | 11-03-01 | 03 | 2 | CARD-04/D-11 | — | Single heart on favorites | grep | `rg 'FavoriteButton' components/listings/FavoritesPageClient.tsx` expects 0 | ❌ W0 | ⬜ pending |
 | 11-03-02 | 03 | 2 | CARD-02/D-23 | — | Favorites distance wiring | manual | Human verify `/favorites` with center active | — | ⬜ pending |
@@ -50,9 +50,9 @@ created: 2026-08-10
 
 ## Wave 0 Requirements
 
-- [ ] `lib/listings/card-metadata.ts` — extract from `ListListingCard.tsx`
-- [ ] `lib/listings/card-metadata.test.ts` — covers CARD-01, CARD-02, D-17, D-19 edge cases
-- [ ] `vitest.config.ts` — already includes `lib/**/*.test.ts`; no config change needed
+- [x] `lib/listings/card-metadata.ts` — extract from `ListListingCard.tsx`
+- [x] `lib/listings/card-metadata.test.ts` — covers CARD-01, CARD-02, D-17, D-19 edge cases
+- [x] `vitest.config.ts` — already includes `lib/**/*.test.ts`; no config change needed
 
 ---
 
@@ -69,11 +69,11 @@ created: 2026-08-10
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 15s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 15s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** Wave 0 complete (Plan 01)
