@@ -248,7 +248,7 @@ Plans:
 
 **Requirements:** SET-01–06, TD-01, I18N-01 (partial)
 
-**Plans:** 6/7 plans executed
+**Plans:** 5/7 plans executed
 
 Plans:
 **Wave 0**
@@ -261,7 +261,7 @@ Plans:
 **Wave 1** *(blocked on Wave 0)*
 
 - [x] 14-05-PLAN.md — Tracer: DND end-to-end (NotificationsSection UI, GET/PATCH route, cron enforcement)
-- [x] 14-06-PLAN.md — Delete Account end-to-end (AccountSection UI, GET/POST route)
+- [ ] 14-06-PLAN.md — Delete Account end-to-end (AccountSection UI, GET/POST route)
 
 **Wave 2** *(blocked on Wave 1)*
 
