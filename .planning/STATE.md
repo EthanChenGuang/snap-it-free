@@ -15,7 +15,7 @@ progress:
   completed_plans: 20
   percent: 50
 last_activity: 2026-08-10
-last_activity_desc: "Executed Phase 12.1 — trilingual Subito category labels (2/2 plans)"
+last_activity_desc: "Completed quick task 260810-tb5: iOS-native filter bottom sheet redesign"
 ---
 
 # Project State
@@ -147,6 +147,7 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | 2026-08-10 | feed-ui-polish | Feed header icons, short search placeholder, floating nav capsule w/ scroll-hide |
 | 2026-08-10 | waterfall-feed-polish | Full-bleed scroll under glass nav, icon/card aesthetic polish |
 | 2026-08-10 | select-location-radius-pin-radar | Radius pill clicks, pin overlay, minimalist radar/circle styling |
+| 2026-08-10 | redesign-filter-bottom-sheet-ui-to-ios-n | iOS-native filter sheet: pill city chips, 3-col category chip grid, sticky blurred Reset/Apply bar |
 | 2026-08-10 | refine-feed-list-page-header-filtering-p | Remove city/radius pills; split filter vs map badge indicators |
 
 ## Accumulated Context
