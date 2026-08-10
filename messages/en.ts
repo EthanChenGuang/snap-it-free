@@ -187,6 +187,15 @@ export const messages: Messages = {
       enabledLabel: 'Sound alerts on',
       disabledLabel: 'Sound alerts off',
     },
+    dnd: {
+      title: 'Do Not Disturb',
+      description: 'Pause push notifications during a quiet window',
+      startLabel: 'Start',
+      endLabel: 'End',
+      enabledLabel: 'Do Not Disturb on',
+      disabledLabel: 'Do Not Disturb off',
+      saveError: 'Could not save quiet hours — try again',
+    },
     zones: {
       sectionTitle: 'Zone management',
       addZone: 'Add zone',
@@ -214,6 +223,19 @@ export const messages: Messages = {
       description: 'Permanently clear monitoring history and local preferences.',
       resetButton: 'Reset cache and data',
       confirmReset: 'Confirm reset',
+    },
+    account: {
+      sectionTitle: 'Account',
+      deleteTitle: 'Delete account',
+      deleteDescription:
+        'Permanently delete your account and all your listings, favorites, and messages. This cannot be undone.',
+      deleteButton: 'Delete account',
+      confirmDelete: 'Tap again to confirm',
+      deleteError: 'Could not delete account — try again',
+      activeClaimsWarning: (n: number) =>
+        n === 1
+          ? 'You have 1 active claim in progress — deleting will end that conversation.'
+          : `You have ${n} active claims in progress — deleting will end those conversations.`,
     },
     alerts: {
       sectionTitle: 'Alerts & notifications',

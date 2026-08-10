@@ -187,6 +187,15 @@ export const messages: Messages = {
       enabledLabel: '声音提醒已开启',
       disabledLabel: '声音提醒已关闭',
     },
+    dnd: {
+      title: '免打扰',
+      description: '在安静时段暂停推送通知',
+      startLabel: '开始',
+      endLabel: '结束',
+      enabledLabel: '免打扰已开启',
+      disabledLabel: '免打扰已关闭',
+      saveError: '无法保存免打扰时段 — 请重试',
+    },
     zones: {
       sectionTitle: '区域管理',
       addZone: '添加区域',
@@ -214,6 +223,15 @@ export const messages: Messages = {
       description: '永久清除本地监控记录与偏好。',
       resetButton: '重置缓存与数据',
       confirmReset: '确认重置',
+    },
+    account: {
+      sectionTitle: '账户',
+      deleteTitle: '删除账户',
+      deleteDescription: '永久删除你的账户及所有发布、收藏和消息。此操作无法撤销。',
+      deleteButton: '删除账户',
+      confirmDelete: '再次点击确认',
+      deleteError: '无法删除账户 — 请重试',
+      activeClaimsWarning: (n: number) => `你有 ${n} 个进行中的认领 — 删除将结束相关对话。`,
     },
     alerts: {
       sectionTitle: '提醒与通知',

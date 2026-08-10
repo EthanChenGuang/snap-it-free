@@ -194,6 +194,15 @@ export const messages = {
       enabledLabel: 'Avvisi sonori attivi',
       disabledLabel: 'Avvisi sonori disattivati',
     },
+    dnd: {
+      title: 'Non disturbare',
+      description: 'Sospendi le notifiche push durante una fascia oraria silenziosa',
+      startLabel: 'Inizio',
+      endLabel: 'Fine',
+      enabledLabel: 'Non disturbare attivo',
+      disabledLabel: 'Non disturbare disattivato',
+      saveError: "Impossibile salvare l'orario silenzioso — riprova",
+    },
     zones: {
       sectionTitle: 'Gestione zone',
       addZone: 'Aggiungi zona',
@@ -221,6 +230,19 @@ export const messages = {
       description: 'Elimina definitivamente cronologia di monitoraggio e preferenze locali.',
       resetButton: 'Reimposta cache e dati',
       confirmReset: 'Conferma reimpostazione',
+    },
+    account: {
+      sectionTitle: 'Account',
+      deleteTitle: 'Elimina account',
+      deleteDescription:
+        'Elimina definitivamente il tuo account e tutti i tuoi annunci, preferiti e messaggi. Questa azione non può essere annullata.',
+      deleteButton: 'Elimina account',
+      confirmDelete: 'Tocca di nuovo per confermare',
+      deleteError: "Impossibile eliminare l'account — riprova",
+      activeClaimsWarning: (n: number) =>
+        n === 1
+          ? "Hai 1 richiesta attiva in corso — l'eliminazione chiuderà quella conversazione."
+          : `Hai ${n} richieste attive in corso — l'eliminazione chiuderà quelle conversazioni.`,
     },
     alerts: {
       sectionTitle: 'Avvisi e notifiche',
