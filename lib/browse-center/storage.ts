@@ -50,6 +50,13 @@ export function writeBrowseCenter(center: BrowseCenter): BrowseCenter {
   return center;
 }
 
+export function clearBrowseCenter(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(BROWSE_CENTER_STORAGE_KEY);
+  invalidateBrowseCenterCache(null);
+  window.dispatchEvent(new CustomEvent(BROWSE_CENTER_CHANGE_EVENT, { detail: null }));
+}
+
 export function subscribeBrowseCenter(onStoreChange: () => void): () => void {
   if (typeof window === 'undefined') return () => {};
   const handler = () => {

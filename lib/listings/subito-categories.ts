@@ -36,6 +36,15 @@ export function matchesSubitoCategory(
   return legacySlugFromInferred(inferred) === selected;
 }
 
+/** OR match across multiple category slugs; empty selection passes all (D-40, D-44). */
+export function matchesAnySubitoCategories(
+  listing: SubitoListingFilterInput,
+  selected: string[],
+): boolean {
+  if (selected.length === 0) return true;
+  return selected.some((slug) => matchesSubitoCategory(listing, slug));
+}
+
 /** Italian default label; uses category_en/category_zh when locale ≠ it (D-31). */
 export function getSubitoCategoryLabel(
   slug: SubitoCategoryFilter,
