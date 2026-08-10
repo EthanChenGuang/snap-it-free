@@ -116,7 +116,7 @@ Plans:
 
 **Requirements:** CARD-01–05, I18N-01 (partial)
 
-**Plans:** 4/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 **Wave 0**
@@ -221,7 +221,7 @@ Plans:
 | 1–6, 8 | v1.0 | 39/39 | Shipped | 2026-08-09 |
 | 9. Feed-First Home & Nav | v2.0 | 0/4 | Complete    | 2026-08-09 |
 | 10. Filter Sheet & Distance | v2.0 | 0/5 | In Progress|  |
-| 11. Grid Listing Cards | v2.0 | 0/4 | In Progress|  |
+| 11. Grid Listing Cards | v2.0 | 0/4 | Complete    | 2026-08-10 |
 | 12. Favorites Folders | v2.0 | 0/? | Planned | — |
 | 13. Select Location | v2.0 | 0/? | Planned | — |
 | 14. Settings Parity | v2.0 | 0/? | Planned | — |

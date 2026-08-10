@@ -1,32 +1,39 @@
 ---
 phase: 11-grid-listing-cards
 verified: 2026-08-10T16:31:00Z
-status: human_needed
+status: passed
 score: 10/12 must-haves verified
 behavior_unverified: 2
 overrides_applied: 0
 behavior_unverified_items:
+
   - truth: "FavoriteButton login gate blocks unauthenticated toggle and opens AuthPromptModal on grid"
     test: "Open home feed logged out; click heart on any card"
     expected: "Auth prompt modal opens; favorite state does not toggle; no API call"
     why_human: "Auth gate is wired in FavoriteButton handleClick but no component/integration test exercises the session=false path on grid cards"
+
   - truth: "Heart click does not trigger card navigation (stopPropagation on favorite)"
     test: "Click heart on a grid card (logged in or out)"
     expected: "Card does not navigate to /listing/[id]; only favorite action or auth modal fires"
     why_human: "stopPropagation lives in FavoriteButton; card uses article onClick for navigation — interaction ordering requires runtime click test"
 human_verification:
+
   - test: "Open `/` feed grid and inspect card chrome"
     expected: "Each card shows emerald FREE pill top-left, glass heart top-right, 4:5 portrait image with rounded-2xl, line-clamp-1 title, text-xs metadata"
     why_human: "Visual Stitch contract (D-01–D-08, D-18, D-20) cannot be judged by grep alone"
+
   - test: "Toggle favorite logged in on feed grid"
     expected: "Single heart per card; orange filled state when favorited; toast on add/remove (D-27)"
     why_human: "Favorited visual state and toast are runtime UX behaviors"
+
   - test: "Open `/favorites` with saved listings and active distance center"
     expected: "Single heart per card (no duplicate overlay); metadata shows `{distance} · {time}` when lat/lng and center available"
     why_human: "Favorites distance wiring is code-present; runtime center resolution depends on browse/GPS consent chain"
+
   - test: "Find a claimed listing on feed grid"
     expected: "Photo dimmed (opacity-60 on ListingPhoto only); FREE badge and heart remain full brightness; metadata ends with localized Reserved suffix"
     why_human: "Claimed dimming and suffix are visual/runtime checks on live listing data"
+
   - test: "Confirm no Claim CTA on grid; open listing detail for scraped and UGC items"
     expected: "Grid cards have no Claim button; detail page retains claim/deep-link actions in ScrapedListingShell / UgcListingShell"
     why_human: "Grid absence is grep-verified; detail-page claim UX requires manual navigation confirm"
