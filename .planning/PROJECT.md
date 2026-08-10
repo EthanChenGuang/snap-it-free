@@ -18,7 +18,7 @@ Users can find and claim real free items near them in Venice faster than by manu
 1. **Feed-first IA** — Grid home replaces map-first `/`; map opened via location button (Snag interaction pattern, Stitch visuals)
 2. **Search & filters** — Filter bottom sheet (km radius + categories), active filter pills, distance on cards; retain Venice zone + Padova city filters
 3. **Navigation** — Bottom nav Home · Favorites · Settings; Post via drawer; no subscription tab
-4. **Favorites** — Category folder grid with drill-down
+4. **Canonical category mapping** — Unified resolver across Subito, UGC, and future sources using 17 Subito regalo slugs
 5. **Select Location** — Full-screen map picker for filter center and UGC post
 6. **Settings parity** — DND, delete account, Stitch restyle; retain alerts/zone/appearance/iOS A2HS
 7. **Production deploy** — Vercel PWA + Fly.io worker + OAuth + cron + D-19 smoke (Phase 7)
@@ -66,7 +66,7 @@ See [.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md) for v2.0 checkable re
 - [ ] Feed-first grid home + nav restructure (Phase 9)
 - [ ] Filter sheet, distance, active pills (Phase 10)
 - [ ] Grid cards: FREE badge, heart, metadata (Phase 11)
-- [ ] Favorites category folders (Phase 12)
+- [ ] Canonical category mapping across sources (Phase 12)
 - [ ] Select Location flow (Phase 13)
 - [ ] Settings: DND, delete account (Phase 14)
 - [ ] Production deploy (Phase 7)
@@ -106,4 +106,4 @@ See [.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md) for v2.0 checkable re
 This document evolves at phase transitions and milestone boundaries.
 
 ---
-*Last updated: 2026-08-09 — v2.0 milestone initialized*
+*Last updated: 2026-08-10 — Phase 12 scope pivot to canonical category mapping*

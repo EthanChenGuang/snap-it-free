@@ -37,11 +37,11 @@ Requirements for this milestone. Each maps to roadmap phases.
 - [x] **CARD-04**: Favorite heart on each card reuses FavoriteButton with existing login gate
 - [x] **CARD-05**: Grid cards omit Claim CTA; detail page retains deep-link (scraped) and claim/reserve (UGC)
 
-### Favorites Organization
+### Canonical Category Mapping
 
-- [ ] **FAV-01**: Favorites screen shows a category folder grid (Furniture, Electronics, Home & Garden, For Kids, Other) mapped from listing category
-- [ ] **FAV-02**: Tapping a folder drills into favorites filtered to that category
-- [ ] **FAV-03**: Empty folders display with 0-item count and appropriate empty state
+- [ ] **CAT-01**: `resolveCanonicalCategorySlug` resolves Subito, UGC, and title-inference paths with catalog-validated slugs
+- [ ] **CAT-02**: New UGC posts persist canonical slug in `listing.category` at insert time
+- [ ] **CAT-03**: PostCategory and inference slug mapping tables documented and covered by unit tests
 
 ### Select Location
 
@@ -79,6 +79,12 @@ Requirements for this milestone. Each maps to roadmap phases.
 ## v3+ Requirements
 
 Deferred beyond v2.0. Tracked but not in current roadmap.
+
+### Favorites Organization (deferred v3+)
+
+- **FAV-01**: Favorites category folder grid — deferred; blocked on canonical mapping; user chose flat favorites for v2.0 (D-03)
+- **FAV-02**: Folder drill-down — deferred to v3+
+- **FAV-03**: Empty folder states — deferred to v3+
 
 ### Scraping & Platform
 
@@ -123,9 +129,12 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | CARD-03 | Phase 11 | Complete |
 | CARD-04 | Phase 11 | Complete |
 | CARD-05 | Phase 11 | Complete |
-| FAV-01 | Phase 12 | Pending |
-| FAV-02 | Phase 12 | Pending |
-| FAV-03 | Phase 12 | Pending |
+| CAT-01 | Phase 12 | Pending |
+| CAT-02 | Phase 12 | Pending |
+| CAT-03 | Phase 12 | Pending |
+| FAV-01 | v3+ | Deferred |
+| FAV-02 | v3+ | Deferred |
+| FAV-03 | v3+ | Deferred |
 | LOC-01 | Phase 13 | Pending |
 | LOC-02 | Phase 13 | Pending |
 | LOC-03 | Phase 13 | Pending |
@@ -153,4 +162,4 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-08-09*  
-*Last updated: 2026-08-09 after v2.0 milestone init*
+*Last updated: 2026-08-10 after Phase 12 scope pivot (CAT-01–03, FAV-01–03 deferred)*
