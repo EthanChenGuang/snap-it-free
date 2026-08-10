@@ -51,7 +51,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Settings (Consumer)
 
-- [ ] **SET-01**: Push notifications toggle retained and restyled to Stitch settings layout
+- [x] **SET-01**: Push notifications toggle retained and restyled to Stitch settings layout
 - [x] **SET-02**: Do Not Disturb: user-configurable quiet hours or silent-push window for notifications
 - [ ] **SET-03**: Language selection retained (zh / en / it)
 - [x] **SET-04**: Delete account: Supabase account deletion with associated user data cleanup (auth-gated, destructive confirmation)
@@ -138,7 +138,7 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | LOC-01 | Phase 13 | Complete |
 | LOC-02 | Phase 13 | Complete |
 | LOC-03 | Phase 13 | Complete |
-| SET-01 | Phase 14 | Pending |
+| SET-01 | Phase 14 | Complete |
 | SET-02 | Phase 14 | Complete |
 | SET-03 | Phase 14 | Pending |
 | SET-04 | Phase 14 | Complete |
