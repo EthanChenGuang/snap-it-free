@@ -23,11 +23,11 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Search, Filters & Distance
 
-- [ ] **FILT-01**: Filter bottom sheet exposes km radius slider (1–50 km, user preference persisted) and category multi-select mapped to existing Subito/UGC categories
+- [x] **FILT-01**: Filter bottom sheet exposes km radius slider (1–50 km, user preference persisted) and category multi-select mapped to existing Subito/UGC categories
 - [ ] **FILT-02**: Filter sheet has Apply and Reset actions; radius and categories compose with existing zone/city filters
 - [ ] **FILT-03**: Active filter pills appear below the search bar (e.g. category ×, radius, zone) and are dismissible
-- [ ] **FILT-04**: Venice zone chips (Centro / Mestre / Lido) and Padova city filter remain available alongside radius
-- [ ] **FILT-05**: Distance filtering uses client-side haversine on lat/lng; listings without coordinates are excluded from radius results or sorted last
+- [x] **FILT-04**: Venice zone chips (Centro / Mestre / Lido) and Padova city filter remain available alongside radius
+- [x] **FILT-05**: Distance filtering uses client-side haversine on lat/lng; listings without coordinates are excluded from radius results or sorted last
 
 ### Listing Grid Cards
 
@@ -113,11 +113,11 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | HOME-01 | Phase 9 | Complete |
 | HOME-02 | Phase 9 | Complete |
 | HOME-03 | Phase 9 | Complete |
-| FILT-01 | Phase 10 | Pending |
+| FILT-01 | Phase 10 | Complete |
 | FILT-02 | Phase 10 | Pending |
 | FILT-03 | Phase 10 | Pending |
-| FILT-04 | Phase 10 | Pending |
-| FILT-05 | Phase 10 | Pending |
+| FILT-04 | Phase 10 | Complete |
+| FILT-05 | Phase 10 | Complete |
 | CARD-01 | Phase 11 | Pending |
 | CARD-02 | Phase 11 | Pending |
 | CARD-03 | Phase 11 | Pending |

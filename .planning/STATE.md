@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 10
-current_phase_name: Search, Filter Sheet & Distance
-current_plan: Not started
-status: planning
-stopped_at: Phase 10 context gathered
-last_updated: "2026-08-10T12:41:54.624Z"
+current_phase_name: search-filter-sheet-distance
+current_plan: 2
+status: executing
+stopped_at: Completed 10-01-PLAN.md
+last_updated: "2026-08-10T13:03:44.331Z"
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 10
+  completed_plans: 6
   percent: 14
 last_activity: 2026-08-09
 last_activity_desc: v2.0 milestone requirements + roadmap created
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
 
-**Current focus:** Phase 9 — feed-first-home-navigation-ia
+**Current focus:** Phase 10 — search-filter-sheet-distance
 
 ## Current Position
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
-Phase: 10 — Search, Filter Sheet & Distance
-**Current Plan:** Not started
+Phase: 10 (search-filter-sheet-distance) — EXECUTING
+**Current Plan:** 2
 **Total Plans in Phase:** 5
-Status: Ready to plan
+Status: Ready to execute
 
-Progress: [██████████] 100% v2.0 (0/7 phases)
+Progress: [██████░░░░] 60% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -65,6 +65,7 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | Phase 09 P02 | 3min | 3 tasks | 15 files |
 | Phase 09-feed-first-home-navigation-ia P04 | 4min | 3 tasks | 5 files |
 | Phase 09-feed-first-home-navigation-ia P03 | 8min | 3 tasks | 11 files |
+| Phase 10-search-filter-sheet-distance P01 | 4min | 3 tasks | 12 files |
 
 ## Deferred Items (from v1.0)
 
@@ -84,9 +85,9 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T12:41:54.614Z
-**Stopped at:** Phase 10 context gathered
-**Resume file:** .planning/phases/10-search-filter-sheet-distance/10-CONTEXT.md
+**Last session:** 2026-08-10T13:03:44.323Z
+**Stopped at:** Completed 10-01-PLAN.md
+**Resume file:** None
 
 ## Decisions
 
@@ -97,6 +98,8 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 - [Phase ?]: Manage my posts link moved from NavMenuDrawer to GeneralSection
 - [Phase ?]: SelectLocationZoneChips separate export keeps MapExplorer All chip unchanged
 - [Phase ?]: Confirm label derived from selected zone or nearest Venice vs Padova distance
+- [Phase ?]: Wave 0 lib-only TDD foundation — Plans 02–05 import tested helpers without reimplementing
+- [Phase ?]: matchesAnySubitoCategories uses (listing, selected[]) matching FeedHomeClient pipeline
 
 ## Quick Tasks Completed
 

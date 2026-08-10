@@ -72,9 +72,32 @@ Plans:
 
 #### Phase 10: Search, Filter Sheet & Distance
 
-**Goal:** Filter bottom sheet (km radius + categories), active filter pills, haversine distance; zone/city filters retained.
+**Goal:** Filter bottom sheet (km radius + categories), active filter pills, haversine distance; zone/city filters retained (consumer override: city-only per D-01).
 
 **Requirements:** FILT-01–05, I18N-01 (partial)
+
+**Plans:** 1/5 plans executed
+
+Plans:
+**Wave 0**
+
+- [x] 10-01-PLAN.md — Wave 0 TDD: haversine, filter-prefs, city/radius helpers, clearBrowseCenter
+
+**Wave 1** *(blocked on Wave 0)*
+
+- [ ] 10-02-PLAN.md — Tracer: FilterSheet + city filter E2E; D-01 city-only checkpoint
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 10-03-PLAN.md — Full pipeline, radius/categories sheet, active pills row
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 10-04-PLAN.md — Card distance metadata, select-location cleanup, center pill
+
+**Wave 4** *(blocked on Wave 3)*
+
+- [ ] 10-05-PLAN.md — i18n completion, stub removal, phase gate verification
 
 **Success criteria:**
 
@@ -178,7 +201,7 @@ Plans:
 |-------|-----------|-------|--------|-----------|
 | 1–6, 8 | v1.0 | 39/39 | Shipped | 2026-08-09 |
 | 9. Feed-First Home & Nav | v2.0 | 0/4 | Complete    | 2026-08-09 |
-| 10. Filter Sheet & Distance | v2.0 | 0/? | Planned | — |
+| 10. Filter Sheet & Distance | v2.0 | 0/5 | In Progress|  |
 | 11. Grid Listing Cards | v2.0 | 0/? | Planned | — |
 | 12. Favorites Folders | v2.0 | 0/? | Planned | — |
 | 13. Select Location | v2.0 | 0/? | Planned | — |
