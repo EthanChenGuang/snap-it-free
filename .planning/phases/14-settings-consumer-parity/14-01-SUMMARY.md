@@ -81,7 +81,7 @@ Each task was committed atomically:
 1. **Task 1: Author migration 022** - `f19aeb7` (feat)
 2. **Task 2: Push migration 022 to live Supabase** - deployment only (no file changes; verified via psql)
 
-**Plan metadata:** pending (docs: complete plan)
+**Plan metadata:** `6fe440d` (docs: complete plan)
 
 ## Files Created/Modified
 
