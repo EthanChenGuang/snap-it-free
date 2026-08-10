@@ -248,7 +248,7 @@ Plans:
 
 **Requirements:** SET-01–06, TD-01, I18N-01 (partial)
 
-**Plans:** 6/7 plans executed
+**Plans:** 7/7 plans executed
 
 Plans:
 **Wave 0**
@@ -265,7 +265,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 14-07-PLAN.md — Phase gate: TD-01 04-VERIFICATION.md + regression audit + 14-VALIDATION.md sign-off
+- [x] 14-07-PLAN.md — Phase gate: TD-01 04-VERIFICATION.md + regression audit + 14-VALIDATION.md sign-off
 
 **Success criteria:**
 

@@ -53,10 +53,10 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 - [x] **SET-01**: Push notifications toggle retained and restyled to Stitch settings layout
 - [x] **SET-02**: Do Not Disturb: user-configurable quiet hours or silent-push window for notifications
-- [ ] **SET-03**: Language selection retained (zh / en / it)
+- [x] **SET-03**: Language selection retained (zh / en / it)
 - [x] **SET-04**: Delete account: Supabase account deletion with associated user data cleanup (auth-gated, destructive confirmation)
-- [ ] **SET-05**: Sign out retained
-- [ ] **SET-06**: Existing settings preserved: keyword alerts, zone preferences, appearance, iOS Add-to-Home-Screen shortcuts
+- [x] **SET-05**: Sign out retained
+- [x] **SET-06**: Existing settings preserved: keyword alerts, zone preferences, appearance, iOS Add-to-Home-Screen shortcuts
 
 ### Production Deploy
 
@@ -72,7 +72,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Tech Debt (carry-forward, execute if low cost)
 
-- [ ] **TD-01**: Phase 4 formal `04-VERIFICATION.md` completed
+- [x] **TD-01**: Phase 4 formal `04-VERIFICATION.md` completed
 - [ ] **TD-02**: Physical iPhone standalone push QA sign-off (v1 UAT test 12)
 - [ ] **TD-03**: Google OAuth production redirect URLs verified end-to-end
 
@@ -140,12 +140,12 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | LOC-03 | Phase 13 | Complete |
 | SET-01 | Phase 14 | Complete |
 | SET-02 | Phase 14 | Complete |
-| SET-03 | Phase 14 | Pending |
+| SET-03 | Phase 14 | Complete |
 | SET-04 | Phase 14 | Complete |
-| SET-05 | Phase 14 | Pending |
-| SET-06 | Phase 14 | Pending |
+| SET-05 | Phase 14 | Complete |
+| SET-06 | Phase 14 | Complete |
 | I18N-01 | Phases 9–14 | Complete |
-| TD-01 | Phase 14 | Pending |
+| TD-01 | Phase 14 | Complete |
 | TD-02 | Phase 7 | Pending |
 | TD-03 | Phase 7 | Pending |
 | DEPLOY-01 | Phase 7 | Pending |
