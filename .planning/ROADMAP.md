@@ -116,7 +116,7 @@ Plans:
 
 **Requirements:** CARD-01–05, I18N-01 (partial)
 
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 
 Plans:
 **Wave 0**
@@ -125,7 +125,7 @@ Plans:
 
 **Wave 1** *(blocked on Wave 0)*
 
-- [ ] 11-02-PLAN.md — Tracer: ListListingCard claimed suffix + dim + wire metadata helper on feed
+- [x] 11-02-PLAN.md — Tracer: ListListingCard claimed suffix + dim + wire metadata helper on feed
 
 **Wave 2** *(blocked on Wave 1)*
 

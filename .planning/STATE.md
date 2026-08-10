@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 11
 current_phase_name: grid-listing-cards
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-08-10T16:20:00.835Z"
+stopped_at: Completed 11-02-PLAN.md
+last_updated: "2026-08-10T16:22:54.754Z"
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 14
-  completed_plans: 11
+  completed_plans: 12
   percent: 29
 last_activity: 2026-08-10
 last_activity_desc: "Completed quick task 260810-nfg: Feed header pills & badge indicators"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 11 (grid-listing-cards) — EXECUTING
-**Current Plan:** 2
+**Current Plan:** 3
 **Total Plans in Phase:** 4
 Status: Ready to execute
 
-Progress: [████████░░] 79% v2.0 (0/7 phases)
+Progress: [█████████░] 86% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -71,6 +71,7 @@ Progress: [████████░░] 79% v2.0 (0/7 phases)
 | Phase 10-search-filter-sheet-distance P04 | 8min | 3 tasks | 7 files |
 | Phase 10-search-filter-sheet-distance P05 | 3min | 3 tasks | 6 files |
 | Phase 11-grid-listing-cards P01 | 3min | 2 tasks | 3 files |
+| Phase 11-grid-listing-cards P02 | 2min | 3 tasks | 1 files |
 
 ## Deferred Items (from v1.0)
 
@@ -90,8 +91,8 @@ Progress: [████████░░] 79% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T16:20:00.823Z
-**Stopped at:** Completed 11-01-PLAN.md
+**Last session:** 2026-08-10T16:22:54.744Z
+**Stopped at:** Completed 11-02-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -116,6 +117,8 @@ Progress: [████████░░] 79% v2.0 (0/7 phases)
 - [Phase ?]: radiusEnable renamed to radiusEnabledLabel; removeFilterAriaLabel template for city/category pill dismiss
 - [Phase ?]: filterComingSoon stub verified absent; consumer filter UI uses city keys only per D-03/D-30
 - [Phase ?]: buildCardMetadata extracted to lib/listings/ with TDD; ListListingCard import deferred to Plan 02
+- [Phase ?]: Photo-only opacity-60 for claimed dimming; FREE badge and heart overlays unaffected (D-21)
+- [Phase ?]: ListPageClient inherits claimed suffix/dim without distanceMeters — city · time fallback acceptable (D-22)
 
 ## Quick Tasks Completed
 
