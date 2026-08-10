@@ -124,6 +124,8 @@ export const messages: Messages = {
     guidelines: 'By posting you agree to the community guidelines.',
     successToast: 'Listing published',
     missingFields: 'Add a photo and title to continue.',
+    locationRowPending: 'Tap to set pickup location',
+    locationRequiredError: 'Set a pickup location to continue.',
     uploadError: 'Photo upload failed.',
     createError: 'Could not publish. Try again.',
     pinOutsideVenice: 'Move the pin inside Venice',

@@ -128,6 +128,8 @@ export const messages = {
     guidelines: 'Pubblicando accetti le linee guida della community.',
     successToast: 'Annuncio pubblicato',
     missingFields: 'Aggiungi foto e titolo per continuare.',
+    locationRowPending: 'Tocca per impostare il luogo di ritiro',
+    locationRequiredError: 'Imposta un luogo di ritiro per continuare.',
     uploadError: 'Caricamento foto non riuscito.',
     createError: 'Pubblicazione non riuscita. Riprova.',
     pinOutsideVenice: 'Sposta il pin dentro Venezia',

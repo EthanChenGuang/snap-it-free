@@ -124,6 +124,8 @@ export const messages: Messages = {
     guidelines: '发布即表示你同意社区准则。',
     successToast: '已发布',
     missingFields: '请添加照片和标题后再继续。',
+    locationRowPending: '点击设置取货地点',
+    locationRequiredError: '请先设置取货地点。',
     uploadError: '照片上传失败。',
     createError: '发布失败，请重试。',
     pinOutsideVenice: '请将图钉移到威尼斯范围内',

@@ -1,14 +1,14 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toaster';
 import { createClient } from '@/lib/supabase/client';
-import { nearestVeniceZone } from '@/lib/geo/nearest-zone';
 import { ZONE_CENTERS } from '@/lib/geo/zone-centers';
+import { readPostDraft } from '@/lib/post-draft/storage';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { POST_CATEGORIES, type PostCategory } from '@/lib/listings/canonical-categories';
 
@@ -47,23 +47,23 @@ function buildDescription(
 }
 
 export function PostForm() {
-  const { messages, zoneLabel } = useMessages();
+  const { messages } = useMessages();
 
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<PostCategory>('furniture');
   const [condition, setCondition] = useState<ItemCondition>('good');
-  const [pinLocation, setPinLocation] = useState(true);
   const [lat, setLat] = useState(ZONE_CENTERS.centro_storico.lat);
   const [lng, setLng] = useState(ZONE_CENTERS.centro_storico.lng);
+  const [locationConfirmed, setLocationConfirmed] = useState(false);
+  const [cityLabel, setCityLabel] = useState('');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [geoError, setGeoError] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -72,48 +72,15 @@ export function PostForm() {
     });
   }, []);
 
-  const requestGeolocation = useCallback(() => {
-    if (!navigator.geolocation) {
-      setGeoError(messages.post.geolocationUnavailable);
-      return;
-    }
-
-    setGeoError(null);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLat(position.coords.latitude);
-        setLng(position.coords.longitude);
-      },
-      (positionError) => {
-        if (positionError.code === positionError.PERMISSION_DENIED) {
-          setGeoError(messages.post.geolocationDenied);
-        } else if (positionError.code === positionError.TIMEOUT) {
-          setGeoError(messages.post.geolocationTimeout);
-        } else {
-          setGeoError(messages.post.geolocationUnavailable);
-        }
-        setPinLocation(false);
-        setLat(ZONE_CENTERS.centro_storico.lat);
-        setLng(ZONE_CENTERS.centro_storico.lng);
-      },
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
-  }, []);
-
   useEffect(() => {
-    if (pinLocation) {
-      requestGeolocation();
-    } else {
-      setLat(ZONE_CENTERS.centro_storico.lat);
-      setLng(ZONE_CENTERS.centro_storico.lng);
-      setGeoError(null);
+    const draft = readPostDraft();
+    if (draft) {
+      setLat(draft.lat);
+      setLng(draft.lng);
+      setLocationConfirmed(draft.locationConfirmed);
+      setCityLabel(draft.label ?? '');
     }
-  }, [pinLocation, requestGeolocation]);
-
-  const locationLine = useMemo(() => {
-    const zone = nearestVeniceZone(lat, lng);
-    return `Venezia, ${zoneLabel(zone)}`;
-  }, [lat, lng]);
+  }, []);
 
   const applyPhotoFile = (file: File) => {
     setPhotoFile(file);
@@ -142,6 +109,11 @@ export function PostForm() {
 
     if (!photoFile || !title.trim()) {
       setError(messages.post.missingFields);
+      return;
+    }
+
+    if (!locationConfirmed) {
+      setError(messages.post.locationRequiredError);
       return;
     }
 
@@ -328,29 +300,19 @@ export function PostForm() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-outline-variant bg-surface-container-low p-space-md">
+          <button
+            type="button"
+            onClick={() => router.push('/select-location?context=post')}
+            className="flex w-full items-center justify-between rounded-lg border border-outline-variant bg-surface-container-low p-space-md"
+          >
             <div className="flex items-center gap-space-md">
               <span className="material-symbols-outlined text-on-surface-variant">location_on</span>
-              <div>
-                <p className="text-label-md text-primary">{messages.post.pinCurrentLocation}</p>
-                <p className="text-label-sm text-secondary">
-                  {pinLocation ? locationLine : messages.post.pinLocationDefault}
-                </p>
-                {geoError && pinLocation && (
-                  <p className="mt-space-xs text-label-sm text-error">{geoError}</p>
-                )}
-              </div>
+              <p className="text-label-md font-normal text-on-surface">
+                {locationConfirmed ? cityLabel : messages.post.locationRowPending}
+              </p>
             </div>
-            <label className="relative inline-flex cursor-pointer items-center">
-              <input
-                type="checkbox"
-                className="peer sr-only"
-                checked={pinLocation}
-                onChange={(event) => setPinLocation(event.target.checked)}
-              />
-              <div className="relative h-6 w-11 rounded-full bg-outline-variant after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-outline-variant after:bg-surface-container-lowest after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:outline-none rtl:peer-checked:after:-translate-x-full" />
-            </label>
-          </div>
+            <span className="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+          </button>
         </section>
 
         {error && <p className="text-label-sm text-error">{error}</p>}
