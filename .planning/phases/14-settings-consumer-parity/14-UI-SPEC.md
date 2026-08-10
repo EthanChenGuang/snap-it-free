@@ -143,7 +143,7 @@ EN is source of truth; zh/it mirror the existing `messages/{zh,it}.ts` tone (sho
 - Delete Account two-step confirm button (`interactive-control`, `form`)
 - Active-claims warning line (`static-content`, conditional)
 
-Applicable state considerations resolved: 7 covered, 2 backstop, 1 unresolved
+Applicable state considerations resolved: 6 covered, 2 backstop, 1 dismissed, 1 unresolved
 
 | Category | Element(s) | Status | Resolution / Reason |
 |----------|------------|--------|---------------------|
@@ -154,7 +154,8 @@ Applicable state considerations resolved: 7 covered, 2 backstop, 1 unresolved
 | error | Delete Account request failure | 🧪 backstop | `settings.account.deleteError` copy defined above; needs explicit test that a failed delete API call resets the two-step confirm state to idle (not stuck on "tap again to confirm") and surfaces the error inline |
 | zero-one-many | Active-claims warning line | ✅ covered | Explicit singular/plural copy variants defined in Copywriting Contract (`n === 1` vs `n > 1`); `n === 0` renders no warning line at all (D-17 only triggers the line when claims exist) |
 | overflow / long-text | DND helper text, Account danger-box description | ✅ covered | All copy is short, fixed-vocabulary, non-user-generated (translator-authored strings only) — no truncation/wrap handling needed, consistent with every other settings row on this screen |
-| empty | DND / Account sections | not applicable | Neither surface is a list/collection — DND always shows its toggle, Account always shows its one row; there is no "zero items" state to design |
+| empty | DND time inputs (form — first load, before a saved quiet-hours value exists) | ✅ covered | Cross-references the "populated (three-state)" row above — the toggle's "off" state (no saved value yet) already defines this exact case: toggle unchecked, time inputs hidden entirely. No separate empty-form treatment needed beyond the three-state model already specified. |
+| empty | Delete Account button (form — single confirm action, no data fields) | dismissed | Not a data-entry form — it is a single-action confirm button with no fields to be "empty," so the empty/unfilled-form consideration does not meaningfully apply here. |
 | conditional visibility (DND gating) | DND sub-block within `NotificationsSection` | ⚠ unresolved | D-06 locks "shown only when Push Notifications is on" but CONTEXT.md doesn't specify the exact behavior when a user turns Push OFF while DND was previously configured ON — does the DND sub-block simply hide (preserving its saved state for when Push is re-enabled, consistent with D-08's "configured-but-paused" philosophy) or does turning Push off also force-disable DND server-side? Recommend: **hide only, do not force-disable** — the quiet-hours row is enforcement-scoped to "all server push" per D-04, and if Push itself is off there's nothing to suppress, so no forced write is needed; this is a planner decision to confirm, not locked here |
 
 <!-- Status vocabulary (locked by probe-core projectTruths):
