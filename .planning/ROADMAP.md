@@ -209,7 +209,7 @@ Plans:
 
 **Requirements:** LOC-01–03, I18N-01 (partial)
 
-**Plans:** 4/4 plans executed
+**Plans:** 5/5 plans executed
 
 Plans:
 **Wave 0**
@@ -227,6 +227,10 @@ Plans:
 **Wave 3** *(blocked on Wave 2)*
 
 - [x] 13-04-PLAN.md — Phase gate: integration audit, full lib suite, VALIDATION.md sign-off
+
+**Gap closure**
+
+- [x] 13-05-PLAN.md — Restore missing infrastructure; green test:lib + build (nyquist_compliant)
 
 **Success criteria:**
 
@@ -284,7 +288,7 @@ Plans:
 | 10. Filter Sheet & Distance | v2.0 | 0/5 | In Progress|  |
 | 11. Grid Listing Cards | v2.0 | 0/4 | Complete    | 2026-08-10 |
 | 12. Canonical Category Mapping | v2.0 | 4/4 | Complete    | 2026-08-10 |
-| 13. Select Location | v2.0 | 4/4 | Complete    | 2026-08-10 |
+| 13. Select Location | v2.0 | 5/5 | Verified | 2026-08-10 |
 | 14. Settings Parity | v2.0 | 0/? | Planned | — |
 | 7. Production Deploy | v2.0 | 0/4 | Planned | — |
 
