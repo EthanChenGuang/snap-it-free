@@ -331,7 +331,7 @@ export const SelectLocationMapPane = forwardRef<MapRef, SelectLocationMapPanePro
         {showRadiusControls && (
           <div className="pointer-events-none absolute inset-x-0 top-3 z-30 flex justify-center px-gutter">
             <div
-              className="pointer-events-auto flex gap-1 rounded-full border border-outline-variant bg-surface-container-lowest/95 p-1 shadow-[0_2px_12px_rgba(0,0,0,0.08)] backdrop-blur-sm"
+              className="pointer-events-auto flex gap-1 rounded-full border border-outline-variant bg-surface-container-lowest p-1 shadow-[0_2px_12px_rgba(0,0,0,0.08)]"
               role="group"
               aria-label={radiusLabel}
               onPointerDown={(event) => event.stopPropagation()}
@@ -347,7 +347,7 @@ export const SelectLocationMapPane = forwardRef<MapRef, SelectLocationMapPanePro
                       handleRadiusSelect(km);
                     }}
                     className={cn(
-                      'min-h-9 touch-manipulation rounded-full px-space-md py-space-xs text-label-sm font-medium transition-colors',
+                      'min-h-9 touch-manipulation rounded-full px-space-md py-space-xs text-label-sm font-normal transition-colors',
                       active
                         ? 'bg-primary text-on-primary'
                         : 'text-on-surface hover:bg-surface-container-low',
@@ -366,7 +366,7 @@ export const SelectLocationMapPane = forwardRef<MapRef, SelectLocationMapPanePro
           type="button"
           onClick={onLocateMe}
           aria-label={locateMeAriaLabel}
-          className="absolute bottom-[calc(10rem+env(safe-area-inset-bottom,0px))] right-4 z-20 flex h-12 w-12 touch-manipulation items-center justify-center rounded-full border border-outline-variant/40 bg-surface-container-lowest shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-opacity active:opacity-90"
+          className="absolute bottom-[calc(10rem+env(safe-area-inset-bottom,0px))] right-4 z-20 flex h-12 w-12 touch-manipulation items-center justify-center rounded-full border border-outline-variant/40 bg-surface-container-lowest transition-opacity active:opacity-90"
         >
           <span className="material-symbols-outlined text-[22px] text-on-surface">
             my_location

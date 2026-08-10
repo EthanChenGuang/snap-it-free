@@ -249,7 +249,7 @@ export function SelectLocationClient() {
         )}
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 px-gutter pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <div className="pointer-events-auto rounded-xl border border-outline-variant bg-surface-container-lowest p-space-md shadow-[0_4px_24px_rgba(0,0,0,0.08)]">
+          <div className="pointer-events-auto rounded-lg border border-outline-variant bg-surface-container-lowest p-space-md">
             <div
               className="mb-space-md flex items-center gap-space-sm rounded-lg border border-outline-variant bg-surface-container-low px-space-md py-space-sm"
               aria-live="polite"
