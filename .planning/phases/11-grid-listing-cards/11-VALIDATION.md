@@ -40,7 +40,7 @@ created: 2026-08-10
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | 11-01-01 | 01 | 0 | CARD-01/02 | — | Metadata builder unit tests | unit | `npm run test:lib -- lib/listings/card-metadata.test.ts -x` | ✅ | ✅ green |
 | 11-02-01 | 02 | 1 | CARD-01–05 | — | Tracer card polish E2E | manual | Human verify at `/` grid | — | ⬜ pending |
-| 11-03-01 | 03 | 2 | CARD-04/D-11 | — | Single heart on favorites | grep | `rg 'FavoriteButton' components/listings/FavoritesPageClient.tsx` expects 0 | ❌ W0 | ⬜ pending |
+| 11-03-01 | 03 | 2 | CARD-04/D-11 | — | Single heart on favorites | grep | `rg 'FavoriteButton' components/listings/FavoritesPageClient.tsx` expects 0 | ✅ | ✅ green |
 | 11-03-02 | 03 | 2 | CARD-02/D-23 | — | Favorites distance wiring | manual | Human verify `/favorites` with center active | — | ⬜ pending |
 | 11-04-01 | 04 | 3 | I18N-01 | — | Key parity zh/en/it | unit | `npx vitest run messages/key-parity.test.ts` | ✅ | ✅ green |
 
@@ -53,6 +53,17 @@ created: 2026-08-10
 - [x] `lib/listings/card-metadata.ts` — extract from `ListListingCard.tsx`
 - [x] `lib/listings/card-metadata.test.ts` — covers CARD-01, CARD-02, D-17, D-19 edge cases
 - [x] `vitest.config.ts` — already includes `lib/**/*.test.ts`; no config change needed
+
+---
+
+## Integration Audit (Plan 04)
+
+| Check | Result |
+|-------|--------|
+| Zero `FavoriteButton` in `FavoritesPageClient.tsx` | ✅ pass (0 matches) |
+| `ListListingCard` imports `buildCardMetadata` from `lib/listings/card-metadata` | ✅ pass |
+| No Claim button / `ReservedBadge` in `ListListingCard` | ✅ pass |
+| `FeedHomeClient` + `FavoritesPageClient` render `ListListingCard` without outer heart wrappers | ✅ pass |
 
 ---
 
