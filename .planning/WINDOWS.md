@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 8
+open_count: 10
 waived_count: 0
 fixed_count: 0
-total_count: 8
-last_updated: 2026-08-10T13:10:26.025Z
+total_count: 10
+last_updated: 2026-08-10T16:29:14.843Z
 ---
 
 # Broken Windows Ledger
@@ -23,6 +23,8 @@ last_updated: 2026-08-10T13:10:26.025Z
 | 6 | 08 | deviation | .planning/phases/08-subito-regalo-url-matrix-venice-padova-veneto-all-categories/08-PADOVA-SPIKE.md |  | Padova spike coord gate FAIL — 0/2 detail pages with embed coords | open |  | 2026-08-05T17:47:25.725Z |  |
 | 7 | 10 | stub | components/listings/FilterSheet.tsx |  | Radius section shows placeholder text only | open |  | 2026-08-10T13:06:43.226Z |  |
 | 8 | 10 | stub | components/listings/ListListingCard.tsx |  | distanceMeters prop accepted but not rendered in metadata | open |  | 2026-08-10T13:10:26.025Z |  |
+| 9 | 11 | unrun-verify | lib/admin/subito-regalo-catalog.test.ts |  | 3 pre-existing failures block npm run test:lib full suite exit 0 | open |  | 2026-08-10T16:29:14.686Z |  |
+| 10 | 11 | unrun-verify | lib/admin/cleanup.ts | 34 | Pre-existing TS error blocks npm run build exit 0 | open |  | 2026-08-10T16:29:14.843Z |  |
 
 ````json
 [
@@ -120,6 +122,30 @@ last_updated: 2026-08-10T13:10:26.025Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-10T13:10:26.025Z",
+    "resolved_at": null
+  },
+  {
+    "id": 9,
+    "kind": "unrun-verify",
+    "phase": "11",
+    "file": "lib/admin/subito-regalo-catalog.test.ts",
+    "line": null,
+    "description": "3 pre-existing failures block npm run test:lib full suite exit 0",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-10T16:29:14.686Z",
+    "resolved_at": null
+  },
+  {
+    "id": 10,
+    "kind": "unrun-verify",
+    "phase": "11",
+    "file": "lib/admin/cleanup.ts",
+    "line": 34,
+    "description": "Pre-existing TS error blocks npm run build exit 0",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-10T16:29:14.843Z",
     "resolved_at": null
   }
 ]

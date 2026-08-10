@@ -117,7 +117,7 @@ Each task was committed atomically:
 2. **Task 2: Integration grep audit — single heart, no Claim, metadata helper** - `cb9eb5f` (chore)
 3. **Task 3: Phase gate: full lib suite + build + validation sign-off** - `48bcb42` (docs)
 
-**Plan metadata:** pending (docs commit)
+**Plan metadata:** `33eb99b` (docs: complete plan)
 
 ## Files Created/Modified
 
