@@ -4,12 +4,18 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { MapRef } from 'react-map-gl/maplibre';
 import {
+  fitMapToRadius,
   SelectLocationMapPane,
   type SelectLocationMapViewState,
 } from '@/components/map/SelectLocationMapPane';
-import { writeBrowseCenter } from '@/lib/browse-center/context';
+import { applyMapFilterPrefs } from '@/lib/filter-prefs/mode-transitions';
+import {
+  readFilterPrefs,
+  SELECT_LOCATION_RADIUS_OPTIONS,
+} from '@/lib/filter-prefs/storage';
 import { readBrowseCenter } from '@/lib/browse-center/storage';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { cn } from '@/lib/utils';
 
 const VENICE_CENTER = { lat: 45.44, lng: 12.33 };
 const DEFAULT_ZOOM = 14;
@@ -36,17 +42,30 @@ function buildViewState(
   return { longitude: lng, latitude: lat, zoom };
 }
 
+function resolveInitialRadiusKm(): number {
+  const prefs = readFilterPrefs();
+  if (prefs.mode === 'map' && prefs.radiusEnabled) {
+    return prefs.radiusKm;
+  }
+  return 10;
+}
+
 export function SelectLocationClient() {
   const router = useRouter();
   const { messages } = useMessages();
   const mapRef = useRef<MapRef>(null);
   const gpsRequested = useRef(false);
   const [ready, setReady] = useState(false);
+  const [radiusKm, setRadiusKm] = useState(10);
   const [markerPosition, setMarkerPosition] = useState(VENICE_CENTER);
   const [initialViewState, setInitialViewState] = useState(() =>
     buildViewState(VENICE_CENTER.lat, VENICE_CENTER.lng),
   );
   const [pinAnimating, setPinAnimating] = useState(false);
+
+  const fitToRadius = useCallback(() => {
+    fitMapToRadius(mapRef.current, markerPosition, radiusKm);
+  }, [markerPosition, radiusKm]);
 
   const triggerPinDrop = useCallback(() => {
     setPinAnimating(true);
@@ -58,17 +77,15 @@ export function SelectLocationClient() {
       setMarkerPosition(coords);
       setInitialViewState(buildViewState(coords.lat, coords.lng));
       if (fly) {
-        mapRef.current?.flyTo({
-          center: [coords.lng, coords.lat],
-          zoom: DEFAULT_ZOOM,
-          duration: 800,
-        });
+        fitMapToRadius(mapRef.current, coords, radiusKm);
       }
     },
-    [],
+    [radiusKm],
   );
 
   useEffect(() => {
+    setRadiusKm(resolveInitialRadiusKm());
+
     const saved = readBrowseCenter();
     if (saved) {
       applyMarkerPosition({ lat: saved.lat, lng: saved.lng });
@@ -121,24 +138,28 @@ export function SelectLocationClient() {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
-        applyMarkerPosition(coords, true);
+        setMarkerPosition(coords);
+        fitMapToRadius(mapRef.current, coords, radiusKm);
         triggerPinDrop();
       },
       () => {},
       GEO_OPTIONS,
     );
-  }, [applyMarkerPosition, triggerPinDrop]);
+  }, [radiusKm, triggerPinDrop]);
 
   const handleConfirm = () => {
     const label = resolveCityLabel(markerPosition.lat, markerPosition.lng, {
       venice: messages.feed.cityVenice,
       padova: messages.feed.cityPadova,
     });
-    writeBrowseCenter({
-      lat: markerPosition.lat,
-      lng: markerPosition.lng,
-      label,
-    });
+    applyMapFilterPrefs(
+      {
+        lat: markerPosition.lat,
+        lng: markerPosition.lng,
+        label,
+      },
+      radiusKm,
+    );
     router.back();
   };
 
@@ -162,20 +183,53 @@ export function SelectLocationClient() {
 
       <div className="relative min-h-0 flex-1">
         {ready ? (
-          <SelectLocationMapPane
-            ref={mapRef}
-            initialViewState={initialViewState}
-            markerPosition={markerPosition}
-            pinAnimating={pinAnimating}
-            onMapClick={handleMapClick}
-            onLocateMe={handleLocateMe}
-            locateMeAriaLabel={messages.selectLocation.locateMe}
-            onLoad={() => {
-              mapRef.current
-                ?.getMap()
-                ?.setPadding({ top: 0, bottom: 160, left: 0, right: 0 });
-            }}
-          />
+          <>
+            <div className="pointer-events-none absolute inset-x-0 top-3 z-10 flex justify-center px-gutter">
+              <div
+                className="pointer-events-auto flex gap-1 rounded-full border border-outline-variant bg-surface-container-lowest/95 p-1 shadow-[0_2px_12px_rgba(0,0,0,0.08)] backdrop-blur-sm"
+                role="group"
+                aria-label={messages.selectLocation.radiusLabel}
+              >
+                {SELECT_LOCATION_RADIUS_OPTIONS.map((km) => {
+                  const active = radiusKm === km;
+                  return (
+                    <button
+                      key={km}
+                      type="button"
+                      onClick={() => setRadiusKm(km)}
+                      className={cn(
+                        'min-h-9 rounded-full px-space-md py-space-xs text-label-sm font-medium transition-colors',
+                        active
+                          ? 'bg-primary text-on-primary'
+                          : 'text-on-surface-variant hover:bg-surface-container-low',
+                      )}
+                      aria-pressed={active}
+                    >
+                      {messages.selectLocation.radiusOption(km)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <SelectLocationMapPane
+              ref={mapRef}
+              initialViewState={initialViewState}
+              markerPosition={markerPosition}
+              radiusKm={radiusKm}
+              pinAnimating={pinAnimating}
+              onMapClick={handleMapClick}
+              onLocateMe={handleLocateMe}
+              locateMeAriaLabel={messages.selectLocation.locateMe}
+              onFitBounds={fitToRadius}
+              onLoad={() => {
+                mapRef.current
+                  ?.getMap()
+                  ?.setPadding({ top: 56, bottom: 160, left: 24, right: 24 });
+                fitMapToRadius(mapRef.current, markerPosition, radiusKm);
+              }}
+            />
+          </>
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-surface-container-low">
             <p className="text-label-sm text-on-surface-variant">

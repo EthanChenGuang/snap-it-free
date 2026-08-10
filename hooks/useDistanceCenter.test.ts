@@ -56,7 +56,12 @@ describe('composeFeedListings pipeline', () => {
       lat: null,
       lng: null,
     };
-    const applied = { ...DEFAULT_FILTER_PREFS, radiusEnabled: true, radiusKm: 50 };
+    const applied = {
+      ...DEFAULT_FILTER_PREFS,
+      mode: 'map' as const,
+      radiusEnabled: true,
+      radiusKm: 50,
+    };
     const { listings } = composeFeedListings({
       listings: [baseListing, noCoord],
       applied,
@@ -112,6 +117,57 @@ describe('composeFeedListings pipeline', () => {
     });
     expect(listings[0]?.id).toBe(near.id);
     expect(listings[1]?.id).toBe(far.id);
+  });
+
+  it('applies city filter only in city mode', () => {
+    const padovaListing: ListingRow = {
+      ...baseListing,
+      id: 'cccccccc-cccc-cccc-cccc-cccccccccccc',
+      zone: null,
+      city: 'padova',
+      lat: 45.41,
+      lng: 11.88,
+    };
+    const applied = {
+      ...DEFAULT_FILTER_PREFS,
+      mode: 'city' as const,
+      city: 'venice' as const,
+      radiusEnabled: false,
+    };
+    const { listings } = composeFeedListings({
+      listings: [baseListing, padovaListing],
+      applied,
+      center,
+      searchQuery: '',
+      language: 'en',
+      cityLabels,
+    });
+    expect(listings).toHaveLength(1);
+    expect(listings[0]?.id).toBe(baseListing.id);
+  });
+
+  it('skips radius filter when mode is city even if radiusEnabled legacy flag set', () => {
+    const far: ListingRow = {
+      ...baseListing,
+      id: 'dddddddd-dddd-dddd-dddd-dddddddddddd',
+      lat: 45.9,
+      lng: 12.9,
+    };
+    const applied = {
+      ...DEFAULT_FILTER_PREFS,
+      mode: 'city' as const,
+      radiusEnabled: true,
+      radiusKm: 1,
+    };
+    const { listings } = composeFeedListings({
+      listings: [baseListing, far],
+      applied,
+      center,
+      searchQuery: '',
+      language: 'en',
+      cityLabels,
+    });
+    expect(listings).toHaveLength(2);
   });
 
   it('sorts by posted_at desc when no center', () => {

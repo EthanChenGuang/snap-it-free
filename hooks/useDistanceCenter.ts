@@ -69,11 +69,13 @@ export function composeFeedListings({
     matchesFeedSearch(listing, searchQuery, language, cityLabels),
   );
 
-  if (applied.radiusEnabled && center) {
+  if (applied.mode === 'map' && applied.radiusEnabled && center) {
     rows = filterByRadiusKm(rows, center, applied.radiusKm);
   }
 
-  rows = rows.filter((listing) => matchesConsumerCity(listing, applied.city));
+  if (applied.mode === 'city' && applied.city !== 'all') {
+    rows = rows.filter((listing) => matchesConsumerCity(listing, applied.city));
+  }
 
   if (applied.categories.length > 0) {
     rows = rows.filter((listing) => matchesAnySubitoCategories(listing, applied.categories));

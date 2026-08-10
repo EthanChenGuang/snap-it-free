@@ -58,6 +58,7 @@ export const messages: Messages = {
     cityAll: '全部',
     cityVenice: '威尼斯',
     cityPadova: '帕多瓦',
+    cityFilterMapHint: '按距离搜索请使用首页的图钉按钮。',
     categoriesLabel: '分类',
     clearSelection: '清除选择',
     withinKm: (km: number) => `${km}公里内`,
@@ -79,6 +80,8 @@ export const messages: Messages = {
     back: '返回',
     selectedLocationLabel: '已选位置',
     locateMe: '定位到我的位置',
+    radiusLabel: '搜索半径',
+    radiusOption: (km: number) => `${km}公里`,
   },
   post: {
     title: '发布免费物品',

@@ -10,12 +10,17 @@ import {
   type ReactNode,
 } from 'react';
 import {
+  applyCityFilterPrefs,
+  clearMapFilterPrefs,
+} from '@/lib/filter-prefs/mode-transitions';
+import {
   DEFAULT_FILTER_PREFS,
-  readFilterPrefs,
   subscribeFilterPrefs,
+  readFilterPrefs,
   writeFilterPrefs,
   type FilterPrefs,
 } from '@/lib/filter-prefs/storage';
+import { clearBrowseCenter } from '@/lib/browse-center/storage';
 
 type FeedFilterContextValue = {
   applied: FilterPrefs;
@@ -36,8 +41,8 @@ const FeedFilterContext = createContext<FeedFilterContextValue | null>(null);
 
 function computeHasActiveFilters(prefs: FilterPrefs): boolean {
   return (
-    prefs.radiusEnabled ||
-    prefs.city !== 'all' ||
+    (prefs.mode === 'map' && prefs.radiusEnabled) ||
+    (prefs.mode === 'city' && prefs.city !== 'all') ||
     prefs.categories.length > 0
   );
 }
@@ -61,18 +66,32 @@ export function FeedFilterProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const applyDraft = useCallback(() => {
-    writeFilterPrefs(draft);
+    const categoryOnlyInMapMode =
+      applied.mode === 'map' &&
+      draft.city === 'all' &&
+      draft.city === applied.city;
+
+    if (categoryOnlyInMapMode) {
+      writeFilterPrefs({ ...applied, categories: draft.categories });
+    } else {
+      applyCityFilterPrefs({
+        ...draft,
+        mode: 'city',
+        radiusEnabled: false,
+      });
+    }
     setSheetOpenState(false);
-  }, [draft]);
+  }, [draft, applied]);
 
   const resetFilters = useCallback(() => {
     const cleared = { ...DEFAULT_FILTER_PREFS };
     setDraftState(cleared);
+    clearBrowseCenter();
     writeFilterPrefs(cleared);
   }, []);
 
   const dismissCity = useCallback(() => {
-    writeFilterPrefs({ ...applied, city: 'all' });
+    applyCityFilterPrefs({ ...applied, city: 'all' });
   }, [applied]);
 
   const dismissCategory = useCallback(
@@ -84,8 +103,8 @@ export function FeedFilterProvider({ children }: { children: ReactNode }) {
   );
 
   const dismissRadius = useCallback(() => {
-    writeFilterPrefs({ ...applied, radiusEnabled: false });
-  }, [applied]);
+    clearMapFilterPrefs();
+  }, []);
 
   const setSheetOpen = useCallback(
     (open: boolean) => {

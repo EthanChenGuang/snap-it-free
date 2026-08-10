@@ -7,7 +7,7 @@ import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import { useFeedScroll } from '@/components/shell/FeedScrollContext';
 import { useDistanceCenter } from '@/hooks/useDistanceCenter';
 import { useBrowseCenter } from '@/lib/browse-center/context';
-import { clearBrowseCenter } from '@/lib/browse-center/storage';
+import { clearMapFilterPrefs } from '@/lib/filter-prefs/mode-transitions';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { getSubitoCategoryLabel } from '@/lib/listings/subito-categories';
 import { cn } from '@/lib/utils';
@@ -82,22 +82,21 @@ function FeedActiveFilterPills() {
   const { searchQuery, setSearchQuery } = useFeedScroll();
   const { applied, dismissCity, dismissCategory, dismissRadius } = useFeedFilter();
   const browseCenter = useBrowseCenter();
-  const { centerSource, requestGps } = useDistanceCenter(applied.radiusEnabled);
+  const mapModeActive = applied.mode === 'map' && applied.radiusEnabled;
+  const { centerSource, requestGps } = useDistanceCenter(mapModeActive);
 
-  const showCenterPill = centerSource === 'browse' || centerSource === 'gps';
+  const showCenterPill = mapModeActive && centerSource === 'browse' && !!browseCenter;
   const centerLabel =
-    centerSource === 'browse' && browseCenter?.label
-      ? browseCenter.label
-      : messages.feed.myLocation;
+    browseCenter?.label ?? messages.feed.myLocation;
 
   const handleClearCenter = () => {
-    clearBrowseCenter();
+    clearMapFilterPrefs();
     requestGps();
   };
 
   const hasSearchPill = searchQuery.trim().length > 0;
-  const hasRadiusPill = applied.radiusEnabled;
-  const hasCityPill = applied.city !== 'all';
+  const hasRadiusPill = mapModeActive;
+  const hasCityPill = applied.mode === 'city' && applied.city !== 'all';
   const hasCategoryPills = applied.categories.length > 0;
 
   if (

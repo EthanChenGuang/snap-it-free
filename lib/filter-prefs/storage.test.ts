@@ -14,6 +14,7 @@ describe('readFilterPrefs', () => {
 
   it('returns DEFAULT_FILTER_PREFS when storage empty (D-14, D-16, D-76)', () => {
     expect(readFilterPrefs()).toEqual({
+      mode: 'city',
       radiusKm: 10,
       radiusEnabled: false,
       city: 'all',
@@ -41,21 +42,30 @@ describe('writeFilterPrefs', () => {
 
   it('round-trips values via readFilterPrefs', () => {
     const prefs = {
-      radiusKm: 25,
+      mode: 'map' as const,
+      radiusKm: 50,
       radiusEnabled: true,
-      city: 'venice' as const,
+      city: 'all' as const,
       categories: ['informatica', 'arredamento-casalinghi'],
     };
     writeFilterPrefs(prefs);
     expect(readFilterPrefs()).toEqual(prefs);
   });
 
-  it('clamps radiusKm to 1–50 range', () => {
+  it('clamps radiusKm to 1–100 range', () => {
     writeFilterPrefs({ ...DEFAULT_FILTER_PREFS, radiusKm: 0 });
     expect(readFilterPrefs().radiusKm).toBe(1);
 
-    writeFilterPrefs({ ...DEFAULT_FILTER_PREFS, radiusKm: 99 });
-    expect(readFilterPrefs().radiusKm).toBe(50);
+    writeFilterPrefs({ ...DEFAULT_FILTER_PREFS, radiusKm: 150 });
+    expect(readFilterPrefs().radiusKm).toBe(100);
+  });
+
+  it('infers map mode from legacy radiusEnabled storage', () => {
+    localStorage.setItem(
+      FILTER_PREFS_STORAGE_KEY,
+      JSON.stringify({ radiusKm: 10, radiusEnabled: true, city: 'all', categories: [] }),
+    );
+    expect(readFilterPrefs().mode).toBe('map');
   });
 
   it('coerces invalid city string to all', () => {

@@ -1,4 +1,7 @@
+export type FilterMode = 'city' | 'map';
+
 export type FilterPrefs = {
+  mode: FilterMode;
   radiusKm: number;
   radiusEnabled: boolean;
   city: 'all' | 'venice' | 'padova';
@@ -9,6 +12,7 @@ export const FILTER_PREFS_STORAGE_KEY = 'shoumanwu_filter_prefs';
 export const FILTER_PREFS_CHANGE_EVENT = 'shoumanwu-filter-prefs-change';
 
 export const DEFAULT_FILTER_PREFS: FilterPrefs = {
+  mode: 'city',
   radiusKm: 10,
   radiusEnabled: false,
   city: 'all',
@@ -16,12 +20,28 @@ export const DEFAULT_FILTER_PREFS: FilterPrefs = {
 };
 
 const VALID_CITIES = new Set<FilterPrefs['city']>(['all', 'venice', 'padova']);
+const VALID_MODES = new Set<FilterMode>(['city', 'map']);
+const RADIUS_PRESETS = [5, 10, 50, 100] as const;
+export const SELECT_LOCATION_RADIUS_OPTIONS = RADIUS_PRESETS;
 
 function clampRadiusKm(value: unknown): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     return DEFAULT_FILTER_PREFS.radiusKm;
   }
-  return Math.min(50, Math.max(1, Math.round(value)));
+  const rounded = Math.round(value);
+  if (RADIUS_PRESETS.includes(rounded as (typeof RADIUS_PRESETS)[number])) {
+    return rounded;
+  }
+  return Math.min(100, Math.max(1, rounded));
+}
+
+function parseMode(value: unknown, parsed: Record<string, unknown>): FilterMode {
+  if (typeof value === 'string' && VALID_MODES.has(value as FilterMode)) {
+    return value as FilterMode;
+  }
+  if (parsed.radiusEnabled === true) return 'map';
+  if (parsed.city !== undefined && parsed.city !== 'all') return 'city';
+  return 'city';
 }
 
 function parseCity(value: unknown): FilterPrefs['city'] {
@@ -41,6 +61,7 @@ function parseFilterPrefs(raw: string | null): FilterPrefs {
   try {
     const parsed = JSON.parse(raw) as Record<string, unknown>;
     return {
+      mode: parseMode(parsed.mode, parsed),
       radiusKm: clampRadiusKm(parsed.radiusKm),
       radiusEnabled: parsed.radiusEnabled === true,
       city: parseCity(parsed.city),
@@ -69,6 +90,7 @@ export function readFilterPrefs(): FilterPrefs {
 
 export function writeFilterPrefs(prefs: FilterPrefs): FilterPrefs {
   const normalized: FilterPrefs = {
+    mode: VALID_MODES.has(prefs.mode) ? prefs.mode : 'city',
     radiusKm: clampRadiusKm(prefs.radiusKm),
     radiusEnabled: prefs.radiusEnabled === true,
     city: parseCity(prefs.city),

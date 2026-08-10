@@ -19,7 +19,8 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
   const { messages, language } = useMessages();
   const { searchQuery, registerScrollContainer } = useFeedScroll();
   const { applied } = useFeedFilter();
-  const { center } = useDistanceCenter(applied.radiusEnabled);
+  const mapModeActive = applied.mode === 'map' && applied.radiusEnabled;
+  const { center } = useDistanceCenter(mapModeActive);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { listings, isRefreshing } = useListingsPoll(initialListings);
@@ -55,8 +56,8 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
 
   const hasSearchQuery = searchQuery.trim().length > 0;
   const hasCategoryFilter = applied.categories.length > 0;
-  const hasCityFilter = applied.city !== 'all';
-  const hasRadiusFilter = applied.radiusEnabled;
+  const hasCityFilter = applied.mode === 'city' && applied.city !== 'all';
+  const hasRadiusFilter = mapModeActive;
   const hasActiveFilter =
     hasSearchQuery || hasRadiusFilter || hasCityFilter || hasCategoryFilter;
 

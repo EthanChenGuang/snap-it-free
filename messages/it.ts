@@ -60,6 +60,7 @@ export const messages = {
     cityAll: 'Tutte',
     cityVenice: 'Venezia',
     cityPadova: 'Padova',
+    cityFilterMapHint: 'Per cercare nel raggio usa il pulsante pin sulla home.',
     categoriesLabel: 'Categorie',
     clearSelection: 'Cancella selezione',
     withinKm: (km: number) => `Entro ${km} km`,
@@ -81,6 +82,8 @@ export const messages = {
     back: 'Indietro',
     selectedLocationLabel: 'Posizione selezionata',
     locateMe: 'Vai alla mia posizione',
+    radiusLabel: 'Raggio di ricerca',
+    radiusOption: (km: number) => `${km} km`,
   },
   post: {
     title: 'Pubblica oggetto gratis',

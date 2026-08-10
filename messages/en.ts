@@ -58,6 +58,7 @@ export const messages: Messages = {
     cityAll: 'All',
     cityVenice: 'Venice',
     cityPadova: 'Padova',
+    cityFilterMapHint: 'To search by radius, use the pin button on the home feed.',
     categoriesLabel: 'Categories',
     clearSelection: 'Clear selection',
     withinKm: (km: number) => `Within ${km} km`,
@@ -79,6 +80,8 @@ export const messages: Messages = {
     back: 'Back',
     selectedLocationLabel: 'Selected location',
     locateMe: 'Go to my location',
+    radiusLabel: 'Search radius',
+    radiusOption: (km: number) => `${km} km`,
   },
   post: {
     title: 'Post a free item',

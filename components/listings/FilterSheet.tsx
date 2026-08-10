@@ -8,10 +8,8 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
-import { SettingsToggle } from '@/components/settings/SettingsUi';
 import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import type { FilterPrefs } from '@/lib/filter-prefs/storage';
-import { DEFAULT_FILTER_PREFS } from '@/lib/filter-prefs/storage';
 import { useMessages } from '@/lib/i18n/useMessages';
 import {
   getSubitoCategoryLabel,
@@ -57,7 +55,7 @@ function ConsumerCityChipSelector({
   );
 }
 
-/** Filter bottom sheet — draft until Apply (D-51, D-53, D-57). */
+/** Filter bottom sheet — city + categories; radius lives on /select-location. */
 export function FilterSheet() {
   const { messages, language } = useMessages();
   const {
@@ -90,13 +88,6 @@ export function FilterSheet() {
     setDraft({ categories: next });
   };
 
-  const handleRadiusToggle = (enabled: boolean) => {
-    setDraft({
-      radiusEnabled: enabled,
-      radiusKm: enabled ? draft.radiusKm || DEFAULT_FILTER_PREFS.radiusKm : draft.radiusKm,
-    });
-  };
-
   return (
     <Drawer open={sheetOpen} onOpenChange={handleOpenChange}>
       <DrawerContent className="max-h-[85vh] pb-space-xl">
@@ -107,46 +98,11 @@ export function FilterSheet() {
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
           <section className="border-b border-outline-variant px-gutter py-space-md">
             <h3 className="mb-space-sm text-label-md font-medium text-on-surface-variant">
-              {messages.feed.radiusLabel}
-            </h3>
-            <div className="flex items-center justify-between gap-space-md">
-              <span className="text-body-md text-on-surface">
-                {draft.radiusEnabled ? messages.feed.withinKm(draft.radiusKm) : messages.feed.radiusOff}
-              </span>
-              <SettingsToggle
-                checked={draft.radiusEnabled}
-                onChange={handleRadiusToggle}
-                ariaLabel={messages.feed.radiusEnabledLabel}
-              />
-            </div>
-            {draft.radiusEnabled && (
-              <div className="mt-space-md flex flex-col gap-space-sm">
-                <input
-                  type="range"
-                  min={1}
-                  max={50}
-                  step={1}
-                  value={draft.radiusKm}
-                  onChange={(event) =>
-                    setDraft({ radiusKm: Number.parseInt(event.target.value, 10) })
-                  }
-                  className="w-full accent-primary"
-                  aria-valuemin={1}
-                  aria-valuemax={50}
-                  aria-valuenow={draft.radiusKm}
-                  aria-label={messages.feed.radiusLabel}
-                />
-                <span className="text-label-sm text-on-surface-variant">
-                  {messages.feed.withinKm(draft.radiusKm)}
-                </span>
-              </div>
-            )}
-          </section>
-
-          <section className="border-b border-outline-variant px-gutter py-space-md">
-            <h3 className="mb-space-sm text-label-md font-medium text-on-surface-variant">
               {messages.feed.cityLabel}
             </h3>
+            <p className="mb-space-sm text-label-sm text-on-surface-variant">
+              {messages.feed.cityFilterMapHint}
+            </p>
             <ConsumerCityChipSelector
               value={draft.city}
               onChange={(city) => setDraft({ city })}
