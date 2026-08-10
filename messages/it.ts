@@ -41,13 +41,13 @@ export const messages = {
     syncCta: 'Accedi',
   },
   list: {
-    searchPlaceholder: 'Cerca oggetti vicino a te…',
+    searchPlaceholder: 'Cerca oggetti…',
     emptyTitle: 'Nessun annuncio corrisponde ai filtri',
     emptyDescription: 'Prova a selezionare Tutte le categorie o modifica i filtri zona.',
     refreshing: 'Aggiornamento…',
   },
   feed: {
-    searchPlaceholder: 'Cerca oggetti gratis vicino a te…',
+    searchPlaceholder: 'Cerca oggetti…',
     filterComingSoon: 'Filtri in arrivo',
     openFilters: 'Filtri',
     openSelectLocation: 'Scegli posizione di navigazione',

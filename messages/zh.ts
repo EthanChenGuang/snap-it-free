@@ -39,13 +39,13 @@ export const messages: Messages = {
     syncCta: '登录',
   },
   list: {
-    searchPlaceholder: '搜索附近的免费物品…',
+    searchPlaceholder: '搜索物品…',
     emptyTitle: '暂无符合条件的物品',
     emptyDescription: '尝试选择「Tutte」分类或调整区域筛选。',
     refreshing: '刷新中…',
   },
   feed: {
-    searchPlaceholder: '搜索附近的免费物品…',
+    searchPlaceholder: '搜索物品…',
     filterComingSoon: '筛选功能即将推出',
     openFilters: '筛选',
     openSelectLocation: '选择浏览位置',

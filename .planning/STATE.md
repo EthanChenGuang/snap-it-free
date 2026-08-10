@@ -97,3 +97,9 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 - [Phase ?]: Manage my posts link moved from NavMenuDrawer to GeneralSection
 - [Phase ?]: SelectLocationZoneChips separate export keeps MapExplorer All chip unchanged
 - [Phase ?]: Confirm label derived from selected zone or nearest Venice vs Padova distance
+
+## Quick Tasks Completed
+
+| Date | Slug | Summary |
+|------|------|---------|
+| 2026-08-10 | feed-ui-polish | Feed header icons, short search placeholder, floating nav capsule w/ scroll-hide |

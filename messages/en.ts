@@ -39,13 +39,13 @@ export const messages: Messages = {
     syncCta: 'Sign in',
   },
   list: {
-    searchPlaceholder: 'Search free items near you…',
+    searchPlaceholder: 'Search items…',
     emptyTitle: 'No listings match your filters',
     emptyDescription: 'Try selecting the Tutte category or adjusting zone filters.',
     refreshing: 'Refreshing…',
   },
   feed: {
-    searchPlaceholder: 'Search free items near you…',
+    searchPlaceholder: 'Search items…',
     filterComingSoon: 'Filters coming soon',
     openFilters: 'Filters',
     openSelectLocation: 'Choose browse location',
