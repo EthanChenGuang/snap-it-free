@@ -5,6 +5,7 @@ status: draft
 shadcn_initialized: false
 preset: none
 created: 2026-08-10
+revised: 2026-08-10
 ---
 
 # Phase 13 — UI Design Contract
@@ -24,6 +25,8 @@ created: 2026-08-10
 | Font | Inter, loaded via `next/font/google` in `app/layout.tsx` |
 
 **Why no shadcn gate:** `components.json` does not exist and the project is **not** shadcn-based. The whole app is governed by a locked, pre-existing custom design system — **Google Stitch "Structured Minimalist"** — enforced project-wide by `.planning/google-stitch-ui-design/SKILL.md` and `.planning/google-stitch-ui-design/DESIGN.md`. Tokens are already implemented as Tailwind v4 `@theme` CSS variables in `app/globals.css` (verified: `--color-surface-container-lowest`, `--color-outline-variant`, `--text-label-md`, `--text-body-md`, etc. match DESIGN.md 1:1). This UI-SPEC extends that existing system for Phase 13 screens only — it does not introduce a new design language.
+
+**Primary visual focal point:** The full-viewport map canvas and the red `SelectLocationRedPin` are the dominant visual element on both browse and post select-location screens (D-46 — AppChrome header/bottom-nav hidden). Floating UI layered above it — minimal header, radius chip bar, locate-me FAB, and the bottom confirm panel — is secondary chrome; none of it should visually compete with the map + pin for attention (flat, low-elevation, border-only per the Color corrections below).
 
 **Screen prototype references (mandatory reading before implementation, per project skill):**
 - `.planning/google-stitch-ui-design/map_explorer_notion_style/code.html` — adapt for the select-location full-screen picker (strip the bottom drawer/product-list sheet; this screen is picker-only, per D-42)
@@ -57,13 +60,16 @@ Phase 13 screens use a subset of the project's full Stitch type scale (see DESIG
 | Role | Size | Weight | Line Height | Used for |
 |------|------|--------|-------------|----------|
 | Body | 15px (`body-md`) | 400 | 1.6 | Live city preview text, PostForm description textarea |
-| Label | 14px (`label-md`) | 500 (600/`font-semibold` on header title only) | 1.4 | Header title ("Select Location" / "Set pickup location"), PostForm field labels, PostForm location-row primary line |
+| Label | 14px (`label-md`) | 600 (`font-semibold`) for header title only; 400 (`font-normal`, override) for the PostForm location-row text | 1.4 | Header title ("Select Location" / "Set pickup location"); PostForm location-row primary line — pending "Tap to set pickup location" or confirmed city string (D-02/D-09/D-10) |
+| Micro-label | 12px (`label-sm`) | 400 (`font-normal`, override) for radius chip labels; 600 (`font-semibold`, unchanged) for Confirm button label | 1.2 | Radius preset chip labels (`{km} km`, browse only, D-43); Confirm button label ("Confirm location" / "Confirm pickup location") |
 | Heading | 24px (`h3`) | 600 | 1.4 | Not used on the select-location screen itself; used only where `PostForm`'s Item Title input reuses `text-h3` (out of this phase's scope, unchanged) |
-| Display | — | — | — | Not applicable — no display-scale text in this phase |
 
-**Documented exception (inherited from Stitch, not a phase-specific decision):** `label-sm` (12px / 500 / 1.2) is used for radius preset chip labels (`{km} km`) and the FAB has no visible label (icon-only, `aria-label` only). This is the existing Stitch micro-label token, not a new size — do not introduce a 6th font size.
+**Correction from prior draft — mandatory override, not an inherited exception:** the project-wide Stitch `label-md`/`label-sm` tokens default to font-weight **500** (`--text-label-md--font-weight: 500`, `--text-label-sm--font-weight: 500` in `app/globals.css`). This spec previously carried that 500 forward as a "documented Stitch exception" for radius chip labels and PostForm field captions — that is **not permitted**: the 2-weight-max rule applies to every weight rendered on this phase's screens, regardless of framing, and CONTEXT.md does not lock a font-weight exception (D-43/D-45 specify chip/row *styling*, not weight). The fix:
+- **Radius chip labels** (`SelectLocationMapPane.tsx` ~line 343, currently `text-label-sm font-medium`): change to `text-label-sm font-normal` — explicitly overrides the token's built-in 500 down to 400.
+- **PostForm location-row text** (new element replacing the old `pinCurrentLocation`/`pinLocationDefault` lines, D-02): build with `text-label-md font-normal` (or `text-label-sm font-normal` if the confirmed-state city string uses the smaller size) — explicitly override, do not rely on the bare token.
+- **Pre-existing, untouched PostForm captions** (Photo label, Title label, Description label, upload-hint text) are **out of Phase 13's scope** — not modified by D-01–D-46, not part of the Component Inventory changes below — and are intentionally excluded from this typography contract. Their existing 500-weight styling is unchanged project convention that lives outside this phase; do not touch them and do not count them against this phase's weight budget.
 
-**Weight contract:** 2 primary weights — **400 regular** (body/description copy) and **600 semibold** (header title, Confirm button label — emphasis/CTA elements). **500 medium** appears as an inherited Stitch label-token default (radius chip text, PostForm field captions) — carry it forward unchanged, do not invent new weights.
+**Weight contract:** exactly **2 weights** — **400 regular** (body/description copy, radius chip labels, PostForm location-row text — all via explicit `font-normal` where the underlying token defaults to 500) and **600 semibold** (header title, Confirm button label — both via explicit `font-semibold`).
 
 ---
 
@@ -95,6 +101,7 @@ This is a **dual-context screen** (D-01) — copy branches on `?context=post` vs
 |---------|-----------------|--------------|
 | Screen title (`selectLocation.title` / new key) | "Select Location" (existing, unchanged) | **"Set pickup location"** (new — D-08; add trilingual keys, e.g. `selectLocation.postTitle`) |
 | Primary CTA (Confirm button) | "Confirm location" (existing `selectLocation.confirm`, unchanged) | **"Confirm pickup location"** (new — D-37; e.g. `selectLocation.confirmPickup`) |
+| Locate-me FAB `aria-label` | "Go to my location" (existing `selectLocation.locateMe`, unchanged) — same copy in both contexts, FAB is not context-branched (D-25/D-26) | Same, reused verbatim |
 | PostForm location row — unconfirmed state | n/a | **"Tap to set pickup location"** (new — D-09; e.g. `post.locationRowPending`). Block submit until confirmed (D-39). |
 | PostForm location row — confirmed state | n/a | Same city string shown in the map preview (Venice / Padova, trilingual via existing `feed.cityVenice` / `feed.cityPadova`) — no new key needed; tapping again re-opens the map with coords preloaded (D-10) |
 | Live location preview row | City name only (Venice / Padova via `feed.cityVenice`/`cityPadova`) — **replaces** the static `selectLocation.selectedLocationLabel` placeholder (D-15); live-updates on pin move (D-14); `aria-live="polite"` (D-20); empty until map ready, per Loading row below | Same city-name preview pattern, same live-update/aria-live behavior |
@@ -109,6 +116,8 @@ This is a **dual-context screen** (D-01) — copy branches on `?context=post` vs
 - `selectLocation.confirmPickup` (or reuse under `post.*` — Claude's Discretion per CONTEXT.md; recommend keeping under `selectLocation.*` for symmetry with existing `selectLocation.confirm`) — "Confirm pickup location" (D-37)
 - `post.locationRowPending` — "Tap to set pickup location" (D-09)
 - `post.locationRequiredError` — "Set a pickup location to continue." (D-39, proposed — confirm exact copy with planner)
+
+**Existing key reused unchanged (confirming not overlooked):** `selectLocation.locateMe` = "Go to my location" — already trilingual in `messages/{zh,en,it}.ts`, used for the locate-me FAB `aria-label` in both browse and post contexts (D-25/D-26). No new key required; listed here so the planner doesn't mistake its absence from the "new keys" list above for an omission.
 
 **Keys to retire (superseded, remove or leave orphaned per executor's judgment):** `post.pinCurrentLocation`, `post.pinLocationDefault`, `post.zoneLabel`, `post.pinLabel` — no longer rendered once the GPS toggle → location row swap (D-02) and zone-label hide (D-11) land.
 
@@ -172,8 +181,8 @@ Reused as-is (no visual change beyond the corrections listed under Color above):
 
 Modified this phase (visual + prop changes):
 - `components/map/SelectLocationClient.tsx` — add `context` branching (title/CTA copy, confirm handler, radius-UI visibility), promote `resolveCityLabel` to shared util per Claude's Discretion, wire live preview + `aria-live="polite"` (D-20), fix `rounded-xl`+shadow → `rounded-lg`+no-shadow on confirm panel (D-40)
-- `components/map/SelectLocationMapPane.tsx` — accept `showRadiusControls: boolean` prop (false for post, D-26/D-32), fix radius-chip-bar translucency/blur → solid Stitch pill (D-43), review FAB shadow → border-only (D-44)
-- `components/ugc/PostForm.tsx` — remove GPS toggle + zone-label line (D-02/D-11); add tappable location row (two copy states: pending / confirmed, per Copywriting Contract above) that navigates to `/select-location?context=post`; block submit until `locationConfirmed === true` (D-39)
+- `components/map/SelectLocationMapPane.tsx` — accept `showRadiusControls: boolean` prop (false for post, D-26/D-32), fix radius-chip-bar translucency/blur → solid Stitch pill (D-43), review FAB shadow → border-only (D-44), fix radius chip label weight from `font-medium` (500) to `font-normal` (400) per Typography correction above
+- `components/ugc/PostForm.tsx` — remove GPS toggle + zone-label line (D-02/D-11); add tappable location row (two copy states: pending / confirmed, per Copywriting Contract above) built with `font-normal` (400) text, not the bare `text-label-md`/`text-label-sm` token default of 500, per Typography correction above; navigates to `/select-location?context=post`; block submit until `locationConfirmed === true` (D-39)
 
 Net-new (if not already present):
 - `post.locationRequiredError` validation message rendering (reuse existing inline `<p className="text-label-sm text-error">` pattern already used for `error` state in `PostForm.tsx` line ~356)
@@ -190,3 +199,5 @@ Net-new (if not already present):
 - [ ] Dimension 6 Registry Safety: PASS
 
 **Approval:** pending
+</content>
+</invoke>
