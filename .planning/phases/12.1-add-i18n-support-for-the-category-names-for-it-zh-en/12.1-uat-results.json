@@ -1,0 +1,37 @@
+{
+  "base": "http://localhost:3003",
+  "ranAt": "2026-08-10T19:12:24.881Z",
+  "results": [
+    {
+      "id": 1,
+      "name": "FilterSheet category checklist — Italian (D-14 / 12.1)",
+      "pass": true,
+      "detail": "checkboxes=17 labelsMatch=true noSlugs=true"
+    },
+    {
+      "id": 4,
+      "name": "FilterSheet category checklist — English locale (12.1 D-16)",
+      "pass": true,
+      "detail": "checkboxes=17 enMatch=true differsFromIt=true"
+    },
+    {
+      "id": 5,
+      "name": "FilterSheet category checklist — Chinese spot-check (12.1)",
+      "pass": true,
+      "detail": "checkboxes=17 firstLabel=家居用品"
+    },
+    {
+      "id": 2,
+      "name": "Favorites flat grid (D-01/D-15)",
+      "pass": true,
+      "detail": "folderText=0 folderLinks=0 noDrillDown=true"
+    },
+    {
+      "id": 3,
+      "name": "PostForm category picker labels (D-12)",
+      "pass": true,
+      "detail": "count=6 values=[\"furniture\",\"tech\",\"books\",\"apparel\",\"kitchenware\",\"others\"] labels=[\"Furniture\",\"Electronics\",\"Books\",\"Apparel\",\"Kitchen\",\"Other\"]"
+    }
+  ],
+  "passed": true
+}
