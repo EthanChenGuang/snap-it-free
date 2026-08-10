@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Drawer,
@@ -66,6 +67,12 @@ export function FilterSheet() {
     applyDraft,
     resetFilters,
   } = useFeedFilter();
+
+  useEffect(() => {
+    if (sheetOpen) {
+      resetDraftFromApplied();
+    }
+  }, [sheetOpen, resetDraftFromApplied]);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {

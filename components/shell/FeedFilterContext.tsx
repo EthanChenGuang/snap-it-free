@@ -75,12 +75,14 @@ export function FeedFilterProvider({ children }: { children: ReactNode }) {
 
   const setSheetOpen = useCallback(
     (open: boolean) => {
-      if (!open) {
+      if (open) {
+        setDraftState(applied);
+      } else {
         resetDraftFromApplied();
       }
       setSheetOpenState(open);
     },
-    [resetDraftFromApplied],
+    [applied, resetDraftFromApplied],
   );
 
   const hasActiveFilters = useMemo(
