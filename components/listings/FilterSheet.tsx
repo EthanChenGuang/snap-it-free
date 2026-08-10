@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import {
   Drawer,
   DrawerContent,
@@ -151,23 +150,26 @@ export function FilterSheet() {
               })}
             </div>
           </section>
-        </div>
 
-        <footer className="sticky bottom-0 flex gap-space-sm border-t border-outline-variant bg-surface px-gutter py-space-md">
-          <Button
-            type="button"
-            variant="secondary"
-            className="flex-1"
-            onClick={() => {
-              resetFilters();
-            }}
-          >
-            {messages.feed.resetFilters}
-          </Button>
-          <Button type="button" className="flex-1" onClick={applyDraft}>
-            {messages.feed.applyFilters}
-          </Button>
-        </footer>
+          <footer className="sticky bottom-0 flex gap-3 border-t border-outline-variant bg-surface/80 p-4 pt-3 backdrop-blur-md">
+            <button
+              type="button"
+              className="flex-1 rounded-full bg-surface-container py-3.5 text-sm font-semibold text-on-surface transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline"
+              onClick={() => {
+                resetFilters();
+              }}
+            >
+              {messages.feed.resetFilters}
+            </button>
+            <button
+              type="button"
+              className="flex-[2] rounded-full bg-primary py-3.5 text-sm font-semibold text-on-primary shadow-md transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline"
+              onClick={applyDraft}
+            >
+              {messages.feed.applyFilters}
+            </button>
+          </footer>
+        </div>
       </DrawerContent>
     </Drawer>
   );
