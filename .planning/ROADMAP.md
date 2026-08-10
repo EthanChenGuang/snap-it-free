@@ -76,7 +76,7 @@ Plans:
 
 **Requirements:** FILT-01–05, I18N-01 (partial)
 
-**Plans:** 2/5 plans executed
+**Plans:** 3/5 plans executed
 
 Plans:
 **Wave 0**
@@ -89,7 +89,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 10-03-PLAN.md — Full pipeline, radius/categories sheet, active pills row
+- [x] 10-03-PLAN.md — Full pipeline, radius/categories sheet, active pills row
 
 **Wave 3** *(blocked on Wave 2)*
 

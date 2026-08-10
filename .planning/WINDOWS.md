@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 6
+open_count: 8
 waived_count: 0
 fixed_count: 0
-total_count: 6
-last_updated: 2026-08-05T17:47:25.725Z
+total_count: 8
+last_updated: 2026-08-10T13:10:26.025Z
 ---
 
 # Broken Windows Ledger
@@ -21,6 +21,8 @@ last_updated: 2026-08-05T17:47:25.725Z
 | 4 | 04 | unrun-verify | app/api/alerts/matches/route.ts |  | npx next build blocked by pre-existing maplibre-gl Turbopack error | open |  | 2026-08-01T14:35:17.427Z |  |
 | 5 | 06 | stub | app/admin/page.tsx | 8 | Auth gate TODO — Plan 03 middleware (D-48) | open |  | 2026-08-04T18:39:30.035Z |  |
 | 6 | 08 | deviation | .planning/phases/08-subito-regalo-url-matrix-venice-padova-veneto-all-categories/08-PADOVA-SPIKE.md |  | Padova spike coord gate FAIL — 0/2 detail pages with embed coords | open |  | 2026-08-05T17:47:25.725Z |  |
+| 7 | 10 | stub | components/listings/FilterSheet.tsx |  | Radius section shows placeholder text only | open |  | 2026-08-10T13:06:43.226Z |  |
+| 8 | 10 | stub | components/listings/ListListingCard.tsx |  | distanceMeters prop accepted but not rendered in metadata | open |  | 2026-08-10T13:10:26.025Z |  |
 
 ````json
 [
@@ -94,6 +96,30 @@ last_updated: 2026-08-05T17:47:25.725Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-05T17:47:25.725Z",
+    "resolved_at": null
+  },
+  {
+    "id": 7,
+    "kind": "stub",
+    "phase": "10",
+    "file": "components/listings/FilterSheet.tsx",
+    "line": null,
+    "description": "Radius section shows placeholder text only",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-10T13:06:43.226Z",
+    "resolved_at": null
+  },
+  {
+    "id": 8,
+    "kind": "stub",
+    "phase": "10",
+    "file": "components/listings/ListListingCard.tsx",
+    "line": null,
+    "description": "distanceMeters prop accepted but not rendered in metadata",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-10T13:10:26.025Z",
     "resolved_at": null
   }
 ]
