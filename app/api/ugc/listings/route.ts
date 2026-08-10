@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { loadZonePolygons, tagZone } from '@/lib/geo/zone-tag';
+import { mapPostCategoryToSlug } from '@/lib/listings/canonical-categories';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
 import { createListingSchemaForUser } from '@/lib/ugc/schemas';
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { title, photoUrl, lat, lng, description } = parsed.data;
+  const { title, photoUrl, lat, lng, description, postCategory } = parsed.data;
   const zones = loadZonePolygons();
   const zone = tagZone(lat, lng, zones);
 
@@ -73,6 +74,7 @@ export async function POST(request: Request) {
     content_hash: hash,
     owner_user_id: user.id,
     description: description ?? null,
+    category: mapPostCategoryToSlug(postCategory),
   });
 
   if (error) {
