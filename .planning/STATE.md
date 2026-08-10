@@ -6,8 +6,8 @@ current_phase: 13
 current_phase_name: Select Location Flow
 current_plan: Not started
 status: planning
-stopped_at: Phase 13 context gathered
-last_updated: "2026-08-10T19:27:41.017Z"
+stopped_at: Phase 13 UI-SPEC approved
+last_updated: "2026-08-10T20:05:03.689Z"
 progress:
   total_phases: 8
   completed_phases: 5
@@ -97,9 +97,9 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T21:45:00.000Z
-**Stopped at:** Phase 12.1 verified complete (UAT + security + verification all passed); Phase 13 context gathered, ready to plan
-**Resume file:** .planning/phases/13-select-location-flow/13-CONTEXT.md
+**Last session:** 2026-08-10T20:05:03.680Z
+**Stopped at:** Phase 13 UI-SPEC approved
+**Resume file:** /home/guang/Projects/Experiments/snap-it-free/.planning/phases/13-select-location-flow/13-UI-SPEC.md
 
 ## Decisions
 
