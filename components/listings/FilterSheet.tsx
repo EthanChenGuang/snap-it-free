@@ -39,16 +39,20 @@ function ConsumerCityChipSelector({
       {CITY_OPTIONS.map((city) => {
         const isActive = value === city;
         return (
-          <Button
+          <button
             key={city}
             type="button"
-            variant={isActive ? 'chipActive' : 'chip'}
-            size="sm"
-            className="shrink-0 whitespace-nowrap"
+            aria-pressed={isActive}
             onClick={() => onChange(city)}
+            className={cn(
+              'inline-flex min-h-11 shrink-0 items-center justify-center whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline',
+              isActive
+                ? 'bg-primary text-on-primary shadow-sm'
+                : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high',
+            )}
           >
             {labels[city]}
-          </Button>
+          </button>
         );
       })}
     </div>
@@ -90,17 +94,17 @@ export function FilterSheet() {
 
   return (
     <Drawer open={sheetOpen} onOpenChange={handleOpenChange}>
-      <DrawerContent className="max-h-[85vh] pb-space-xl">
-        <DrawerHeader className="border-b border-outline-variant">
-          <DrawerTitle>{messages.feed.filtersTitle}</DrawerTitle>
+      <DrawerContent className="max-h-[85vh]">
+        <DrawerHeader className="border-b border-outline-variant px-gutter pb-space-md pt-space-sm">
+          <DrawerTitle className="text-xl">{messages.feed.filtersTitle}</DrawerTitle>
         </DrawerHeader>
 
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-          <section className="border-b border-outline-variant px-gutter py-space-md">
+          <section className="px-gutter py-space-md">
             <h3 className="mb-space-sm text-label-md font-medium text-on-surface-variant">
               {messages.feed.cityLabel}
             </h3>
-            <p className="mb-space-sm text-label-sm text-on-surface-variant">
+            <p className="mb-3 mt-1 text-xs text-neutral-400 dark:text-on-surface-variant">
               {messages.feed.cityFilterMapHint}
             </p>
             <ConsumerCityChipSelector
@@ -127,7 +131,7 @@ export function FilterSheet() {
             <ul className="flex flex-col gap-space-xs">
               {SUBITO_CATEGORY_SLUGS.map((slug) => {
                 const checked = draft.categories.includes(slug);
-                const label = getSubitoCategoryLabel(slug, language);
+                const label = getSubitoCategoryLabel(slug, language, { messages }) ?? slug;
                 return (
                   <li key={slug}>
                     <label
