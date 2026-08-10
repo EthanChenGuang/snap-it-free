@@ -145,19 +145,39 @@ Plans:
 
 ---
 
-#### Phase 12: Favorites Category Folders
+#### Phase 12: Canonical Category Mapping
 
-**Goal:** Replace flat favorites list with category folder grid and drill-down.
+**Goal:** Unified canonical category mapping across listing sources (Subito scraped, UGC, future Facebook stub) using 17 Subito regalo slugs as canonical IDs.
 
-**Requirements:** FAV-01–03, I18N-01 (partial)
+**Requirements:** CAT-01–03, I18N-01 (partial)
+
+**Plans:** 4 plans
+
+Plans:
+**Wave 0**
+
+- [ ] 12-01-PLAN.md — Tracer: canonical-categories TDD module + filter consumer + Wave 0 docs (D-19–D-24)
+
+**Wave 1** *(blocked on Wave 0)*
+
+- [ ] 12-02-PLAN.md — Refactor subito-categories + listing-fields to delegate to resolver
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 12-03-PLAN.md — UGC insert path persists category slug (PostCategory → DB column)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 12-04-PLAN.md — Integration grep audits, full lib suite, phase gate
 
 **Success criteria:**
 
-1. Five folder tiles with counts (Furniture, Electronics, Home & Garden, For Kids, Other)
-2. Folder tap shows filtered favorites; empty folders show 0 items
-3. Category mapping documented for scraped + UGC listings
+1. `resolveCanonicalCategorySlug` resolves Subito, UGC, and title-inference paths
+2. New UGC posts persist canonical slug in `listing.category`
+3. Slug mapping tables documented and covered by unit tests
+4. FilterSheet category checklist behavior unchanged; favorites remain flat grid
 
-**Depends on:** Phase 9 (Favorites tab prominence)
+**Depends on:** Phase 11
 
 ---
 
@@ -222,7 +242,7 @@ Plans:
 | 9. Feed-First Home & Nav | v2.0 | 0/4 | Complete    | 2026-08-09 |
 | 10. Filter Sheet & Distance | v2.0 | 0/5 | In Progress|  |
 | 11. Grid Listing Cards | v2.0 | 0/4 | Complete    | 2026-08-10 |
-| 12. Favorites Folders | v2.0 | 0/? | Planned | — |
+| 12. Canonical Category Mapping | v2.0 | 0/4 | Planned | — |
 | 13. Select Location | v2.0 | 0/? | Planned | — |
 | 14. Settings Parity | v2.0 | 0/? | Planned | — |
 | 7. Production Deploy | v2.0 | 0/4 | Planned | — |
