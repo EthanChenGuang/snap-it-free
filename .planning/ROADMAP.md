@@ -151,12 +151,12 @@ Plans:
 
 **Requirements:** CAT-01–03, I18N-01 (partial)
 
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 **Wave 0**
 
-- [ ] 12-01-PLAN.md — Tracer: canonical-categories TDD module + filter consumer + Wave 0 docs (D-19–D-24)
+- [x] 12-01-PLAN.md — Tracer: canonical-categories TDD module + filter consumer + Wave 0 docs (D-19–D-24)
 
 **Wave 1** *(blocked on Wave 0)*
 
@@ -242,7 +242,7 @@ Plans:
 | 9. Feed-First Home & Nav | v2.0 | 0/4 | Complete    | 2026-08-09 |
 | 10. Filter Sheet & Distance | v2.0 | 0/5 | In Progress|  |
 | 11. Grid Listing Cards | v2.0 | 0/4 | Complete    | 2026-08-10 |
-| 12. Canonical Category Mapping | v2.0 | 0/4 | Planned | — |
+| 12. Canonical Category Mapping | v2.0 | 0/4 | In Progress|  |
 | 13. Select Location | v2.0 | 0/? | Planned | — |
 | 14. Settings Parity | v2.0 | 0/? | Planned | — |
 | 7. Production Deploy | v2.0 | 0/4 | Planned | — |

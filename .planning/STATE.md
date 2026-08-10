@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 12
-current_phase_name: Favorites Category Folders
-current_plan: Not started
+current_phase_name: canonical-category-mapping
+current_plan: 2
 status: executing
-stopped_at: Phase 12 context gathered
-last_updated: "2026-08-10T18:26:19.347Z"
+stopped_at: Completed 12-01-PLAN.md
+last_updated: "2026-08-10T18:35:20.732Z"
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 18
-  completed_plans: 14
+  completed_plans: 15
   percent: 43
 last_activity: 2026-08-10
 last_activity_desc: "Completed quick task 260810-nfg: Feed header pills & badge indicators"
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
 
-**Current focus:** Phase 11 — grid-listing-cards
+**Current focus:** Phase 12 — canonical-category-mapping
 
 ## Current Position
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
-Phase: 12 — Favorites Category Folders
-**Current Plan:** Not started
+Phase: 12 (canonical-category-mapping) — EXECUTING
+**Current Plan:** 2
 **Total Plans in Phase:** 4
 Status: Ready to execute
 
-Progress: [██████████] 100% v2.0 (0/7 phases)
+Progress: [████████░░] 83% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -74,6 +74,7 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | Phase 11-grid-listing-cards P02 | 2min | 3 tasks | 1 files |
 | Phase 11-grid-listing-cards P03 | 2min | 3 tasks | 1 files |
 | Phase 11-grid-listing-cards P04 | 3min | 3 tasks | 2 files |
+| Phase 12-canonical-category-mapping P01 | 5min | 3 tasks | 7 files |
 
 ## Deferred Items (from v1.0)
 
@@ -93,9 +94,9 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T18:13:27.659Z
-**Stopped at:** Phase 12 context gathered
-**Resume file:** .planning/phases/12-canonical-category-mapping/12-CONTEXT.md
+**Last session:** 2026-08-10T18:35:20.718Z
+**Stopped at:** Completed 12-01-PLAN.md
+**Resume file:** None
 
 ## Decisions
 
@@ -125,6 +126,8 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 - [Phase ?]: useDistanceCenter(false) on favorites — center resolves, radius filtering off per D-23
 - [Phase ?]: No feed.cardReserved variant — listing.reserved fits metadata in zh/en/it per Plan 04 verification
 - [Phase ?]: Phase 11 scoped tests pass; subito-regalo-catalog and cleanup.ts failures deferred as pre-existing admin debt
+- [Phase ?]: Unknown DB slugs fall through to title inference (D-18)
+- [Phase ?]: Phase 12 scope pivot: CAT-01–03 active, FAV-01–03 deferred v3+
 
 ## Quick Tasks Completed
 
