@@ -1,28 +1,35 @@
 'use client';
 
 import Link from 'next/link';
+import { FilterSheet } from '@/components/listings/FilterSheet';
 import { CompactLocaleChip } from '@/components/shell/CompactLocaleChip';
+import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import { useFeedScroll } from '@/components/shell/FeedScrollContext';
-import { toast } from '@/components/ui/toaster';
 import { useMessages } from '@/lib/i18n/useMessages';
-import { getSubitoCategoryLabel } from '@/lib/listings/subito-categories';
 import { cn } from '@/lib/utils';
 
-function FeedActiveFilterPills() {
-  const { language } = useMessages();
-  const { selectedCategory, setSelectedCategory } = useFeedScroll();
+function cityPillLabel(
+  city: 'venice' | 'padova',
+  messages: ReturnType<typeof useMessages>['messages'],
+): string {
+  return city === 'venice' ? messages.feed.cityVenice : messages.feed.cityPadova;
+}
 
-  if (selectedCategory === 'all') {
+function FeedActiveFilterPills() {
+  const { messages } = useMessages();
+  const { applied, dismissCity } = useFeedFilter();
+
+  if (applied.city === 'all') {
     return null;
   }
 
-  const label = getSubitoCategoryLabel(selectedCategory, language);
+  const label = cityPillLabel(applied.city, messages);
 
   return (
     <div className="flex flex-wrap gap-space-sm px-gutter pb-space-sm">
       <button
         type="button"
-        onClick={() => setSelectedCategory('all')}
+        onClick={dismissCity}
         className="inline-flex items-center gap-space-xs rounded-full border border-outline-variant bg-surface-container-lowest px-space-md py-space-xs text-label-sm text-on-surface transition-opacity active:opacity-80"
         aria-label={`Remove ${label} filter`}
       >
@@ -35,10 +42,11 @@ function FeedActiveFilterPills() {
   );
 }
 
-/** HOME-02 unified feed header: locale chip + search + filter stub + location (D-04). */
+/** HOME-02 unified feed header: locale chip + search + filter sheet + location (D-04). */
 export function FeedHeaderRow() {
   const { messages } = useMessages();
   const { searchQuery, setSearchQuery, headerHidden } = useFeedScroll();
+  const { setSheetOpen, hasActiveFilters } = useFeedFilter();
 
   return (
     <header
@@ -69,10 +77,16 @@ export function FeedHeaderRow() {
         </div>
         <button
           type="button"
-          onClick={() => toast(messages.feed.filterComingSoon)}
-          className="flex h-10 w-10 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full bg-surface-container-lowest text-on-surface shadow-sm transition-opacity active:opacity-80"
+          onClick={() => setSheetOpen(true)}
+          className="relative flex h-10 w-10 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full bg-surface-container-lowest text-on-surface transition-opacity active:opacity-80"
           aria-label={messages.feed.openFilters}
         >
+          {hasActiveFilters && (
+            <span
+              className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary"
+              aria-hidden
+            />
+          )}
           <span
             className="material-symbols-outlined text-[22px]"
             style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24" }}
@@ -94,6 +108,7 @@ export function FeedHeaderRow() {
         </Link>
       </div>
       <FeedActiveFilterPills />
+      <FilterSheet />
     </header>
   );
 }

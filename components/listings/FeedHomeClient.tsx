@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ListListingCard } from '@/components/listings/ListListingCard';
+import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import { useFeedScroll } from '@/components/shell/FeedScrollContext';
 import { matchesFeedSearch } from '@/lib/listings/feed-search';
-import { excludeReportedIds } from '@/lib/listings/filters';
-import { matchesSubitoCategory } from '@/lib/listings/subito-categories';
+import { excludeReportedIds, matchesConsumerCity } from '@/lib/listings/filters';
+import { matchesAnySubitoCategories } from '@/lib/listings/subito-categories';
 import { useListingsPoll } from '@/lib/listings/useListingsPoll';
 import { readReportedIds, REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
 import type { ListingRow } from '@/lib/listings/types';
@@ -17,7 +18,8 @@ type FeedHomeClientProps = {
 
 export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
   const { messages, language, zoneLabel } = useMessages();
-  const { searchQuery, selectedCategory, registerScrollContainer } = useFeedScroll();
+  const { searchQuery, registerScrollContainer } = useFeedScroll();
+  const { applied } = useFeedFilter();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { listings, isRefreshing } = useListingsPoll(initialListings);
@@ -38,13 +40,16 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
   const filteredListings = useMemo(() => {
     const visible = excludeReportedIds(listings, reportedIds);
     return visible.filter((listing) => {
-      if (!matchesSubitoCategory(listing, selectedCategory)) return false;
+      if (!matchesAnySubitoCategories(listing, applied.categories)) return false;
+      if (!matchesConsumerCity(listing, applied.city)) return false;
       return matchesFeedSearch(listing, searchQuery, language, zoneLabel);
     });
-  }, [listings, reportedIds, searchQuery, selectedCategory, language, zoneLabel]);
+  }, [listings, reportedIds, searchQuery, applied, language, zoneLabel]);
 
   const hasSearchQuery = searchQuery.trim().length > 0;
-  const hasCategoryFilter = selectedCategory !== 'all';
+  const hasCategoryFilter = applied.categories.length > 0;
+  const hasCityFilter = applied.city !== 'all';
+  const hasActiveFilter = hasSearchQuery || hasCategoryFilter || hasCityFilter;
 
   return (
     <main className="flex h-full min-h-0 flex-col overflow-hidden bg-background">
@@ -62,12 +67,10 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
               inventory_2
             </span>
             <p className="text-body-md font-semibold text-on-surface">
-              {hasSearchQuery || hasCategoryFilter
-                ? messages.feed.emptySearchTitle
-                : messages.feed.emptyTitle}
+              {hasActiveFilter ? messages.feed.emptySearchTitle : messages.feed.emptyTitle}
             </p>
             <p className="mt-space-xs text-label-sm text-on-surface-variant">
-              {hasSearchQuery || hasCategoryFilter
+              {hasActiveFilter
                 ? messages.feed.emptySearchDescription
                 : messages.feed.emptyDescription}
             </p>

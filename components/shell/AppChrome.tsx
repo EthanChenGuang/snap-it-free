@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { BottomNav } from '@/components/shell/BottomNav';
 import { FeedHeaderRow } from '@/components/shell/FeedHeaderRow';
+import { FeedFilterProvider } from '@/components/shell/FeedFilterContext';
 import { FeedScrollProvider } from '@/components/shell/FeedScrollContext';
 import { SimpleTitleBar } from '@/components/shell/SimpleTitleBar';
 import { useMessages } from '@/lib/i18n/useMessages';
@@ -39,13 +40,15 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
 
   if (showFeedHeader) {
     return (
-      <FeedScrollProvider>
-        <div className="app-shell">
-          <FeedHeaderRow />
-          <div className="app-main min-h-0">{children}</div>
-        </div>
-        {showBottomNav && <BottomNav />}
-      </FeedScrollProvider>
+      <FeedFilterProvider>
+        <FeedScrollProvider>
+          <div className="app-shell">
+            <FeedHeaderRow />
+            <div className="app-main min-h-0">{children}</div>
+          </div>
+          {showBottomNav && <BottomNav />}
+        </FeedScrollProvider>
+      </FeedFilterProvider>
     );
   }
 

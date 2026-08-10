@@ -8,14 +8,10 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { SubitoCategoryFilter } from '@/lib/listings/subito-categories';
-
 type FeedScrollContextValue = {
   headerHidden: boolean;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  selectedCategory: SubitoCategoryFilter;
-  setSelectedCategory: (category: SubitoCategoryFilter) => void;
   registerScrollContainer: (element: HTMLElement | null) => void;
 };
 
@@ -27,7 +23,6 @@ const SCROLL_THRESHOLD_PX = 8;
 export function FeedScrollProvider({ children }: { children: ReactNode }) {
   const [headerHidden, setHeaderHidden] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<SubitoCategoryFilter>('all');
   const lastScrollTopRef = useRef(0);
   const cleanupRef = useRef<(() => void) | null>(null);
 
@@ -63,8 +58,6 @@ export function FeedScrollProvider({ children }: { children: ReactNode }) {
         headerHidden,
         searchQuery,
         setSearchQuery,
-        selectedCategory,
-        setSelectedCategory,
         registerScrollContainer,
       }}
     >
