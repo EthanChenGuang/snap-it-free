@@ -248,7 +248,7 @@ Plans:
 
 **Requirements:** SET-01–06, TD-01, I18N-01 (partial)
 
-**Plans:** 7/7 plans executed
+**Plans:** 7/8 plans executed (1 gap closure pending)
 
 Plans:
 **Wave 0**
@@ -266,6 +266,10 @@ Plans:
 **Wave 2** *(blocked on Wave 1)*
 
 - [x] 14-07-PLAN.md — Phase gate: TD-01 04-VERIFICATION.md + regression audit + 14-VALIDATION.md sign-off
+
+**Wave 3** *(gap closure from 14-VERIFICATION.md)*
+
+- [ ] 14-08-PLAN.md — Close D-14 event-order mismatch + full suite/lint green (test debt alignment)
 
 **Success criteria:**
 
