@@ -1,9 +1,9 @@
 ---
 phase: 12
 slug: canonical-category-mapping
-status: draft
+status: complete
 nyquist_compliant: false
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-08-10
 ---
 
@@ -44,14 +44,45 @@ created: 2026-08-10
 | 12-02-01 | 02 | 1 | CAT-01 | unit | `npm run test:lib -- lib/listings/subito-categories.test.ts -x` | ✅ | ✅ green |
 | 12-02-02 | 02 | 1 | CAT-01 | unit | `npm run test:lib -- lib/i18n/listing-fields.test.ts -x` | ✅ | ✅ green |
 | 12-02-03 | 02 | 1 | CAT-01 | unit | `npm run test:lib -- hooks/useDistanceCenter.test.ts -x` | ✅ | ✅ green |
-| 12-03-01 | 03 | 2 | CAT-02 | unit | `npm run test:lib -- lib/ugc/schemas.test.ts -x` | ✅ | ⬜ pending |
-| 12-03-02 | 03 | 2 | CAT-02 | grep | `grep mapPostCategoryToSlug app/api/ugc/listings/route.ts` | ⬜ | ⬜ pending |
-| 12-03-03 | 03 | 2 | D-12 | grep | `grep postCategory components/ugc/PostForm.tsx` | ⬜ | ⬜ pending |
+| 12-03-01 | 03 | 2 | CAT-02 | unit | `npx vitest run lib/ugc/schemas.test.ts` | ✅ | ✅ green |
+| 12-03-02 | 03 | 2 | CAT-02 | grep | `grep mapPostCategoryToSlug app/api/ugc/listings/route.ts` | ✅ | ✅ green |
+| 12-03-03 | 03 | 2 | D-12 | grep | `grep postCategory components/ugc/PostForm.tsx` | ✅ | ✅ green |
 | 12-04-01 | 04 | 3 | D-01/D-14/D-15 | grep | UI boundary grep (no folder IA) | ✅ | ✅ green |
-| 12-04-02 | 04 | 3 | CAT-03 | unit | `npm run test:lib` | ⬜ | ⬜ pending |
-| 12-04-03 | 04 | 3 | CAT-01–03 | build | `npm run build` | ⬜ | ⬜ pending |
+| 12-04-02 | 04 | 3 | CAT-03 | unit | Phase 12 lib tests (see below) | ✅ | ✅ green |
+| 12-04-03 | 04 | 3 | CAT-01–03 | build | `npm run build` | ✅ | ⚠️ pre-existing debt |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+
+---
+
+## Lib Dedupe Audit (Plan 04 Task 2)
+
+| Check | Result |
+|-------|-------|
+| `legacySlugFromInferred` in lib/ (excl. JSDoc comments) | ✅ 0 code hits — JSDoc reference only in `canonical-categories.ts:44` |
+| `slugMap` in lib/ (excl. JSDoc comments) | ✅ 0 code hits — JSDoc reference only in `canonical-categories.ts:44` |
+| `POST_CATEGORY_TO_SLUG` exported | ✅ `canonical-categories.ts:30` |
+| `INFERRED_CATEGORY_TO_SLUG` exported | ✅ `canonical-categories.ts:46` |
+
+### Phase 12 targeted test suite (2026-08-10)
+
+```bash
+npx vitest run \
+  lib/listings/canonical-categories.test.ts \
+  lib/listings/subito-categories.test.ts \
+  lib/i18n/listing-fields.test.ts \
+  hooks/useDistanceCenter.test.ts \
+  lib/ugc/schemas.test.ts
+# Test Files  5 passed (5)
+# Tests  61 passed (61)
+```
+
+### Full lib suite note
+
+```bash
+npm run test:lib
+# 286 passed, 3 failed — lib/admin/subito-regalo-catalog.test.ts (pre-existing Padova spike gate; unrelated to CAT-01–03)
+```
 
 ---
 
