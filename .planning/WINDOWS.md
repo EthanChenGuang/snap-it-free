@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 10
+open_count: 12
 waived_count: 0
 fixed_count: 0
-total_count: 10
-last_updated: 2026-08-10T16:29:14.843Z
+total_count: 12
+last_updated: 2026-08-10T18:41:56.148Z
 ---
 
 # Broken Windows Ledger
@@ -25,6 +25,8 @@ last_updated: 2026-08-10T16:29:14.843Z
 | 8 | 10 | stub | components/listings/ListListingCard.tsx |  | distanceMeters prop accepted but not rendered in metadata | open |  | 2026-08-10T13:10:26.025Z |  |
 | 9 | 11 | unrun-verify | lib/admin/subito-regalo-catalog.test.ts |  | 3 pre-existing failures block npm run test:lib full suite exit 0 | open |  | 2026-08-10T16:29:14.686Z |  |
 | 10 | 11 | unrun-verify | lib/admin/cleanup.ts | 34 | Pre-existing TS error blocks npm run build exit 0 | open |  | 2026-08-10T16:29:14.843Z |  |
+| 11 | 12 | unrun-verify | lib/admin/subito-regalo-catalog.test.ts |  | 3 pre-existing failures in full npm run test:lib (Padova spike gate) | open |  | 2026-08-10T18:41:56.063Z |  |
+| 12 | 12 | unrun-verify | lib/admin/cleanup.ts |  | Pre-existing TS error blocks npm run build (Postgrest cast) | open |  | 2026-08-10T18:41:56.148Z |  |
 
 ````json
 [
@@ -146,6 +148,30 @@ last_updated: 2026-08-10T16:29:14.843Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-10T16:29:14.843Z",
+    "resolved_at": null
+  },
+  {
+    "id": 11,
+    "kind": "unrun-verify",
+    "phase": "12",
+    "file": "lib/admin/subito-regalo-catalog.test.ts",
+    "line": null,
+    "description": "3 pre-existing failures in full npm run test:lib (Padova spike gate)",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-10T18:41:56.063Z",
+    "resolved_at": null
+  },
+  {
+    "id": 12,
+    "kind": "unrun-verify",
+    "phase": "12",
+    "file": "lib/admin/cleanup.ts",
+    "line": null,
+    "description": "Pre-existing TS error blocks npm run build (Postgrest cast)",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-10T18:41:56.148Z",
     "resolved_at": null
   }
 ]

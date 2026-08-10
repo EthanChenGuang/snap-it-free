@@ -151,7 +151,7 @@ Plans:
 
 **Requirements:** CAT-01–03, I18N-01 (partial)
 
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans executed
 
 Plans:
 **Wave 0**
@@ -168,7 +168,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 12-04-PLAN.md — Integration grep audits, full lib suite, phase gate
+- [x] 12-04-PLAN.md — Integration grep audits, full lib suite, phase gate
 
 **Success criteria:**
 

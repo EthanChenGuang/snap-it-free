@@ -5,15 +5,15 @@ milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 12
 current_phase_name: canonical-category-mapping
 current_plan: 4
-status: executing
-stopped_at: Completed 12-03-PLAN.md
-last_updated: "2026-08-10T18:40:01.224Z"
+status: verifying
+stopped_at: Completed 12-04-PLAN.md
+last_updated: "2026-08-10T18:42:10.006Z"
 progress:
   total_phases: 7
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 18
-  completed_plans: 17
-  percent: 43
+  completed_plans: 18
+  percent: 57
 last_activity: 2026-08-10
 last_activity_desc: "Completed quick task 260810-nfg: Feed header pills & badge indicators"
 ---
@@ -34,9 +34,9 @@ Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy
 Phase: 12 (canonical-category-mapping) — EXECUTING
 **Current Plan:** 4
 **Total Plans in Phase:** 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 
-Progress: [█████████░] 94% v2.0 (0/7 phases)
+Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -77,6 +77,7 @@ Progress: [█████████░] 94% v2.0 (0/7 phases)
 | Phase 12-canonical-category-mapping P01 | 5min | 3 tasks | 7 files |
 | Phase 12-canonical-category-mapping P02 | 8min | 3 tasks | 5 files |
 | Phase 12-canonical-category-mapping P03 | 5min | 3 tasks | 5 files |
+| Phase 12-canonical-category-mapping P04 | 3 min | 3 tasks | 2 files |
 
 ## Deferred Items (from v1.0)
 
@@ -96,8 +97,8 @@ Progress: [█████████░] 94% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T18:40:01.214Z
-**Stopped at:** Completed 12-03-PLAN.md
+**Last session:** 2026-08-10T18:42:09.996Z
+**Stopped at:** Completed 12-04-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -134,6 +135,7 @@ Progress: [█████████░] 94% v2.0 (0/7 phases)
 - [Phase ?]: Filter and display paths both consume resolveCanonicalCategorySlug exclusively
 - [Phase ?]: POST_CATEGORIES derived from POST_CATEGORY_TO_SLUG for zod enum and PostForm picker
 - [Phase ?]: UGC create accepts postCategory enum only; server maps slug at insert (V5)
+- [Phase ?]: Phase 12 Nyquist sign-off uses phase-scoped vitest; pre-existing admin test/build debt documented not blocking CAT gates
 
 ## Quick Tasks Completed
 
