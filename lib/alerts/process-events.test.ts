@@ -22,6 +22,12 @@ function createSupabaseMock(config: {
     zone: string | null;
   } | null;
   profiles: Array<{ user_id: string; language: string }>;
+  userNotificationPrefs?: Array<{
+    user_id: string;
+    dnd_enabled: boolean;
+    quiet_start: string;
+    quiet_end: string;
+  }>;
 }) {
   const upsert = vi.fn().mockResolvedValue({ error: null });
   const updateEq = vi.fn().mockResolvedValue({ error: null });
@@ -62,12 +68,21 @@ function createSupabaseMock(config: {
             in: vi.fn().mockResolvedValue({ data: config.profiles, error: null }),
           }),
         };
+      case 'user_notification_prefs':
+        return {
+          select: vi.fn().mockReturnValue({
+            in: vi.fn().mockResolvedValue({
+              data: config.userNotificationPrefs ?? [],
+              error: null,
+            }),
+          }),
+        };
       default:
         throw new Error(`unexpected table ${table}`);
     }
   });
 
-  return { from };
+  return { from, alertMatchesUpsert: upsert };
 }
 
 describe('processPendingListingEvents locale fan-out', () => {
@@ -135,6 +150,71 @@ describe('processPendingListingEvents locale fan-out', () => {
       expect.objectContaining({
         title: 'Divano',
         body: expect.stringContaining('新的免费物品'),
+      }),
+    );
+  });
+
+  it('skips fanOutMatchPush during active quiet hours but still upserts alert_matches', async () => {
+    const userId = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee';
+    const listingId = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
+    const eventId = '10101010-1010-1010-1010-101010101010';
+    const alertId = '20202020-2020-2020-2020-202020202020';
+
+    const { from, alertMatchesUpsert } = createSupabaseMock({
+      events: [{ id: eventId, listing_id: listingId }],
+      alerts: [{ id: alertId, user_id: userId, keyword: 'Sofa', zone: null }],
+      listing: {
+        id: listingId,
+        title: 'Free sofa',
+        zone: 'mestre_marghera',
+      },
+      profiles: [{ user_id: userId, language: 'en' }],
+      userNotificationPrefs: [
+        {
+          user_id: userId,
+          dnd_enabled: true,
+          quiet_start: '00:00',
+          quiet_end: '23:59',
+        },
+      ],
+    });
+
+    const { processPendingListingEvents } = await import('./process-events');
+    const processed = await processPendingListingEvents({ from } as never);
+
+    expect(processed).toBe(1);
+    expect(alertMatchesUpsert).toHaveBeenCalledTimes(1);
+    expect(fanOutMatchPush).not.toHaveBeenCalled();
+  });
+
+  it('still sends push when user has no notification prefs row', async () => {
+    const userId = '30303030-3030-3030-3030-303030303030';
+    const listingId = '40404040-4040-4040-4040-404040404040';
+    const eventId = '50505050-5050-5050-5050-505050505050';
+    const alertId = '60606060-6060-6060-6060-606060606060';
+
+    const { from } = createSupabaseMock({
+      events: [{ id: eventId, listing_id: listingId }],
+      alerts: [{ id: alertId, user_id: userId, keyword: 'Chair', zone: null }],
+      listing: {
+        id: listingId,
+        title: 'Free chair',
+        zone: 'mestre_marghera',
+      },
+      profiles: [{ user_id: userId, language: 'en' }],
+      userNotificationPrefs: [],
+    });
+
+    const { processPendingListingEvents } = await import('./process-events');
+    await processPendingListingEvents({ from } as never);
+
+    expect(fanOutMatchPush).toHaveBeenCalledTimes(1);
+    expect(fanOutMatchPush).toHaveBeenCalledWith(
+      expect.anything(),
+      userId,
+      expect.objectContaining({
+        title: 'Free chair',
+        url: `/listing/${listingId}`,
       }),
     );
   });
