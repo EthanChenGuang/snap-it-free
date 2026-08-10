@@ -130,6 +130,16 @@ export function useDistanceCenter(radiusEnabled: boolean) {
     }
   }, [radiusEnabled, browseCenter, requestGps]);
 
+  const prevHadBrowseCenter = useRef(!!browseCenter);
+  useEffect(() => {
+    const hadBrowse = prevHadBrowseCenter.current;
+    const hasBrowse = !!browseCenter;
+    if (hadBrowse && !hasBrowse) {
+      requestGps();
+    }
+    prevHadBrowseCenter.current = hasBrowse;
+  }, [browseCenter, requestGps]);
+
   const resolved = useMemo(
     () => resolveDistanceCenter(browseCenter, gpsCenter),
     [browseCenter, gpsCenter],

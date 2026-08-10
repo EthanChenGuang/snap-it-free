@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { matchesFeedSearch } from './feed-search';
-import type { ListingRow, VeniceZone } from './types';
+import { matchesFeedSearch, type ConsumerCityLabels } from './feed-search';
+import type { ListingRow } from './types';
 
 const baseListing: ListingRow = {
   id: '11111111-1111-1111-1111-111111111111',
@@ -16,19 +16,15 @@ const baseListing: ListingRow = {
   status: 'active',
 };
 
-const zoneLabel = (zone: VeniceZone) => {
-  const labels: Record<VeniceZone, string> = {
-    centro_storico: 'Historic Center',
-    mestre_marghera: 'Mestre',
-    lido_murano: 'Lido',
-  };
-  return labels[zone];
+const cityLabels: ConsumerCityLabels = {
+  venice: 'Venice',
+  padova: 'Padova',
 };
 
 describe('matchesFeedSearch', () => {
   it('returns true for any listing when query is empty', () => {
-    expect(matchesFeedSearch(baseListing, '', 'it', zoneLabel)).toBe(true);
-    expect(matchesFeedSearch(baseListing, '   ', 'it', zoneLabel)).toBe(true);
+    expect(matchesFeedSearch(baseListing, '', 'it', cityLabels)).toBe(true);
+    expect(matchesFeedSearch(baseListing, '   ', 'it', cityLabels)).toBe(true);
   });
 
   it('matches title substring with locale-aware resolveListingTitle', () => {
@@ -38,19 +34,32 @@ describe('matchesFeedSearch', () => {
       title_en: 'Free lamp',
     };
 
-    expect(matchesFeedSearch(listing, 'free lamp', 'en', zoneLabel)).toBe(true);
-    expect(matchesFeedSearch(listing, 'lampada', 'it', zoneLabel)).toBe(true);
+    expect(matchesFeedSearch(listing, 'free lamp', 'en', cityLabels)).toBe(true);
+    expect(matchesFeedSearch(listing, 'lampada', 'it', cityLabels)).toBe(true);
   });
 
-  it('matches location label via zone or city', () => {
-    expect(matchesFeedSearch(baseListing, 'historic', 'en', zoneLabel)).toBe(true);
+  it('matches consumer city label for Venice zone listings', () => {
+    expect(matchesFeedSearch(baseListing, 'venice', 'en', cityLabels)).toBe(true);
 
+    const mestreListing: ListingRow = {
+      ...baseListing,
+      zone: 'mestre_marghera',
+    };
+    expect(matchesFeedSearch(mestreListing, 'venice', 'en', cityLabels)).toBe(true);
+  });
+
+  it('matches Padova city label', () => {
     const padovaListing: ListingRow = {
       ...baseListing,
       zone: null,
       city: 'padova',
     };
-    expect(matchesFeedSearch(padovaListing, 'padova', 'it', zoneLabel)).toBe(true);
+    expect(matchesFeedSearch(padovaListing, 'padova', 'it', cityLabels)).toBe(true);
+  });
+
+  it('does not match zone subdivision names', () => {
+    expect(matchesFeedSearch(baseListing, 'historic center', 'en', cityLabels)).toBe(false);
+    expect(matchesFeedSearch(baseListing, 'mestre', 'en', cityLabels)).toBe(false);
   });
 
   it('matches description substring when description_zh is present', () => {
@@ -59,10 +68,10 @@ describe('matchesFeedSearch', () => {
       description_zh: '九成新台灯，免费自取',
     };
 
-    expect(matchesFeedSearch(listing, '台灯', 'zh', zoneLabel)).toBe(true);
+    expect(matchesFeedSearch(listing, '台灯', 'zh', cityLabels)).toBe(true);
   });
 
   it('returns false when query matches nothing', () => {
-    expect(matchesFeedSearch(baseListing, 'xyznonexistent', 'it', zoneLabel)).toBe(false);
+    expect(matchesFeedSearch(baseListing, 'xyznonexistent', 'it', cityLabels)).toBe(false);
   });
 });

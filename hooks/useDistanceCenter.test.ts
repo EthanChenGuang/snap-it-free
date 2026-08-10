@@ -44,6 +44,8 @@ describe('resolveDistanceCenter', () => {
   });
 });
 
+const cityLabels = { venice: 'Venice', padova: 'Padova' };
+
 describe('composeFeedListings pipeline', () => {
   const center = VENICE_DEFAULT_CENTER;
 
@@ -61,7 +63,7 @@ describe('composeFeedListings pipeline', () => {
       center,
       searchQuery: '',
       language: 'en',
-      zoneLabel: () => '',
+      cityLabels,
     });
     expect(listings).toHaveLength(1);
     expect(listings[0]?.id).toBe(baseListing.id);
@@ -81,7 +83,7 @@ describe('composeFeedListings pipeline', () => {
       center,
       searchQuery: '',
       language: 'en',
-      zoneLabel: () => '',
+      cityLabels,
     });
     expect(listings).toHaveLength(2);
   });
@@ -106,7 +108,7 @@ describe('composeFeedListings pipeline', () => {
       center,
       searchQuery: '',
       language: 'en',
-      zoneLabel: () => '',
+      cityLabels,
     });
     expect(listings[0]?.id).toBe(near.id);
     expect(listings[1]?.id).toBe(far.id);
@@ -130,7 +132,7 @@ describe('composeFeedListings pipeline', () => {
       center: null,
       searchQuery: '',
       language: 'en',
-      zoneLabel: () => '',
+      cityLabels,
     });
     expect(listings[0]?.id).toBe(newer.id);
   });
@@ -156,7 +158,7 @@ describe('composeFeedListings pipeline', () => {
       center: null,
       searchQuery: '',
       language: 'en',
-      zoneLabel: () => '',
+      cityLabels,
     });
     expect(listings).toHaveLength(2);
   });
