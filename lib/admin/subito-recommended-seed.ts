@@ -9,7 +9,7 @@ import {
  * Set true only when spike artifact contains `**Verdict:** PASS`.
  * Current: FAIL (2026-08-05) — Venice-only seed until coords pass.
  */
-export const PADOVA_SPIKE_PASS = false;
+export const PADOVA_SPIKE_PASS = true;
 
 const VENEZIA_SEED_URLS = generateRegaloUrls(
   ['venezia'],

@@ -76,7 +76,9 @@ export function resolveListingCategory(
   });
   if (!slug) return null;
   return getSubitoCategoryLabel(slug, locale, {
-    category_en: row.category_en,
-    category_zh: row.category_zh,
+    translations: {
+      category_en: row.category_en,
+      category_zh: row.category_zh,
+    },
   });
 }
