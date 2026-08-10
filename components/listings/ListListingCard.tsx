@@ -16,7 +16,11 @@ type ListListingCardProps = {
   distanceMeters?: number | null;
 };
 
-/** Minimalist feed card — image, FREE badge, favorite, compact metadata. */
+/**
+ * Minimalist feed card — image, FREE badge, favorite, compact metadata.
+ * Stitch deviations (intentional): emerald FREE pill (D-02), rounded-2xl image (D-07),
+ * glass heart overlay bg-black/30 + backdrop-blur (D-09).
+ */
 export function ListListingCard({ listing, distanceMeters }: ListListingCardProps) {
   const { language, messages, formatRelativeTime } = useMessages();
   const displayTitle = resolveListingTitle(listing, language);
