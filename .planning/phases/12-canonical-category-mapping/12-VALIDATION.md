@@ -2,9 +2,10 @@
 phase: 12
 slug: canonical-category-mapping
 status: complete
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: true
 created: 2026-08-10
+signed_off: 2026-08-10
 ---
 
 # Phase 12 — Validation Strategy
@@ -140,9 +141,38 @@ rg 'messages\.post\.categories' components/ugc/PostForm.tsx
 
 ## ROADMAP Success Criteria (D-22)
 
-| # | Criterion | Evidence |
-|---|-----------|----------|
-| 1 | Resolver works for Subito/UGC/inference | `canonical-categories.test.ts` |
-| 2 | New UGC posts persist category slug | route grep + `schemas.test.ts` |
-| 3 | Mapping documented + tests pass | JSDoc tables + lib suite |
-| 4 | FilterSheet behavior unchanged | integration grep + manual |
+| # | Criterion | Evidence | Status |
+|---|-----------|----------|--------|
+| 1 | Resolver works for Subito/UGC/inference | `canonical-categories.test.ts` (12 tests green) | ✅ |
+| 2 | New UGC posts persist category slug | `grep mapPostCategoryToSlug app/api/ugc/listings/route.ts` + `schemas.test.ts` | ✅ |
+| 3 | Mapping documented + tests pass | JSDoc `POST_CATEGORY_TO_SLUG` / `INFERRED_CATEGORY_TO_SLUG` + 61 phase lib tests | ✅ |
+| 4 | FilterSheet behavior unchanged | integration grep (12-04-01) + manual D-14 | ✅ automated / manual pending |
+
+### Build verification (PostCategory import chain)
+
+```bash
+npm run build
+# Failed: lib/admin/cleanup.ts:34 Postgrest type cast (pre-existing; unrelated to PostCategory chain)
+# PostCategory resolver/UGC path verified via targeted vitest + successful webpack compile before TS check
+```
+
+### I18N-01 partial
+
+Message files unchanged in Phase 12 — `messages/key-parity.test.ts` skipped (no message file edits).
+
+---
+
+## Manual verify items for `/gsd-verify-work`
+
+1. **FilterSheet visual (D-14):** Open filter sheet → confirm 17 Subito category labels unchanged
+2. **Favorites flat grid (D-01/D-15):** Open `/favorites` → confirm two-column flat grid, no folder tiles
+3. **PostForm labels (D-12):** Post flow → confirm six friendly category picker labels
+
+---
+
+## Out-of-scope debt (not blocking Phase 12 CAT gates)
+
+| Item | File | Notes |
+|------|------|-------|
+| Padova spike gate tests | `lib/admin/subito-regalo-catalog.test.ts` | 3 failures; PADOVA_SPIKE_PASS vs artifact mismatch |
+| Build TS error | `lib/admin/cleanup.ts:34` | PostgrestFilterBuilder cast; pre-existing |
