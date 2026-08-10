@@ -116,7 +116,7 @@ Plans:
 
 **Requirements:** CARD-01–05, I18N-01 (partial)
 
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans executed
 
 Plans:
 **Wave 0**
@@ -133,7 +133,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 11-04-PLAN.md — i18n verification + phase gate
+- [x] 11-04-PLAN.md — i18n verification + phase gate
 
 **Success criteria:**
 

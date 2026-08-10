@@ -5,15 +5,15 @@ milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 11
 current_phase_name: grid-listing-cards
 current_plan: 4
-status: executing
-stopped_at: Completed 11-03-PLAN.md
-last_updated: "2026-08-10T16:24:56.273Z"
+status: verifying
+stopped_at: Completed 11-04-PLAN.md
+last_updated: "2026-08-10T16:28:54.120Z"
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 14
-  completed_plans: 13
-  percent: 29
+  completed_plans: 14
+  percent: 43
 last_activity: 2026-08-10
 last_activity_desc: "Completed quick task 260810-nfg: Feed header pills & badge indicators"
 ---
@@ -34,9 +34,9 @@ Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy
 Phase: 11 (grid-listing-cards) — EXECUTING
 **Current Plan:** 4
 **Total Plans in Phase:** 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 
-Progress: [█████████░] 93% v2.0 (0/7 phases)
+Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -73,6 +73,7 @@ Progress: [█████████░] 93% v2.0 (0/7 phases)
 | Phase 11-grid-listing-cards P01 | 3min | 2 tasks | 3 files |
 | Phase 11-grid-listing-cards P02 | 2min | 3 tasks | 1 files |
 | Phase 11-grid-listing-cards P03 | 2min | 3 tasks | 1 files |
+| Phase 11-grid-listing-cards P04 | 3min | 3 tasks | 2 files |
 
 ## Deferred Items (from v1.0)
 
@@ -92,8 +93,8 @@ Progress: [█████████░] 93% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T16:24:56.258Z
-**Stopped at:** Completed 11-03-PLAN.md
+**Last session:** 2026-08-10T16:28:54.106Z
+**Stopped at:** Completed 11-04-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -122,6 +123,8 @@ Progress: [█████████░] 93% v2.0 (0/7 phases)
 - [Phase ?]: ListPageClient inherits claimed suffix/dim without distanceMeters — city · time fallback acceptable (D-22)
 - [Phase ?]: Favorites inline haversine per listing — no composeFeedListings per D-30
 - [Phase ?]: useDistanceCenter(false) on favorites — center resolves, radius filtering off per D-23
+- [Phase ?]: No feed.cardReserved variant — listing.reserved fits metadata in zh/en/it per Plan 04 verification
+- [Phase ?]: Phase 11 scoped tests pass; subito-regalo-catalog and cleanup.ts failures deferred as pre-existing admin debt
 
 ## Quick Tasks Completed
 
