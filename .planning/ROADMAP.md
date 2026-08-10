@@ -248,13 +248,13 @@ Plans:
 
 **Requirements:** SET-01–06, TD-01, I18N-01 (partial)
 
-**Plans:** 3/7 plans executed
+**Plans:** 4/7 plans executed
 
 Plans:
 **Wave 0**
 
 - [x] 14-01-PLAN.md — DB migration 022 (user_notification_prefs + delete_account_data RPC) + blocking push
-- [ ] 14-02-PLAN.md — DND lib TDD: isQuietHoursActive, loadUserQuietHours, syncUserNotificationPrefs
+- [x] 14-02-PLAN.md — DND lib TDD: isQuietHoursActive, loadUserQuietHours, syncUserNotificationPrefs
 - [x] 14-03-PLAN.md — Delete-account lib TDD: deleteAccountData orchestration (Storage → RPC → admin.deleteUser)
 - [x] 14-04-PLAN.md — DND + Account i18n keys (zh/en/it)
 
