@@ -497,17 +497,15 @@ const { center } = useDistanceCenter(false);
 | A3 | `useDistanceCenter(false)` provides same center as feed for distance labels | Favorites wiring | Distance mismatch between feed and favorites if center resolution differs |
 | A4 | `listing.reserved` uppercase not required on grid (suffix is inline, not badge) | Metadata | Minor style inconsistency vs `ReservedBadge` |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Photo vs container opacity for claimed dimming**
-   - What we know: D-21 says reduce photo opacity; container opacity dims overlays.
-   - What's unclear: Exact implementation for badge/heart brightness.
-   - Recommendation: Apply opacity to `ListingPhoto` wrapper only; default `opacity-60`; human verify at phase gate.
+1. **Photo vs container opacity for claimed dimming** — **RESOLVED (Plan 02)**
+   - Decision: Apply opacity to `ListingPhoto` only via `className` prop when `listing.status === 'claimed'` (e.g. `opacity-60`); do NOT dim outer image container so FREE badge and heart overlays stay full brightness (D-21, RESEARCH Pitfall 2).
+   - Plan reference: 11-02-PLAN.md tracer task — ListingPhoto receives opacity class, not outer container.
 
-2. **Reuse `listing.reserved` vs new key**
-   - What we know: Keys exist in zh/en/it; badge uses same string.
-   - What's unclear: Whether Italian "Riservato" is too long on narrow cards.
-   - Recommendation: Reuse `listing.reserved` (D-29 preference); add `feed.cardReserved` only if UAT fails.
+2. **Reuse `listing.reserved` vs new key** — **RESOLVED (Plan 04 / D-29)**
+   - Decision: Reuse existing `messages.listing.reserved` for grid metadata suffix in all locales (zh 已预订 / en Reserved / it Riservato). No new `messages.feed.cardReserved` key unless UAT fails visual QA.
+   - Plan reference: 11-04-PLAN.md task 1 — confirm trilingual `listing.reserved` wiring; add shorter variant only if copy too long in Italian UAT.
 
 ## Environment Availability
 
