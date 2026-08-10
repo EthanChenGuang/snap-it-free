@@ -189,7 +189,7 @@ Plans:
 
 **Depends on:** Phase 12
 
-**Plans:** 2/2 complete
+**Plans:** 2/2 plans complete
 
 Plans:
 

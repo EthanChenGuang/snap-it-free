@@ -7,15 +7,15 @@ current_phase_name: Select Location Flow
 current_plan: Not started
 status: planning
 stopped_at: Phase 13 context gathered
-last_updated: "2026-08-10T18:58:00.000Z"
+last_updated: "2026-08-10T19:27:41.017Z"
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 20
   completed_plans: 20
-  percent: 50
+  percent: 63
 last_activity: 2026-08-10
-last_activity_desc: "Completed quick task 260810-tb5: iOS-native filter bottom sheet redesign"
+last_activity_desc: "Phase 12.1 verified complete: self-run UAT (5/5), security review (0 threats open), goal-backward verification (11/11, 1 gap found+fixed — stale FilterSheet UAT selector)"
 ---
 
 # Project State
@@ -97,8 +97,8 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T18:56:44.386Z
-**Stopped at:** Phase 13 context gathered
+**Last session:** 2026-08-10T21:45:00.000Z
+**Stopped at:** Phase 12.1 verified complete (UAT + security + verification all passed); Phase 13 context gathered, ready to plan
 **Resume file:** .planning/phases/13-select-location-flow/13-CONTEXT.md
 
 ## Decisions
@@ -156,3 +156,4 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 
 - Phase 12.1 inserted after Phase 12: add i18n support for the category names for it/zh/en (URGENT)
 - Phase 12.1 executed: trilingual messages.feed.subitoCategories + locale-aware filter/chip/pill labels; UAT 5/5, unit 36/36
+- Phase 12.1 verified (self-tested, no human in the loop per user request): UAT 5/5, security review 6/6 threats closed (retroactive STRIDE, no threat model authored at plan time), goal-backward verification 11/11 after fixing one gap — `scripts/phase12-uat-automation.mjs`'s selector had gone stale when an unrelated quick task (260810-tb5, commit 47d5259) swapped FilterSheet's checkbox list for a button chip grid 2 min after the UAT commit. Fixed and re-confirmed 5/5 against current HEAD. Phase marked complete in ROADMAP/STATE.

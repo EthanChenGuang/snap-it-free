@@ -66,10 +66,14 @@ See [.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md) for v2.0 checkable re
 - [ ] Feed-first grid home + nav restructure (Phase 9)
 - [ ] Filter sheet, distance, active pills (Phase 10)
 - [ ] Grid cards: FREE badge, heart, metadata (Phase 11)
-- [ ] Canonical category mapping across sources (Phase 12)
 - [ ] Select Location flow (Phase 13)
 - [ ] Settings: DND, delete account (Phase 14)
 - [ ] Production deploy (Phase 7)
+
+### Validated (v2.0)
+
+- ✓ Canonical category mapping across sources — Phase 12
+- ✓ Trilingual category labels (it/zh/en) in filter/chip/pill surfaces and listing detail — Phase 12.1
 
 ### Out of Scope (v2.0)
 
@@ -106,4 +110,4 @@ See [.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md) for v2.0 checkable re
 This document evolves at phase transitions and milestone boundaries.
 
 ---
-*Last updated: 2026-08-10 — Phase 12 scope pivot to canonical category mapping*
+*Last updated: 2026-08-10 — Phase 12.1 (category names i18n) verified complete*
