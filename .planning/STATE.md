@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 13
 current_phase_name: select-location-flow
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: Completed 13-01-PLAN.md
-last_updated: "2026-08-10T21:10:25.032Z"
+stopped_at: Completed 13-02-PLAN.md
+last_updated: "2026-08-10T21:13:08.742Z"
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 24
-  completed_plans: 21
+  completed_plans: 22
   percent: 63
 last_activity: 2026-08-10
 last_activity_desc: "Phase 12.1 verified complete: self-run UAT (5/5), security review (0 threats open), goal-backward verification (11/11, 1 gap found+fixed — stale FilterSheet UAT selector)"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 13 (select-location-flow) — EXECUTING
-**Current Plan:** 2
+**Current Plan:** 3
 **Total Plans in Phase:** 4
 Status: Ready to execute
 
-Progress: [█████████░] 88% v2.0 (0/7 phases)
+Progress: [█████████░] 92% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -79,6 +79,7 @@ Progress: [█████████░] 88% v2.0 (0/7 phases)
 | Phase 12-canonical-category-mapping P03 | 5min | 3 tasks | 5 files |
 | Phase 12-canonical-category-mapping P04 | 3 min | 3 tasks | 2 files |
 | Phase 13-select-location-flow P01 | 2min | 2 tasks | 4 files |
+| Phase 13-select-location-flow P02 | 2min | 2 tasks | 6 files |
 
 ## Deferred Items (from v1.0)
 
@@ -98,8 +99,8 @@ Progress: [█████████░] 88% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T21:10:25.022Z
-**Stopped at:** Completed 13-01-PLAN.md
+**Last session:** 2026-08-10T21:13:08.733Z
+**Stopped at:** Completed 13-02-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -140,6 +141,8 @@ Progress: [█████████░] 88% v2.0 (0/7 phases)
 - [Phase ?]: Partial post draft with valid lat/lng but missing locationConfirmed returns locationConfirmed false not null — preloads pin, blocks submit
 - [Phase ?]: writePostDraft always persists locationConfirmed true regardless of caller input (D-36)
 - [Phase ?]: Wave 0 lib-only TDD foundation — Plan 02 imports resolveCityLabel and post-draft storage
+- [Phase ?]: Post context flyTo at DEFAULT_ZOOM instead of fitMapToRadius when radius UI hidden (D-26)
+- [Phase ?]: D-12 accepted: non-location PostForm fields reset on navigate-out-and-back — follow-up phase candidate
 
 ## Quick Tasks Completed
 

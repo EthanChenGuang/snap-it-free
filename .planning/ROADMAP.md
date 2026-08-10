@@ -209,7 +209,7 @@ Plans:
 
 **Requirements:** LOC-01–03, I18N-01 (partial)
 
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 
 Plans:
 **Wave 0**
@@ -218,7 +218,7 @@ Plans:
 
 **Wave 1** *(blocked on Wave 0)*
 
-- [ ] 13-02-PLAN.md — Tracer: post-context picker context branching + PostForm pickup-location row
+- [x] 13-02-PLAN.md — Tracer: post-context picker context branching + PostForm pickup-location row
 
 **Wave 2** *(blocked on Wave 1)*
 
