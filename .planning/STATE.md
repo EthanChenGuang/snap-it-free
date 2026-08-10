@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 14
 current_phase_name: settings-consumer-parity
-current_plan: 1
+current_plan: 2
 status: ready_to_execute
-stopped_at: Completed 14-03-PLAN.md
-last_updated: "2026-08-10T22:46:25.372Z"
+stopped_at: Completed 14-01-PLAN.md
+last_updated: "2026-08-10T22:46:35.325Z"
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 32
-  completed_plans: 27
+  completed_plans: 28
   percent: 75
 last_activity: 2026-08-10
 last_activity_desc: "Phase 13 verified: goal-backward verification 20/20 automated must-haves, Plan 05 gap closure green test:lib (287/287) + build, 4 human UAT items + D-12 open"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 14 (settings-consumer-parity) — READY TO EXECUTE
-**Current Plan:** 1
+**Current Plan:** 2
 **Total Plans in Phase:** 7
 Status: Phase 13 verified — Phase 14 planned (7 plans); ready to execute Plan 01
 
-Progress: [████████░░] 84% v2.0 (0/7 phases)
+Progress: [█████████░] 88% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -84,6 +84,7 @@ Progress: [████████░░] 84% v2.0 (0/7 phases)
 | Phase 13-select-location-flow P04 | 110s | 2 tasks | 1 files |
 | Phase 13-select-location-flow P05 | 15min | 5 tasks | 23 files |
 | Phase 14-settings-consumer-parity P03 | 4min | 1 tasks | 2 files |
+| Phase 14-settings-consumer-parity P01 | 8min | 2 tasks | 1 files |
 
 ## Deferred Items (from v1.0)
 
@@ -103,8 +104,8 @@ Progress: [████████░░] 84% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T22:46:25.328Z
-**Stopped at:** Completed 14-03-PLAN.md
+**Last session:** 2026-08-10T22:46:35.309Z
+**Stopped at:** Completed 14-01-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -150,6 +151,7 @@ Progress: [████████░░] 84% v2.0 (0/7 phases)
 - [Phase ?]: Radius chip bar keeps subtle shadow per DESIGN.md Level-2; only translucency and blur removed (D-43)
 - [Phase ?]: Locate-me FAB failure stays silent — pin unchanged, no error UI per planner resolution
 - [Phase ?]: deleteAccountData uses paginated storage.list before single remove(); hard delete via default deleteUser
+- [Phase ?]: Applied migration 022 via Supavisor pooler after direct db host IPv6 unreachable in WSL2
 
 ## Quick Tasks Completed
 
