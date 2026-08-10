@@ -1,0 +1,115 @@
+import { describe, expect, it } from 'vitest';
+import {
+  INFERRED_CATEGORY_TO_SLUG,
+  mapPostCategoryToSlug,
+  normalizeCatalogSlug,
+  POST_CATEGORY_TO_SLUG,
+  resolveCanonicalCategorySlug,
+} from './canonical-categories';
+
+describe('normalizeCatalogSlug', () => {
+  it('accepts catalog slugs (D-18)', () => {
+    expect(normalizeCatalogSlug('informatica')).toBe('informatica');
+    expect(normalizeCatalogSlug('arredamento-casalinghi')).toBe('arredamento-casalinghi');
+  });
+
+  it('rejects unknown slugs (D-18)', () => {
+    expect(normalizeCatalogSlug('not-a-real-slug')).toBeNull();
+    expect(normalizeCatalogSlug('')).toBeNull();
+    expect(normalizeCatalogSlug(null)).toBeNull();
+  });
+});
+
+describe('resolveCanonicalCategorySlug', () => {
+  it('prefers valid DB slug over title inference (CAT-01)', () => {
+    expect(
+      resolveCanonicalCategorySlug({
+        source: 'subito',
+        title: 'Divano in ottime condizioni',
+        category: 'informatica',
+      }),
+    ).toBe('informatica');
+  });
+
+  it('falls back to inference when category null (CAT-01)', () => {
+    expect(
+      resolveCanonicalCategorySlug({
+        source: 'ugc',
+        title: 'Monitor 24 pollici',
+        category: null,
+      }),
+    ).toBe('informatica');
+  });
+
+  it('returns null for facebook source stub (D-09)', () => {
+    expect(
+      resolveCanonicalCategorySlug({
+        source: 'facebook',
+        title: 'Chair free',
+        category: null,
+      }),
+    ).toBeNull();
+  });
+
+  it('retries inference when DB slug unknown (D-18)', () => {
+    expect(
+      resolveCanonicalCategorySlug({
+        source: 'subito',
+        title: 'Monitor 24 pollici',
+        category: 'bogus-slug',
+      }),
+    ).toBe('informatica');
+  });
+
+  it('returns null when no resolvable category (CAT-01)', () => {
+    expect(
+      resolveCanonicalCategorySlug({
+        source: 'subito',
+        title: 'Oggetto generico',
+        category: null,
+      }),
+    ).toBeNull();
+  });
+});
+
+describe('mapPostCategoryToSlug', () => {
+  it('maps kitchenware to arredamento-casalinghi (D-11)', () => {
+    expect(mapPostCategoryToSlug('kitchenware')).toBe('arredamento-casalinghi');
+  });
+
+  it('maps others to usato (D-11)', () => {
+    expect(mapPostCategoryToSlug('others')).toBe('usato');
+  });
+
+  it('maps all six PostCategory values (D-11, CAT-03)', () => {
+    expect(mapPostCategoryToSlug('furniture')).toBe('arredamento-casalinghi');
+    expect(mapPostCategoryToSlug('tech')).toBe('informatica');
+    expect(mapPostCategoryToSlug('books')).toBe('libri-riviste');
+    expect(mapPostCategoryToSlug('apparel')).toBe('abbigliamento-accessori');
+  });
+});
+
+describe('POST_CATEGORY_TO_SLUG table (CAT-03)', () => {
+  it('documents all six UGC PostCategory → Subito slug mappings', () => {
+    expect(POST_CATEGORY_TO_SLUG).toEqual({
+      furniture: 'arredamento-casalinghi',
+      tech: 'informatica',
+      books: 'libri-riviste',
+      apparel: 'abbigliamento-accessori',
+      kitchenware: 'arredamento-casalinghi',
+      others: 'usato',
+    });
+  });
+});
+
+describe('INFERRED_CATEGORY_TO_SLUG table (CAT-03)', () => {
+  it('documents title-inference bucket → Subito slug mappings', () => {
+    expect(INFERRED_CATEGORY_TO_SLUG).toEqual({
+      furniture: 'arredamento-casalinghi',
+      tech: 'informatica',
+      apparel: 'abbigliamento-accessori',
+      books: 'libri-riviste',
+      home_decor: 'arredamento-casalinghi',
+    });
+  });
+});
