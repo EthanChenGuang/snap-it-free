@@ -40,7 +40,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 ### Canonical Category Mapping
 
 - [x] **CAT-01**: `resolveCanonicalCategorySlug` resolves Subito, UGC, and title-inference paths with catalog-validated slugs
-- [ ] **CAT-02**: New UGC posts persist canonical slug in `listing.category` at insert time
+- [x] **CAT-02**: New UGC posts persist canonical slug in `listing.category` at insert time
 - [x] **CAT-03**: PostCategory and inference slug mapping tables documented and covered by unit tests
 
 ### Select Location
@@ -130,7 +130,7 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | CARD-04 | Phase 11 | Complete |
 | CARD-05 | Phase 11 | Complete |
 | CAT-01 | Phase 12 | Complete |
-| CAT-02 | Phase 12 | Pending |
+| CAT-02 | Phase 12 | Complete |
 | CAT-03 | Phase 12 | Complete |
 | FAV-01 | v3+ | Deferred |
 | FAV-02 | v3+ | Deferred |

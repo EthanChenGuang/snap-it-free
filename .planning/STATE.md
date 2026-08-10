@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 12
 current_phase_name: canonical-category-mapping
-current_plan: 3
+current_plan: 4
 status: executing
-stopped_at: Completed 12-02-PLAN.md
-last_updated: "2026-08-10T18:37:25.077Z"
+stopped_at: Completed 12-03-PLAN.md
+last_updated: "2026-08-10T18:40:01.224Z"
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 18
-  completed_plans: 16
+  completed_plans: 17
   percent: 43
 last_activity: 2026-08-10
 last_activity_desc: "Completed quick task 260810-nfg: Feed header pills & badge indicators"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 12 (canonical-category-mapping) — EXECUTING
-**Current Plan:** 3
+**Current Plan:** 4
 **Total Plans in Phase:** 4
 Status: Ready to execute
 
-Progress: [█████████░] 89% v2.0 (0/7 phases)
+Progress: [█████████░] 94% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -76,6 +76,7 @@ Progress: [█████████░] 89% v2.0 (0/7 phases)
 | Phase 11-grid-listing-cards P04 | 3min | 3 tasks | 2 files |
 | Phase 12-canonical-category-mapping P01 | 5min | 3 tasks | 7 files |
 | Phase 12-canonical-category-mapping P02 | 8min | 3 tasks | 5 files |
+| Phase 12-canonical-category-mapping P03 | 5min | 3 tasks | 5 files |
 
 ## Deferred Items (from v1.0)
 
@@ -95,8 +96,8 @@ Progress: [█████████░] 89% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T18:37:25.065Z
-**Stopped at:** Completed 12-02-PLAN.md
+**Last session:** 2026-08-10T18:40:01.214Z
+**Stopped at:** Completed 12-03-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -131,6 +132,8 @@ Progress: [█████████░] 89% v2.0 (0/7 phases)
 - [Phase ?]: Phase 12 scope pivot: CAT-01–03 active, FAV-01–03 deferred v3+
 - [Phase ?]: ListingCategoryFieldRow.source optional with subito default for legacy callers
 - [Phase ?]: Filter and display paths both consume resolveCanonicalCategorySlug exclusively
+- [Phase ?]: POST_CATEGORIES derived from POST_CATEGORY_TO_SLUG for zod enum and PostForm picker
+- [Phase ?]: UGC create accepts postCategory enum only; server maps slug at insert (V5)
 
 ## Quick Tasks Completed
 

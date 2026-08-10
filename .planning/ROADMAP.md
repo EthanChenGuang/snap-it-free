@@ -151,7 +151,7 @@ Plans:
 
 **Requirements:** CAT-01–03, I18N-01 (partial)
 
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 **Wave 0**
@@ -164,7 +164,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 12-03-PLAN.md — UGC insert path persists category slug (PostCategory → DB column)
+- [x] 12-03-PLAN.md — UGC insert path persists category slug (PostCategory → DB column)
 
 **Wave 3** *(blocked on Wave 2)*
 
