@@ -76,8 +76,11 @@ export const messages = {
     browseFeed: 'Sfoglia feed',
   },
   selectLocation: {
+    title: 'Seleziona posizione',
     confirm: 'Conferma posizione',
     back: 'Indietro',
+    selectedLocationLabel: 'Posizione selezionata',
+    locateMe: 'Vai alla mia posizione',
   },
   post: {
     title: 'Pubblica oggetto gratis',

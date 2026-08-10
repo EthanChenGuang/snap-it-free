@@ -74,8 +74,11 @@ export const messages: Messages = {
     browseFeed: '浏览首页',
   },
   selectLocation: {
+    title: '选择位置',
     confirm: '确认位置',
     back: '返回',
+    selectedLocationLabel: '已选位置',
+    locateMe: '定位到我的位置',
   },
   post: {
     title: '发布免费物品',

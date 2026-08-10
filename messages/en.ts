@@ -74,8 +74,11 @@ export const messages: Messages = {
     browseFeed: 'Browse feed',
   },
   selectLocation: {
+    title: 'Select Location',
     confirm: 'Confirm location',
     back: 'Back',
+    selectedLocationLabel: 'Selected location',
+    locateMe: 'Go to my location',
   },
   post: {
     title: 'Post a free item',
