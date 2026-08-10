@@ -1,3 +1,11 @@
+---
+phase: 13-select-location-flow
+plan: 04
+nyquist_compliant: false
+phase_gate_status: ready_for_verify_work
+requirements: [LOC-01, LOC-02, LOC-03, I18N-01]
+---
+
 # Phase 13: Select Location Flow — Validation
 
 **Phase gate:** Plan 04 (Wave 3)  
