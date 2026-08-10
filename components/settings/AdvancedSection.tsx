@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { SettingsCard } from '@/components/settings/SettingsUi';
+import { SettingsGroupCard } from '@/components/settings/SettingsUi';
 import { resetLocalAppData } from '@/lib/settings/preferences';
 import { FAVORITES_CHANGE_EVENT } from '@/lib/favorites/storage';
 import { REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
@@ -25,19 +25,19 @@ export function AdvancedSection() {
   };
 
   return (
-    <section className="pb-space-xl">
-      <SettingsCard className="border-error/20 bg-error-container/30 p-space-md">
+    <section className="mb-6">
+      <SettingsGroupCard className="border border-red-100 bg-red-50/30 p-4">
         <h3 className="text-body-md font-bold text-error">{messages.settings.advanced.title}</h3>
-        <p className="mb-space-md text-label-sm text-secondary">{messages.settings.advanced.description}</p>
+        <p className="mb-4 text-label-sm text-secondary">{messages.settings.advanced.description}</p>
         <button
           type="button"
           onClick={handleReset}
           onBlur={() => setConfirming(false)}
-          className="rounded-lg border border-error bg-surface-container-lowest px-space-md py-space-xs text-label-md text-error transition-all hover:bg-error hover:text-on-error"
+          className="rounded-xl border border-error bg-white px-4 py-2 text-label-md text-error transition-colors active:bg-error active:text-on-error"
         >
           {confirming ? messages.settings.advanced.confirmReset : messages.settings.advanced.resetButton}
         </button>
-      </SettingsCard>
+      </SettingsGroupCard>
     </section>
   );
 }

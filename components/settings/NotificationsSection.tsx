@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { usePwaOnboarding } from '@/components/providers/PwaOnboardingProvider';
 import { Button } from '@/components/ui/button';
 import {
-  SettingsCard,
+  SettingsGroupCard,
+  SettingsRowDivider,
   SettingsSectionTitle,
   SettingsToggle,
 } from '@/components/settings/SettingsUi';
@@ -207,10 +208,10 @@ export function NotificationsSection() {
     !isLoggedIn || Boolean(disabledReason) || loading || busy || showInstallCta;
 
   return (
-    <section className="mb-space-xl">
+    <section className="mb-6">
       <SettingsSectionTitle>{messages.settings.notificationsSection}</SettingsSectionTitle>
-      <SettingsCard>
-        <div className="flex items-center justify-between gap-space-md border-b border-outline-variant p-space-md">
+      <SettingsGroupCard>
+        <div className="flex items-center justify-between gap-4 p-4">
           <div className="min-w-0 flex-1">
             <p className="text-body-md font-medium text-on-surface">{messages.settings.push.title}</p>
             <p className="text-label-sm text-secondary">
@@ -218,7 +219,7 @@ export function NotificationsSection() {
                 ? messages.settings.push.iosDisabled
                 : (disabledReason ?? messages.settings.push.description)}
             </p>
-            {error && <p className="mt-space-xs text-label-sm text-error">{error}</p>}
+            {error && <p className="mt-1 text-label-sm text-error">{error}</p>}
           </div>
           {showInstallCta ? (
             <Button type="button" size="sm" variant="secondary" onClick={openInstallGuide}>
@@ -236,7 +237,9 @@ export function NotificationsSection() {
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-space-md border-b border-outline-variant p-space-md">
+        <SettingsRowDivider />
+
+        <div className="flex items-center justify-between gap-4 p-4">
           <div className="min-w-0 flex-1">
             <p className="text-body-md font-medium text-on-surface">{messages.settings.sound.title}</p>
             <p className="text-label-sm text-secondary">{messages.settings.sound.description}</p>
@@ -254,7 +257,9 @@ export function NotificationsSection() {
 
         {pushEnabled && !dndLoading && (
           <>
-            <div className="flex items-center justify-between gap-space-md border-b border-outline-variant p-space-md">
+            <SettingsRowDivider />
+
+            <div className="flex items-center justify-between gap-4 p-4">
               <div className="min-w-0 flex-1">
                 <p className="text-body-md font-medium text-on-surface">{messages.settings.dnd.title}</p>
                 <p className="text-label-sm text-secondary">{messages.settings.dnd.description}</p>
@@ -271,32 +276,32 @@ export function NotificationsSection() {
             </div>
 
             {dndPrefs.dndEnabled && (
-              <div className="flex flex-wrap items-center gap-space-sm p-space-md">
-                <label className="flex items-center gap-space-xs text-label-sm text-secondary">
+              <div className="flex flex-wrap items-center gap-3 px-4 pb-4">
+                <label className="flex items-center gap-2 text-label-sm text-secondary">
                   <span>{messages.settings.dnd.startLabel}</span>
                   <input
                     type="time"
                     value={dndPrefs.quietStart}
                     onChange={(event) => void handleDndChange({ quietStart: event.target.value })}
-                    className="min-h-11 rounded-sm border border-outline-variant bg-surface px-space-sm text-body-md text-on-surface"
+                    className="min-h-11 rounded-lg border border-neutral-200 bg-white px-3 text-body-md text-on-surface"
                   />
                 </label>
-                <label className="flex items-center gap-space-xs text-label-sm text-secondary">
+                <label className="flex items-center gap-2 text-label-sm text-secondary">
                   <span>{messages.settings.dnd.endLabel}</span>
                   <input
                     type="time"
                     value={dndPrefs.quietEnd}
                     onChange={(event) => void handleDndChange({ quietEnd: event.target.value })}
-                    className="min-h-11 rounded-sm border border-outline-variant bg-surface px-space-sm text-body-md text-on-surface"
+                    className="min-h-11 rounded-lg border border-neutral-200 bg-white px-3 text-body-md text-on-surface"
                   />
                 </label>
               </div>
             )}
 
-            {dndError && <p className="px-space-md pb-space-md text-label-sm text-error">{dndError}</p>}
+            {dndError && <p className="px-4 pb-4 text-label-sm text-error">{dndError}</p>}
           </>
         )}
-      </SettingsCard>
+      </SettingsGroupCard>
     </section>
   );
 }

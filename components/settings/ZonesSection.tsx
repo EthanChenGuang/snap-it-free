@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { AlertCreateSheet } from '@/components/settings/AlertCreateSheet';
-import { SettingsCard, SettingsSectionTitle } from '@/components/settings/SettingsUi';
+import { SettingsGroupCard, SettingsSectionTitle } from '@/components/settings/SettingsUi';
 import { Button } from '@/components/ui/button';
 import { useAuthSession } from '@/lib/auth/useAuthSession';
 import type { AlertRow } from '@/lib/alerts/schemas';
@@ -203,15 +203,15 @@ export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
 
   return (
     <>
-      <section id="zones" className="mb-space-xl scroll-mt-space-lg">
-        <div className="mb-space-md flex items-center justify-between">
-          <h2 className="ml-space-xs text-label-md uppercase tracking-wider text-on-secondary-container">
+      <section id="zones" className="mb-6 scroll-mt-space-lg">
+        <div className="mb-2 flex items-center justify-between px-4">
+          <h2 className="text-xs font-medium uppercase tracking-wide text-neutral-500">
             {messages.settings.zones.sectionTitle}
           </h2>
           <button
             type="button"
             onClick={handleCreateClick}
-            className="flex items-center gap-1 text-label-sm font-medium text-primary hover:underline"
+            className="flex items-center gap-0.5 text-label-sm font-medium text-primary active:opacity-70"
           >
             <span className="material-symbols-outlined text-[16px]">add</span>
             {messages.settings.zones.addZone}
@@ -219,30 +219,35 @@ export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
         </div>
 
         {!isLoggedIn ? (
-          <SettingsCard className="p-space-md">
+          <SettingsGroupCard className="p-4">
             <p className="text-body-md text-on-surface-variant">{messages.settings.alerts.signInPrompt}</p>
-            <Button type="button" className="mt-space-md w-fit" onClick={() => setAuthOpen(true)}>
+            <Button type="button" className="mt-4 w-fit" onClick={() => setAuthOpen(true)}>
               {messages.settings.signIn}
             </Button>
-          </SettingsCard>
+          </SettingsGroupCard>
         ) : loading ? (
-          <SettingsCard className="p-space-md">
+          <SettingsGroupCard className="p-4">
             <p className="text-body-md text-on-surface-variant">{messages.settings.profileLoading}</p>
-          </SettingsCard>
+          </SettingsGroupCard>
         ) : alerts.length === 0 ? (
-          <SettingsCard className="p-space-md">
+          <SettingsGroupCard className="border border-neutral-100 p-4">
             <p className="text-body-md font-medium text-on-surface">{messages.settings.zones.emptyTitle}</p>
-            <p className="mt-space-xs text-label-sm text-secondary">
+            <p className="mt-1 text-label-sm text-secondary">
               {messages.settings.zones.emptyDescription}
             </p>
-            <Button type="button" className="mt-space-md w-fit" onClick={() => setCreateOpen(true)}>
+            <button
+              type="button"
+              onClick={() => setCreateOpen(true)}
+              className="mt-4 inline-flex items-center gap-1 rounded-xl bg-primary px-4 py-2 text-label-md font-medium text-on-primary transition-transform active:scale-[0.98]"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
               {messages.settings.zones.addZone}
-            </Button>
-          </SettingsCard>
+            </button>
+          </SettingsGroupCard>
         ) : (
-          <div className="grid grid-cols-1 gap-space-md md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {alerts.map((alert) => (
-              <SettingsCard key={alert.id} className="flex flex-col gap-space-sm p-space-md">
+              <SettingsGroupCard key={alert.id} className="flex flex-col gap-3 p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-container">
                     <span className="material-symbols-outlined text-primary">{alertIcon(alert)}</span>
@@ -274,12 +279,12 @@ export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
                       : messages.settings.zones.noRecentActivity}
                   </span>
                 </div>
-              </SettingsCard>
+              </SettingsGroupCard>
             ))}
           </div>
         )}
 
-        {error && <p className="mt-space-md text-label-sm text-error">{error}</p>}
+        {error && <p className="mt-4 text-label-sm text-error">{error}</p>}
       </section>
 
       <AuthPromptModal

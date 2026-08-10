@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { SettingsCard, SettingsSectionTitle } from '@/components/settings/SettingsUi';
+import { SettingsGroupCard, SettingsSectionTitle } from '@/components/settings/SettingsUi';
 import { useAuthSession } from '@/lib/auth/useAuthSession';
 import { FAVORITES_CHANGE_EVENT } from '@/lib/favorites/storage';
 import { useMessages } from '@/lib/i18n/useMessages';
@@ -69,15 +69,15 @@ export function AccountSection() {
   };
 
   return (
-    <section className="pb-space-xl">
+    <section className="mb-6">
       <SettingsSectionTitle>{messages.settings.account.sectionTitle}</SettingsSectionTitle>
-      <SettingsCard className="border-error/20 bg-error-container/30 p-space-md">
+      <SettingsGroupCard className="border border-red-100 bg-red-50/30 p-4">
         <h3 className="text-body-md font-bold text-error">{messages.settings.account.deleteTitle}</h3>
-        <p className="mb-space-md text-label-sm text-secondary">
+        <p className="mb-4 text-label-sm text-secondary">
           {messages.settings.account.deleteDescription}
         </p>
         {activeClaims > 0 && (
-          <p className="mb-space-md text-label-sm text-error">
+          <p className="mb-4 text-label-sm text-error">
             {messages.settings.account.activeClaimsWarning(activeClaims)}
           </p>
         )}
@@ -86,12 +86,12 @@ export function AccountSection() {
           onClick={() => void handleDelete()}
           onBlur={() => setConfirming(false)}
           disabled={deleting}
-          className="rounded-lg border border-error bg-surface-container-lowest px-space-md py-space-xs text-label-md text-error transition-all hover:bg-error hover:text-on-error"
+          className="rounded-xl border border-error bg-white px-4 py-2 text-label-md text-error transition-colors active:bg-error active:text-on-error"
         >
           {confirming ? messages.settings.account.confirmDelete : messages.settings.account.deleteButton}
         </button>
-        {error && <p className="mt-space-xs text-label-sm text-error">{error}</p>}
-      </SettingsCard>
+        {error && <p className="mt-2 text-label-sm text-error">{error}</p>}
+      </SettingsGroupCard>
     </section>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { SettingsCard, SettingsSectionTitle } from '@/components/settings/SettingsUi';
+import { SettingsGroupCard, SettingsSectionTitle } from '@/components/settings/SettingsUi';
 import {
   readAppPreferences,
   subscribeAppPreferences,
@@ -20,10 +20,10 @@ export function LanguageSection() {
   );
 
   return (
-    <section className="mb-space-xl">
+    <section className="mb-6">
       <SettingsSectionTitle>{messages.settings.languageSection}</SettingsSectionTitle>
-      <SettingsCard className="p-space-xs">
-        <div className="flex rounded-lg bg-surface-container-low p-space-xs">
+      <SettingsGroupCard className="p-2">
+        <div className="flex rounded-xl bg-neutral-100 p-1">
           {LANGUAGES.map((language) => {
             const active = preferences.language === language.id;
             return (
@@ -32,17 +32,17 @@ export function LanguageSection() {
                 type="button"
                 onClick={() => setAppLanguage(language.id)}
                 className={cn(
-                  'flex flex-1 flex-col items-center gap-space-xs rounded-md px-space-sm py-space-sm transition-colors',
+                  'flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-2.5 transition-colors',
                   active
-                    ? 'bg-primary text-on-primary'
-                    : 'text-on-surface hover:bg-surface-container-high',
+                    ? 'bg-white text-on-surface shadow-sm'
+                    : 'text-on-surface hover:bg-white/50',
                 )}
               >
                 <span className="text-label-md font-bold">{language.label}</span>
                 <span
                   className={cn(
                     'text-[10px] font-medium uppercase',
-                    active ? 'opacity-80' : 'text-secondary',
+                    active ? 'text-secondary' : 'text-neutral-400',
                   )}
                 >
                   {language.sublabel}
@@ -51,7 +51,7 @@ export function LanguageSection() {
             );
           })}
         </div>
-      </SettingsCard>
+      </SettingsGroupCard>
     </section>
   );
 }
