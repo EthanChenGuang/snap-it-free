@@ -39,9 +39,9 @@ type FeedFilterContextValue = {
 
 const FeedFilterContext = createContext<FeedFilterContextValue | null>(null);
 
+/** General filter-sheet conditions (category, city mode). Map/radius is indicated on the map pin. */
 function computeHasActiveFilters(prefs: FilterPrefs): boolean {
   return (
-    (prefs.mode === 'map' && prefs.radiusEnabled) ||
     (prefs.mode === 'city' && prefs.city !== 'all') ||
     prefs.categories.length > 0
   );
