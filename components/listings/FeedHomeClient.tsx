@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ListListingCard } from '@/components/listings/ListListingCard';
+import { RubberbandScroll } from '@/components/ui/RubberbandScroll';
 import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import { useFeedScroll } from '@/components/shell/FeedScrollContext';
 import { composeFeedListings, useDistanceCenter } from '@/hooks/useDistanceCenter';
@@ -63,9 +64,9 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
 
   return (
     <main className="flex h-full min-h-0 flex-col overflow-hidden bg-background">
-      <div
+      <RubberbandScroll
         ref={scrollRef}
-        className="no-scrollbar h-full flex-1 overflow-y-auto px-gutter pt-space-sm pb-[calc(5rem+env(safe-area-inset-bottom,0px))]"
+        className="no-scrollbar h-full flex-1 px-gutter pt-space-sm pb-[calc(5rem+env(safe-area-inset-bottom,0px))]"
       >
         {filteredListings.length === 0 && isRefreshing ? (
           <div className="flex items-center justify-center p-space-xl text-label-sm text-on-surface-variant">
@@ -96,7 +97,7 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
             ))}
           </section>
         )}
-      </div>
+      </RubberbandScroll>
     </main>
   );
 }

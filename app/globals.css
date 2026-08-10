@@ -152,6 +152,17 @@ body {
   overflow-x: hidden;
 }
 
+/* iOS-style rubberband overscroll for in-page scroll regions (feed, favorites). */
+.rubberband-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: auto;
+  touch-action: pan-y;
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
 .map-container {
   height: 100%;
 }

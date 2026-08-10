@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
+import { RubberbandScroll } from '@/components/ui/RubberbandScroll';
 import { ListListingCard } from '@/components/listings/ListListingCard';
 import { useDistanceCenter } from '@/hooks/useDistanceCenter';
 import {
@@ -119,7 +120,8 @@ export function FavoritesPageClient() {
   if (listings.length === 0) {
     return (
       <>
-        <main className="flex h-full flex-col overflow-y-auto px-gutter pb-space-xl pt-space-md">
+        <main className="flex h-full flex-col overflow-hidden px-gutter pb-space-xl pt-space-md">
+          <RubberbandScroll className="no-scrollbar flex-1">
           <div className="border border-outline-variant bg-surface-container-lowest p-space-xl text-center">
             <span className="material-symbols-outlined mb-space-sm text-4xl text-on-surface-variant">
               favorite
@@ -146,6 +148,7 @@ export function FavoritesPageClient() {
               {messages.feed.browseFeed}
             </Link>
           </div>
+          </RubberbandScroll>
         </main>
         <AuthPromptModal
           open={authOpen}
@@ -160,7 +163,7 @@ export function FavoritesPageClient() {
   return (
     <>
       <main className="flex h-full flex-col overflow-hidden">
-        <div className="no-scrollbar flex-1 overflow-y-auto px-gutter pb-space-xl pt-space-md">
+        <RubberbandScroll className="no-scrollbar flex-1 px-gutter pb-space-xl pt-space-md">
           {syncBanner}
           <section className="grid grid-cols-2 gap-3">
             {listings.map((listing) => {
@@ -177,7 +180,7 @@ export function FavoritesPageClient() {
               );
             })}
           </section>
-        </div>
+        </RubberbandScroll>
       </main>
       <AuthPromptModal
         open={authOpen}
