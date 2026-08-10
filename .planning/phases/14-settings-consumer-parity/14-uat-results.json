@@ -1,0 +1,170 @@
+{
+  "base": "http://localhost:3003",
+  "passed": 27,
+  "total": 27,
+  "results": [
+    {
+      "id": "T1",
+      "name": "user_notification_prefs table exists on remote Supabase",
+      "pass": true,
+      "detail": "select ok"
+    },
+    {
+      "id": "T2",
+      "name": "delete_account_data RPC exists on remote Supabase",
+      "pass": true,
+      "detail": "rpc callable"
+    },
+    {
+      "id": "T3",
+      "name": "components/settings/ZonesSection.tsx zero diff from baseline",
+      "pass": true,
+      "detail": "0 bytes changed"
+    },
+    {
+      "id": "T3",
+      "name": "components/settings/GeneralSection.tsx zero diff from baseline",
+      "pass": true,
+      "detail": "0 bytes changed"
+    },
+    {
+      "id": "T3",
+      "name": "components/settings/LanguageSection.tsx zero diff from baseline",
+      "pass": true,
+      "detail": "0 bytes changed"
+    },
+    {
+      "id": "T3",
+      "name": "lib/pwa/ios-detect.ts zero diff from baseline",
+      "pass": true,
+      "detail": "0 bytes changed"
+    },
+    {
+      "id": "T3",
+      "name": "lib/pwa/usePushSubscribe.ts zero diff from baseline",
+      "pass": true,
+      "detail": "0 bytes changed"
+    },
+    {
+      "id": "T4",
+      "name": "AccountSection resets local data before event dispatches",
+      "pass": true,
+      "detail": "reset@161, fav@225"
+    },
+    {
+      "id": "T5",
+      "name": "GET /api/user/notification-prefs returns D-08 defaults for new user",
+      "pass": true,
+      "detail": "{\"dndEnabled\":false,\"quietStart\":\"22:00\",\"quietEnd\":\"08:00\"}"
+    },
+    {
+      "id": "T6",
+      "name": "PATCH enables DND and persists quiet hours",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "id": "T7",
+      "name": "DND toggle + time values saved in user_notification_prefs",
+      "pass": true,
+      "detail": "{\"dnd_enabled\":true,\"quiet_start\":\"21:30:00\",\"quiet_end\":\"08:00:00\"}"
+    },
+    {
+      "id": "T8",
+      "name": "PATCH updates quiet_start without resetting dnd_enabled",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "id": "T9",
+      "name": "Time picker value auto-saved server-side",
+      "pass": true,
+      "detail": "{\"quiet_start\":\"23:15:00\",\"dnd_enabled\":true}"
+    },
+    {
+      "id": "T10",
+      "name": "DND block gated on pushEnabled && !dndLoading in NotificationsSection",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "T11",
+      "name": "DND time pickers render when dndPrefs.dndEnabled is true",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "T12",
+      "name": "GET /api/user/delete returns activeClaims for claimed listings",
+      "pass": true,
+      "detail": "{\"activeClaims\":1}"
+    },
+    {
+      "id": "T13",
+      "name": "AccountSection uses two-step inline confirm pattern",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "T14",
+      "name": "POST /api/user/delete removes account",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "id": "T15",
+      "name": "Supabase user removed after delete",
+      "pass": true,
+      "detail": "gone"
+    },
+    {
+      "id": "T16",
+      "name": "Account danger card uses Stitch error border/background tokens",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "T17",
+      "name": "SettingsCard uses flat border surface (no shadow utilities)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "T18",
+      "name": "Account section between Language and Advanced in SettingsPageClient",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "T19",
+      "name": "First POST /api/user/delete succeeds",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "id": "T20",
+      "name": "Second POST returns 401 after user deleted",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "id": "T21",
+      "name": "Full vitest suite green (npm run test)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "T22",
+      "name": "TypeScript lint green (npm run lint)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "T23",
+      "name": "Phase-scoped vitest suite green (27 tests)",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "failed": []
+}
