@@ -1,11 +1,13 @@
 import { SUBITO_REGALO_CATALOG } from '@/lib/admin/subito-regalo-catalog';
 import type { AppLanguage } from '@/lib/settings/preferences';
-import { inferListingCategory } from './categories';
+import { resolveCanonicalCategorySlug } from './canonical-categories';
+import type { ListingSource } from './types';
 
 /** Subito slug filter value — 'all' means no category filter. */
 export type SubitoCategoryFilter = string | 'all';
 
 type SubitoListingFilterInput = {
+  source?: ListingSource;
   title: string;
   category?: string | null;
 };
@@ -19,21 +21,18 @@ const CATALOG_LABEL_BY_SLUG = new Map(
   SUBITO_REGALO_CATALOG.map((entry) => [entry.slug, entry.labelIt] as const),
 );
 
-/**
- * Prefer DB `listing.category` slug over title keyword inference (D-29).
- * Title inference is fallback only when category column is null.
- */
+/** Delegates to resolveCanonicalCategorySlug for catalog-valid slug matching (D-05). */
 export function matchesSubitoCategory(
   listing: SubitoListingFilterInput,
   selected: SubitoCategoryFilter,
 ): boolean {
   if (selected === 'all') return true;
-  if (listing.category) {
-    return listing.category === selected;
-  }
-  const inferred = inferListingCategory(listing.title);
-  if (!inferred) return false;
-  return legacySlugFromInferred(inferred) === selected;
+  const resolved = resolveCanonicalCategorySlug({
+    source: listing.source ?? 'subito',
+    title: listing.title,
+    category: listing.category,
+  });
+  return resolved === selected;
 }
 
 /** OR match across multiple category slugs; empty selection passes all (D-40, D-44). */
@@ -63,18 +62,6 @@ export function getSubitoCategoryLabel(
 
 function nonEmpty(value: string | null | undefined): value is string {
   return typeof value === 'string' && value.trim().length > 0;
-}
-
-/** Maps legacy title-inference buckets to nearest Subito slug for fallback only. */
-function legacySlugFromInferred(inferred: Exclude<import('./categories').ListingCategory, 'All'>): string {
-  const map: Record<Exclude<import('./categories').ListingCategory, 'All'>, string> = {
-    furniture: 'arredamento-casalinghi',
-    tech: 'informatica',
-    apparel: 'abbigliamento-accessori',
-    books: 'libri-riviste',
-    home_decor: 'arredamento-casalinghi',
-  };
-  return map[inferred];
 }
 
 export const SUBITO_CATEGORY_SLUGS = SUBITO_REGALO_CATALOG.map((entry) => entry.slug);

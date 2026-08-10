@@ -22,6 +22,21 @@ describe('matchesSubitoCategory', () => {
       matchesSubitoCategory({ title: 'Monitor 24 pollici', category: null }, 'informatica'),
     ).toBe(true);
   });
+
+  it('falls back to title inference when DB slug is unknown (D-18)', () => {
+    expect(
+      matchesSubitoCategory(
+        { title: 'Monitor 24 pollici', category: 'bogus-slug' },
+        'informatica',
+      ),
+    ).toBe(true);
+    expect(
+      matchesSubitoCategory(
+        { title: 'Monitor 24 pollici', category: 'bogus-slug' },
+        'arredamento-casalinghi',
+      ),
+    ).toBe(false);
+  });
 });
 
 describe('getSubitoCategoryLabel', () => {
