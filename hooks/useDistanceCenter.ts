@@ -5,7 +5,7 @@ import { useBrowseCenter } from '@/lib/browse-center/context';
 import type { BrowseCenter } from '@/lib/browse-center/storage';
 import type { FilterPrefs } from '@/lib/filter-prefs/storage';
 import { haversineKm } from '@/lib/geo/haversine';
-import { matchesFeedSearch } from '@/lib/listings/feed-search';
+import { matchesFeedSearch, type ConsumerCityLabels } from '@/lib/listings/feed-search';
 import {
   filterByRadiusKm,
   matchesConsumerCity,
@@ -13,7 +13,7 @@ import {
   sortByPostedAtDesc,
 } from '@/lib/listings/filters';
 import { matchesAnySubitoCategories } from '@/lib/listings/subito-categories';
-import type { ListingRow, VeniceZone } from '@/lib/listings/types';
+import type { ListingRow } from '@/lib/listings/types';
 import type { AppLanguage } from '@/lib/settings/preferences';
 
 export const VENICE_DEFAULT_CENTER = { lat: 45.44, lng: 12.33 };
@@ -50,7 +50,7 @@ type ComposeFeedListingsInput = {
   center: DistanceCenter | null;
   searchQuery: string;
   language: AppLanguage;
-  zoneLabel: (zone: VeniceZone) => string;
+  cityLabels: ConsumerCityLabels;
 };
 
 /** Client-side filter pipeline: search → radius → city → categories → sort (D-29). */
@@ -60,13 +60,13 @@ export function composeFeedListings({
   center,
   searchQuery,
   language,
-  zoneLabel,
+  cityLabels,
 }: ComposeFeedListingsInput): {
   listings: ListingRow[];
   distanceMap: Map<string, number>;
 } {
   let rows = listings.filter((listing) =>
-    matchesFeedSearch(listing, searchQuery, language, zoneLabel),
+    matchesFeedSearch(listing, searchQuery, language, cityLabels),
   );
 
   if (applied.radiusEnabled && center) {

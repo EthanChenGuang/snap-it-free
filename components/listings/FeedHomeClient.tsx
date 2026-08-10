@@ -16,7 +16,7 @@ type FeedHomeClientProps = {
 };
 
 export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
-  const { messages, language, zoneLabel } = useMessages();
+  const { messages, language } = useMessages();
   const { searchQuery, registerScrollContainer } = useFeedScroll();
   const { applied } = useFeedFilter();
   const { center } = useDistanceCenter(applied.radiusEnabled);
@@ -45,10 +45,13 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
       center,
       searchQuery,
       language,
-      zoneLabel,
+      cityLabels: {
+        venice: messages.feed.cityVenice,
+        padova: messages.feed.cityPadova,
+      },
     });
     return { filteredListings: filtered, distanceMap: distances };
-  }, [listings, reportedIds, searchQuery, applied, center, language, zoneLabel]);
+  }, [listings, reportedIds, searchQuery, applied, center, language, messages.feed.cityVenice, messages.feed.cityPadova]);
 
   const hasSearchQuery = searchQuery.trim().length > 0;
   const hasCategoryFilter = applied.categories.length > 0;
@@ -87,7 +90,7 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
               <ListListingCard
                 key={listing.id}
                 listing={listing}
-                distanceMeters={distanceMap.get(listing.id)}
+                distanceMeters={distanceMap.get(listing.id) ?? null}
               />
             ))}
           </section>

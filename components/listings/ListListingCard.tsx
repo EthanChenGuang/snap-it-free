@@ -3,37 +3,40 @@
 import { useRouter } from 'next/navigation';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
+import { formatDistance } from '@/lib/geo/format-distance';
 import { resolveListingTitle } from '@/lib/i18n/listing-fields';
+import { listingConsumerCityLabel } from '@/lib/listings/feed-search';
 import type { ListingRow } from '@/lib/listings/types';
 import { useMessages } from '@/lib/i18n/useMessages';
 
 type ListListingCardProps = {
   listing: ListingRow;
-  /** Distance in meters from active center; wired to metadata in Plan 10-04. */
-  distanceMeters?: number;
+  /** Distance in meters from active center; null when coords or center unavailable. */
+  distanceMeters?: number | null;
 };
 
-function listingLocationLabel(
-  listing: ListingRow,
-  zoneLabel: ReturnType<typeof useMessages>['zoneLabel'],
+function buildCardMetadata(
+  distanceMeters: number | null | undefined,
+  cityLabel: string,
+  postedLabel: string,
 ): string {
-  if (listing.zone) {
-    return zoneLabel(listing.zone);
+  if (distanceMeters != null) {
+    return `${formatDistance(distanceMeters)} · ${postedLabel}`;
   }
-  if (listing.city) {
-    return listing.city.charAt(0).toUpperCase() + listing.city.slice(1);
-  }
-  return '';
+  return [cityLabel, postedLabel].filter(Boolean).join(' · ');
 }
 
 /** Minimalist feed card — image, FREE badge, favorite, compact metadata. */
-export function ListListingCard({ listing, distanceMeters: _distanceMeters }: ListListingCardProps) {
-  const { language, messages, zoneLabel, formatRelativeTime } = useMessages();
+export function ListListingCard({ listing, distanceMeters }: ListListingCardProps) {
+  const { language, messages, formatRelativeTime } = useMessages();
   const displayTitle = resolveListingTitle(listing, language);
   const router = useRouter();
-  const locationText = listingLocationLabel(listing, zoneLabel);
+  const cityLabel = listingConsumerCityLabel(listing, {
+    venice: messages.feed.cityVenice,
+    padova: messages.feed.cityPadova,
+  });
   const postedLabel = formatRelativeTime(listing.posted_at);
-  const metadata = [locationText, postedLabel].filter(Boolean).join(' · ');
+  const metadata = buildCardMetadata(distanceMeters, cityLabel, postedLabel);
 
   return (
     <article
