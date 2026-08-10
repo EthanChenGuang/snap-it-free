@@ -209,7 +209,7 @@ Plans:
 
 **Requirements:** LOC-01–03, I18N-01 (partial)
 
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 **Wave 0**
@@ -222,7 +222,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 13-03-PLAN.md — Live preview + aria-live + ready-gated Confirm + Stitch flat-card corrections
+- [x] 13-03-PLAN.md — Live preview + aria-live + ready-gated Confirm + Stitch flat-card corrections
 
 **Wave 3** *(blocked on Wave 2)*
 

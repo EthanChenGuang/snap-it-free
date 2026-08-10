@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 13
 current_phase_name: select-location-flow
-current_plan: 3
+current_plan: 4
 status: executing
-stopped_at: Completed 13-02-PLAN.md
-last_updated: "2026-08-10T21:13:08.742Z"
+stopped_at: Completed 13-03-PLAN.md
+last_updated: "2026-08-10T21:14:42.030Z"
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 24
-  completed_plans: 22
+  completed_plans: 23
   percent: 63
 last_activity: 2026-08-10
 last_activity_desc: "Phase 12.1 verified complete: self-run UAT (5/5), security review (0 threats open), goal-backward verification (11/11, 1 gap found+fixed — stale FilterSheet UAT selector)"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 13 (select-location-flow) — EXECUTING
-**Current Plan:** 3
+**Current Plan:** 4
 **Total Plans in Phase:** 4
 Status: Ready to execute
 
-Progress: [█████████░] 92% v2.0 (0/7 phases)
+Progress: [██████████] 96% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -80,6 +80,7 @@ Progress: [█████████░] 92% v2.0 (0/7 phases)
 | Phase 12-canonical-category-mapping P04 | 3 min | 3 tasks | 2 files |
 | Phase 13-select-location-flow P01 | 2min | 2 tasks | 4 files |
 | Phase 13-select-location-flow P02 | 2min | 2 tasks | 6 files |
+| Phase 13-select-location-flow P03 | 2 min | 2 tasks | 2 files |
 
 ## Deferred Items (from v1.0)
 
@@ -99,8 +100,8 @@ Progress: [█████████░] 92% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T21:13:08.733Z
-**Stopped at:** Completed 13-02-PLAN.md
+**Last session:** 2026-08-10T21:14:42.021Z
+**Stopped at:** Completed 13-03-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -143,6 +144,8 @@ Progress: [█████████░] 92% v2.0 (0/7 phases)
 - [Phase ?]: Wave 0 lib-only TDD foundation — Plan 02 imports resolveCityLabel and post-draft storage
 - [Phase ?]: Post context flyTo at DEFAULT_ZOOM instead of fitMapToRadius when radius UI hidden (D-26)
 - [Phase ?]: D-12 accepted: non-location PostForm fields reset on navigate-out-and-back — follow-up phase candidate
+- [Phase ?]: Radius chip bar keeps subtle shadow per DESIGN.md Level-2; only translucency and blur removed (D-43)
+- [Phase ?]: Locate-me FAB failure stays silent — pin unchanged, no error UI per planner resolution
 
 ## Quick Tasks Completed
 
