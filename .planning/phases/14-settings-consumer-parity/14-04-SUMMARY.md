@@ -84,7 +84,7 @@ Each task was committed atomically:
 
 1. **Task 1: Add settings.dnd.* and settings.account.* keys** - `27a6fae` (feat)
 
-**Plan metadata:** pending (docs commit)
+**Plan metadata:** `a7ae721` (docs: complete plan)
 
 ## Files Created/Modified
 - `messages/en.ts` - EN source copy for dnd + account sections
