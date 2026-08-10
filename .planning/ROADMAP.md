@@ -248,15 +248,15 @@ Plans:
 
 **Requirements:** SET-01–06, TD-01, I18N-01 (partial)
 
-**Plans:** 7 plans
+**Plans:** 2/7 plans executed
 
 Plans:
 **Wave 0**
 
 - [ ] 14-01-PLAN.md — DB migration 022 (user_notification_prefs + delete_account_data RPC) + blocking push
 - [ ] 14-02-PLAN.md — DND lib TDD: isQuietHoursActive, loadUserQuietHours, syncUserNotificationPrefs
-- [ ] 14-03-PLAN.md — Delete-account lib TDD: deleteAccountData orchestration (Storage → RPC → admin.deleteUser)
-- [ ] 14-04-PLAN.md — DND + Account i18n keys (zh/en/it)
+- [x] 14-03-PLAN.md — Delete-account lib TDD: deleteAccountData orchestration (Storage → RPC → admin.deleteUser)
+- [x] 14-04-PLAN.md — DND + Account i18n keys (zh/en/it)
 
 **Wave 1** *(blocked on Wave 0)*
 
@@ -308,7 +308,7 @@ Plans:
 | 11. Grid Listing Cards | v2.0 | 0/4 | Complete    | 2026-08-10 |
 | 12. Canonical Category Mapping | v2.0 | 4/4 | Complete    | 2026-08-10 |
 | 13. Select Location | v2.0 | 5/5 | Verified | 2026-08-10 |
-| 14. Settings Parity | v2.0 | 0/7 | Planned | — |
+| 14. Settings Parity | v2.0 | 0/7 | In Progress|  |
 | 7. Production Deploy | v2.0 | 0/4 | Planned | — |
 
 ## Execution Order

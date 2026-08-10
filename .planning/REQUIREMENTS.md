@@ -54,7 +54,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 - [ ] **SET-01**: Push notifications toggle retained and restyled to Stitch settings layout
 - [ ] **SET-02**: Do Not Disturb: user-configurable quiet hours or silent-push window for notifications
 - [ ] **SET-03**: Language selection retained (zh / en / it)
-- [ ] **SET-04**: Delete account: Supabase account deletion with associated user data cleanup (auth-gated, destructive confirmation)
+- [x] **SET-04**: Delete account: Supabase account deletion with associated user data cleanup (auth-gated, destructive confirmation)
 - [ ] **SET-05**: Sign out retained
 - [ ] **SET-06**: Existing settings preserved: keyword alerts, zone preferences, appearance, iOS Add-to-Home-Screen shortcuts
 
@@ -141,7 +141,7 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | SET-01 | Phase 14 | Pending |
 | SET-02 | Phase 14 | Pending |
 | SET-03 | Phase 14 | Pending |
-| SET-04 | Phase 14 | Pending |
+| SET-04 | Phase 14 | Complete |
 | SET-05 | Phase 14 | Pending |
 | SET-06 | Phase 14 | Pending |
 | I18N-01 | Phases 9–14 | Complete |
