@@ -47,7 +47,7 @@ created: 2026-08-10
 | 12-03-01 | 03 | 2 | CAT-02 | unit | `npm run test:lib -- lib/ugc/schemas.test.ts -x` | ✅ | ⬜ pending |
 | 12-03-02 | 03 | 2 | CAT-02 | grep | `grep mapPostCategoryToSlug app/api/ugc/listings/route.ts` | ⬜ | ⬜ pending |
 | 12-03-03 | 03 | 2 | D-12 | grep | `grep postCategory components/ugc/PostForm.tsx` | ⬜ | ⬜ pending |
-| 12-04-01 | 04 | 3 | D-01/D-14/D-15 | grep | UI boundary grep (no folder IA) | ⬜ | ⬜ pending |
+| 12-04-01 | 04 | 3 | D-01/D-14/D-15 | grep | UI boundary grep (no folder IA) | ✅ | ✅ green |
 | 12-04-02 | 04 | 3 | CAT-03 | unit | `npm run test:lib` | ⬜ | ⬜ pending |
 | 12-04-03 | 04 | 3 | CAT-01–03 | build | `npm run build` | ⬜ | ⬜ pending |
 
@@ -67,10 +67,33 @@ created: 2026-08-10
 
 | Check | Result |
 |-------|--------|
-| No folder tiles / drill-down in `FavoritesPageClient.tsx` | ⬜ pending |
-| `FilterSheet` still uses `SUBITO_CATEGORY_SLUGS` | ⬜ pending |
-| `PostForm` category picker uses `messages.post.categories` | ⬜ pending |
-| No `legacySlugFromInferred` outside canonical module | ⬜ pending |
+| No folder tiles / drill-down in `FavoritesPageClient.tsx` | ✅ green — no `FolderTile`, `folder drill`, or `/favorites/[` |
+| `FilterSheet` still uses `SUBITO_CATEGORY_SLUGS` | ✅ green — import + map at lines 16, 128 |
+| `PostForm` category picker uses `messages.post.categories` | ✅ green — `postCategoryLabel` at line 23 |
+| No `FavoriteButton` or category display on favorites grid | ✅ green — no matches in `FavoritesPageClient.tsx` |
+| No merged category groups in `FilterSheet` | ✅ green — no merged/group patterns |
+| No `legacySlugFromInferred` / `slugMap` code (comments OK) | ✅ green — JSDoc only in `canonical-categories.ts` |
+
+### Grep command outputs (2026-08-10)
+
+```bash
+# Task 12-04-01 automated verify — PASS
+! rg -q 'FolderTile|folder drill|/favorites/\[' components/listings/FavoritesPageClient.tsx \
+  && rg -q 'SUBITO_CATEGORY_SLUGS' components/listings/FilterSheet.tsx
+
+# FavoritesPageClient — no folder IA, no FavoriteButton, no category display
+rg 'FolderTile|folder drill|/favorites/\[|FavoriteButton|category' components/listings/FavoritesPageClient.tsx
+# (no matches)
+
+# FilterSheet — SUBITO_CATEGORY_SLUGS checklist unchanged
+rg 'SUBITO_CATEGORY_SLUGS' components/listings/FilterSheet.tsx
+# 16:  SUBITO_CATEGORY_SLUGS,
+# 128:              {SUBITO_CATEGORY_SLUGS.map((slug) => {
+
+# PostForm — i18n category labels via messages.post.categories
+rg 'messages\.post\.categories' components/ugc/PostForm.tsx
+# 23:  return messages.post.categories[category];
+```
 
 ---
 
