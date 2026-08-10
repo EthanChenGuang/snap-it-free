@@ -1,6 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
+import { AccountSection } from '@/components/settings/AccountSection';
 import { AdvancedSection } from '@/components/settings/AdvancedSection';
 import { GeneralSection } from '@/components/settings/GeneralSection';
 import { LanguageSection } from '@/components/settings/LanguageSection';
@@ -26,6 +27,7 @@ export function SettingsPageClient() {
       <NotificationsSection />
       <ZonesSection autoOpenCreate={autoOpenCreate} />
       <LanguageSection />
+      <AccountSection />
       <AdvancedSection />
     </main>
   );
