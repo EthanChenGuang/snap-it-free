@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 12
+open_count: 13
 waived_count: 0
 fixed_count: 0
-total_count: 12
-last_updated: 2026-08-10T18:41:56.148Z
+total_count: 13
+last_updated: 2026-08-10T21:17:38.028Z
 ---
 
 # Broken Windows Ledger
@@ -27,6 +27,7 @@ last_updated: 2026-08-10T18:41:56.148Z
 | 10 | 11 | unrun-verify | lib/admin/cleanup.ts | 34 | Pre-existing TS error blocks npm run build exit 0 | open |  | 2026-08-10T16:29:14.843Z |  |
 | 11 | 12 | unrun-verify | lib/admin/subito-regalo-catalog.test.ts |  | 3 pre-existing failures in full npm run test:lib (Padova spike gate) | open |  | 2026-08-10T18:41:56.063Z |  |
 | 12 | 12 | unrun-verify | lib/admin/cleanup.ts |  | Pre-existing TS error blocks npm run build (Postgrest cast) | open |  | 2026-08-10T18:41:56.148Z |  |
+| 13 | 13 | deviation | .planning/phases/13-select-location-flow/13-VALIDATION.md |  | D-12 PostForm field loss across picker round trip — OPEN developer decision | open |  | 2026-08-10T21:17:38.028Z |  |
 
 ````json
 [
@@ -172,6 +173,18 @@ last_updated: 2026-08-10T18:41:56.148Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-10T18:41:56.148Z",
+    "resolved_at": null
+  },
+  {
+    "id": 13,
+    "kind": "deviation",
+    "phase": "13",
+    "file": ".planning/phases/13-select-location-flow/13-VALIDATION.md",
+    "line": null,
+    "description": "D-12 PostForm field loss across picker round trip — OPEN developer decision",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-10T21:17:38.028Z",
     "resolved_at": null
   }
 ]

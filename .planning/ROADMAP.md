@@ -284,7 +284,7 @@ Plans:
 | 10. Filter Sheet & Distance | v2.0 | 0/5 | In Progress|  |
 | 11. Grid Listing Cards | v2.0 | 0/4 | Complete    | 2026-08-10 |
 | 12. Canonical Category Mapping | v2.0 | 4/4 | Complete    | 2026-08-10 |
-| 13. Select Location | v2.0 | 0/4 | In Progress|  |
+| 13. Select Location | v2.0 | 4/4 | Complete    | 2026-08-10 |
 | 14. Settings Parity | v2.0 | 0/? | Planned | — |
 | 7. Production Deploy | v2.0 | 0/4 | Planned | — |
 
