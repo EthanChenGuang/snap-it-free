@@ -5,8 +5,21 @@ import { FilterSheet } from '@/components/listings/FilterSheet';
 import { CompactLocaleChip } from '@/components/shell/CompactLocaleChip';
 import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import { useFeedScroll } from '@/components/shell/FeedScrollContext';
+import { useDistanceCenter } from '@/hooks/useDistanceCenter';
+import { useBrowseCenter } from '@/lib/browse-center/context';
+import { clearBrowseCenter } from '@/lib/browse-center/storage';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { getSubitoCategoryLabel } from '@/lib/listings/subito-categories';
 import { cn } from '@/lib/utils';
+
+const PILL_CLASS =
+  'inline-flex items-center gap-space-xs rounded-full border border-outline-variant bg-surface-container-lowest px-space-md py-space-xs text-label-sm text-on-surface transition-opacity active:opacity-80';
+
+function truncateSearchQuery(query: string, maxLen = 24): string {
+  const trimmed = query.trim();
+  if (trimmed.length <= maxLen) return trimmed;
+  return `${trimmed.slice(0, maxLen - 1)}…`;
+}
 
 function cityPillLabel(
   city: 'venice' | 'padova',
@@ -15,29 +28,128 @@ function cityPillLabel(
   return city === 'venice' ? messages.feed.cityVenice : messages.feed.cityPadova;
 }
 
-function FeedActiveFilterPills() {
-  const { messages } = useMessages();
-  const { applied, dismissCity } = useFeedFilter();
-
-  if (applied.city === 'all') {
-    return null;
-  }
-
-  const label = cityPillLabel(applied.city, messages);
-
+function FilterPill({
+  label,
+  onDismiss,
+  dismissLabel,
+}: {
+  label: string;
+  onDismiss: () => void;
+  dismissLabel: string;
+}) {
   return (
-    <div className="flex flex-wrap gap-space-sm px-gutter pb-space-sm">
+    <button type="button" onClick={onDismiss} className={PILL_CLASS} aria-label={dismissLabel}>
+      <span>{label}</span>
+      <span className="material-symbols-outlined text-[16px] text-on-surface-variant" aria-hidden>
+        close
+      </span>
+    </button>
+  );
+}
+
+function CenterFilterPill({
+  label,
+  onDismiss,
+  dismissLabel,
+}: {
+  label: string;
+  onDismiss: () => void;
+  dismissLabel: string;
+}) {
+  return (
+    <span className={PILL_CLASS}>
+      <Link href="/select-location" className="min-w-0 truncate">
+        {label}
+      </Link>
       <button
         type="button"
-        onClick={dismissCity}
-        className="inline-flex items-center gap-space-xs rounded-full border border-outline-variant bg-surface-container-lowest px-space-md py-space-xs text-label-sm text-on-surface transition-opacity active:opacity-80"
-        aria-label={`Remove ${label} filter`}
+        onClick={onDismiss}
+        className="shrink-0"
+        aria-label={dismissLabel}
       >
-        <span>{label}</span>
         <span className="material-symbols-outlined text-[16px] text-on-surface-variant">
           close
         </span>
       </button>
+    </span>
+  );
+}
+
+function FeedActiveFilterPills() {
+  const { messages, language } = useMessages();
+  const { searchQuery, setSearchQuery } = useFeedScroll();
+  const { applied, dismissCity, dismissCategory, dismissRadius } = useFeedFilter();
+  const browseCenter = useBrowseCenter();
+  const { centerSource, requestGps } = useDistanceCenter(applied.radiusEnabled);
+
+  const showCenterPill = centerSource === 'browse' || centerSource === 'gps';
+  const centerLabel =
+    centerSource === 'browse' && browseCenter?.label
+      ? browseCenter.label
+      : messages.feed.myLocation;
+
+  const handleClearCenter = () => {
+    clearBrowseCenter();
+    requestGps();
+  };
+
+  const hasSearchPill = searchQuery.trim().length > 0;
+  const hasRadiusPill = applied.radiusEnabled;
+  const hasCityPill = applied.city !== 'all';
+  const hasCategoryPills = applied.categories.length > 0;
+
+  if (
+    !hasSearchPill &&
+    !showCenterPill &&
+    !hasRadiusPill &&
+    !hasCityPill &&
+    !hasCategoryPills
+  ) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-space-sm px-gutter pb-space-sm">
+      {hasSearchPill && (
+        <FilterPill
+          label={truncateSearchQuery(searchQuery)}
+          onDismiss={() => setSearchQuery('')}
+          dismissLabel={messages.feed.removeSearchFilter}
+        />
+      )}
+
+      {showCenterPill && (
+        <CenterFilterPill
+          label={centerLabel}
+          onDismiss={handleClearCenter}
+          dismissLabel={messages.feed.removeCenterFilter}
+        />
+      )}
+
+      {hasRadiusPill && (
+        <FilterPill
+          label={messages.feed.withinKm(applied.radiusKm)}
+          onDismiss={dismissRadius}
+          dismissLabel={messages.feed.removeRadiusFilter}
+        />
+      )}
+
+      {hasCityPill && applied.city !== 'all' && (
+        <FilterPill
+          label={cityPillLabel(applied.city, messages)}
+          onDismiss={dismissCity}
+          dismissLabel={`Remove ${cityPillLabel(applied.city, messages)} filter`}
+        />
+      )}
+
+      {applied.categories.map((slug) => (
+        <FilterPill
+          key={slug}
+          label={getSubitoCategoryLabel(slug, language)}
+          onDismiss={() => dismissCategory(slug)}
+          dismissLabel={`Remove ${getSubitoCategoryLabel(slug, language)} filter`}
+        />
+      ))}
     </div>
   );
 }
@@ -96,7 +208,7 @@ export function FeedHeaderRow() {
         </button>
         <Link
           href="/select-location"
-          className="flex h-10 w-10 shrink-0 touch-manipulation items-center justify-center rounded-full bg-surface-container-lowest text-error shadow-sm transition-opacity active:opacity-80"
+          className="flex h-10 w-10 shrink-0 touch-manipulation items-center justify-center rounded-full bg-surface-container-lowest text-error transition-opacity active:opacity-80"
           aria-label={messages.feed.openSelectLocation}
         >
           <span
