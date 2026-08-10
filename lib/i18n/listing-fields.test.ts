@@ -41,33 +41,38 @@ describe('resolveListingDescription', () => {
   it('returns description_en for English when present', () => {
     expect(
       resolveListingDescription(
-        { description: 'Descrizione', description_en: 'Description' },
+        { title: 'Fixture', description: 'Descrizione', description_en: 'Description' },
         'en',
       ),
     ).toBe('Description');
   });
 
   it('falls back to description for English when description_en absent', () => {
-    expect(resolveListingDescription({ description: 'Descrizione' }, 'en')).toBe('Descrizione');
+    expect(resolveListingDescription({ title: 'Fixture', description: 'Descrizione' }, 'en')).toBe(
+      'Descrizione',
+    );
   });
 
   it('returns description_zh for Chinese when present', () => {
     expect(
-      resolveListingDescription({ description: 'Descrizione', description_zh: '描述' }, 'zh'),
+      resolveListingDescription(
+        { title: 'Fixture', description: 'Descrizione', description_zh: '描述' },
+        'zh',
+      ),
     ).toBe('描述');
   });
 
   it('returns original description for Italian', () => {
     expect(
       resolveListingDescription(
-        { description: 'Descrizione', description_en: 'Description' },
+        { title: 'Fixture', description: 'Descrizione', description_en: 'Description' },
         'it',
       ),
     ).toBe('Descrizione');
   });
 
   it('returns null when no description fields provided', () => {
-    expect(resolveListingDescription({}, 'en')).toBeNull();
+    expect(resolveListingDescription({ title: 'Fixture' }, 'en')).toBeNull();
   });
 });
 
@@ -75,7 +80,12 @@ describe('resolveListingCategory', () => {
   it('returns category_en when locale en and column populated (D-31)', () => {
     expect(
       resolveListingCategory(
-        { category: 'informatica', category_en: 'Computing', category_zh: '电脑' },
+        {
+          title: 'Fixture',
+          category: 'informatica',
+          category_en: 'Computing',
+          category_zh: '电脑',
+        },
         'en',
       ),
     ).toBe('Computing');
@@ -84,14 +94,21 @@ describe('resolveListingCategory', () => {
   it('returns category_zh when locale zh and column populated (D-31)', () => {
     expect(
       resolveListingCategory(
-        { category: 'informatica', category_en: 'Computing', category_zh: '电脑' },
+        {
+          title: 'Fixture',
+          category: 'informatica',
+          category_en: 'Computing',
+          category_zh: '电脑',
+        },
         'zh',
       ),
     ).toBe('电脑');
   });
 
   it('falls back to Italian catalog label when translation absent', () => {
-    expect(resolveListingCategory({ category: 'informatica' }, 'en')).toBe('Informatica');
+    expect(resolveListingCategory({ title: 'Fixture', category: 'informatica' }, 'en')).toBe(
+      'Informatica',
+    );
   });
 
   it('returns null when category and inference both absent', () => {

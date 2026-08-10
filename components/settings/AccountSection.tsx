@@ -56,9 +56,9 @@ export function AccountSection() {
         return;
       }
 
+      resetLocalAppData();
       window.dispatchEvent(new CustomEvent(FAVORITES_CHANGE_EVENT, { detail: [] }));
       window.dispatchEvent(new CustomEvent(REPORTS_CHANGE_EVENT, { detail: [] }));
-      resetLocalAppData();
       await createClient().auth.signOut();
       router.push('/');
     } catch {
