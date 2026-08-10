@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { alertMatchesListing } from './matcher';
 import type { VeniceZone } from '@/lib/listings/types';
 import { fanOutMatchPush } from '@/lib/notifications/web-push';
+import { isQuietHoursActive, loadUserQuietHours } from '@/lib/user/notification-prefs';
 import { buildMatchPushContent, loadUserLocales } from '@/lib/user/locale';
 import type { AppLanguage } from '@/lib/settings/preferences';
 
@@ -82,9 +83,12 @@ async function processOneEvent(
 
     const userIds = [...new Set(matches.map((alert) => alert.user_id))];
     const localeByUser = await loadUserLocales(supabase, userIds);
+    const quietHoursByUser = await loadUserQuietHours(supabase, userIds);
 
     await Promise.allSettled(
       userIds.map(async (userId) => {
+        if (isQuietHoursActive(quietHoursByUser.get(userId))) return;
+
         const locale: AppLanguage = localeByUser.get(userId) ?? 'zh';
         const { title, body } = buildMatchPushContent(listingRow, locale);
 
