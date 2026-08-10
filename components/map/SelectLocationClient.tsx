@@ -184,34 +184,6 @@ export function SelectLocationClient() {
       <div className="relative min-h-0 flex-1">
         {ready ? (
           <>
-            <div className="pointer-events-none absolute inset-x-0 top-3 z-10 flex justify-center px-gutter">
-              <div
-                className="pointer-events-auto flex gap-1 rounded-full border border-outline-variant bg-surface-container-lowest/95 p-1 shadow-[0_2px_12px_rgba(0,0,0,0.08)] backdrop-blur-sm"
-                role="group"
-                aria-label={messages.selectLocation.radiusLabel}
-              >
-                {SELECT_LOCATION_RADIUS_OPTIONS.map((km) => {
-                  const active = radiusKm === km;
-                  return (
-                    <button
-                      key={km}
-                      type="button"
-                      onClick={() => setRadiusKm(km)}
-                      className={cn(
-                        'min-h-9 rounded-full px-space-md py-space-xs text-label-sm font-medium transition-colors',
-                        active
-                          ? 'bg-primary text-on-primary'
-                          : 'text-on-surface-variant hover:bg-surface-container-low',
-                      )}
-                      aria-pressed={active}
-                    >
-                      {messages.selectLocation.radiusOption(km)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             <SelectLocationMapPane
               ref={mapRef}
               initialViewState={initialViewState}
@@ -229,6 +201,34 @@ export function SelectLocationClient() {
                 fitMapToRadius(mapRef.current, markerPosition, radiusKm);
               }}
             />
+
+            <div className="pointer-events-none absolute inset-x-0 top-3 z-30 flex justify-center px-gutter">
+              <div
+                className="pointer-events-auto flex gap-1 rounded-full border border-outline-variant bg-surface-container-lowest/95 p-1 shadow-[0_2px_12px_rgba(0,0,0,0.08)] backdrop-blur-sm"
+                role="group"
+                aria-label={messages.selectLocation.radiusLabel}
+              >
+                {SELECT_LOCATION_RADIUS_OPTIONS.map((km) => {
+                  const active = radiusKm === km;
+                  return (
+                    <button
+                      key={km}
+                      type="button"
+                      onClick={() => setRadiusKm(km)}
+                      className={cn(
+                        'min-h-9 touch-manipulation rounded-full px-space-md py-space-xs text-label-sm font-medium transition-colors',
+                        active
+                          ? 'bg-primary text-on-primary'
+                          : 'text-on-surface hover:bg-surface-container-low',
+                      )}
+                      aria-pressed={active}
+                    >
+                      {messages.selectLocation.radiusOption(km)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </>
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-surface-container-low">

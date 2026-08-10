@@ -93,7 +93,7 @@ export const SelectLocationMapPane = forwardRef<MapRef, SelectLocationMapPanePro
     }, [markerPosition, radiusKm, onFitBounds]);
 
     return (
-      <div className="relative h-full w-full">
+      <div className="relative z-0 h-full w-full">
         <Map
           ref={ref}
           initialViewState={initialViewState}
@@ -130,8 +130,8 @@ export const SelectLocationMapPane = forwardRef<MapRef, SelectLocationMapPanePro
               id="select-radius-radar-fill"
               type="fill"
               paint={{
-                'fill-color': '#EA4335',
-                'fill-opacity': 0.14,
+                'fill-color': '#000000',
+                'fill-opacity': 0.12,
               }}
             />
           </Source>
@@ -149,7 +149,7 @@ export const SelectLocationMapPane = forwardRef<MapRef, SelectLocationMapPanePro
           type="button"
           onClick={onLocateMe}
           aria-label={locateMeAriaLabel}
-          className="absolute bottom-[calc(10rem+env(safe-area-inset-bottom,0px))] right-4 z-10 flex h-12 w-12 touch-manipulation items-center justify-center rounded-full border border-outline-variant/40 bg-surface-container-lowest shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-opacity active:opacity-90"
+          className="absolute bottom-[calc(10rem+env(safe-area-inset-bottom,0px))] right-4 z-20 flex h-12 w-12 touch-manipulation items-center justify-center rounded-full border border-outline-variant/40 bg-surface-container-lowest shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-opacity active:opacity-90"
         >
           <span className="material-symbols-outlined text-[22px] text-on-surface">
             my_location
