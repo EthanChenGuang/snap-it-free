@@ -151,7 +151,7 @@ Plans:
 
 **Requirements:** CAT-01–03, I18N-01 (partial)
 
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 
 Plans:
 **Wave 0**
@@ -160,7 +160,7 @@ Plans:
 
 **Wave 1** *(blocked on Wave 0)*
 
-- [ ] 12-02-PLAN.md — Refactor subito-categories + listing-fields to delegate to resolver
+- [x] 12-02-PLAN.md — Refactor subito-categories + listing-fields to delegate to resolver
 
 **Wave 2** *(blocked on Wave 1)*
 
