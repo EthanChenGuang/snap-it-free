@@ -97,7 +97,7 @@ Each task was committed atomically:
 2. **Task 2: Wire favorites distanceMeters via useDistanceCenter + haversineKm** - `92a5a1d` (feat)
 3. **Task 3: Align favorites grid gap to feed gap-3** - `4f40685` (fix)
 
-**Plan metadata:** pending (docs commit)
+**Plan metadata:** `3478910` (docs: complete plan)
 
 ## Files Created/Modified
 
