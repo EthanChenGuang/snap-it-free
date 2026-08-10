@@ -116,7 +116,7 @@ Plans:
 
 **Requirements:** CARD-01–05, I18N-01 (partial)
 
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 **Wave 0**
@@ -129,7 +129,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 11-03-PLAN.md — FavoritesPageClient dedupe heart + distance wiring + gap alignment
+- [x] 11-03-PLAN.md — FavoritesPageClient dedupe heart + distance wiring + gap alignment
 
 **Wave 3** *(blocked on Wave 2)*
 
