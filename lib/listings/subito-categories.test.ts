@@ -46,6 +46,24 @@ describe('matchesSubitoCategory', () => {
       ),
     ).toBe(false);
   });
+
+  it("matches unresolved (null-category) listings against the 'usato' catch-all", () => {
+    expect(
+      matchesSubitoCategory({ title: 'quaderno vuoto', category: null }, 'usato'),
+    ).toBe(true);
+  });
+
+  it("does not match a listing that resolves to a different specific category against 'usato'", () => {
+    expect(
+      matchesSubitoCategory({ title: 'sedia da ufficio', category: null }, 'usato'),
+    ).toBe(false);
+  });
+
+  it("still matches listings literally tagged 'usato' in the DB (regression)", () => {
+    expect(
+      matchesSubitoCategory({ title: 'anything', category: 'usato' }, 'usato'),
+    ).toBe(true);
+  });
 });
 
 describe('getSubitoCategoryLabel', () => {
