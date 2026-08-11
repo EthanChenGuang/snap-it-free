@@ -18,8 +18,7 @@ type ListListingCardProps = {
 
 /**
  * Minimalist feed card — image, FREE badge, favorite, compact metadata.
- * Stitch deviations (intentional): emerald FREE pill (D-02), rounded-2xl image (D-07),
- * glass heart overlay bg-black/30 + backdrop-blur (D-09).
+ * iOS photo-first layout with top gradient legibility overlay and press feedback.
  */
 export function ListListingCard({ listing, distanceMeters }: ListListingCardProps) {
   const { language, messages, formatRelativeTime } = useMessages();
@@ -41,7 +40,7 @@ export function ListListingCard({ listing, distanceMeters }: ListListingCardProp
 
   return (
     <article
-      className="group flex cursor-pointer flex-col"
+      className="group flex cursor-pointer flex-col transition-transform duration-150 ease-out active:scale-[0.98]"
       onClick={() => router.push(`/listing/${listing.id}`)}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -52,7 +51,7 @@ export function ListListingCard({ listing, distanceMeters }: ListListingCardProp
       role="link"
       tabIndex={0}
     >
-      <div className="relative mb-space-sm aspect-[4/5] overflow-hidden rounded-2xl bg-surface-container-high">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-surface-container-high">
         <ListingPhoto
           src={listing.photo_url}
           alt={displayTitle}
@@ -62,26 +61,25 @@ export function ListListingCard({ listing, distanceMeters }: ListListingCardProp
           )}
           sizes="(max-width: 768px) 50vw, 400px"
         />
-        <span className="absolute left-space-sm top-space-sm rounded-full bg-emerald-500/80 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 rounded-t-2xl bg-gradient-to-b from-black/30 to-transparent"
+          aria-hidden
+        />
+        <span className="absolute left-3 top-3 z-20 rounded-full bg-emerald-500/80 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
           {messages.listing.free}
         </span>
         <FavoriteButton
           listingId={listing.id}
           size="sm"
           tone="overlay"
-          className="absolute right-space-sm top-space-sm h-9 w-9 rounded-full bg-black/30 p-2 backdrop-blur-md transition hover:scale-105 hover:bg-black/40"
+          className="absolute right-3 top-3 z-20 h-9 w-9 rounded-full bg-black/30 p-2 backdrop-blur-md transition hover:bg-black/40"
         />
       </div>
 
-      <div className="min-w-0 px-space-xs">
-        <h3 className="line-clamp-1 text-label-md font-medium leading-tight text-on-surface">
-          {displayTitle}
-        </h3>
+      <div className="min-w-0">
+        <h3 className="mt-2.5 line-clamp-1 text-sm font-medium text-neutral-900">{displayTitle}</h3>
         {metadata && (
-          <p
-            className="mt-space-xs line-clamp-1 text-xs text-on-surface-variant"
-            suppressHydrationWarning
-          >
+          <p className="mt-0.5 line-clamp-1 text-xs text-neutral-400" suppressHydrationWarning>
             {metadata}
           </p>
         )}

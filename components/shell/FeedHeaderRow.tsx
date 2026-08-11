@@ -86,9 +86,9 @@ export function FeedHeaderRow() {
   return (
     <header
       className={cn(
-        'relative z-[100] isolate w-full shrink-0 bg-background transition-all duration-200',
+        'sticky top-0 z-30 w-full shrink-0 border-b border-neutral-100/60 bg-white/80 backdrop-blur-md transition-all duration-200',
         headerHidden &&
-          'pointer-events-none max-h-0 overflow-hidden py-0 opacity-0 -translate-y-full',
+          'pointer-events-none max-h-0 overflow-hidden border-transparent py-0 opacity-0 -translate-y-full',
       )}
     >
       <div className="mx-auto flex max-w-container-max items-center justify-between gap-space-sm px-gutter py-space-md">
