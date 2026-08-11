@@ -60,6 +60,30 @@ describe('UpdateGlobalConfigSchema', () => {
     const result = UpdateGlobalConfigSchema.safeParse({ proxy_url: 'not-a-url' });
     expect(result.success).toBe(false);
   });
+
+  it('accepts crawl efficiency fields within bounds (D-15-32)', () => {
+    const result = UpdateGlobalConfigSchema.safeParse({
+      early_stop_k: 5,
+      full_refresh_hours: 24,
+      max_pages: 3,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects early_stop_k below 1', () => {
+    const result = UpdateGlobalConfigSchema.safeParse({ early_stop_k: 0 });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects early_stop_k above 50', () => {
+    const result = UpdateGlobalConfigSchema.safeParse({ early_stop_k: 51 });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects max_pages above 3', () => {
+    const result = UpdateGlobalConfigSchema.safeParse({ max_pages: 4 });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('CreateJobSchema', () => {
@@ -70,6 +94,27 @@ describe('CreateJobSchema', () => {
 
   it('rejects unknown source slug', () => {
     const result = CreateJobSchema.safeParse({ source_slug: 'unknown' });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts crawl_mode full (D-15-08)', () => {
+    const result = CreateJobSchema.safeParse({ source_slug: 'subito', crawl_mode: 'full' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.crawl_mode).toBe('full');
+    }
+  });
+
+  it('defaults crawl_mode to incremental', () => {
+    const result = CreateJobSchema.safeParse({ source_slug: 'subito' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.crawl_mode).toBe('incremental');
+    }
+  });
+
+  it('rejects invalid crawl_mode', () => {
+    const result = CreateJobSchema.safeParse({ source_slug: 'subito', crawl_mode: 'shadow' });
     expect(result.success).toBe(false);
   });
 });
