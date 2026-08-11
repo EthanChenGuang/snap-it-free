@@ -310,13 +310,13 @@ Plans:
 
 **Depends on:** v1.0 Phases 1, 6, 8 (scraper foundation + admin + URL matrix). **Recommended before Phase 7** (Production Deploy).
 
-**Plans:** 2/6 plans executed
+**Plans:** 3/6 plans executed
 
 Plans:
 
 - [x] 15-01-PLAN.md — Wave 0 spike hard gate + stack/proxy ADRs (SCRP-E01/E05/E06)
 - [x] 15-02-PLAN.md — Migration 023 crawl metrics schema + blocking push
-- [ ] 15-03-PLAN.md — Tracer: HTTP extract + crawl hash + early-stop + known-set
+- [x] 15-03-PLAN.md — Tracer: HTTP extract + crawl hash + early-stop + known-set
 - [ ] 15-04-PLAN.md — HttpCrawler primary + Playwright fallback queue + feature flag
 - [ ] 15-05-PLAN.md — Worker crawl mode, soft proxy gate, JSON validation, metrics, email alerts
 - [ ] 15-06-PLAN.md — Admin crawl config, proxy health, degraded banner, run metrics UI

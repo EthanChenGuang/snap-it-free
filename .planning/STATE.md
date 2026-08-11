@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 15
 current_phase_name: scraper-incremental-crawl-and-search-efficiency
-current_plan: 3
+current_plan: 4
 status: executing
-stopped_at: Completed 15-02-PLAN.md
-last_updated: "2026-08-11T18:03:27.578Z"
+stopped_at: Completed 15-03-PLAN.md
+last_updated: "2026-08-11T18:05:40.791Z"
 progress:
   total_phases: 9
   completed_phases: 7
   total_plans: 39
-  completed_plans: 35
+  completed_plans: 36
   percent: 78
 last_activity: 2026-08-11
 last_activity_desc: "Quick task 260811-nwf: scraper translation pipeline batch-scoped config/cap + bounded-concurrency dispatch, 80 round trips → 2-3 per batch of 20"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 15 (scraper-incremental-crawl-and-search-efficiency) — EXECUTING
-**Current Plan:** 3
+**Current Plan:** 4
 **Total Plans in Phase:** 6
 Status: Ready to execute
 
-Progress: [█████████░] 90% v2.0 (0/7 phases)
+Progress: [█████████░] 92% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -90,6 +90,7 @@ Progress: [█████████░] 90% v2.0 (0/7 phases)
 | Phase 14-settings-consumer-parity P07 | 12min | 2 tasks | 2 files |
 | Phase 15 P01 | 12min | 3 tasks | 5 files |
 | Phase 15 P02 | 5min | 2 tasks | 1 files |
+| Phase 15 P03 | 8 | 2 tasks | 11 files |
 
 ## Deferred Items (from v1.0)
 
@@ -109,8 +110,8 @@ Progress: [█████████░] 90% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-11T18:03:27.563Z
-**Stopped at:** Completed 15-02-PLAN.md
+**Last session:** 2026-08-11T18:05:40.778Z
+**Stopped at:** Completed 15-03-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -168,6 +169,8 @@ Progress: [█████████░] 90% v2.0 (0/7 phases)
 - [Phase ?]: Production proxy: Italian residential required; soft degraded gate (ADR 015)
 - [Phase ?]: max_pages default 1 per D-15-23 page-1 ship; admin may allow up to 3 later
 - [Phase ?]: Applied migration 023 via Supavisor pooler (IPv4) after direct db host IPv6 unreachable in WSL2
+- [Phase ?]: Early-stop break at K leaves tail unprocessed per newest-first assumption
+- [Phase ?]: Category JSON geo resolves via municipality centroid lookup without detail page
 
 ## Quick Tasks Completed
 
