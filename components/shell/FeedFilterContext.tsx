@@ -24,12 +24,11 @@ import { clearBrowseCenter } from '@/lib/browse-center/storage';
 
 type FeedFilterContextValue = {
   applied: FilterPrefs;
-  draft: FilterPrefs;
   sheetOpen: boolean;
   setSheetOpen: (open: boolean) => void;
-  setDraft: (partial: Partial<FilterPrefs>) => void;
-  resetDraftFromApplied: () => void;
-  applyDraft: () => void;
+  setCity: (city: FilterPrefs['city']) => void;
+  toggleCategory: (slug: string) => void;
+  clearCategories: () => void;
   resetFilters: () => void;
   hasActiveFilters: boolean;
   dismissCity: () => void;
@@ -54,38 +53,37 @@ export function FeedFilterProvider({ children }: { children: ReactNode }) {
     readFilterPrefs,
     () => DEFAULT_FILTER_PREFS,
   );
-  const [draft, setDraftState] = useState<FilterPrefs>(DEFAULT_FILTER_PREFS);
   const [sheetOpen, setSheetOpenState] = useState(false);
 
-  const resetDraftFromApplied = useCallback(() => {
-    setDraftState(applied);
+  const setCity = useCallback(
+    (city: FilterPrefs['city']) => {
+      const categoryOnlyInMapMode = applied.mode === 'map' && city === 'all';
+
+      if (categoryOnlyInMapMode) {
+        writeFilterPrefs({ ...applied, city });
+      } else {
+        applyCityFilterPrefs({ ...applied, city });
+      }
+    },
+    [applied],
+  );
+
+  const toggleCategory = useCallback(
+    (slug: string) => {
+      const next = applied.categories.includes(slug)
+        ? applied.categories.filter((item) => item !== slug)
+        : [...applied.categories, slug];
+      writeFilterPrefs({ ...applied, categories: next });
+    },
+    [applied],
+  );
+
+  const clearCategories = useCallback(() => {
+    writeFilterPrefs({ ...applied, categories: [] });
   }, [applied]);
-
-  const setDraft = useCallback((partial: Partial<FilterPrefs>) => {
-    setDraftState((prev) => ({ ...prev, ...partial }));
-  }, []);
-
-  const applyDraft = useCallback(() => {
-    const categoryOnlyInMapMode =
-      applied.mode === 'map' &&
-      draft.city === 'all' &&
-      draft.city === applied.city;
-
-    if (categoryOnlyInMapMode) {
-      writeFilterPrefs({ ...applied, categories: draft.categories });
-    } else {
-      applyCityFilterPrefs({
-        ...draft,
-        mode: 'city',
-        radiusEnabled: false,
-      });
-    }
-    setSheetOpenState(false);
-  }, [draft, applied]);
 
   const resetFilters = useCallback(() => {
     const cleared = { ...DEFAULT_FILTER_PREFS };
-    setDraftState(cleared);
     clearBrowseCenter();
     writeFilterPrefs(cleared);
   }, []);
@@ -106,17 +104,9 @@ export function FeedFilterProvider({ children }: { children: ReactNode }) {
     clearMapFilterPrefs();
   }, []);
 
-  const setSheetOpen = useCallback(
-    (open: boolean) => {
-      if (open) {
-        setDraftState(applied);
-      } else {
-        resetDraftFromApplied();
-      }
-      setSheetOpenState(open);
-    },
-    [applied, resetDraftFromApplied],
-  );
+  const setSheetOpen = useCallback((open: boolean) => {
+    setSheetOpenState(open);
+  }, []);
 
   const hasActiveFilters = useMemo(
     () => computeHasActiveFilters(applied),
@@ -126,12 +116,11 @@ export function FeedFilterProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       applied,
-      draft,
       sheetOpen,
       setSheetOpen,
-      setDraft,
-      resetDraftFromApplied,
-      applyDraft,
+      setCity,
+      toggleCategory,
+      clearCategories,
       resetFilters,
       hasActiveFilters,
       dismissCity,
@@ -140,12 +129,11 @@ export function FeedFilterProvider({ children }: { children: ReactNode }) {
     }),
     [
       applied,
-      draft,
       sheetOpen,
       setSheetOpen,
-      setDraft,
-      resetDraftFromApplied,
-      applyDraft,
+      setCity,
+      toggleCategory,
+      clearCategories,
       resetFilters,
       hasActiveFilters,
       dismissCity,
