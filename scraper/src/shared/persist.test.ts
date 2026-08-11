@@ -4,7 +4,7 @@ import { persistListing } from './persist.js';
 import type { CanonicalListing } from './schema.js';
 
 vi.mock('../translate/ingest.js', () => ({
-  translateAfterPersist: vi.fn().mockResolvedValue(undefined),
+  translateBatch: vi.fn().mockResolvedValue(undefined),
 }));
 
 const baseListing: CanonicalListing = {
@@ -29,6 +29,7 @@ function createMockSupabase(options: {
   existingHash?: string | null;
   existingId?: string;
   upsertError?: Error | null;
+  touchError?: Error | null;
 }) {
   const upsertedId = options.existingId ?? 'listing-uuid-1';
   const single = vi.fn().mockResolvedValue({
@@ -37,6 +38,8 @@ function createMockSupabase(options: {
   });
   const selectAfterUpsert = vi.fn().mockReturnValue({ single });
   const upsert = vi.fn().mockReturnValue({ select: selectAfterUpsert });
+  const touchEq = vi.fn().mockResolvedValue({ error: options.touchError ?? null });
+  const touchUpdate = vi.fn().mockReturnValue({ eq: touchEq });
   const maybeSingle = vi.fn().mockResolvedValue({
     data:
       options.existingHash != null
@@ -61,12 +64,19 @@ function createMockSupabase(options: {
       return {
         ...selectChain,
         upsert,
+        update: touchUpdate,
       };
     }
     return selectChain;
   });
 
-  return { supabase: { from } as unknown as SupabaseClient, upsert, maybeSingle };
+  return {
+    supabase: { from } as unknown as SupabaseClient,
+    upsert,
+    maybeSingle,
+    touchUpdate,
+    touchEq,
+  };
 }
 
 describe('persistListing', () => {
@@ -74,14 +84,22 @@ describe('persistListing', () => {
     vi.clearAllMocks();
   });
 
-  it('returns skipped without upsert when content_hash unchanged', async () => {
-    const { supabase, upsert } = createMockSupabase({ existingHash: baseListing.content_hash });
+  it('refreshes expires_at when content_hash unchanged', async () => {
+    const { supabase, upsert, touchUpdate, touchEq } = createMockSupabase({
+      existingHash: baseListing.content_hash,
+    });
 
     const result = await persistListing(supabase, baseListing);
 
     expect(result.result).toBe('skipped');
     expect(result.listingId).toBe('listing-uuid-1');
     expect(upsert).not.toHaveBeenCalled();
+    expect(touchUpdate).toHaveBeenCalledOnce();
+    expect(touchEq).toHaveBeenCalledWith('id', 'listing-uuid-1');
+    const [touchRow] = touchUpdate.mock.calls[0];
+    expect(touchRow.status).toBe('active');
+    expect(touchRow.scraped_at).toBeDefined();
+    expect(touchRow.expires_at).toBeDefined();
   });
 
   it('upserts new listing with geom WKT when coords present', async () => {

@@ -8,6 +8,8 @@ export type ListingTranslationFields = {
   category?: string | null;
 };
 
+export const DEFAULT_TRANSLATE_CONCURRENCY = 4;
+
 export type TranslateBatchState = {
   autoTranslate: boolean;
   /** Loaded but intentionally unused downstream (dead field, preserved as-is). */
@@ -98,5 +100,116 @@ async function queueTranslationFailure(
     },
     { onConflict: 'listing_id' },
   );
+}
+
+async function runWithConcurrencyLimit<T>(
+  items: T[],
+  limit: number,
+  worker: (item: T) => Promise<void>,
+): Promise<void> {
+  let cursor = 0;
+  const runnerCount = Math.min(limit, items.length);
+
+  async function runner(): Promise<void> {
+    while (cursor < items.length) {
+      const index = cursor;
+      cursor += 1;
+      await worker(items[index]);
+    }
+  }
+
+  await Promise.all(Array.from({ length: runnerCount }, () => runner()));
+}
+
+async function translateOneListing(
+  supabase: SupabaseClient,
+  listingId: string,
+  fields: ListingTranslationFields,
+  state: TranslateBatchState,
+): Promise<void> {
+  const slot = reserveTranslationSlot(state);
+  if (slot === null) {
+    return;
+  }
+
+  const result = await translateListingFields(
+    {
+      title: fields.title,
+      description: fields.description,
+      category: categoryLabelForSlug(fields.category),
+    },
+    {
+      geminiApiKey: process.env.GEMINI_API_KEY?.trim(),
+      openRouterApiKey: process.env.OPENROUTER_API_KEY?.trim(),
+      openRouterModel: process.env.OPENROUTER_FALLBACK_MODEL?.trim(),
+    },
+  );
+
+  if (result.ok) {
+    const { translations } = result;
+    const { error: updateError } = await supabase
+      .from('listings')
+      .update({
+        title_en: translations.title_en,
+        title_zh: translations.title_zh,
+        description_en: translations.description_en,
+        description_zh: translations.description_zh,
+        category_en: translations.category_en,
+        category_zh: translations.category_zh,
+      })
+      .eq('id', listingId);
+
+    if (updateError) {
+      await queueTranslationFailure(supabase, listingId, updateError.message);
+      return;
+    }
+
+    await supabase.from('translation_queue').delete().eq('listing_id', listingId);
+    return;
+  }
+
+  await queueTranslationFailure(supabase, listingId, result.error);
+}
+
+export type TranslationWorkItem = {
+  listingId: string;
+  fields: ListingTranslationFields;
+};
+
+/** Post-persist translation dispatch (D-24, D-27). Listing persist is never rolled back. */
+export async function translateBatch(
+  supabase: SupabaseClient,
+  items: TranslationWorkItem[],
+  concurrency: number = DEFAULT_TRANSLATE_CONCURRENCY,
+): Promise<void> {
+  if (items.length === 0) {
+    return;
+  }
+
+  const state = await loadTranslateBatchState(supabase);
+  if (!state?.autoTranslate) {
+    return;
+  }
+
+  const startingCount = state.translationsToday;
+
+  await runWithConcurrencyLimit(items, concurrency, (item) =>
+    translateOneListing(supabase, item.listingId, item.fields, state),
+  );
+
+  if (state.translationsToday !== startingCount) {
+    try {
+      await supabase
+        .from('scraper_global_config')
+        .update({
+          translations_today: state.translationsToday,
+          translations_reset_date: state.today,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', 1);
+    } catch (err) {
+      console.warn('translateBatch: failed to flush translations_today counter', err);
+    }
+  }
 }
 

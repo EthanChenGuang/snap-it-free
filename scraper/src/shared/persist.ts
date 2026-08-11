@@ -1,8 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { RawListing } from '../subito/extract.js';
-import { normalizeRawListing } from './normalize.js';
+import { computeExpiresAt, normalizeRawListing } from './normalize.js';
 import type { CanonicalListing } from './schema.js';
-import { translateAfterPersist } from '../translate/ingest.js';
+import { translateBatch, type TranslationWorkItem } from '../translate/ingest.js';
 
 export type PersistResult = 'skipped' | 'inserted' | 'updated';
 
@@ -56,6 +56,20 @@ export async function persistListing(
   }
 
   if (existing?.content_hash === listing.content_hash) {
+    const now = new Date();
+    const { error: touchError } = await supabase
+      .from('listings')
+      .update({
+        status: 'active',
+        expires_at: computeExpiresAt(listing.posted_at, now).toISOString(),
+        scraped_at: now.toISOString(),
+      })
+      .eq('id', existing.id);
+
+    if (touchError) {
+      throw touchError;
+    }
+
     return { result: 'skipped', listingId: (existing.id as string) ?? null };
   }
 
@@ -96,12 +110,6 @@ export async function persistListing(
   const listingId = upserted.id as string;
   const persistResult: PersistResult = existing ? 'updated' : 'inserted';
 
-  await translateAfterPersist(supabase, listingId, {
-    title: listing.title,
-    description: descriptionFromListing(listing),
-    category: listing.category ?? null,
-  });
-
   return { result: persistResult, listingId };
 }
 
@@ -117,6 +125,8 @@ export async function persistBatch(
     rejected: 0,
   };
 
+  const translationWork: TranslationWorkItem[] = [];
+
   for (const raw of rawListings) {
     const result = normalizeRawListing(raw);
 
@@ -130,11 +140,24 @@ export async function persistBatch(
       continue;
     }
 
-    const { result: persistResult } = await persistListing(supabase, result);
+    const { result: persistResult, listingId } = await persistListing(supabase, result);
     if (persistResult === 'inserted') stats.inserted += 1;
     else if (persistResult === 'updated') stats.updated += 1;
     else stats.skipped += 1;
+
+    if (persistResult !== 'skipped' && listingId) {
+      translationWork.push({
+        listingId,
+        fields: {
+          title: result.title,
+          description: descriptionFromListing(result),
+          category: result.category ?? null,
+        },
+      });
+    }
   }
+
+  await translateBatch(supabase, translationWork);
 
   return stats;
 }
