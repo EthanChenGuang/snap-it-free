@@ -5,15 +5,15 @@ milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 15
 current_phase_name: scraper-incremental-crawl-and-search-efficiency
 current_plan: 6
-status: executing
-stopped_at: Completed 15-05-PLAN.md
-last_updated: "2026-08-11T18:10:42.093Z"
+status: verifying
+stopped_at: Completed 15-06-PLAN.md
+last_updated: "2026-08-11T18:14:39.379Z"
 progress:
   total_phases: 9
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 39
-  completed_plans: 38
-  percent: 78
+  completed_plans: 39
+  percent: 89
 last_activity: 2026-08-11
 last_activity_desc: "Quick task 260811-nwf: scraper translation pipeline batch-scoped config/cap + bounded-concurrency dispatch, 80 round trips → 2-3 per batch of 20"
 ---
@@ -34,9 +34,9 @@ Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy
 Phase: 15 (scraper-incremental-crawl-and-search-efficiency) — EXECUTING
 **Current Plan:** 6
 **Total Plans in Phase:** 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 
-Progress: [██████████] 97% v2.0 (0/7 phases)
+Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -93,6 +93,7 @@ Progress: [██████████] 97% v2.0 (0/7 phases)
 | Phase 15 P03 | 8 | 2 tasks | 11 files |
 | Phase 15 P04 | 480 | 2 tasks | 5 files |
 | Phase 15 P05 | 12 | 2 tasks | 7 files |
+| Phase 15 P06 | 18 | 3 tasks | 12 files |
 
 ## Deferred Items (from v1.0)
 
@@ -112,8 +113,8 @@ Progress: [██████████] 97% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-11T18:10:42.080Z
-**Stopped at:** Completed 15-05-PLAN.md
+**Last session:** 2026-08-11T18:14:39.367Z
+**Stopped at:** Completed 15-06-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -177,6 +178,8 @@ Progress: [██████████] 97% v2.0 (0/7 phases)
 - [Phase ?]: Block retry and detail enrichment use separate PlaywrightCrawler runs at concurrency 1
 - [Phase ?]: validateBatchHttp thresholds: completeness ≥0.9, full 0.5, incremental 0.2 with crawlSkipped escape
 - [Phase ?]: Blocked-ratio alerts use notifyOperator emailOnly — no new Telegram in Phase 15
+- [Phase ?]: Admin degraded banner when proxy unset with degraded activity or latest Subito run degraded=true
+- [Phase ?]: Full crawl admin trigger POSTs subito job with crawl_mode full (D-15-08)
 
 ## Quick Tasks Completed
 
