@@ -15,6 +15,8 @@ export const UpdateSourceSchema = z.object({
 
 export const translationProviderSchema = z.enum(['gemini', 'openrouter']);
 
+export const crawlModeSchema = z.enum(['incremental', 'full']);
+
 export const UpdateGlobalConfigSchema = z.object({
   global_pause: z.boolean().optional(),
   auto_translate: z.boolean().optional(),
@@ -23,10 +25,14 @@ export const UpdateGlobalConfigSchema = z.object({
   proxy_url: z.string().url().optional(),
   telegram_chat_id: z.string().max(128).nullable().optional(),
   alert_email: z.union([z.string().email(), z.literal('')]).nullable().optional(),
+  early_stop_k: z.number().int().min(1).max(50).optional(),
+  full_refresh_hours: z.number().int().min(1).max(168).optional(),
+  max_pages: z.number().int().min(1).max(3).optional(),
 });
 
 export const CreateJobSchema = z.object({
   source_slug: sourceSlugSchema,
+  crawl_mode: crawlModeSchema.default('incremental'),
 });
 
 export const TranslationRetrySchema = z

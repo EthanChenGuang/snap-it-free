@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { source_slug } = parsed.data;
+  const { source_slug, crawl_mode } = parsed.data;
 
   const { data: source, error: sourceError } = await session.supabase
     .from('scraper_sources')
@@ -44,11 +44,12 @@ export async function POST(request: Request) {
     .from('scrape_jobs')
     .insert({
       source_slug,
+      crawl_mode,
       status,
       requested_by: session.user.id,
       message,
     })
-    .select('id, source_slug, status, requested_at, message')
+    .select('id, source_slug, crawl_mode, status, requested_at, message')
     .single();
 
   if (insertError) {

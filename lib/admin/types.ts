@@ -36,7 +36,10 @@ export type AdminAlert = {
 export type GlobalAdminStatus = {
   globalPause: boolean;
   lastSyncAt: string | null;
+  showDegradedBanner: boolean;
 };
+
+export type CrawlMode = 'incremental' | 'full';
 
 export type GlobalSettingsConfig = {
   globalPause: boolean;
@@ -49,6 +52,12 @@ export type GlobalSettingsConfig = {
   translationsToday: number;
   translationsResetDate: string;
   updatedAt: string;
+  earlyStopK: number;
+  fullRefreshHours: number;
+  maxPages: number;
+  lastBlockReason: string | null;
+  degradedRunCount: number;
+  showDegradedBanner: boolean;
 };
 
 export type FooterStats = {
@@ -73,6 +82,12 @@ export type ScrapeRunDetail = ScrapeRunListItem & {
   listingsUpdated: number;
   listingsSkipped: number;
   failureReason: string | null;
+  listingsSkippedAtCrawl: number;
+  httpRequests: number | null;
+  wallTimeSeconds: number | null;
+  crawlMode: CrawlMode | null;
+  degraded: boolean;
+  jsonFieldCompleteness: number | null;
 };
 
 export type ScrapeRejectItem = {

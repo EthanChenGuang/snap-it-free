@@ -15,6 +15,11 @@ type GlobalConfigRow = {
   translations_today: number;
   translations_reset_date: string;
   updated_at: string;
+  early_stop_k: number;
+  full_refresh_hours: number;
+  max_pages: number;
+  last_block_reason: string | null;
+  degraded_run_count: number;
 };
 
 function serializeConfig(row: GlobalConfigRow) {
@@ -30,6 +35,11 @@ function serializeConfig(row: GlobalConfigRow) {
     translations_today: row.translations_today,
     translations_reset_date: row.translations_reset_date,
     updated_at: row.updated_at,
+    early_stop_k: row.early_stop_k,
+    full_refresh_hours: row.full_refresh_hours,
+    max_pages: row.max_pages,
+    last_block_reason: row.last_block_reason,
+    degraded_run_count: row.degraded_run_count,
   };
 }
 
@@ -65,7 +75,7 @@ export async function GET() {
   const { data, error } = await session.supabase
     .from('scraper_global_config')
     .select(
-      'id, global_pause, auto_translate, daily_translation_cap, translation_provider, telegram_chat_id, alert_email, proxy_enc, translations_today, translations_reset_date, updated_at',
+      'id, global_pause, auto_translate, daily_translation_cap, translation_provider, telegram_chat_id, alert_email, proxy_enc, translations_today, translations_reset_date, updated_at, early_stop_k, full_refresh_hours, max_pages, last_block_reason, degraded_run_count',
     )
     .eq('id', 1)
     .maybeSingle();
@@ -119,7 +129,7 @@ export async function PATCH(request: Request) {
     })
     .eq('id', 1)
     .select(
-      'id, global_pause, auto_translate, daily_translation_cap, translation_provider, telegram_chat_id, alert_email, proxy_enc, translations_today, translations_reset_date, updated_at',
+      'id, global_pause, auto_translate, daily_translation_cap, translation_provider, telegram_chat_id, alert_email, proxy_enc, translations_today, translations_reset_date, updated_at, early_stop_k, full_refresh_hours, max_pages, last_block_reason, degraded_run_count',
     )
     .single();
 

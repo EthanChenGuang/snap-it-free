@@ -23,6 +23,31 @@ type ScrapeRunRow = {
   failure_reason: string | null;
 };
 
+function computeShowDegradedBanner(params: {
+  proxyConfigured: boolean;
+  degradedRunCount: number;
+  latestSubitoRunDegraded: boolean;
+}): boolean {
+  return (
+    (!params.proxyConfigured && params.degradedRunCount > 0) ||
+    params.latestSubitoRunDegraded
+  );
+}
+
+async function getLatestSubitoRunDegraded(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('scrape_runs')
+    .select('degraded')
+    .eq('source', 'subito')
+    .order('started_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return Boolean(data?.degraded);
+}
+
 function mapLastRun(row: ScrapeRunRow) {
   return {
     id: row.id,
@@ -157,16 +182,24 @@ export async function getGlobalAdminStatus(): Promise<GlobalAdminStatus | null> 
   try {
     const supabase = await createClient();
 
-    const [{ data: globalConfig, error: globalError }, { data: latestRun, error: runError }] =
-      await Promise.all([
-        supabase.from('scraper_global_config').select('global_pause').eq('id', 1).maybeSingle(),
-        supabase
-          .from('scrape_runs')
-          .select('finished_at, started_at')
-          .order('started_at', { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-      ]);
+    const [
+      { data: globalConfig, error: globalError },
+      { data: latestRun, error: runError },
+      latestSubitoRunDegraded,
+    ] = await Promise.all([
+      supabase
+        .from('scraper_global_config')
+        .select('global_pause, proxy_enc, degraded_run_count')
+        .eq('id', 1)
+        .maybeSingle(),
+      supabase
+        .from('scrape_runs')
+        .select('finished_at, started_at')
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      getLatestSubitoRunDegraded(supabase),
+    ]);
 
     if (globalError || runError) {
       return null;
@@ -177,9 +210,17 @@ export async function getGlobalAdminStatus(): Promise<GlobalAdminStatus | null> 
       (latestRun?.started_at as string | null) ??
       null;
 
+    const proxyConfigured = globalConfig?.proxy_enc != null;
+    const degradedRunCount = (globalConfig?.degraded_run_count as number) ?? 0;
+
     return {
       globalPause: Boolean(globalConfig?.global_pause),
       lastSyncAt,
+      showDegradedBanner: computeShowDegradedBanner({
+        proxyConfigured,
+        degradedRunCount,
+        latestSubitoRunDegraded,
+      }),
     };
   } catch {
     return null;
@@ -189,17 +230,23 @@ export async function getGlobalAdminStatus(): Promise<GlobalAdminStatus | null> 
 export async function getGlobalSettingsConfig(): Promise<GlobalSettingsConfig | null> {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('scraper_global_config')
-      .select(
-        'global_pause, auto_translate, daily_translation_cap, translation_provider, telegram_chat_id, alert_email, proxy_enc, translations_today, translations_reset_date, updated_at',
-      )
-      .eq('id', 1)
-      .maybeSingle();
+    const [{ data, error }, latestSubitoRunDegraded] = await Promise.all([
+      supabase
+        .from('scraper_global_config')
+        .select(
+          'global_pause, auto_translate, daily_translation_cap, translation_provider, telegram_chat_id, alert_email, proxy_enc, translations_today, translations_reset_date, updated_at, early_stop_k, full_refresh_hours, max_pages, last_block_reason, degraded_run_count',
+        )
+        .eq('id', 1)
+        .maybeSingle(),
+      getLatestSubitoRunDegraded(supabase),
+    ]);
 
     if (error || !data) {
       return null;
     }
+
+    const proxyConfigured = data.proxy_enc != null;
+    const degradedRunCount = (data.degraded_run_count as number) ?? 0;
 
     return {
       globalPause: Boolean(data.global_pause),
@@ -208,10 +255,20 @@ export async function getGlobalSettingsConfig(): Promise<GlobalSettingsConfig | 
       translationProvider: data.translation_provider as 'gemini' | 'openrouter',
       telegramChatId: (data.telegram_chat_id as string | null) ?? null,
       alertEmail: (data.alert_email as string | null) ?? null,
-      proxyConfigured: data.proxy_enc != null,
+      proxyConfigured,
       translationsToday: data.translations_today as number,
       translationsResetDate: data.translations_reset_date as string,
       updatedAt: data.updated_at as string,
+      earlyStopK: (data.early_stop_k as number) ?? 5,
+      fullRefreshHours: (data.full_refresh_hours as number) ?? 24,
+      maxPages: (data.max_pages as number) ?? 1,
+      lastBlockReason: (data.last_block_reason as string | null) ?? null,
+      degradedRunCount,
+      showDegradedBanner: computeShowDegradedBanner({
+        proxyConfigured,
+        degradedRunCount,
+        latestSubitoRunDegraded,
+      }),
     };
   } catch {
     return null;
@@ -299,7 +356,7 @@ export async function getTranslationQueue(): Promise<TranslationQueueItem[]> {
       )
       .in('status', ['pending', 'failed'])
       .order('updated_at', { ascending: false })
-      .limit(200);
+      .limit(500);
 
     if (error) {
       return [];
@@ -441,7 +498,7 @@ export async function getScrapeRunById(id: string): Promise<ScrapeRunDetail | nu
     const { data, error } = await supabase
       .from('scrape_runs')
       .select(
-        'id, started_at, finished_at, source, status, listings_found, listings_inserted, listings_updated, listings_skipped, listings_rejected, selector_hit_rate, failure_reason',
+        'id, started_at, finished_at, source, status, listings_found, listings_inserted, listings_updated, listings_skipped, listings_skipped_at_crawl, listings_rejected, selector_hit_rate, failure_reason, http_requests, wall_time_seconds, crawl_mode, degraded, json_field_completeness',
       )
       .eq('id', id)
       .maybeSingle();
@@ -453,7 +510,13 @@ export async function getScrapeRunById(id: string): Promise<ScrapeRunDetail | nu
     const row = data as ScrapeRunListRow & {
       listings_updated: number;
       listings_skipped: number;
+      listings_skipped_at_crawl: number;
       failure_reason: string | null;
+      http_requests: number | null;
+      wall_time_seconds: number | string | null;
+      crawl_mode: 'incremental' | 'full' | null;
+      degraded: boolean;
+      json_field_completeness: number | string | null;
     };
 
     return {
@@ -461,6 +524,16 @@ export async function getScrapeRunById(id: string): Promise<ScrapeRunDetail | nu
       listingsUpdated: row.listings_updated,
       listingsSkipped: row.listings_skipped,
       failureReason: row.failure_reason,
+      listingsSkippedAtCrawl: row.listings_skipped_at_crawl ?? 0,
+      httpRequests: row.http_requests != null ? Number(row.http_requests) : null,
+      wallTimeSeconds:
+        row.wall_time_seconds != null ? Number(row.wall_time_seconds) : null,
+      crawlMode: row.crawl_mode,
+      degraded: Boolean(row.degraded),
+      jsonFieldCompleteness:
+        row.json_field_completeness != null
+          ? Number(row.json_field_completeness)
+          : null,
     };
   } catch {
     return null;
