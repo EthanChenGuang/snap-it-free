@@ -280,7 +280,7 @@ export function resolveCoords(
   return { lat: null, lng: null, source: 'none' };
 }
 
-async function dismissCookieBanner(page: Page): Promise<void> {
+export async function dismissCookieBanner(page: Page): Promise<void> {
   const accept = page.locator('#didomi-notice-agree-button, button:has-text("Accetta")');
   if ((await accept.count()) > 0) {
     await accept.first().click({ timeout: 3000 }).catch(() => {});
@@ -308,7 +308,7 @@ async function resolveDetailUrls(page: Page): Promise<string[]> {
   return detailUrls;
 }
 
-async function extractFromDetailPage(
+export async function extractFromDetailPage(
   page: Page,
   sourceCategoryUrl = '',
 ): Promise<{
