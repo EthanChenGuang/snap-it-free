@@ -310,7 +310,7 @@ Plans:
 
 **Depends on:** v1.0 Phases 1, 6, 8 (scraper foundation + admin + URL matrix). **Recommended before Phase 7** (Production Deploy).
 
-**Plans:** 4/6 plans executed
+**Plans:** 5/6 plans executed
 
 Plans:
 
@@ -318,7 +318,7 @@ Plans:
 - [x] 15-02-PLAN.md — Migration 023 crawl metrics schema + blocking push
 - [x] 15-03-PLAN.md — Tracer: HTTP extract + crawl hash + early-stop + known-set
 - [x] 15-04-PLAN.md — HttpCrawler primary + Playwright fallback queue + feature flag
-- [ ] 15-05-PLAN.md — Worker crawl mode, soft proxy gate, JSON validation, metrics, email alerts
+- [x] 15-05-PLAN.md — Worker crawl mode, soft proxy gate, JSON validation, metrics, email alerts
 - [ ] 15-06-PLAN.md — Admin crawl config, proxy health, degraded banner, run metrics UI
 
 **Success criteria:**

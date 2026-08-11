@@ -66,8 +66,8 @@ Requirements for this milestone. Each maps to roadmap phases.
 - [x] **SCRP-E04**: Playwright used only for fallback (missing coords/description), pagination button clicks, or HTTP-block retry
 - [x] **SCRP-E05**: Proxy ADR — dev optional; production full-matrix documents Italian residential rotating proxy requirement; admin shows configured/not configured
 - [x] **SCRP-E06**: Tech stack ADR — keep Crawlee + Node worker; HttpCrawler primary + Playwright secondary (no Python/Apify rewrite)
-- [ ] **SCRP-E07**: Run metrics distinguish crawl-layer skips vs persist-layer skips; log request count and wall time per run
-- [ ] **SCRP-E08**: Batch validation gate still protects against empty/broken feeds; thresholds updated only with documented rationale
+- [x] **SCRP-E07**: Run metrics distinguish crawl-layer skips vs persist-layer skips; log request count and wall time per run
+- [x] **SCRP-E08**: Batch validation gate still protects against empty/broken feeds; thresholds updated only with documented rationale
 
 ### Production Deploy
 
@@ -170,8 +170,8 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | SCRP-E04 | Phase 15 | Complete |
 | SCRP-E05 | Phase 15 | Complete |
 | SCRP-E06 | Phase 15 | Complete |
-| SCRP-E07 | Phase 15 | Pending |
-| SCRP-E08 | Phase 15 | Pending |
+| SCRP-E07 | Phase 15 | Complete |
+| SCRP-E08 | Phase 15 | Complete |
 
 **Coverage:**
 
