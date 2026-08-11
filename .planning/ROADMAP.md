@@ -302,26 +302,61 @@ Plans:
 
 ---
 
+#### Phase 15: Scraper Incremental Crawl & Search Efficiency
+
+**Goal:** Replace the Subito worker's N+1 Playwright detail loop with an HTTP-first category JSON path, DB-aware incremental early-stop, a documented proxy strategy for production anti-bot, and a confirmed Crawlee hybrid stack (HttpCrawler primary + Playwright fallback only).
+
+**Requirements:** SCRP-E01–SCRP-E08
+
+**Depends on:** v1.0 Phases 1, 6, 8 (scraper foundation + admin + URL matrix). **Recommended before Phase 7** (Production Deploy).
+
+**Plans:** 6 plans
+
+Plans:
+
+- [ ] 15-01-PLAN.md — Wave 0 spike hard gate + stack/proxy ADRs (SCRP-E01/E05/E06)
+- [ ] 15-02-PLAN.md — Migration 023 crawl metrics schema + blocking push
+- [ ] 15-03-PLAN.md — Tracer: HTTP extract + crawl hash + early-stop + known-set
+- [ ] 15-04-PLAN.md — HttpCrawler primary + Playwright fallback queue + feature flag
+- [ ] 15-05-PLAN.md — Worker crawl mode, soft proxy gate, JSON validation, metrics, email alerts
+- [ ] 15-06-PLAN.md — Admin crawl config, proxy health, degraded banner, run metrics UI
+
+**Success criteria:**
+
+1. Category URL extraction uses embedded JSON (`__NEXT_DATA__` or equivalent) — **≤1 HTTP request per category page** on the happy path (not 1 + N detail visits)
+2. Incremental crawl: load known `external_id` set; skip unchanged listings at **crawl layer**; early-stop after K consecutive known listings; periodic full refresh (default 24h)
+3. Playwright used only for fallback (missing coords/description), pagination button clicks, or HTTP-block retry — not every listing
+4. Proxy ADR documented: dev optional; production full-matrix requires residential (Italian egress recommended); admin surfaces proxy configured / not configured
+5. Tech stack ADR: **keep Crawlee + Node**; primary engine **HttpCrawler**; Playwright secondary — no Python/Apify rewrite
+6. Run metrics distinguish crawl-skipped vs persist-skipped; wall time and request count drop measurably vs baseline (target: ≥10× fewer requests for 34-URL matrix)
+7. Existing batch validation (count, selector/geo rates) still passes or thresholds updated with documented rationale
+8. Spike artifact in phase dir proves JSON field map on live Subito regalo category URL (incl. Venezia `arredamento-casalinghi` path)
+
+**Context:** [phases/15-scraper-incremental-crawl-and-search-efficiency/15-CONTEXT.md](phases/15-scraper-incremental-crawl-and-search-efficiency/15-CONTEXT.md)
+
+---
+
 ## Progress
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
 | 1–6, 8 | v1.0 | 39/39 | Shipped | 2026-08-09 |
-| 9. Feed-First Home & Nav | v2.0 | 0/4 | Complete    | 2026-08-09 |
-| 10. Filter Sheet & Distance | v2.0 | 0/5 | In Progress|  |
-| 11. Grid Listing Cards | v2.0 | 0/4 | Complete    | 2026-08-10 |
-| 12. Canonical Category Mapping | v2.0 | 4/4 | Complete    | 2026-08-10 |
+| 9. Feed-First Home & Nav | v2.0 | 5/5 | Complete | 2026-08-09 |
+| 10. Filter Sheet & Distance | v2.0 | 5/5 | Complete | 2026-08-10 |
+| 11. Grid Listing Cards | v2.0 | 4/4 | Complete | 2026-08-10 |
+| 12. Canonical Category Mapping | v2.0 | 4/4 | Complete | 2026-08-10 |
 | 13. Select Location | v2.0 | 5/5 | Verified | 2026-08-10 |
-| 14. Settings Parity | v2.0 | 0/7 | In Progress|  |
+| 14. Settings Parity | v2.0 | 8/8 | Complete | 2026-08-10 |
+| 15. Scraper Crawl Efficiency | v2.0 | 0/TBD | Not planned | — |
 | 7. Production Deploy | v2.0 | 0/4 | Planned | — |
 
 ## Execution Order
 
 ```
-Phase 9 → 10 → 11 → 12 → 13 → 14 → 7
+Phase 9 → 10 → 11 → 12 → 13 → 14 → 15 → 7
 ```
 
-UX phases first; deploy last after consumer-facing changes are stable.
+UX phases first; **scraper efficiency before production deploy**; deploy last.
 
 ## Reference Material
 
@@ -338,4 +373,4 @@ Snag-style interaction reference screenshots (feed grid, filter sheet, favorites
 | `/post` | drawer/menu entry (not bottom tab) |
 
 ---
-*Roadmap updated: 2026-08-09 — v2.0 milestone initialized*
+*Roadmap updated: 2026-08-11 — Phase 15 expanded (incremental + proxy + stack ADR)*
