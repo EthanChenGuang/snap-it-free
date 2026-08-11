@@ -38,6 +38,9 @@ export function matchesSubitoCategory(
     title: listing.title,
     category: listing.category,
   });
+  // 'usato' is Subito's own catch-all category, so it also stands in for
+  // "everything that doesn't resolve to a specific bucket" — unresolved listings belong here too.
+  if (selected === 'usato') return resolved === 'usato' || resolved === null;
   return resolved === selected;
 }
 
