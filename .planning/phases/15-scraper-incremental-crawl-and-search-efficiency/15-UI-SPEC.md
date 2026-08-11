@@ -54,7 +54,7 @@ Stitch 4px grid (project tokens — same as scraper-dashboard HTML):
 | Token | Value | Usage in this phase |
 |-------|-------|---------------------|
 | `space-xs` | 4px | Chip/dot gaps; icon-to-label gaps inside status chips |
-| `space-sm` | 8px | Gap between stacked field label and helper; gap between Full crawl secondary button and Save |
+| `space-sm` | 8px | Gap between stacked field label and helper; gap between Full crawl primary button and adjacent controls |
 | `space-md` | 16px | Default field stack spacing inside cards; metric card internal gaps |
 | `space-lg` | 24px | Card padding (`p-space-lg` / match existing `p-5`≈20px by migrating **new** cards to `p-space-lg` or keep `p-5` for visual parity with sibling Settings cards — **prefer matching adjacent SettingsClient cards** so new sections don’t jump density) |
 | `space-xl` | 48px | Page header bottom margin rhythm / major section breaks (`mb-space-xl` on page title block per Stitch settings) |
@@ -72,11 +72,11 @@ Admin surfaces already use Inter Stitch roles. Declared for Phase 15 net-new cop
 | Role | Size | Weight | Line Height | Used for |
 |------|------|--------|-------------|----------|
 | Body | 15px (`body-md`) | 400 | 1.6 | Helper text under crawl fields; degraded banner body; proxy last-block reason value |
-| Label | 12px (`label-sm`) | 500 | 1.2 | Status chips (Configured / Not configured / Degraded / Incremental / Full); uppercase metadata keys; pause-style status text |
-| Label (form / button) | 14px (`label-md`) | 600 via `font-semibold` (matches existing Settings labels/buttons) | 1.4 | Field labels (`Early-stop K`, etc.); primary/secondary button labels |
-| Heading | 15px section / 30px page | 600 | 1.3 | Section card titles (`Crawl efficiency`, enhanced `Proxy`); page title unchanged |
+| Label | 12px (`label-sm`) | **600** via `font-semibold` | 1.2 | Status chips (Configured / Not configured / Degraded / Incremental / Full); uppercase metadata keys; pause-style status text |
+| Label (form / button) | 14px (`label-md`) | **600** via `font-semibold` (matches existing Settings labels/buttons) | 1.4 | Field labels (`Early-stop K`, etc.); Full crawl + Save button labels |
+| Heading | 15px section / 30px page | **600** | 1.3 | Section card titles (`Crawl efficiency`, enhanced `Proxy`); page title unchanged |
 
-**Weight contract:** exactly **2 weights** — **400** (body/helpers) and **600** (section titles, form labels, buttons via existing `font-semibold`). Do not introduce 700 on these surfaces (page title already 600 at 30px in SettingsClient).
+**Weight contract:** exactly **2 weights** — **400** (body/helpers) and **600** (chips, metadata keys, section titles, form labels, buttons). Always apply `font-semibold` on `label-sm` / `label-md` so rendered weight is 600 (never rely on bare token defaults). Do not introduce 700 on these surfaces (page title already 600 at 30px in SettingsClient).
 
 ---
 
@@ -205,7 +205,7 @@ Applicable state considerations resolved: 8 covered, 2 backstop, 1 dismissed, 0 
 
 **Modified:**
 - `components/admin/SettingsClient.tsx`
-  - Insert **Crawl efficiency** card (new section) after Global Pause, before Proxy — bordered card matching Proxy density; three number inputs + Full crawl secondary/primary row
+  - Insert **Crawl efficiency** card (new section) after Global Pause, before Proxy — bordered card matching Proxy density; three number inputs + Full crawl **primary** (black) button
   - Extend **Proxy** card with last-block-reason + degraded-count metadata rows under the existing URL field (D-15-21)
   - Show soft **degraded banner** above cards when prop true (same placement family as `capExceededNotice`)
   - Extend save PATCH body with `early_stop_k`, `full_refresh_hours`, `max_pages` (schema wave)
