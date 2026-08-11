@@ -8,17 +8,21 @@ export type ListingTranslationFields = {
   category?: string | null;
 };
 
-type GlobalTranslateConfig = {
-  auto_translate: boolean;
-  translation_provider: 'gemini' | 'openrouter';
+export type TranslateBatchState = {
+  autoTranslate: boolean;
+  /** Loaded but intentionally unused downstream (dead field, preserved as-is). */
+  translationProvider: 'gemini' | 'openrouter';
+  translationsToday: number;
+  dailyCap: number;
+  today: string;
 };
 
-async function loadTranslateConfig(
+export async function loadTranslateBatchState(
   supabase: SupabaseClient,
-): Promise<GlobalTranslateConfig | null> {
+): Promise<TranslateBatchState | null> {
   const { data, error } = await supabase
     .from('scraper_global_config')
-    .select('auto_translate, translation_provider')
+    .select('auto_translate, translation_provider, translations_today, translations_reset_date, daily_translation_cap')
     .eq('id', 1)
     .maybeSingle();
 
@@ -26,28 +30,8 @@ async function loadTranslateConfig(
     return null;
   }
 
-  return {
-    auto_translate: Boolean(data.auto_translate),
-    translation_provider: (data.translation_provider as 'gemini' | 'openrouter') ?? 'gemini',
-  };
-}
-
-async function checkAndIncrementUsage(
-  supabase: SupabaseClient,
-): Promise<{ allowed: boolean }> {
-  const { data, error } = await supabase
-    .from('scraper_global_config')
-    .select('translations_today, translations_reset_date, daily_translation_cap')
-    .eq('id', 1)
-    .maybeSingle();
-
-  if (error || !data) {
-    return { allowed: false };
-  }
-
   const today = new Date().toISOString().slice(0, 10);
   let translationsToday = data.translations_today as number;
-  const dailyCap = data.daily_translation_cap as number;
 
   if ((data.translations_reset_date as string) < today) {
     translationsToday = 0;
@@ -61,20 +45,28 @@ async function checkAndIncrementUsage(
       .eq('id', 1);
   }
 
-  if (translationsToday >= dailyCap) {
-    return { allowed: false };
+  return {
+    autoTranslate: Boolean(data.auto_translate),
+    translationProvider: (data.translation_provider as 'gemini' | 'openrouter') ?? 'gemini',
+    translationsToday,
+    dailyCap: data.daily_translation_cap as number,
+    today,
+  };
+}
+
+/**
+ * Synchronous, no-`await` in-memory check-and-increment. This is what makes the cap
+ * reservation race-free under concurrent dispatch (D-20 revisit): Node's single-threaded
+ * event loop cannot interleave two concurrent callers inside a function body that never
+ * yields, unlike the old per-listing read-then-write against the database which was racy
+ * once translations for multiple listings could be in flight at once.
+ */
+function reserveTranslationSlot(state: TranslateBatchState): number | null {
+  if (state.translationsToday >= state.dailyCap) {
+    return null;
   }
-
-  const { error: incrementError } = await supabase
-    .from('scraper_global_config')
-    .update({
-      translations_today: translationsToday + 1,
-      translations_reset_date: today,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', 1);
-
-  return { allowed: !incrementError };
+  state.translationsToday += 1;
+  return state.translationsToday;
 }
 
 function categoryLabelForSlug(slug: string | null | undefined): string | null {
@@ -108,57 +100,3 @@ async function queueTranslationFailure(
   );
 }
 
-/** Post-persist translation hook (D-24, D-27). Listing persist is never rolled back. */
-export async function translateAfterPersist(
-  supabase: SupabaseClient,
-  listingId: string,
-  fields: ListingTranslationFields,
-): Promise<void> {
-  const config = await loadTranslateConfig(supabase);
-  if (!config?.auto_translate) {
-    return;
-  }
-
-  const usage = await checkAndIncrementUsage(supabase);
-  if (!usage.allowed) {
-    return;
-  }
-
-  const result = await translateListingFields(
-    {
-      title: fields.title,
-      description: fields.description,
-      category: categoryLabelForSlug(fields.category),
-    },
-    {
-      geminiApiKey: process.env.GEMINI_API_KEY?.trim(),
-      openRouterApiKey: process.env.OPENROUTER_API_KEY?.trim(),
-      openRouterModel: process.env.OPENROUTER_FALLBACK_MODEL?.trim(),
-    },
-  );
-
-  if (result.ok) {
-    const { translations } = result;
-    const { error: updateError } = await supabase
-      .from('listings')
-      .update({
-        title_en: translations.title_en,
-        title_zh: translations.title_zh,
-        description_en: translations.description_en,
-        description_zh: translations.description_zh,
-        category_en: translations.category_en,
-        category_zh: translations.category_zh,
-      })
-      .eq('id', listingId);
-
-    if (updateError) {
-      await queueTranslationFailure(supabase, listingId, updateError.message);
-      return;
-    }
-
-    await supabase.from('translation_queue').delete().eq('listing_id', listingId);
-    return;
-  }
-
-  await queueTranslationFailure(supabase, listingId, result.error);
-}
