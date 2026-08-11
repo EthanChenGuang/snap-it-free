@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
-current_phase: 14
-current_phase_name: settings-consumer-parity
-current_plan: 7
-status: ready_to_execute
-stopped_at: Phase 15 UI-SPEC approved
-last_updated: "2026-08-11T16:40:29.928Z"
+current_phase: 15
+current_phase_name: scraper-incremental-crawl-and-search-efficiency
+current_plan: 2
+status: executing
+stopped_at: Completed 15-01-PLAN.md
+last_updated: "2026-08-11T18:01:26.195Z"
 progress:
   total_phases: 9
   completed_phases: 7
-  total_plans: 33
-  completed_plans: 33
+  total_plans: 39
+  completed_plans: 34
   percent: 78
 last_activity: 2026-08-11
 last_activity_desc: "Quick task 260811-nwf: scraper translation pipeline batch-scoped config/cap + bounded-concurrency dispatch, 80 round trips → 2-3 per batch of 20"
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
 
-**Current focus:** Phase 14 — settings-consumer-parity
+**Current focus:** Phase 15 — scraper-incremental-crawl-and-search-efficiency
 
 ## Current Position
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
-Phase: 14 (settings-consumer-parity) — READY TO EXECUTE
-**Current Plan:** 7
-**Total Plans in Phase:** 8
-Status: Plan 14-05 complete — ready to execute Plan 14-07
+Phase: 15 (scraper-incremental-crawl-and-search-efficiency) — EXECUTING
+**Current Plan:** 2
+**Total Plans in Phase:** 6
+Status: Ready to execute
 
-Progress: [██████████] 100% v2.0 (0/7 phases)
+Progress: [█████████░] 87% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -88,6 +88,7 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | Phase 14-settings-consumer-parity P06 | 5min | 2 tasks | 3 files |
 | Phase 14-settings-consumer-parity P05 | 5min | 2 tasks | 4 files |
 | Phase 14-settings-consumer-parity P07 | 12min | 2 tasks | 2 files |
+| Phase 15 P01 | 12min | 3 tasks | 5 files |
 
 ## Deferred Items (from v1.0)
 
@@ -107,9 +108,9 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-11T16:40:29.910Z
-**Stopped at:** Phase 15 UI-SPEC approved
-**Resume file:** .planning/phases/15-scraper-incremental-crawl-and-search-efficiency/15-UI-SPEC.md
+**Last session:** 2026-08-11T18:01:26.184Z
+**Stopped at:** Completed 15-01-PLAN.md
+**Resume file:** None
 
 ## Decisions
 
@@ -161,6 +162,9 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 - [Phase ?]: No debounce on native time inputs — onChange fires on discrete commit
 - [Phase ?]: TD-01 closed via retroactive 04-VERIFICATION synthesis (13/14 UAT truths, Test 12 physical-device block carried forward)
 - [Phase ?]: Phase 14 regression audit uses f19aeb7^ baseline — zero diff on LanguageSection, GeneralSection, ZonesSection, ios-detect
+- [Phase ?]: HttpCrawler wins Wave 0 spike — listing path props.pageProps.initialState.items.originalList
+- [Phase ?]: Validation gate: JSON completeness ≥0.9; full minCountRatio 0.5; incremental 0.2
+- [Phase ?]: Production proxy: Italian residential required; soft degraded gate (ADR 015)
 
 ## Quick Tasks Completed
 

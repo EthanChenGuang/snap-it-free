@@ -58,6 +58,17 @@ Requirements for this milestone. Each maps to roadmap phases.
 - [x] **SET-05**: Sign out retained
 - [x] **SET-06**: Existing settings preserved: keyword alerts, zone preferences, appearance, iOS Add-to-Home-Screen shortcuts
 
+### Scraper Crawl Efficiency (Phase 15)
+
+- [x] **SCRP-E01**: Category-page primary extract path parses embedded JSON (`__NEXT_DATA__` or equivalent) — not N+1 detail page visits
+- [ ] **SCRP-E02**: Incremental crawl loads known `external_id` set; skips unchanged listings at crawl layer; early-stops after K consecutive known listings (default K=5)
+- [ ] **SCRP-E03**: Periodic full refresh (default 24h) disables early-stop for one run to re-touch visible listings and catch sort drift
+- [ ] **SCRP-E04**: Playwright used only for fallback (missing coords/description), pagination button clicks, or HTTP-block retry
+- [x] **SCRP-E05**: Proxy ADR — dev optional; production full-matrix documents Italian residential rotating proxy requirement; admin shows configured/not configured
+- [x] **SCRP-E06**: Tech stack ADR — keep Crawlee + Node worker; HttpCrawler primary + Playwright secondary (no Python/Apify rewrite)
+- [ ] **SCRP-E07**: Run metrics distinguish crawl-layer skips vs persist-layer skips; log request count and wall time per run
+- [ ] **SCRP-E08**: Batch validation gate still protects against empty/broken feeds; thresholds updated only with documented rationale
+
 ### Production Deploy
 
 - [ ] **DEPLOY-01**: Next.js PWA deployed to Vercel with production env and Serwist service worker
@@ -153,13 +164,21 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | DEPLOY-03 | Phase 7 | Pending |
 | DEPLOY-04 | Phase 7 | Pending |
 | DEPLOY-05 | Phase 7 | Pending |
+| SCRP-E01 | Phase 15 | Complete |
+| SCRP-E02 | Phase 15 | Pending |
+| SCRP-E03 | Phase 15 | Pending |
+| SCRP-E04 | Phase 15 | Pending |
+| SCRP-E05 | Phase 15 | Complete |
+| SCRP-E06 | Phase 15 | Complete |
+| SCRP-E07 | Phase 15 | Pending |
+| SCRP-E08 | Phase 15 | Pending |
 
 **Coverage:**
 
-- v2.0 requirements: 38 total
-- Mapped to phases: 38
+- v2.0 requirements: 46 total
+- Mapped to phases: 46
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-08-09*  
-*Last updated: 2026-08-10 after Phase 12 scope pivot (CAT-01–03, FAV-01–03 deferred)*
+*Last updated: 2026-08-11 — Phase 15 SCRP-E01–E08 (incremental crawl, proxy, stack ADR)*
