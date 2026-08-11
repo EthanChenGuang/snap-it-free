@@ -2,11 +2,23 @@ import { contentHash } from './dedupe.js';
 import { isMislabeledFree } from './free-filter.js';
 import { CanonicalListingSchema, type CanonicalListing } from './schema.js';
 import { loadZonePolygons, tagZone } from './zone-tag.js';
+import { crawlHashForListing } from '../subito/crawl-hash.js';
 import type { RawListing } from '../subito/extract.js';
 import { extractCategoryFromSubitoUrl } from '../subito/normalize.js';
 import { parseRegaloCategoryUrl } from '../subito/url-context.js';
 
 export type NormalizeResult = CanonicalListing | { reject: string };
+
+const LISTING_TTL_MS = 48 * 60 * 60 * 1000;
+
+/** 48h from posted_at while still inside that window; otherwise extend from now when re-seen. */
+export function computeExpiresAt(postedAt: Date, now = new Date()): Date {
+  const fromPosted = postedAt.getTime() + LISTING_TTL_MS;
+  if (fromPosted > now.getTime()) {
+    return new Date(fromPosted);
+  }
+  return new Date(now.getTime() + LISTING_TTL_MS);
+}
 
 const zonePolygons = loadZonePolygons();
 
@@ -15,7 +27,7 @@ export function normalizeRawListing(raw: RawListing): NormalizeResult {
   if (rejectReason) return { reject: rejectReason };
 
   const postedAt = new Date(raw.posted_at);
-  const expiresAt = new Date(postedAt.getTime() + 48 * 60 * 60 * 1000);
+  const expiresAt = computeExpiresAt(postedAt);
 
   const zone =
     raw.lat != null && raw.lng != null ? tagZone(raw.lat, raw.lng, zonePolygons) : null;
@@ -46,5 +58,6 @@ export function normalizeRawListing(raw: RawListing): NormalizeResult {
   };
 
   candidate.content_hash = contentHash(candidate);
+  candidate.crawl_content_hash = crawlHashForListing(raw);
   return CanonicalListingSchema.parse(candidate);
 }

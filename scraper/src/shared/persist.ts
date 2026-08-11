@@ -57,13 +57,17 @@ export async function persistListing(
 
   if (existing?.content_hash === listing.content_hash) {
     const now = new Date();
+    const touchRow: Record<string, string> = {
+      status: 'active',
+      expires_at: computeExpiresAt(listing.posted_at, now).toISOString(),
+      scraped_at: now.toISOString(),
+    };
+    if (listing.crawl_content_hash != null) {
+      touchRow.crawl_content_hash = listing.crawl_content_hash;
+    }
     const { error: touchError } = await supabase
       .from('listings')
-      .update({
-        status: 'active',
-        expires_at: computeExpiresAt(listing.posted_at, now).toISOString(),
-        scraped_at: now.toISOString(),
-      })
+      .update(touchRow)
       .eq('id', existing.id);
 
     if (touchError) {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isMislabeledFree } from './free-filter.js';
-import { normalizeRawListing } from './normalize.js';
+import { computeExpiresAt, normalizeRawListing } from './normalize.js';
 import type { RawListing } from '../subito/extract.js';
 
 const baseRaw: RawListing = {
@@ -41,6 +41,20 @@ describe('isMislabeledFree', () => {
   });
 });
 
+describe('computeExpiresAt', () => {
+  it('uses posted_at plus 48 hours while still inside the window', () => {
+    const postedAt = new Date('2026-07-28T10:00:00.000Z');
+    const now = new Date('2026-07-29T10:00:00.000Z');
+    expect(computeExpiresAt(postedAt, now).toISOString()).toBe('2026-07-30T10:00:00.000Z');
+  });
+
+  it('extends from now when posted_at window has elapsed (re-seen listing)', () => {
+    const postedAt = new Date('2026-07-28T10:00:00.000Z');
+    const now = new Date('2026-08-11T08:00:00.000Z');
+    expect(computeExpiresAt(postedAt, now).toISOString()).toBe('2026-08-13T08:00:00.000Z');
+  });
+});
+
 describe('normalizeRawListing', () => {
   it('rejects mislabeled listings with a reason string', () => {
     const result = normalizeRawListing({
@@ -51,7 +65,7 @@ describe('normalizeRawListing', () => {
   });
 
   it('accepts clean listings and sets expires_at to posted_at plus 48 hours', () => {
-    const postedAt = new Date('2026-07-28T10:00:00.000Z');
+    const postedAt = new Date(Date.now() - 60 * 60 * 1000);
     const result = normalizeRawListing({
       ...baseRaw,
       posted_at: postedAt.toISOString(),
@@ -64,6 +78,25 @@ describe('normalizeRawListing', () => {
     expect(result.status).toBe('active');
     expect(result.expires_at.getTime()).toBe(postedAt.getTime() + 48 * 60 * 60 * 1000);
     expect(result.content_hash).toHaveLength(64);
+    expect(result.crawl_content_hash).toHaveLength(64);
+  });
+
+  it('computes crawl_content_hash from HTTP JSON fields when present', () => {
+    const result = normalizeRawListing({
+      ...baseRaw,
+      price: '0 €',
+      image_urls: ['https://images.sbito.it/a.jpg', 'https://images.sbito.it/b.jpg'],
+    });
+
+    if ('reject' in result) throw new Error('expected canonical listing');
+    expect(result.crawl_content_hash).toHaveLength(64);
+    const withoutImages = normalizeRawListing({
+      ...baseRaw,
+      price: '0 €',
+      image_urls: ['https://images.sbito.it/a.jpg', 'https://images.sbito.it/b.jpg'],
+    });
+    if ('reject' in withoutImages) throw new Error('expected canonical listing');
+    expect(withoutImages.crawl_content_hash).toBe(result.crawl_content_hash);
   });
 
   it('rejects when description contains price language but title is clean', () => {

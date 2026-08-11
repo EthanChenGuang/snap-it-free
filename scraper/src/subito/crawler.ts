@@ -64,8 +64,7 @@ function maskProxyHost(proxyUrl: string): string {
 }
 
 function toRawListing(entry: EarlyStopListing): RawListing {
-  const { price: _price, image_urls: _images, ...raw } = entry;
-  return raw;
+  return entry;
 }
 
 function ingestCategoryResults(

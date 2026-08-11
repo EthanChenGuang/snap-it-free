@@ -13,6 +13,10 @@ export type RawListing = {
   lng: number | null;
   posted_at: string;
   description?: string;
+  /** HTTP category JSON price field (crawl hash input). */
+  price?: string;
+  /** HTTP category JSON image URLs (crawl hash input). */
+  image_urls?: string[];
   /** Category listing URL this listing was scraped from (D-20). */
   source_category_url?: string;
 };
