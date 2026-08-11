@@ -6,14 +6,14 @@ current_phase: 14
 current_phase_name: settings-consumer-parity
 current_plan: 7
 status: ready_to_execute
-stopped_at: Completed 14-07-PLAN.md
-last_updated: "2026-08-10T23:01:37.928Z"
+stopped_at: Phase 15 UI-SPEC approved
+last_updated: "2026-08-11T16:40:29.928Z"
 progress:
-  total_phases: 8
+  total_phases: 9
   completed_phases: 7
   total_plans: 33
-  completed_plans: 32
-  percent: 88
+  completed_plans: 33
+  percent: 78
 last_activity: 2026-08-11
 last_activity_desc: "Quick task 260811-nwf: scraper translation pipeline batch-scoped config/cap + bounded-concurrency dispatch, 80 round trips → 2-3 per batch of 20"
 ---
@@ -107,9 +107,9 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-10T22:52:42.440Z
-**Stopped at:** Completed 14-07-PLAN.md
-**Resume file:** None
+**Last session:** 2026-08-11T16:40:29.910Z
+**Stopped at:** Phase 15 UI-SPEC approved
+**Resume file:** .planning/phases/15-scraper-incremental-crawl-and-search-efficiency/15-UI-SPEC.md
 
 ## Decisions
 
@@ -188,6 +188,7 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ### Roadmap Evolution
 
+- Phase 15 expanded: incremental crawl (JSON + early-stop), proxy ADR (residential for prod), tech stack ADR (Crawlee HttpCrawler hybrid); SCRP-E01–E08 added to REQUIREMENTS.md
 - Phase 12.1 inserted after Phase 12: add i18n support for the category names for it/zh/en (URGENT)
 - Phase 12.1 executed: trilingual messages.feed.subitoCategories + locale-aware filter/chip/pill labels; UAT 5/5, unit 36/36
 - Phase 12.1 verified (self-tested, no human in the loop per user request): UAT 5/5, security review 6/6 threats closed (retroactive STRIDE, no threat model authored at plan time), goal-backward verification 11/11 after fixing one gap — `scripts/phase12-uat-automation.mjs`'s selector had gone stale when an unrelated quick task (260810-tb5, commit 47d5259) swapped FilterSheet's checkbox list for a button chip grid 2 min after the UAT commit. Fixed and re-confirmed 5/5 against current HEAD. Phase marked complete in ROADMAP/STATE.
