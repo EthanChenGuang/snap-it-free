@@ -10,6 +10,7 @@ import {
   formatRomeTooltip,
   formatSelectorRate,
   formatUtcTimestamp,
+  formatWallTimeSeconds,
 } from '@/lib/admin/format';
 import type { ScrapeRunDetail } from '@/lib/admin/types';
 import { cn } from '@/lib/utils';
@@ -49,6 +50,17 @@ export function RunDetailClient({ run }: RunDetailClientProps) {
     run.failureReason?.trim() ||
     (run.status === 'success' ? runDetailMessages.logSuccess : '运行未完成，无详细日志。');
 
+  const crawlModeLabel =
+    run.crawlMode === 'full'
+      ? runDetailMessages.crawlModeFull
+      : run.crawlMode === 'incremental'
+        ? runDetailMessages.crawlModeIncremental
+        : '—';
+
+  const crawlSkipped = run.listingsSkippedAtCrawl ?? 0;
+  const httpRequests = run.httpRequests ?? 0;
+  const wallTime = formatWallTimeSeconds(run.wallTimeSeconds);
+
   return (
     <div className="space-y-6">
       <nav className="flex items-center gap-1.5 text-[14px] text-secondary">
@@ -80,6 +92,14 @@ export function RunDetailClient({ run }: RunDetailClientProps) {
               >
                 {runStatusLabel(run)}
               </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-outline-variant bg-surface-container-high px-2 py-0.5 text-[12px] font-semibold">
+                {crawlModeLabel}
+              </span>
+              {run.degraded ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-outline-variant bg-surface-container-high px-2 py-0.5 text-[12px] font-semibold text-secondary">
+                  {runDetailMessages.degradedChip}
+                </span>
+              ) : null}
             </div>
             <p
               className="mt-1 font-mono text-[14px] text-secondary"
@@ -109,6 +129,9 @@ export function RunDetailClient({ run }: RunDetailClientProps) {
             label: runDetailMessages.metricSelectorRate,
             value: formatSelectorRate(run.selectorHitRate),
           },
+          { label: runDetailMessages.metricCrawlSkipped, value: crawlSkipped },
+          { label: runDetailMessages.metricHttpRequests, value: httpRequests },
+          { label: runDetailMessages.metricWallTime, value: wallTime },
         ].map((metric) => (
           <div
             key={metric.label}

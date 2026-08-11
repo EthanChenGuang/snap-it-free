@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { SourceCard } from '@/components/admin/SourceCard';
 import { MaintenanceCard } from '@/components/admin/MaintenanceCard';
+import { DegradedBanner } from '@/components/admin/DegradedBanner';
 import { adminShellMessages } from '@/components/admin/admin-messages';
 import type { AdminAlert, GlobalAdminStatus, SourceWithLastRun } from '@/lib/admin/types';
 
@@ -31,6 +32,7 @@ export function DashboardClient({
   const router = useRouter();
   const [globalPause, setGlobalPause] = useState(initialGlobalStatus.globalPause);
   const lastSyncAt = initialGlobalStatus.lastSyncAt;
+  const showDegradedBanner = initialGlobalStatus.showDegradedBanner;
   const [sources, setSources] = useState(initialSources);
   const [pauseSaving, setPauseSaving] = useState(false);
 
@@ -110,6 +112,12 @@ export function DashboardClient({
         <h1 className="text-[30px] font-semibold leading-[1.3] tracking-tight">抓取管理</h1>
         <p className="mt-1 text-[15px] text-secondary">Scraper Worker · Admin Console</p>
       </header>
+
+      {showDegradedBanner ? (
+        <div className="mb-space-xl" data-testid="degraded-banner">
+          <DegradedBanner showSettingsLink />
+        </div>
+      ) : null}
 
       <section className="mb-space-xl flex flex-wrap items-center justify-between gap-4 rounded border border-outline-variant bg-surface p-space-md">
         <div className="flex flex-wrap items-center gap-6">

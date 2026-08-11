@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
+import { DegradedBanner } from '@/components/admin/DegradedBanner';
 import { adminShellMessages, settingsMessages, sourcesMessages } from '@/components/admin/admin-messages';
 import type { GlobalSettingsConfig } from '@/lib/admin/types';
 import {
@@ -42,6 +43,13 @@ export function SettingsClient({
   const [newOperatorEmail, setNewOperatorEmail] = useState('');
   const [allowlistSaving, setAllowlistSaving] = useState(false);
   const [deleteConfirmEmail, setDeleteConfirmEmail] = useState<string | null>(null);
+  const [earlyStopK, setEarlyStopK] = useState(initialConfig.earlyStopK);
+  const [fullRefreshHours, setFullRefreshHours] = useState(initialConfig.fullRefreshHours);
+  const [maxPages, setMaxPages] = useState(initialConfig.maxPages);
+  const [fullCrawlStarting, setFullCrawlStarting] = useState(false);
+  const [fullCrawlError, setFullCrawlError] = useState<string | null>(null);
+  const lastBlockReason = initialConfig.lastBlockReason;
+  const degradedRunCount = initialConfig.degradedRunCount;
 
   const capExceeded = translationsToday >= dailyCap;
 
@@ -75,6 +83,9 @@ export function SettingsClient({
       auto_translate: autoTranslate,
       daily_translation_cap: dailyCap,
       translation_provider: translationProvider,
+      early_stop_k: earlyStopK,
+      full_refresh_hours: fullRefreshHours,
+      max_pages: maxPages,
     };
 
     if (proxyUrl.trim()) {
@@ -166,6 +177,29 @@ export function SettingsClient({
     }
   };
 
+  const handleRunFullCrawl = async () => {
+    setFullCrawlError(null);
+    setFullCrawlStarting(true);
+    try {
+      const response = await fetch('/api/admin/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source_slug: 'subito', crawl_mode: 'full' }),
+      });
+
+      if (!response.ok) {
+        setFullCrawlError(settingsMessages.runFullCrawlError);
+        return;
+      }
+
+      router.refresh();
+    } catch {
+      setFullCrawlError(settingsMessages.runFullCrawlError);
+    } finally {
+      setFullCrawlStarting(false);
+    }
+  };
+
   const isSelf = (email: string) =>
     email.trim().toLowerCase() === currentUserEmail.trim().toLowerCase();
 
@@ -191,6 +225,8 @@ export function SettingsClient({
           {settingsMessages.capExceededNotice}
         </p>
       ) : null}
+
+      {initialConfig.showDegradedBanner ? <DegradedBanner /> : null}
 
       <section className="flex flex-col justify-between gap-4 rounded border border-outline-variant bg-surface p-5 sm:flex-row sm:items-center">
         <div>
@@ -221,6 +257,80 @@ export function SettingsClient({
               aria-hidden
             />
           </label>
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded border border-outline-variant bg-surface p-5">
+        <div className="flex flex-col gap-3 border-b border-outline-variant pb-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="flex items-center gap-2 text-[15px] font-semibold">
+            <span className="material-symbols-outlined text-[20px]" aria-hidden>
+              speed
+            </span>
+            {settingsMessages.crawlEfficiencyTitle}
+          </h2>
+          <button
+            type="button"
+            disabled={fullCrawlStarting || globalPause}
+            onClick={handleRunFullCrawl}
+            className="inline-flex min-h-11 items-center justify-center rounded bg-primary px-4 py-2 text-[14px] font-semibold text-on-primary hover:opacity-90 disabled:opacity-50"
+          >
+            {fullCrawlStarting
+              ? settingsMessages.runFullCrawlStarting
+              : settingsMessages.runFullCrawl}
+          </button>
+        </div>
+
+        {fullCrawlError ? (
+          <p className="text-[15px] text-error">{fullCrawlError}</p>
+        ) : null}
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div>
+            <label className="mb-1 block text-[14px] font-semibold">
+              {settingsMessages.earlyStopKLabel}
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={50}
+              value={earlyStopK}
+              onChange={(event) => setEarlyStopK(Number(event.target.value))}
+              className="min-h-11 w-full rounded border border-outline-variant bg-surface-container-low px-3 py-2 font-mono text-[14px] focus:border-primary focus:outline-none"
+            />
+            <p className="mt-1 text-[12px] text-secondary">{settingsMessages.earlyStopKHelp}</p>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-[14px] font-semibold">
+              {settingsMessages.fullRefreshHoursLabel}
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={168}
+              value={fullRefreshHours}
+              onChange={(event) => setFullRefreshHours(Number(event.target.value))}
+              className="min-h-11 w-full rounded border border-outline-variant bg-surface-container-low px-3 py-2 font-mono text-[14px] focus:border-primary focus:outline-none"
+            />
+            <p className="mt-1 text-[12px] text-secondary">
+              {settingsMessages.fullRefreshHoursHelp}
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-[14px] font-semibold">
+              {settingsMessages.maxPagesLabel}
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={3}
+              value={maxPages}
+              onChange={(event) => setMaxPages(Number(event.target.value))}
+              className="min-h-11 w-full rounded border border-outline-variant bg-surface-container-low px-3 py-2 font-mono text-[14px] focus:border-primary focus:outline-none"
+            />
+            <p className="mt-1 text-[12px] text-secondary">{settingsMessages.maxPagesHelp}</p>
+          </div>
         </div>
       </section>
 
@@ -266,6 +376,28 @@ export function SettingsClient({
               </button>
             </div>
             <p className="mt-1 text-[12px] text-secondary">{settingsMessages.proxyHelp}</p>
+          </div>
+
+          <div className="space-y-3 border-t border-outline-variant pt-4">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-secondary">
+                {settingsMessages.lastBlockReasonLabel}
+              </p>
+              <p
+                className="mt-1 line-clamp-2 text-[15px] text-on-surface"
+                title={lastBlockReason?.trim() || undefined}
+              >
+                {lastBlockReason?.trim()
+                  ? lastBlockReason
+                  : settingsMessages.lastBlockReasonEmpty}
+              </p>
+            </div>
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-secondary">
+                {settingsMessages.degradedRunsLabel}
+              </p>
+              <p className="mt-1 font-mono text-[15px] text-on-surface">{degradedRunCount}</p>
+            </div>
           </div>
         </section>
 

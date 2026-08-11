@@ -34,6 +34,19 @@ export function formatDuration(startedAt: string, finishedAt: string | null): st
   return `${minutes}m ${seconds}s`;
 }
 
+export function formatWallTimeSeconds(seconds: number | null | undefined): string {
+  if (seconds == null || !Number.isFinite(seconds)) {
+    return '—';
+  }
+  const totalSeconds = Math.round(seconds);
+  if (totalSeconds < 60) {
+    return `${totalSeconds}s`;
+  }
+  const minutes = Math.floor(totalSeconds / 60);
+  const remainder = totalSeconds % 60;
+  return `${minutes}m ${remainder}s`;
+}
+
 export function formatSelectorRate(rate: number | null): string {
   if (rate == null || !Number.isFinite(rate)) {
     return '—';
