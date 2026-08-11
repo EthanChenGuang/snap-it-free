@@ -15,7 +15,7 @@ progress:
   completed_plans: 32
   percent: 88
 last_activity: 2026-08-11
-last_activity_desc: "Quick task 260811-emq: Post Item page iOS redesign — carousel, chips, frosted submit bar"
+last_activity_desc: "Quick task 260811-gxy: Filter Sheet instant-apply — chip taps commit live, 应用 is close-only"
 ---
 
 # Project State
@@ -176,6 +176,10 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | 2026-08-10 | refine-feed-list-page-header-filtering-p | Remove city/radius pills; split filter vs map badge indicators |
 | 2026-08-11 | redesign-and-refactor-settings-page-ui-t | Settings page iOS Inset Grouped: account header card, grouped toggles, bottom logout |
 | 2026-08-11 | redesign-and-refactor-post-item-page-to- | Post page iOS: multi-image carousel, grouped form card, category chips, frosted submit bar |
+| 2026-08-11 | post-form-redesign | Multi-image draft persist fix, 17 Subito category grid, 5-grade condition pills, slug API |
+| 2026-08-11 | post-media-refine | Photo hydration race fix, carousel/grid switcher, 5-col condition grid, usato→其他 |
+| 2026-08-11 | post-image-persistence | Module-cache photo handoff + draft compression + quota-safe writes; fixes image loss on location return |
+| 2026-08-11 | make-the-filter-sheet-apply-instantly-in | Removed draft-then-Apply model; 城市/分类 chip taps commit instantly to applied filters, 应用 is now close-only |
 
 ## Accumulated Context
 
