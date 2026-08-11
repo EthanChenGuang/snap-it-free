@@ -128,9 +128,23 @@ async function sendTelegramMessage(payload: AlertPayload, chatId: string): Promi
 export async function notifyOperator(
   supabase: SupabaseClient,
   payload: AlertPayload,
+  options: { emailOnly?: boolean } = {},
 ): Promise<void> {
   const routing = await loadAlertRouting(supabase);
-  const channel = resolveChannel(routing);
+  let channel = resolveChannel(routing);
+
+  if (options.emailOnly) {
+    const alertTo = routing.alertEmail ?? process.env.ALERT_TO;
+    if (process.env.RESEND_API_KEY && process.env.ALERT_FROM && alertTo) {
+      channel = 'resend';
+    } else {
+      console.error(
+        `ALERT_DELIVERY_FAILED channel=email-only run_id=${payload.runId} error=No email alerting credentials configured`,
+      );
+      return;
+    }
+  }
+
   if (!channel) {
     console.error(
       `ALERT_DELIVERY_FAILED channel=none run_id=${payload.runId} error=No alerting credentials configured`,
