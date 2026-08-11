@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import {
   Drawer,
   DrawerContent,
@@ -64,32 +63,14 @@ export function FilterSheet() {
   const {
     sheetOpen,
     setSheetOpen,
-    draft,
-    setDraft,
-    resetDraftFromApplied,
-    applyDraft,
+    applied,
+    setCity,
+    toggleCategory,
+    clearCategories,
     resetFilters,
   } = useFeedFilter();
 
-  useEffect(() => {
-    if (sheetOpen) {
-      resetDraftFromApplied();
-    }
-  }, [sheetOpen, resetDraftFromApplied]);
-
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      resetDraftFromApplied();
-    }
-    setSheetOpen(open);
-  };
-
-  const toggleCategory = (slug: string) => {
-    const next = draft.categories.includes(slug)
-      ? draft.categories.filter((item) => item !== slug)
-      : [...draft.categories, slug];
-    setDraft({ categories: next });
-  };
+  const handleOpenChange = (open: boolean) => setSheetOpen(open);
 
   return (
     <Drawer open={sheetOpen} onOpenChange={handleOpenChange}>
@@ -107,8 +88,8 @@ export function FilterSheet() {
               {messages.feed.cityFilterMapHint}
             </p>
             <ConsumerCityChipSelector
-              value={draft.city}
-              onChange={(city) => setDraft({ city })}
+              value={applied.city}
+              onChange={setCity}
             />
           </section>
 
@@ -117,10 +98,10 @@ export function FilterSheet() {
               <h3 className="text-label-md font-medium text-on-surface-variant">
                 {messages.feed.categoriesLabel}
               </h3>
-              {draft.categories.length > 0 && (
+              {applied.categories.length > 0 && (
                 <button
                   type="button"
-                  onClick={() => setDraft({ categories: [] })}
+                  onClick={() => clearCategories()}
                   className="text-label-sm text-on-surface-variant underline-offset-2 hover:underline"
                 >
                   {messages.feed.clearSelection}
@@ -129,7 +110,7 @@ export function FilterSheet() {
             </div>
             <div className="grid grid-cols-3 gap-2.5">
               {SUBITO_CATEGORY_SLUGS.map((slug) => {
-                const checked = draft.categories.includes(slug);
+                const checked = applied.categories.includes(slug);
                 const label = getSubitoCategoryLabel(slug, language, { messages }) ?? slug;
                 return (
                   <button
@@ -164,7 +145,7 @@ export function FilterSheet() {
             <button
               type="button"
               className="flex-[2] rounded-full bg-primary py-3.5 text-sm font-semibold text-on-primary shadow-md transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline"
-              onClick={applyDraft}
+              onClick={() => setSheetOpen(false)}
             >
               {messages.feed.applyFilters}
             </button>
