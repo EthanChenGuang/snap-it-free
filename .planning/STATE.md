@@ -176,6 +176,7 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | 2026-08-10 | refine-feed-list-page-header-filtering-p | Remove city/radius pills; split filter vs map badge indicators |
 | 2026-08-11 | redesign-and-refactor-settings-page-ui-t | Settings page iOS Inset Grouped: account header card, grouped toggles, bottom logout |
 | 2026-08-11 | redesign-and-refactor-post-item-page-to- | Post page iOS: multi-image carousel, grouped form card, category chips, frosted submit bar |
+| 2026-08-11 | fix-aria-hidden-filter-trigger-focus | Blur filter-sheet trigger button on open to prevent aria-hidden focus-retention warning |
 | 2026-08-11 | post-form-redesign | Multi-image draft persist fix, 17 Subito category grid, 5-grade condition pills, slug API |
 | 2026-08-11 | post-media-refine | Photo hydration race fix, carousel/grid switcher, 5-col condition grid, usato→其他 |
 | 2026-08-11 | post-image-persistence | Module-cache photo handoff + draft compression + quota-safe writes; fixes image loss on location return |

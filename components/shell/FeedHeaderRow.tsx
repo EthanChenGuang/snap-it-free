@@ -112,7 +112,10 @@ export function FeedHeaderRow() {
         </div>
         <button
           type="button"
-          onClick={() => setSheetOpen(true)}
+          onClick={(event) => {
+            event.currentTarget.blur();
+            setSheetOpen(true);
+          }}
           className="relative flex h-10 w-10 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full bg-surface-container-lowest text-on-surface transition-opacity active:opacity-80"
           aria-label={messages.feed.openFilters}
         >
