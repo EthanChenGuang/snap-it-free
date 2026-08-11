@@ -93,6 +93,8 @@ export const messages: Messages = {
     photoLabel: '主图',
     uploadHint: '点击上传或拖拽到此处',
     uploadFormatHint: '建议使用高清 JPG 或 PNG',
+    addMorePhotos: '+ 添加更多图片',
+    removePhoto: '删除图片',
     titleLabel: '标题',
     titlePlaceholder: '你要送出什么？',
     categoryLabel: '分类',

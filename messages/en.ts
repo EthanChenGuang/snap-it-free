@@ -93,6 +93,8 @@ export const messages: Messages = {
     photoLabel: 'Main photo',
     uploadHint: 'Click to upload or drag and drop',
     uploadFormatHint: 'High-quality JPG or PNG recommended',
+    addMorePhotos: '+ Add more photos',
+    removePhoto: 'Remove photo',
     titleLabel: 'Listing title',
     titlePlaceholder: 'What are you giving away?',
     categoryLabel: 'Category',

@@ -96,6 +96,8 @@ export const messages = {
     photoLabel: 'Foto principale',
     uploadHint: 'Clicca per caricare o trascina qui',
     uploadFormatHint: 'JPG o PNG ad alta qualità consigliati',
+    addMorePhotos: '+ Aggiungi altre foto',
+    removePhoto: 'Rimuovi foto',
     titleLabel: 'Titolo annuncio',
     titlePlaceholder: 'Cosa stai regalando?',
     categoryLabel: 'Categoria',
