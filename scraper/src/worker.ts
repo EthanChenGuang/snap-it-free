@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { pathToFileURL } from 'node:url';
 import {
   CRON_ENABLED,
+  isHttpCrawlerEnabled,
   SCRAPE_MIN_COUNT_RATIO,
   SCRAPE_MIN_GEO_RESOLUTION_RATE,
   SCRAPE_MIN_SELECTOR_RATE,
@@ -9,13 +10,26 @@ import {
   supabaseAdmin,
 } from './config.js';
 import { notifyOperator } from './alert/notify.js';
-import { loadSourceConfig, updateNextRunAt } from './config-loader.js';
+import {
+  loadJobCrawlMode,
+  loadSourceConfig,
+  recordDegradedRun,
+  updateLastFullRefreshAt,
+  updateNextRunAt,
+} from './config-loader.js';
 import { persistBatch } from './shared/persist.js';
-import { validateBatch } from './shared/validate-run.js';
+import { validateBatch, validateBatchHttp } from './shared/validate-run.js';
 import { loadZonePolygons, tagZone } from './shared/zone-tag.js';
 import { runSchedulerTick, TICK_INTERVAL_MS } from './scheduler.js';
 import { runSubitoCrawler } from './subito/crawler.js';
+import { loadKnownListingSet } from './subito/known-set.js';
 import { resolveSourceRun } from './worker-placeholder.js';
+import {
+  decideCrawlMode,
+  evaluateProxyGate,
+  isProductionSoftProxyContext,
+  type CrawlMode,
+} from './worker-proxy-gate.js';
 
 const COMING_SOON_MESSAGE = '该数据源尚未接入';
 
@@ -38,6 +52,12 @@ type FinishScrapeRunParams = {
   rejected?: number;
   failureReason?: string;
   selectorHitRate: number;
+  listingsSkippedAtCrawl?: number;
+  httpRequests?: number;
+  wallTimeSeconds?: number;
+  crawlMode?: CrawlMode;
+  degraded?: boolean;
+  jsonFieldCompleteness?: number;
 };
 
 async function updateScrapeJob(
@@ -109,6 +129,13 @@ export async function finishScrapeRun(
       listings_rejected: params.rejected ?? 0,
       failure_reason: params.failureReason ?? null,
       selector_hit_rate: params.selectorHitRate,
+      listings_skipped_at_crawl: params.listingsSkippedAtCrawl ?? 0,
+      http_requests: params.httpRequests ?? null,
+      wall_time_seconds:
+        params.wallTimeSeconds != null ? Number(params.wallTimeSeconds.toFixed(2)) : null,
+      crawl_mode: params.crawlMode ?? null,
+      degraded: params.degraded ?? false,
+      json_field_completeness: params.jsonFieldCompleteness ?? null,
     })
     .eq('id', runId);
 
@@ -121,6 +148,9 @@ function parseValidationFailure(reason: string): { failureCode: string; failureD
   if (reason.includes('geo resolution rate')) {
     return { failureCode: 'LOW_GEO_RESOLUTION', failureDetail: reason };
   }
+  if (reason.includes('json field completeness')) {
+    return { failureCode: 'LOW_JSON_COMPLETENESS', failureDetail: reason };
+  }
   if (reason.includes('selector hit rate')) {
     return { failureCode: 'LOW_SELECTOR_RATE', failureDetail: reason };
   }
@@ -130,11 +160,28 @@ function parseValidationFailure(reason: string): { failureCode: string; failureD
   return { failureCode: 'VALIDATION_FAILED', failureDetail: reason };
 }
 
-function computeMinCount(trailingMedians: number[]): number {
+function computeMinCount(trailingMedians: number[], ratio = SCRAPE_MIN_COUNT_RATIO): number {
   const median = trailingMedians.length
     ? trailingMedians.reduce((a, b) => a + b, 0) / trailingMedians.length
     : 50;
-  return Math.floor(median * SCRAPE_MIN_COUNT_RATIO);
+  return Math.floor(median * ratio);
+}
+
+function logPersistBreakdown(stats: {
+  inserted: number;
+  updated: number;
+  skipped: number;
+  rejected: number;
+}): void {
+  console.log(
+    JSON.stringify({
+      event: 'persist_breakdown',
+      persist_skipped: stats.skipped,
+      inserted: stats.inserted,
+      updated: stats.updated,
+      rejected: stats.rejected,
+    }),
+  );
 }
 
 /** DB-driven scrape for one source slug (D-18, D-32). */
@@ -186,8 +233,27 @@ export async function runSourceScrape(
     return;
   }
 
+  const jobCrawlMode = jobId ? await loadJobCrawlMode(supabase, jobId) : null;
+  const crawlMode = decideCrawlMode({
+    lastFullRefreshAt: config.lastFullRefreshAt,
+    fullRefreshHours: config.fullRefreshHours,
+    jobCrawlMode,
+  });
+  const isFullRefresh = crawlMode === 'full';
+
+  const proxyGate = evaluateProxyGate({
+    isProduction: isProductionSoftProxyContext(),
+    proxyUrl: config.proxyUrl,
+  });
+  if (proxyGate.warning) {
+    console.warn(proxyGate.warning);
+  }
+  const runDegraded = proxyGate.degraded;
+
   const run = await startScrapeRun(supabase, sourceSlug);
-  console.log(`Scrape run ${run.id} (${sourceSlug}) started at ${run.startedAt.toISOString()}`);
+  console.log(
+    `Scrape run ${run.id} (${sourceSlug}) started at ${run.startedAt.toISOString()} mode=${crawlMode} degraded=${runDegraded}`,
+  );
 
   try {
     const trailingMedians = await getTrailingMedians(supabase);
@@ -196,18 +262,71 @@ export async function runSourceScrape(
       ? Math.round(trailingMedians.reduce((a, b) => a + b, 0) / trailingMedians.length)
       : 50;
 
-    console.log(`Crawling ${config.urls.length} URL(s) for ${sourceSlug}`);
-    let rawListings;
-    let selectorHitRate;
+    const knownMap =
+      sourceSlug === 'subito' ? await loadKnownListingSet(supabase, sourceSlug) : new Map();
+
+    console.log(`Crawling ${config.urls.length} URL(s) for ${sourceSlug} (mode=${crawlMode})`);
+    const crawlStartedAt = Date.now();
+    let crawlResult;
 
     if (sourceSlug === 'subito') {
-      ({ rawListings, selectorHitRate } = await runSubitoCrawler(
-        config.urls,
-        config.preset,
-        config.proxyUrl,
-      ));
+      crawlResult = await runSubitoCrawler(config.urls, config.preset, config.proxyUrl, {
+        knownMap,
+        earlyStopK: config.earlyStopK,
+        isFullRefresh,
+        mode: crawlMode,
+      });
     } else {
       throw new Error(`No crawler implementation for source: ${sourceSlug}`);
+    }
+
+    const wallTimeSeconds = (Date.now() - crawlStartedAt) / 1000;
+    const {
+      rawListings,
+      selectorHitRate,
+      httpRequests,
+      listingsSkippedAtCrawl,
+      jsonFieldCompleteness,
+      blockedUrlCount,
+    } = crawlResult;
+
+    console.log(
+      JSON.stringify({
+        event: 'crawl_complete',
+        crawl_mode: crawlMode,
+        listings_found: rawListings.length,
+        crawl_skipped: listingsSkippedAtCrawl,
+        http_requests: httpRequests,
+        json_field_completeness: jsonFieldCompleteness,
+        blocked_url_count: blockedUrlCount,
+        wall_time_seconds: Number(wallTimeSeconds.toFixed(2)),
+      }),
+    );
+
+    const totalUrls = config.urls.length;
+    const blockedRatio = totalUrls > 0 ? blockedUrlCount / totalUrls : 0;
+    if (blockedRatio > 0.5) {
+      const blockReason = `${blockedUrlCount}/${totalUrls} category URLs blocked`;
+      await recordDegradedRun(supabase, blockReason).catch((err) => {
+        console.error('Failed to record degraded run:', err);
+      });
+
+      await notifyOperator(
+        supabase,
+        {
+          runId: run.id,
+          startedAt: run.startedAt,
+          parsedCount: rawListings.length,
+          minCount,
+          medianCount,
+          selectorPct: Math.round(jsonFieldCompleteness * 100),
+          failureCode: 'HIGH_BLOCK_RATE',
+          failureDetail: blockReason,
+        },
+        { emailOnly: true },
+      ).catch((notifyErr) => {
+        console.error('Failed to send blocked-ratio alert:', notifyErr);
+      });
     }
 
     const zones = loadZonePolygons();
@@ -223,23 +342,44 @@ export async function runSourceScrape(
         `geo resolution rate: ${geoResolutionRate.toFixed(2)}; zone rate: ${zoneRate.toFixed(2)}`,
     );
 
-    const validation = validateBatch(
-      rawListings,
-      trailingMedians,
+    const useHttpValidation = isHttpCrawlerEnabled();
+    const validation = useHttpValidation
+      ? validateBatchHttp({
+          listings: rawListings,
+          trailingMedians,
+          jsonFieldCompleteness,
+          crawlMode,
+          listingsSkippedAtCrawl,
+          geoResolutionRate,
+          minGeoResolutionRate: SCRAPE_MIN_GEO_RESOLUTION_RATE,
+        })
+      : validateBatch(
+          rawListings,
+          trailingMedians,
+          selectorHitRate,
+          SCRAPE_MIN_COUNT_RATIO,
+          SCRAPE_MIN_SELECTOR_RATE,
+          geoResolutionRate,
+          SCRAPE_MIN_GEO_RESOLUTION_RATE,
+        );
+
+    const finishBase = {
+      listingsFound: rawListings.length,
       selectorHitRate,
-      SCRAPE_MIN_COUNT_RATIO,
-      SCRAPE_MIN_SELECTOR_RATE,
-      geoResolutionRate,
-      SCRAPE_MIN_GEO_RESOLUTION_RATE,
-    );
+      listingsSkippedAtCrawl,
+      httpRequests,
+      wallTimeSeconds,
+      crawlMode,
+      degraded: runDegraded || blockedRatio > 0.5,
+      jsonFieldCompleteness,
+    };
 
     if (!validation.ok) {
       const { failureCode, failureDetail } = parseValidationFailure(validation.reason);
       await finishScrapeRun(supabase, run.id, {
+        ...finishBase,
         status: 'failed',
-        listingsFound: rawListings.length,
         failureReason: validation.reason,
-        selectorHitRate,
       });
 
       await notifyOperator(supabase, {
@@ -248,7 +388,9 @@ export async function runSourceScrape(
         parsedCount: rawListings.length,
         minCount,
         medianCount,
-        selectorPct: Math.round(selectorHitRate * 100),
+        selectorPct: useHttpValidation
+          ? Math.round(jsonFieldCompleteness * 100)
+          : Math.round(selectorHitRate * 100),
         failureCode,
         failureDetail,
       });
@@ -261,15 +403,26 @@ export async function runSourceScrape(
     }
 
     const stats = await persistBatch(supabase, rawListings, run.id);
+    logPersistBreakdown(stats);
+
     await finishScrapeRun(supabase, run.id, {
+      ...finishBase,
       status: 'success',
-      listingsFound: rawListings.length,
       inserted: stats.inserted,
       updated: stats.updated,
       skipped: stats.skipped,
       rejected: stats.rejected,
-      selectorHitRate,
     });
+
+    if (isFullRefresh) {
+      await updateLastFullRefreshAt(supabase);
+    }
+
+    if (runDegraded) {
+      await recordDegradedRun(supabase, 'Production run without proxy').catch((err) => {
+        console.error('Failed to record proxy degraded run:', err);
+      });
+    }
 
     if (jobId) {
       await updateScrapeJob(supabase, jobId, 'completed');
@@ -280,7 +433,7 @@ export async function runSourceScrape(
     }
 
     console.log(
-      `Run ${run.id} complete: inserted=${stats.inserted} updated=${stats.updated} skipped=${stats.skipped} rejected=${stats.rejected}`,
+      `Run ${run.id} complete: inserted=${stats.inserted} updated=${stats.updated} skipped=${stats.skipped} rejected=${stats.rejected} crawl_skipped=${listingsSkippedAtCrawl}`,
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -289,6 +442,7 @@ export async function runSourceScrape(
       listingsFound: 0,
       failureReason: message,
       selectorHitRate: 0,
+      degraded: runDegraded,
     }).catch((finishErr) => {
       console.error('Failed to finish scrape run after error:', finishErr);
     });
