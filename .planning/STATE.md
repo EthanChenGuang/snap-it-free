@@ -15,7 +15,7 @@ progress:
   completed_plans: 32
   percent: 88
 last_activity: 2026-08-11
-last_activity_desc: "Quick task 260811-2hj: Settings page iOS Inset Grouped redesign complete"
+last_activity_desc: "Quick task 260811-2rx: Product list page iOS polish — frosted header, card animations"
 ---
 
 # Project State
@@ -175,6 +175,7 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | 2026-08-10 | redesign-filter-bottom-sheet-ui-to-ios-n | iOS-native filter sheet: pill city chips, 3-col category chip grid, sticky blurred Reset/Apply bar |
 | 2026-08-10 | refine-feed-list-page-header-filtering-p | Remove city/radius pills; split filter vs map badge indicators |
 | 2026-08-11 | redesign-and-refactor-settings-page-ui-t | Settings page iOS Inset Grouped: account header card, grouped toggles, bottom logout |
+| 2026-08-11 | redesign-and-elevate-product-list-page-u | Feed iOS polish: frosted header, card gradient overlay, heart spring pop |
 
 ## Accumulated Context
 
