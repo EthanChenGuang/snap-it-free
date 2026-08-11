@@ -63,7 +63,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 - [x] **SCRP-E01**: Category-page primary extract path parses embedded JSON (`__NEXT_DATA__` or equivalent) — not N+1 detail page visits
 - [x] **SCRP-E02**: Incremental crawl loads known `external_id` set; skips unchanged listings at crawl layer; early-stops after K consecutive known listings (default K=5)
 - [x] **SCRP-E03**: Periodic full refresh (default 24h) disables early-stop for one run to re-touch visible listings and catch sort drift
-- [ ] **SCRP-E04**: Playwright used only for fallback (missing coords/description), pagination button clicks, or HTTP-block retry
+- [x] **SCRP-E04**: Playwright used only for fallback (missing coords/description), pagination button clicks, or HTTP-block retry
 - [x] **SCRP-E05**: Proxy ADR — dev optional; production full-matrix documents Italian residential rotating proxy requirement; admin shows configured/not configured
 - [x] **SCRP-E06**: Tech stack ADR — keep Crawlee + Node worker; HttpCrawler primary + Playwright secondary (no Python/Apify rewrite)
 - [ ] **SCRP-E07**: Run metrics distinguish crawl-layer skips vs persist-layer skips; log request count and wall time per run
@@ -167,7 +167,7 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | SCRP-E01 | Phase 15 | Complete |
 | SCRP-E02 | Phase 15 | Complete |
 | SCRP-E03 | Phase 15 | Complete |
-| SCRP-E04 | Phase 15 | Pending |
+| SCRP-E04 | Phase 15 | Complete |
 | SCRP-E05 | Phase 15 | Complete |
 | SCRP-E06 | Phase 15 | Complete |
 | SCRP-E07 | Phase 15 | Pending |

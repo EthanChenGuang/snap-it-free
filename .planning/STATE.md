@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 15
 current_phase_name: scraper-incremental-crawl-and-search-efficiency
-current_plan: 4
+current_plan: 5
 status: executing
-stopped_at: Completed 15-03-PLAN.md
-last_updated: "2026-08-11T18:05:40.791Z"
+stopped_at: Completed 15-04-PLAN.md
+last_updated: "2026-08-11T18:08:17.855Z"
 progress:
   total_phases: 9
   completed_phases: 7
   total_plans: 39
-  completed_plans: 36
+  completed_plans: 37
   percent: 78
 last_activity: 2026-08-11
 last_activity_desc: "Quick task 260811-nwf: scraper translation pipeline batch-scoped config/cap + bounded-concurrency dispatch, 80 round trips → 2-3 per batch of 20"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 15 (scraper-incremental-crawl-and-search-efficiency) — EXECUTING
-**Current Plan:** 4
+**Current Plan:** 5
 **Total Plans in Phase:** 6
 Status: Ready to execute
 
-Progress: [█████████░] 92% v2.0 (0/7 phases)
+Progress: [██████████] 95% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -91,6 +91,7 @@ Progress: [█████████░] 92% v2.0 (0/7 phases)
 | Phase 15 P01 | 12min | 3 tasks | 5 files |
 | Phase 15 P02 | 5min | 2 tasks | 1 files |
 | Phase 15 P03 | 8 | 2 tasks | 11 files |
+| Phase 15 P04 | 480 | 2 tasks | 5 files |
 
 ## Deferred Items (from v1.0)
 
@@ -110,8 +111,8 @@ Progress: [█████████░] 92% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-11T18:05:40.778Z
-**Stopped at:** Completed 15-03-PLAN.md
+**Last session:** 2026-08-11T18:08:17.844Z
+**Stopped at:** Completed 15-04-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -171,6 +172,8 @@ Progress: [█████████░] 92% v2.0 (0/7 phases)
 - [Phase ?]: Applied migration 023 via Supavisor pooler (IPv4) after direct db host IPv6 unreachable in WSL2
 - [Phase ?]: Early-stop break at K leaves tail unprocessed per newest-first assumption
 - [Phase ?]: Category JSON geo resolves via municipality centroid lookup without detail page
+- [Phase ?]: unset USE_HTTP_CRAWLER defaults to on; shadow logs single-run compare metrics
+- [Phase ?]: Block retry and detail enrichment use separate PlaywrightCrawler runs at concurrency 1
 
 ## Quick Tasks Completed
 
