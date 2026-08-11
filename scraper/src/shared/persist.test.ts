@@ -119,6 +119,16 @@ describe('persistListing', () => {
     expect(options).toEqual({ onConflict: 'source,external_id' });
   });
 
+  it('writes crawl_content_hash on insert when provided', async () => {
+    const { supabase, upsert } = createMockSupabase({ existingHash: null });
+    const crawlHash = 'c'.repeat(64);
+
+    await persistListing(supabase, { ...baseListing, crawl_content_hash: crawlHash });
+
+    const [row] = upsert.mock.calls[0];
+    expect(row.crawl_content_hash).toBe(crawlHash);
+  });
+
   it('upserts with null geom when coords absent', async () => {
     const { supabase, upsert } = createMockSupabase({ existingHash: null });
     const noCoords = { ...baseListing, lat: null, lng: null, content_hash: 'b'.repeat(64) };

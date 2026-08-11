@@ -88,6 +88,9 @@ export async function persistListing(
     posted_at: listing.posted_at.toISOString(),
     expires_at: listing.expires_at.toISOString(),
     content_hash: listing.content_hash,
+    ...(listing.crawl_content_hash != null
+      ? { crawl_content_hash: listing.crawl_content_hash }
+      : {}),
     scraped_at: new Date().toISOString(),
     category: listing.category ?? null,
     raw_payload: listing.raw_payload ?? null,
