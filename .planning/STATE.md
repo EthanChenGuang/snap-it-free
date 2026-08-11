@@ -15,7 +15,7 @@ progress:
   completed_plans: 32
   percent: 88
 last_activity: 2026-08-11
-last_activity_desc: "Quick task 260811-gxy: Filter Sheet instant-apply — chip taps commit live, 应用 is close-only"
+last_activity_desc: "Quick task 260811-hta: usato catch-all chip renamed to Other/Altro/其他, matchesSubitoCategory now treats unresolved listings as Other"
 ---
 
 # Project State
@@ -181,6 +181,7 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | 2026-08-11 | post-media-refine | Photo hydration race fix, carousel/grid switcher, 5-col condition grid, usato→其他 |
 | 2026-08-11 | post-image-persistence | Module-cache photo handoff + draft compression + quota-safe writes; fixes image loss on location return |
 | 2026-08-11 | make-the-filter-sheet-apply-instantly-in | Removed draft-then-Apply model; 城市/分类 chip taps commit instantly to applied filters, 应用 is now close-only |
+| 2026-08-11 | rename-the-subito-catch-all-category-lab | usato chip label "All categories" → "Other"/"Altro"/"其他"; matchesSubitoCategory now matches unresolved listings as the true catch-all (not just literal usato) |
 
 ## Accumulated Context
 
