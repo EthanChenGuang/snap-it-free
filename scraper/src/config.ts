@@ -34,3 +34,21 @@ export function getProxyUrl(): string | undefined {
   }
   return url;
 }
+
+export type UseHttpCrawlerMode = 'off' | 'shadow' | 'on';
+
+/**
+ * USE_HTTP_CRAWLER rollout flag (D-15-28).
+ * unset → on (post-cutover default); off → legacy Playwright-only; shadow → HTTP + compare log.
+ */
+export function getUseHttpCrawlerMode(): UseHttpCrawlerMode {
+  const raw = process.env.USE_HTTP_CRAWLER?.trim().toLowerCase();
+  if (raw === 'off') return 'off';
+  if (raw === 'shadow') return 'shadow';
+  if (raw === 'on') return 'on';
+  return 'on';
+}
+
+export function isHttpCrawlerEnabled(): boolean {
+  return getUseHttpCrawlerMode() !== 'off';
+}
