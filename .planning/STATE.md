@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 15
 current_phase_name: scraper-incremental-crawl-and-search-efficiency
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: Completed 15-01-PLAN.md
-last_updated: "2026-08-11T18:01:26.195Z"
+stopped_at: Completed 15-02-PLAN.md
+last_updated: "2026-08-11T18:03:27.578Z"
 progress:
   total_phases: 9
   completed_phases: 7
   total_plans: 39
-  completed_plans: 34
+  completed_plans: 35
   percent: 78
 last_activity: 2026-08-11
 last_activity_desc: "Quick task 260811-nwf: scraper translation pipeline batch-scoped config/cap + bounded-concurrency dispatch, 80 round trips → 2-3 per batch of 20"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 15 (scraper-incremental-crawl-and-search-efficiency) — EXECUTING
-**Current Plan:** 2
+**Current Plan:** 3
 **Total Plans in Phase:** 6
 Status: Ready to execute
 
-Progress: [█████████░] 87% v2.0 (0/7 phases)
+Progress: [█████████░] 90% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -89,6 +89,7 @@ Progress: [█████████░] 87% v2.0 (0/7 phases)
 | Phase 14-settings-consumer-parity P05 | 5min | 2 tasks | 4 files |
 | Phase 14-settings-consumer-parity P07 | 12min | 2 tasks | 2 files |
 | Phase 15 P01 | 12min | 3 tasks | 5 files |
+| Phase 15 P02 | 5min | 2 tasks | 1 files |
 
 ## Deferred Items (from v1.0)
 
@@ -108,8 +109,8 @@ Progress: [█████████░] 87% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-11T18:01:26.184Z
-**Stopped at:** Completed 15-01-PLAN.md
+**Last session:** 2026-08-11T18:03:27.563Z
+**Stopped at:** Completed 15-02-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -165,6 +166,8 @@ Progress: [█████████░] 87% v2.0 (0/7 phases)
 - [Phase ?]: HttpCrawler wins Wave 0 spike — listing path props.pageProps.initialState.items.originalList
 - [Phase ?]: Validation gate: JSON completeness ≥0.9; full minCountRatio 0.5; incremental 0.2
 - [Phase ?]: Production proxy: Italian residential required; soft degraded gate (ADR 015)
+- [Phase ?]: max_pages default 1 per D-15-23 page-1 ship; admin may allow up to 3 later
+- [Phase ?]: Applied migration 023 via Supavisor pooler (IPv4) after direct db host IPv6 unreachable in WSL2
 
 ## Quick Tasks Completed
 
