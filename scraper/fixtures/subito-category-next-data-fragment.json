@@ -1,0 +1,174 @@
+{
+  "_meta": {
+    "source": "https://www.subito.it/annunci-veneto/regalo/arredamento-casalinghi/venezia/venezia/",
+    "capturedAt": "2026-08-11T18:00:09.160Z",
+    "listingArrayPath": "props.pageProps.initialState.items.originalList",
+    "note": "Sanitized fragment for Plan 15-03 unit tests — advertiser/body redacted"
+  },
+  "props": {
+    "pageProps": {
+      "initialState": {
+        "items": {
+          "originalList": [
+            {
+              "kind": "AdItem",
+              "subject": "mobiletto legno",
+              "date": "2026-08-11 13:00:50",
+              "type": {
+                "key": "g",
+                "value": "In regalo",
+                "weight": 0
+              },
+              "category": {
+                "friendlyName": "arredamento-casalinghi",
+                "label": "Arredamento e Casalinghi"
+              },
+              "features": {
+                "/price": {
+                  "type": "number",
+                  "uri": "/price",
+                  "label": "Prezzo",
+                  "values": [
+                    {
+                      "key": "0",
+                      "value": "0 €"
+                    }
+                  ]
+                }
+              },
+              "images": [
+                {
+                  "cdnBaseUrl": "https://images.sbito.it/api/v1/sbt-ads-images-pro/images/1f/1f42c45e-b720-48ea-bc45-6f4dca904710"
+                },
+                {
+                  "cdnBaseUrl": "https://images.sbito.it/api/v1/sbt-ads-images-pro/images/a9/a9715dfb-9b31-4102-acb1-fa195bce7f90"
+                }
+              ],
+              "urls": {
+                "default": "https://www.subito.it/arredamento-casalinghi/mobiletto-legno-venezia-656979545.htm",
+                "mobile": "https://www.subito.it/arredamento-casalinghi/mobiletto-legno-venezia-656979545.htm"
+              },
+              "geo": {
+                "city": {
+                  "value": "Venezia",
+                  "shortName": "VE"
+                },
+                "town": {
+                  "value": "Venezia"
+                }
+              },
+              "advertiser": {
+                "userId": "[redacted]"
+              },
+              "body": "[redacted description]"
+            },
+            {
+              "kind": "AdItem",
+              "subject": "divano  ",
+              "date": "2026-08-11 08:37:13",
+              "type": {
+                "key": "g",
+                "value": "In regalo",
+                "weight": 0
+              },
+              "category": {
+                "friendlyName": "arredamento-casalinghi",
+                "label": "Arredamento e Casalinghi"
+              },
+              "features": {
+                "/price": {
+                  "type": "number",
+                  "uri": "/price",
+                  "label": "Prezzo",
+                  "values": [
+                    {
+                      "key": "0",
+                      "value": "0 €"
+                    }
+                  ]
+                }
+              },
+              "images": [
+                {
+                  "cdnBaseUrl": "https://images.sbito.it/api/v1/sbt-ads-images-pro/images/03/03eeddc4-b985-4de2-908d-756531aa3be3"
+                },
+                {
+                  "cdnBaseUrl": "https://images.sbito.it/api/v1/sbt-ads-images-pro/images/90/90a01a20-c70a-4c84-93f9-689f9c5398d7"
+                }
+              ],
+              "urls": {
+                "default": "https://www.subito.it/arredamento-casalinghi/divano-venezia-656955180.htm",
+                "mobile": "https://www.subito.it/arredamento-casalinghi/divano-venezia-656955180.htm"
+              },
+              "geo": {
+                "city": {
+                  "value": "Venezia",
+                  "shortName": "VE"
+                },
+                "town": {
+                  "value": "Venezia"
+                }
+              },
+              "advertiser": {
+                "userId": "[redacted]"
+              },
+              "body": "[redacted description]"
+            },
+            {
+              "kind": "AdItem",
+              "subject": "mobile soggiorno ",
+              "date": "2026-08-09 23:11:59",
+              "type": {
+                "key": "g",
+                "value": "In regalo",
+                "weight": 0
+              },
+              "category": {
+                "friendlyName": "arredamento-casalinghi",
+                "label": "Arredamento e Casalinghi"
+              },
+              "features": {
+                "/price": {
+                  "type": "number",
+                  "uri": "/price",
+                  "label": "Prezzo",
+                  "values": [
+                    {
+                      "key": "0",
+                      "value": "0 €"
+                    }
+                  ]
+                }
+              },
+              "images": [
+                {
+                  "cdnBaseUrl": "https://images.sbito.it/api/v1/sbt-ads-images-pro/images/11/112e9663-cf4f-4f71-aab8-ada2a6cfb655"
+                },
+                {
+                  "cdnBaseUrl": "https://images.sbito.it/api/v1/sbt-ads-images-pro/images/f9/f900a12e-0aeb-4412-b433-42ad9f57bb14"
+                }
+              ],
+              "urls": {
+                "default": "https://www.subito.it/arredamento-casalinghi/mobile-soggiorno-venezia-656851383.htm",
+                "mobile": "https://www.subito.it/arredamento-casalinghi/mobile-soggiorno-venezia-656851383.htm"
+              },
+              "geo": {
+                "city": {
+                  "value": "Venezia",
+                  "shortName": "VE"
+                },
+                "town": {
+                  "value": "Venezia"
+                }
+              },
+              "advertiser": {
+                "userId": "[redacted]"
+              },
+              "body": "[redacted description]"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
