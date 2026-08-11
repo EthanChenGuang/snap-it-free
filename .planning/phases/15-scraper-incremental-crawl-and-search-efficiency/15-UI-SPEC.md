@@ -1,10 +1,11 @@
 ---
 phase: 15
 slug: scraper-incremental-crawl-and-search-efficiency
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-08-11
+reviewed_at: 2026-08-11T18:40:00Z
 ---
 
 # Phase 15 — UI Design Contract
@@ -158,32 +159,40 @@ Admin UI copy lives in `components/admin/admin-messages.ts` (Chinese-first, matc
 
 ## UI Considerations
 
-> Shape-rooted UI state coverage for Phase 15 admin surfaces. Empty/error **copy** is in Copywriting Contract; this table covers state behavior.
+> Shape-rooted UI state coverage from ui-consideration-probe (post-checker). Empty/error **copy** stays in Copywriting Contract; this table covers state behavior only.
 
-**Elements classified:**
-- Crawl efficiency numeric fields (`form`)
-- Full crawl trigger (`interactive-control`)
-- Proxy health metadata rows (`static-content` + existing proxy input)
-- Soft degraded banner (`static-content`, conditional)
-- Run detail metric tiles + mode/degraded chips (`list-collection` / status)
-
-Applicable state considerations resolved: 8 covered, 2 backstop, 1 dismissed, 0 unresolved
+**Elements classified (kinds confirmed):**
+- E1 Crawl efficiency fields — `form`
+- E2 Full crawl trigger — `interactive-control`
+- E3 Proxy health rows — `static-content` + `form`
+- E4 Soft degraded banner — `static-content`
+- E5 Run detail metrics/chips — `list-collection`
 
 | Category | Element(s) | Status | Resolution / Reason |
 |----------|------------|--------|---------------------|
-| empty | Last block reason | ✅ covered | Renders documented “No recent block” empty copy when null/empty |
-| empty | Degraded run count | ✅ covered | Always shows integer including `0` — no prose empty state |
-| empty | Crawl fields on first load | ✅ covered | Prefill defaults K=5, hours=24, max_pages=3 from CONTEXT when DB JSON keys absent |
-| loading | Settings fetch / save | ✅ covered | Existing SettingsClient pattern: disable Save while `saving`; Full crawl disables while enqueue in flight — no new skeleton |
-| loading | Degraded banner | ✅ covered | Banner absent until server props resolve; do not flash error styling |
-| populated | Proxy health section | ✅ covered | Configured chip + last block reason + degraded count visible together in the existing Proxy card (D-15-21) |
-| partial | Crawl fields | ✅ covered | Each field independent; Save persists whatever is valid via PATCH — invalid numbers blocked by schema (int mins) with inline saveError |
-| error | Config save / full crawl enqueue | 🧪 backstop | saveError / full-crawl error copy defined; needs test that failed PATCH/POST surfaces inline notice without clearing typed field values |
-| error | Soft degraded (proxy unset) | ✅ covered | Banner is informational soft-gate (D-15-18), not an error state — uses tonal notice, not error-container |
-| overflow / long-text | Last block reason | ✅ covered | Clamp to 2 lines with `truncate`/`line-clamp-2`; full string in `title` tooltip — block reasons can be long HTTP/cookie messages |
-| zero-one-many | Degraded run count | ✅ covered | Single integer; no pluralization UI beyond the number |
-| empty | Full crawl button (form) | dismissed | Not a data-entry empty state — always-visible trigger |
-| conditional visibility | Degraded banner | ✅ covered | Show on Dashboard + Settings when soft-gate condition true (proxy not configured **and** at least one degraded run exists, **or** latest completed run has `degraded=true` — planner may pick exact predicate; UI shows/hides as a single boolean prop). Hide entirely when proxy configured and no degraded flag |
+| empty | E1 Crawl fields | ✅ covered | Prefill defaults K=5, hours=24, max_pages=3 when DB JSON keys absent |
+| loading | E1 Crawl fields | ✅ covered | Existing SettingsClient: disable Save while `saving`; no new skeleton |
+| error | E1 Crawl fields / E2 Full crawl | 🧪 backstop | saveError + full-crawl error copy defined; verify failed PATCH/POST shows inline notice without clearing typed values |
+| partial | E1 Crawl fields | ✅ covered | Fields independent; invalid numbers blocked by schema mins with inline saveError |
+| long-text | E1 Crawl fields | dismissed | Numeric inputs only — no free-text overflow path |
+| long-text | E2 Full crawl button | dismissed | Fixed short CTA labels (`Run full crawl` / `Starting…`) |
+| empty | E3 Last block reason | ✅ covered | “No recent block” empty copy when null/empty |
+| empty | E3 Degraded run count | ✅ covered | Always shows integer including `0` |
+| loading | E3 Proxy health | ✅ covered | Rows absent until server props resolve; no error flash |
+| error | E3 Proxy health | ✅ covered | Soft degraded is informational (D-15-18), not error-container; URL save uses existing saveError |
+| partial | E3 Proxy health | ✅ covered | Configured chip + last block + degraded count visible together; missing reason uses empty copy |
+| overflow | E3 Last block reason | ✅ covered | `line-clamp-2` + full string in `title` tooltip |
+| long-text | E3 Last block reason | ✅ covered | Same clamp/tooltip as overflow |
+| overflow | E4 Degraded banner | ✅ covered | Body wraps at body-md; fixed short heading |
+| long-text | E4 Degraded banner | ✅ covered | Body wraps; zh/en strings are short operator notices |
+| empty | E5 Run metrics | ✅ covered | Numeric tiles show `0`; Degraded chip hidden when `degraded !== true` |
+| loading | E5 Run metrics | ✅ covered | Existing RunDetailClient load pattern — no new skeleton for Phase 15 tiles |
+| error | E5 Run metrics | 🧪 backstop | Reuse existing run-detail error surface; verify missing new columns render as `—`/`0` not crash |
+| populated | E5 Run metrics | ✅ covered | Metric tiles + Incremental/Full chip + optional Degraded chip per Copywriting |
+| partial | E5 Run metrics | ✅ covered | Mode chip always; Degraded only when true; metrics always present |
+| overflow | E5 Run metrics | ✅ covered | Fixed tile grid; wall time formatted `Xm Ys` / `Ns` |
+| zero-one-many | E5 Run metrics | ✅ covered | Fixed metric set (not variable-length list); chips show/hide as booleans |
+| conditional visibility | E4 Degraded banner | ✅ covered | Show on Dashboard + Settings when soft-gate prop true (proxy unset and degraded activity, or latest run `degraded=true` — planner picks exact predicate). Hide when proxy configured and no degraded flag. Not dismissible. |
 
 ---
 
@@ -240,11 +249,11 @@ Applicable state considerations resolved: 8 covered, 2 backstop, 1 dismissed, 0 
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved (gsd-ui-checker, 2026-08-11)
