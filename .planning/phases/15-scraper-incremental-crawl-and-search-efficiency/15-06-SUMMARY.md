@@ -118,7 +118,12 @@ Each task was committed atomically:
 2. **Task 2: Settings crawl card, proxy health, degraded banners, run metrics UI** — `65fed4e` (feat)
 3. **Task 3: Human verify admin crawl + proxy + run metrics UI** — approved (no code commit)
 
-**Plan metadata:** pending final docs commit
+**Plan metadata:** `5a81205` (docs: complete plan)
+
+## Self-Check: PASSED
+
+- FOUND: `.planning/phases/15-scraper-incremental-crawl-and-search-efficiency/15-06-SUMMARY.md`
+- FOUND: commits `e0c48db`, `f205d39`, `65fed4e`, `5a81205`
 
 ## Files Created/Modified
 
