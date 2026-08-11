@@ -16,7 +16,7 @@ export const SUBITO_REGALO_CATALOG = [
   { slug: 'fotografia', labelIt: 'Fotografia' },
   { slug: 'videogiochi', labelIt: 'Console e Videogiochi' },
   { slug: 'animali', labelIt: 'Animali' },
-  { slug: 'usato', labelIt: 'Tutte le categorie' },
+  { slug: 'usato', labelIt: 'Altro' },
 ] as const;
 
 export type SubitoRegaloSlug = (typeof SUBITO_REGALO_CATALOG)[number]['slug'];

@@ -17,7 +17,7 @@ export const subitoCategoriesIt = {
   fotografia: 'Fotografia',
   videogiochi: 'Console e Videogiochi',
   animali: 'Animali',
-  usato: 'Tutte le categorie',
+  usato: 'Altro',
 } satisfies Record<SubitoRegaloSlug, string>;
 
 export const subitoCategoriesEn = {
@@ -37,7 +37,7 @@ export const subitoCategoriesEn = {
   fotografia: 'Photography',
   videogiochi: 'Games & consoles',
   animali: 'Pets',
-  usato: 'All categories',
+  usato: 'Other',
 } satisfies Record<SubitoRegaloSlug, string>;
 
 export const subitoCategoriesZh = {
@@ -57,5 +57,5 @@ export const subitoCategoriesZh = {
   fotografia: '摄影',
   videogiochi: '游戏主机',
   animali: '宠物',
-  usato: '全部分类',
+  usato: '其他',
 } satisfies Record<SubitoRegaloSlug, string>;
