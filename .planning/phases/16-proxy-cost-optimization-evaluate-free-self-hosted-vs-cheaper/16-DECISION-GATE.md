@@ -37,11 +37,11 @@ Same canonical formula as `aggregate-block-rate.mjs` and future `getSubitoBlocke
 
 | Field | Value |
 |-------|-------|
-| Last computed | _pending_ |
+| Last computed | 2026-08-12T15:01:05.483Z |
 | Window | 7 days (from spike start 2026-08-12) |
-| blocked_ratio_7d | _pending_ |
-| Gate | _pending_ |
-| Recommendation | _pending_ |
+| blocked_ratio_7d | 0.0% |
+| Gate | PASS |
+| Recommendation | STAY_DIRECT |
 
 ## Operator actions after verdict
 

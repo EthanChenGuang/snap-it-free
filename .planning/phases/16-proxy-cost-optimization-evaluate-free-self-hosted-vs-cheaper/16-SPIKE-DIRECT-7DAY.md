@@ -48,22 +48,35 @@ target_url_count per run = COALESCE(array_length(target_urls_snapshot, 1), 0)
 
 | Date | Runs | Mean blocked_ratio | Degraded runs | Notes |
 |------|------|--------------------|---------------|-------|
-| _pending_ | — | — | — | Day 0 baseline — run `run-direct-production-spike.mjs` |
+| 2026-08-12 | 1000 | 0.0% | 0 | Day 0 baseline (auto) |
 
 ### Aggregate summary (7-day window)
 
 | Metric | Value |
 |--------|-------|
 | Window days | 7 |
-| Total runs | _pending_ |
-| blocked_ratio_7d | _pending_ |
-| Gate recommendation | _pending_ |
-| Sample sufficient (≥7 days)? | _pending_ |
+| Total runs | 1000 |
+| blocked_ratio_7d | 0.0% |
+| Gate recommendation | STAY_DIRECT |
+| Sample sufficient (≥7 days)? | partial — extend to 7 days |
 
 ## Daily log
 
 _Appended automatically by `run-direct-production-spike.mjs`. Do not edit dated sections by hand._
 
 <!-- daily-log-start -->
+
+
+
+### 2026-08-12 — direct spike snapshot
+
+- **Generated:** 2026-08-12T15:01:05.483Z
+- **Window:** last 7 days (since 2026-08-05T15:01:05.150Z)
+- **Runs:** 1000 (4 with target URLs)
+- **blocked_ratio_7d:** 0.0% (0/136 URLs)
+- **Mean per-run ratio:** 0.0%
+- **Median per-run ratio:** 0.0%
+- **Degraded runs:** 0
+- **Gate (50%):** STAY_DIRECT
 
 <!-- daily-log-end -->
