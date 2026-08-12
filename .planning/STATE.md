@@ -4,10 +4,10 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 16
 current_phase_name: proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper
-current_plan: 5
-status: executing
-stopped_at: Completed 16-04-PLAN.md
-last_updated: "2026-08-12T15:11:33.982Z"
+current_plan: 3
+status: paused
+stopped_at: "16-03 checkpoint — operator running 7-day direct spike (2026-08-12 → 2026-08-19)"
+last_updated: "2026-08-12T15:15:00.000Z"
 progress:
   total_phases: 10
   completed_phases: 8
@@ -31,10 +31,10 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 ## Current Position
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
-Phase: 16 (proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper) — EXECUTING
-**Current Plan:** 5
+Phase: 16 (proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper) — PAUSED
+**Current Plan:** 3 (awaiting 7-day direct spike gate)
 **Total Plans in Phase:** 5
-Status: Ready to execute
+Status: Operator spike in progress — return with STAY_DIRECT or NEED_RESIDENTIAL after 2026-08-19
 
 Progress: [██████████] 95% v2.0 (0/7 phases)
 

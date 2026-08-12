@@ -9,6 +9,15 @@
 
 Measure Subito block rate on production Fly.io datacenter IPs without residential proxy for 7 days. Outcome feeds `16-DECISION-GATE.md` (STAY_DIRECT vs NEED_RESIDENTIAL).
 
+## Operator commitment (2026-08-12)
+
+Operator confirmed **7-day direct-crawl spike without proxy** on production Fly.io:
+
+- **If PASS** (`blocked_ratio_7d < 50%` after ≥7 days): **STAY_DIRECT** — keep proxy unset
+- **If FAIL** (`blocked_ratio_7d ≥ 50%`): **NEED_RESIDENTIAL** — test providers in cost-ladder order (Webshare free → Webshare paid → IPRoyal → Decodo) via `run-provider-compare-spike.mjs`
+
+Plan 16-03 remains open until operator returns final gate verdict. Plan 16-04 closed with `skipped-direct-pass` (provider compare deferred until FAIL).
+
 ## Operator checklist
 
 Before starting the spike window:
