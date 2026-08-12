@@ -25,6 +25,11 @@ export const sourcesMessages = {
   tableActions: '操作',
   edit: '编辑',
   runNow: '立即运行',
+  runModeMenuLabel: '选择运行模式',
+  runModeIncremental: '增量抓取',
+  runModeIncrementalHelp: '仅抓取最新 listing',
+  runModeFull: '全量抓取',
+  runModeFullHelp: '完整刷新，关闭 early-stop',
   statusRunning: '运行中',
   statusComingSoon: '即将支持',
   statusPaused: '已暂停',
@@ -55,6 +60,38 @@ export const sourcesMessages = {
   save: '保存更改',
   cancel: '取消',
   saveFooterNote: '更改将在下次 worker 周期生效。',
+  runQueued: '任务已提交，等待 worker 执行（约 1 分钟内）。',
+  runQueuedPaused: '全局暂停中：仅执行本次手动任务，计划抓取仍暂停。',
+  runSourceDisabled: '数据源已暂停，仍可手动运行一次。',
+  runSubmitting: '提交中…',
+  runWaitingWorker: '等待 worker 接收任务…',
+  runInProgress: '抓取进行中…',
+  runComplete: '运行完成',
+  runFailed: '无法提交运行任务',
+  refreshList: '刷新',
+  globalPauseBanner: '全局暂停中：计划抓取已停，「立即运行」仍可手动触发。',
+  globalPauseHint: '集成数据源 · 全局暂停中（可手动运行）',
+  lastRunLabel: '上次运行',
+  recentRunLabel: '最近一次运行',
+  lastFullSuccessLabel: '上次全量成功',
+  lastFullSuccessNone: '暂无成功记录',
+  noDataPlaceholder: '-',
+  runStatusSuccess: '成功',
+  runStatusFailed: '失败',
+  runStatusRunning: '运行中',
+  listingsCountBadge: (count: number) => `${count} listings`,
+  listingsCountEmpty: '0 listings',
+  antiBlockPrefix: '防封',
+  intervalPrefix: '频率',
+  validateUrls: '测试 URL',
+  validateUrlsRunning: (count: number) => `正在验证 ${count} 个 URL…`,
+  validateUrlsEmpty: '请先添加至少一个 URL。',
+  validateUrlsAllPass: (count: number) => `${count} 个 URL 格式与可达性验证通过。`,
+  validateUrlsPartialFail: (failed: number, total: number) =>
+    `${failed}/${total} 个 URL 未通过验证。`,
+  validateUrlsFormatError: '格式错误',
+  validateUrlsReachError: '不可达',
+  validateUrlsRequestError: '无法完成 URL 验证，请稍后重试。',
 } as const;
 
 export const antiBlockPresetLabels: Record<string, string> = {
@@ -75,42 +112,115 @@ export const sourceDisplayNames: Record<string, string> = {
 
 export const runsMessages = {
   pageTitle: '运行记录',
+  pageSubtitle: '每次后台抓取任务一条记录（非单条 URL）',
   filterAllSources: '全部数据源',
+  filterAllStatuses: '全部状态',
+  filterAllModes: '全部模式',
+  filterAllTriggers: '全部触发方式',
+  filterStatusSuccess: '成功',
+  filterStatusFailed: '失败',
+  filterStatusPartial: '未正常完成',
+  filterStatusRunning: '运行中',
+  filterModeIncremental: '增量',
+  filterModeFull: '全量',
+  filterTriggerCron: '定时',
+  filterTriggerManual: '手动',
   emptyHeading: '暂无运行记录',
-  emptyBody: '系统中尚无后台抓取记录。请在概览页对 Subito 点击「立即运行」以填充此视图。',
+  emptyBody: '近 7 天内尚无后台抓取记录。请在概览页对 Subito 点击「立即运行」以填充此视图。',
   emptyCta: '返回概览',
   tableStarted: '开始时间',
   tableSource: '数据源',
   tableStatus: '状态',
+  tableMode: '模式',
+  tableTrigger: '触发',
+  tableDuration: '耗时',
   tableFound: '发现',
   tableInserted: '入库',
   tableRejected: '拒绝',
+  tableReason: '原因',
   tableSelectorRate: 'Selector rate',
   tableActions: '操作',
   viewDetail: '查看详情',
   statusSuccess: '成功',
   statusFailed: '失败',
-  statusPartial: '部分成功',
+  statusSkipped: '已跳过',
+  statusIncomplete: '未完成',
   statusRunning: '运行中',
-  runCount: (n: number) => `${n} 条记录`,
+  triggerCron: '定时',
+  triggerManual: '手动',
+  triggerUnknown: '—',
+  modeIncremental: '增量',
+  modeFull: '全量',
+  modeUnknown: '—',
+  runCount: (n: number, days = 7) => `近 ${days} 天 · ${n} 条`,
+} as const;
+
+export const runsMasterDetailMessages = {
+  segmentLabel: '状态筛选',
+  segmentAll: '全部',
+  segmentFailed: '仅失败',
+  segmentSkipped: '已跳过',
+  timeFilterLabel: '时间范围',
+  timeDays7: '近 7 天',
+  timeDays14: '近 14 天',
+  timeDays30: '近 30 天',
+  timeFilterHint: '切换时间范围将刷新列表数据',
+  metricFound: '发现数',
+  metricInserted: '入库数',
+  metricRejected: '拒绝数',
+  metricDuration: '总耗时',
+  logTitle: '运行日志',
+  copyLog: '复制',
+  copied: '已复制',
+  selectRunTitle: '选择一条运行记录',
+  selectRunBody: '在左侧列表中点击记录，即可在此查看指标与日志详情。',
+  detailLoadError: '无法加载运行详情',
 } as const;
 
 export const runDetailMessages = {
   pageTitle: '运行详情',
   breadcrumbRuns: '运行记录',
   runLabel: (id: string) => `运行 #${id.slice(0, 8)}`,
+  timeRange: (started: string, finished: string | null, duration: string) =>
+    finished ? `${started} → ${finished} (${duration})` : `${started}（运行中）`,
+  triggerCron: '定时任务',
+  triggerManual: '手动触发',
+  triggerUnknown: '未知触发',
+  funnelTitle: '结果漏斗',
+  funnelFound: '发现',
+  funnelCrawlSkipped: '抓取跳过',
+  funnelInserted: '入库',
+  funnelUpdated: '更新',
+  funnelPersistSkipped: '持久化跳过',
+  funnelRejected: '拒绝',
+  qualityTitle: '质量指标',
+  metricSelectorRate: 'Selector rate',
+  metricJsonCompleteness: 'JSON 完整度',
+  metricHttpRequests: 'HTTP 请求数',
+  metricBlockedUrls: 'Blocked URL',
+  urlBreakdownTitle: '分类 URL',
+  urlBreakdownEmpty: '本次运行未记录 URL 明细（历史数据）。',
+  urlColumnLabel: '分类',
+  urlColumnFound: '发现',
+  urlColumnCrawlSkipped: '抓取跳过',
+  urlColumnStatus: '状态',
+  urlStatusOk: '正常',
+  urlStatusNotRun: '未抓取',
+  urlStatusBlocked: 'Blocked',
+  urlEarlyStop: 'Early-stop',
   metricFound: '发现数',
   metricInserted: '入库数',
   metricRejected: '拒绝数',
-  metricSelectorRate: 'Selector rate',
   metricCrawlSkipped: '抓取层跳过',
-  metricHttpRequests: 'HTTP 请求数',
   metricWallTime: '墙钟时间',
   crawlModeIncremental: '增量',
   crawlModeFull: '全量',
+  crawlModeUnknown: '—',
   degradedChip: '降级',
+  jobLink: '关联任务',
   logSection: '日志摘要',
   logSuccess: '运行成功完成，未发现错误。',
+  logDegraded: '运行完成但处于降级模式，请检查代理或 block 状态。',
   rejectsLink: '查看本次拒绝记录',
   sourceConfig: '数据源配置',
 } as const;
@@ -137,7 +247,41 @@ export const rejectsMessages = {
   tableActions: '操作',
   viewJson: '查看 JSON',
   hideJson: '收起 JSON',
+  selectRejectTitle: '选择一条拒绝记录',
+  selectRejectBody: '从左侧列表选择记录，查看完整上下文与命中规则。',
+  detailListingId: 'Listing ID',
+  detailSource: '数据源',
+  detailFoundAt: '发现时间',
+  copyListingId: '复制 Listing ID',
+  copiedListingId: '已复制',
+  ruleAnalysisTitle: '命中规则分析',
+  ruleStrategyLabel: '策略',
+  rulePatternLabel: '匹配模式',
+  ruleRawReasonLabel: '原始原因',
+  snapshotTitle: '文本快照',
+  snapshotTitleLabel: '标题',
+  snapshotDescriptionLabel: '描述',
+  snapshotRawJson: '原始 JSON',
+  linkedRun: '关联运行',
+  rescrapeOne: '重新抓取此条',
+  rescraping: '抓取中…',
+  rescrapeSuccess: '已重新入库，关键词过滤已跳过',
+  rescrapeSuccessOffline: '已从快照恢复入库（原 listing 可能已下架，暂无图片）',
+  rescrapeFailed: '重新抓取失败',
+  viewListing: '查看 listing',
 } as const;
+
+export const rejectsMasterDetailMessages = {
+  countChip: (n: number) => `共 ${n} 条拒绝记录`,
+} as const;
+
+function formatTranslationDurationMs(ms: number): string {
+  return ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`;
+}
+
+function translationProviderLabel(provider: 'gemini' | 'openrouter'): string {
+  return provider === 'gemini' ? 'Gemini' : 'OpenRouter';
+}
 
 export const translationMessages = {
   pageTitle: '翻译队列',
@@ -149,6 +293,12 @@ export const translationMessages = {
   retryAll: '重新翻译',
   retrying: '翻译中…',
   retryAllPending: '重新翻译全部待处理',
+  batchSelection: (selected: number, total: number) =>
+    `已选 ${selected} 项 / 共 ${total} 条待翻译`,
+  batchRetry: '批量重试',
+  batchRetrying: (n: number) => `翻译中… (${n} 条，约需 8 秒)`,
+  clearSelection: '清空选中',
+  attemptsLabel: (n: number) => `重试 ${n} 次`,
   tableListing: 'Listing',
   tableStatus: '状态',
   tableAttempts: '重试次数',
@@ -156,9 +306,43 @@ export const translationMessages = {
   tableActions: '操作',
   statusPending: '待翻译',
   statusFailed: '失败',
+  errorBadgeLabel: (error: string) => {
+    const lower = error.toLowerCase();
+    if (
+      lower.includes('provider') ||
+      lower.includes('api key') ||
+      lower.includes('translation providers failed')
+    ) {
+      return 'Provider 异常';
+    }
+    return '翻译失败';
+  },
   emptyHeading: '翻译队列为空',
   emptyBody: '所有 listing 已完成翻译。',
+  translateSuccessDetail: (provider: 'gemini' | 'openrouter', durationMs: number) =>
+    `翻译成功 · ${translationProviderLabel(provider)} · ${formatTranslationDurationMs(durationMs)}`,
+  translateSuccessBatch: (
+    items: Array<{ provider: 'gemini' | 'openrouter'; durationMs: number }>,
+  ) => {
+    const count = items.length;
+    if (count === 0) {
+      return '翻译成功';
+    }
+    if (count === 1) {
+      const item = items[0];
+      return `翻译成功 · ${translationProviderLabel(item.provider)} · ${formatTranslationDurationMs(item.durationMs)}`;
+    }
+    const avgMs = items.reduce((sum, item) => sum + item.durationMs, 0) / count;
+    const providers = new Set(items.map((item) => item.provider));
+    const providerPart =
+      providers.size === 1 ? ` · ${translationProviderLabel(items[0].provider)}` : '';
+    return `已成功翻译 ${count} 条${providerPart} · 平均 ${formatTranslationDurationMs(avgMs)}`;
+  },
   translateSuccess: (n: number) => (n === 1 ? '翻译成功' : `已成功翻译 ${n} 条`),
+  translateFailureBatch: (n: number) =>
+    n === 1 ? '1 条翻译失败，请查看错误信息' : `${n} 条翻译失败，请查看错误信息`,
+  translatePartialBatch: (successCount: number, failureCount: number) =>
+    `成功 ${successCount} 条，失败 ${failureCount} 条`,
 } as const;
 
 export const settingsMessages = {
@@ -166,7 +350,7 @@ export const settingsMessages = {
   sectionTitle: '系统配置',
   sectionSubtitle: '管理核心运行参数与告警路由。',
   globalPauseTitle: '全局暂停',
-  globalPauseHelp: '立即停止所有计划抓取；手动运行也将禁用。',
+  globalPauseHelp: '停止所有计划抓取；「立即运行」仍可手动触发。',
   pauseInactive: '未启用',
   pauseActive: '已启用',
   proxyTitle: '代理配置',
@@ -211,6 +395,8 @@ export const settingsMessages = {
   runFullCrawlError: '无法启动全量抓取，请重试',
   lastBlockReasonLabel: '最近封禁原因',
   lastBlockReasonEmpty: '暂无封禁记录',
+  proxyQuotaFallbackReason:
+    '代理流量已用尽 — 已降级为直连抓取（PROXY-C04）',
   degradedRunsLabel: '降级运行次数',
   degradedBannerTitle: '降级运行中',
   degradedBannerBody:

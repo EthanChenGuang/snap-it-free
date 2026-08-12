@@ -30,7 +30,7 @@ import {
   isProductionSoftProxyContext,
   type CrawlMode,
 } from './worker-proxy-gate.js';
-import { runSubitoCrawlWithProxyFallback } from './worker-proxy-fallback.js';
+import { runSubitoCrawlWithProxyFallback, PROXY_QUOTA_FALLBACK_REASON } from './worker-proxy-fallback.js';
 
 const COMING_SOON_MESSAGE = '该数据源尚未接入';
 
@@ -375,12 +375,13 @@ export async function runSourceScrape(
         json_field_completeness: jsonFieldCompleteness,
         blocked_url_count: blockedUrlCount,
         wall_time_seconds: Number(wallTimeSeconds.toFixed(2)),
+        proxy_fallback: fallbackDegraded,
       }),
     );
 
     const totalUrls = config.urls.length;
     const blockedRatio = totalUrls > 0 ? blockedUrlCount / totalUrls : 0;
-    if (blockedRatio > 0.5) {
+    if (blockedRatio > 0.5 && !fallbackDegraded) {
       const blockReason = `${blockedUrlCount}/${totalUrls} category URLs blocked`;
       await recordDegradedRun(supabase, blockReason).catch((err) => {
         console.error('Failed to record degraded run:', err);
@@ -496,6 +497,12 @@ export async function runSourceScrape(
     if (runDegraded) {
       await recordDegradedRun(supabase, 'Production run without proxy').catch((err) => {
         console.error('Failed to record proxy degraded run:', err);
+      });
+    }
+
+    if (fallbackDegraded) {
+      await recordDegradedRun(supabase, PROXY_QUOTA_FALLBACK_REASON).catch((err) => {
+        console.error('Failed to record proxy quota fallback degraded run:', err);
       });
     }
 

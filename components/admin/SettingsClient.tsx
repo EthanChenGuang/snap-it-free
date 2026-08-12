@@ -18,6 +18,17 @@ type SettingsClientProps = {
   initialOperators: string[];
 };
 
+function formatLastBlockReason(reason: string | null | undefined): string {
+  const trimmed = reason?.trim();
+  if (!trimmed) {
+    return settingsMessages.lastBlockReasonEmpty;
+  }
+  if (trimmed.includes('proxy quota direct fallback')) {
+    return settingsMessages.proxyQuotaFallbackReason;
+  }
+  return trimmed;
+}
+
 export function SettingsClient({
   initialConfig,
   currentUserEmail,
@@ -387,9 +398,7 @@ export function SettingsClient({
                 className="mt-1 line-clamp-2 text-[15px] text-on-surface"
                 title={lastBlockReason?.trim() || undefined}
               >
-                {lastBlockReason?.trim()
-                  ? lastBlockReason
-                  : settingsMessages.lastBlockReasonEmpty}
+                {formatLastBlockReason(lastBlockReason)}
               </p>
             </div>
             <div>
