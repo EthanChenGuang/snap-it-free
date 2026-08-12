@@ -1,38 +1,216 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { translationMessages } from '@/components/admin/admin-messages';
-import { sourceDisplayNames } from '@/components/admin/admin-messages';
-import type { TranslationQueueItem } from '@/lib/admin/types';
+import {
+  sourceDisplayNames,
+  translationMessages,
+} from '@/components/admin/admin-messages';
+import { TranslationCostKpiGrid } from '@/components/admin/TranslationCostKpiGrid';
+import { TranslationListingCostPill } from '@/components/admin/TranslationListingCostPill';
+import type { TranslationCostSummary, TranslationQueueItem } from '@/lib/admin/types';
 import { cn } from '@/lib/utils';
 
 type TranslationQueueClientProps = {
   initialItems: TranslationQueueItem[];
+  totalPending: number;
+  initialCostSummary: TranslationCostSummary;
 };
 
-export function TranslationQueueClient({ initialItems }: TranslationQueueClientProps) {
+function TranslationQueueCard({
+  item,
+  sourceLabel,
+  selected,
+  isLoading,
+  onToggleSelect,
+  onRetry,
+}: {
+  item: TranslationQueueItem;
+  sourceLabel: string;
+  selected: boolean;
+  isLoading: boolean;
+  onToggleSelect: () => void;
+  onRetry: () => void;
+}) {
+  const displayId = item.externalId ?? item.listingId.slice(0, 8);
+  const isFailed = item.status === 'failed';
+
+  return (
+    <article
+      className={cn(
+        'translation-queue-card',
+        selected && 'translation-queue-card-selected',
+      )}
+    >
+      <div className="translation-queue-card-left">
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onToggleSelect}
+          className="translation-queue-checkbox"
+          aria-label={`选择 ${item.title}`}
+        />
+        <div className="translation-queue-card-meta">
+          <p className="translation-queue-card-title" title={item.title}>
+            {item.title}
+          </p>
+          <div className="translation-queue-card-subinfo">
+            <span className="translation-queue-id tabular-nums">{displayId}</span>
+            <TranslationListingCostPill cost={item.cost} listingId={item.listingId} />
+            <span className="translation-queue-source-badge">{sourceLabel}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="translation-queue-card-middle">
+        <div className="translation-queue-status-row">
+          <span
+            className={cn(
+              'translation-queue-status-badge',
+              isFailed && 'translation-queue-status-badge-failed',
+            )}
+          >
+            {item.statusLabel}
+          </span>
+          <span className="translation-queue-attempts tabular-nums">
+            {translationMessages.attemptsLabel(item.attempts)}
+          </span>
+          {item.lastError ? (
+            <span
+              className="translation-queue-error-badge"
+              tabIndex={0}
+              aria-describedby={`error-tip-${item.listingId}`}
+            >
+              <span className="material-symbols-outlined translation-queue-error-badge-icon" aria-hidden>
+                warning
+              </span>
+              <span>{translationMessages.errorBadgeLabel(item.lastError)}</span>
+              <span
+                id={`error-tip-${item.listingId}`}
+                role="tooltip"
+                className="translation-queue-error-tooltip"
+              >
+                {item.lastError}
+              </span>
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="translation-queue-card-actions">
+        <button
+          type="button"
+          onClick={onRetry}
+          disabled={isLoading}
+          className="translation-queue-retry-btn"
+        >
+          <span
+            className={cn(
+              'material-symbols-outlined text-[16px]',
+              isLoading && 'animate-spin',
+            )}
+            aria-hidden
+          >
+            replay
+          </span>
+          {isLoading ? translationMessages.retrying : translationMessages.retry}
+        </button>
+      </div>
+    </article>
+  );
+}
+
+type ProcessedTranslation = {
+  listingId: string;
+  provider: 'gemini' | 'openrouter';
+  durationMs: number;
+};
+
+type RetryResponse = {
+  processed: ProcessedTranslation[];
+  failures?: Array<{ listingId: string; error: string }>;
+};
+
+export function TranslationQueueClient({
+  initialItems,
+  totalPending,
+  initialCostSummary,
+}: TranslationQueueClientProps) {
   const router = useRouter();
   const [items, setItems] = useState(initialItems);
+  const [pendingCount, setPendingCount] = useState(totalPending);
+  const [costSummary, setCostSummary] = useState(initialCostSummary);
+  const [costLoading, setCostLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [isBulkRetrying, setIsBulkRetrying] = useState(false);
+  const [isRetryAllPending, setIsRetryAllPending] = useState(false);
+  const [isBatchRetrying, setIsBatchRetrying] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
   const notificationTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const pendingCount = items.length;
+  const isTruncated = items.length < pendingCount;
+  const hasSelection = selectedIds.length > 0;
+  const allSelected = items.length > 0 && selectedIds.length === items.length;
+
+  const refreshCostSummary = useCallback(async () => {
+    setCostLoading(true);
+    try {
+      const response = await fetch('/api/admin/translation/cost');
+      const payload = (await response.json()) as {
+        summary?: TranslationCostSummary;
+      };
+      if (response.ok && payload.summary) {
+        setCostSummary(payload.summary);
+      }
+    } catch {
+      // keep existing summary on refresh failure
+    } finally {
+      setCostLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshCostSummary();
+  }, [refreshCostSummary]);
 
   const showNotification = (message: string) => {
     if (notificationTimeout.current) {
       clearTimeout(notificationTimeout.current);
     }
     setNotification(message);
-    notificationTimeout.current = setTimeout(() => setNotification(null), 3000);
+    notificationTimeout.current = setTimeout(() => setNotification(null), 5000);
+  };
+
+  const showProcessedSuccess = (processed: ProcessedTranslation[]) => {
+    if (processed.length === 0) {
+      return;
+    }
+    showNotification(translationMessages.translateSuccessBatch(processed));
+  };
+
+  const showBatchResult = (
+    processed: ProcessedTranslation[],
+    failures?: Array<{ listingId: string; error: string }>,
+  ) => {
+    const failureCount = failures?.length ?? 0;
+    const successCount = processed.length;
+
+    if (successCount > 0 && failureCount === 0) {
+      showProcessedSuccess(processed);
+      return;
+    }
+    if (successCount === 0 && failureCount > 0) {
+      showNotification(translationMessages.translateFailureBatch(failureCount));
+      return;
+    }
+    if (successCount > 0 && failureCount > 0) {
+      showNotification(translationMessages.translatePartialBatch(successCount, failureCount));
+    }
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.length === items.length) {
+    if (allSelected) {
       setSelectedIds([]);
     } else {
       setSelectedIds(items.map((item) => item.listingId));
@@ -45,12 +223,19 @@ export function TranslationQueueClient({ initialItems }: TranslationQueueClientP
     );
   };
 
-  const refreshFromResponse = (processedIds: string[]) => {
-    if (processedIds.length === 0) {
+  const clearSelection = () => {
+    setSelectedIds([]);
+  };
+
+  const refreshFromResponse = (processed: ProcessedTranslation[]) => {
+    if (processed.length === 0) {
       return;
     }
+    const processedIds = processed.map((item) => item.listingId);
     setItems((prev) => prev.filter((item) => !processedIds.includes(item.listingId)));
     setSelectedIds((prev) => prev.filter((id) => !processedIds.includes(id)));
+    setPendingCount((prev) => Math.max(0, prev - processedIds.length));
+    void refreshCostSummary();
   };
 
   const postRetry = async (body: { listing_ids?: string[]; all_pending?: boolean }) => {
@@ -65,7 +250,28 @@ export function TranslationQueueClient({ initialItems }: TranslationQueueClientP
       throw new Error(payload?.error ?? 'Retry failed');
     }
 
-    return (await response.json()) as { processed: string[] };
+    return (await response.json()) as RetryResponse;
+  };
+
+  const applyFailures = (failures?: Array<{ listingId: string; error: string }>) => {
+    if (!failures?.length) {
+      return;
+    }
+    setItems((prev) =>
+      prev.map((item) => {
+        const failure = failures.find((entry) => entry.listingId === item.listingId);
+        if (!failure) {
+          return item;
+        }
+        return {
+          ...item,
+          status: 'failed' as const,
+          statusLabel: translationMessages.statusFailed,
+          attempts: item.attempts + 1,
+          lastError: failure.error,
+        };
+      }),
+    );
   };
 
   const handleRetry = async (listingId: string) => {
@@ -74,10 +280,11 @@ export function TranslationQueueClient({ initialItems }: TranslationQueueClientP
     try {
       const result = await postRetry({ listing_ids: [listingId] });
       refreshFromResponse(result.processed);
+      applyFailures(result.failures);
+      showBatchResult(result.processed, result.failures);
       if (result.processed.length > 0) {
-        showNotification(translationMessages.translateSuccess(result.processed.length));
+        void router.refresh();
       }
-      router.refresh();
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : translationMessages.retrying);
     } finally {
@@ -85,24 +292,39 @@ export function TranslationQueueClient({ initialItems }: TranslationQueueClientP
     }
   };
 
-  const handleBulkRetry = async () => {
+  const handleRetryAllPending = async () => {
     setErrorMessage(null);
-    setIsBulkRetrying(true);
+    setIsRetryAllPending(true);
     try {
-      const body =
-        selectedIds.length > 0
-          ? { listing_ids: selectedIds }
-          : { all_pending: true as const };
-      const result = await postRetry(body);
+      const result = await postRetry({ all_pending: true });
       refreshFromResponse(result.processed);
-      if (result.processed.length > 0) {
-        showNotification(translationMessages.translateSuccess(result.processed.length));
-      }
-      router.refresh();
+      applyFailures(result.failures);
+      showBatchResult(result.processed, result.failures);
+      void router.refresh();
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : translationMessages.retryAll);
     } finally {
-      setIsBulkRetrying(false);
+      setIsRetryAllPending(false);
+    }
+  };
+
+  const handleBatchRetry = async () => {
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    setErrorMessage(null);
+    setIsBatchRetrying(true);
+    try {
+      const result = await postRetry({ listing_ids: selectedIds });
+      refreshFromResponse(result.processed);
+      applyFailures(result.failures);
+      showBatchResult(result.processed, result.failures);
+      void router.refresh();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : translationMessages.retryAll);
+    } finally {
+      setIsBatchRetrying(false);
     }
   };
 
@@ -113,181 +335,114 @@ export function TranslationQueueClient({ initialItems }: TranslationQueueClientP
   const isEmpty = items.length === 0;
 
   return (
-    <div className="space-y-6">
-      <header className="border-b border-outline-variant pb-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-[30px] font-semibold leading-[1.3] tracking-tight">
-              {translationMessages.pageTitle}
-            </h1>
-            <p className="mt-1 text-[15px] text-secondary">{translationMessages.pageSubtitle}</p>
-          </div>
-          <button
-            type="button"
-            onClick={handleBulkRetry}
-            disabled={isEmpty || isBulkRetrying}
-            className="inline-flex items-center gap-1.5 rounded border border-primary bg-primary px-3 py-1.5 text-[14px] font-medium text-on-primary hover:bg-surface-tint disabled:opacity-50"
-          >
-            <span
-              className={cn(
-                'material-symbols-outlined text-[18px]',
-                isBulkRetrying && 'animate-spin',
-              )}
-              aria-hidden
-            >
-              refresh
-            </span>
-            {isBulkRetrying ? translationMessages.retrying : translationMessages.retryAllPending}
-          </button>
+    <div className="translation-queue-page mx-auto max-w-5xl space-y-6 pb-8">
+      <header className="translation-queue-header">
+        <div className="translation-queue-header-copy">
+          <h1 className="translation-queue-title">{translationMessages.pageTitle}</h1>
+          <p className="translation-queue-subtitle">{translationMessages.pageSubtitle}</p>
+          {!isEmpty ? (
+            <p className="translation-queue-pending-hint">
+              {isTruncated
+                ? translationMessages.pendingBannerTruncated(items.length, pendingCount)
+                : translationMessages.pendingBanner(pendingCount)}
+            </p>
+          ) : null}
         </div>
+        <button
+          type="button"
+          onClick={handleRetryAllPending}
+          disabled={isEmpty || isRetryAllPending}
+          className="translation-queue-primary-btn"
+        >
+          <span
+            className={cn(
+              'material-symbols-outlined text-[18px]',
+              isRetryAllPending && 'animate-spin',
+            )}
+            aria-hidden
+          >
+            refresh
+          </span>
+          {isRetryAllPending ? translationMessages.retrying : translationMessages.retryAllPending}
+        </button>
       </header>
 
-      {!isEmpty && (
-        <div className="flex items-center justify-between rounded border border-outline-variant bg-surface-container-low px-4 py-3 text-[14px]">
-          <div className="flex items-center gap-2 text-on-surface">
-            <span className="inline-block h-2 w-2 rounded-full bg-error" aria-hidden />
-            <span>{translationMessages.pendingBanner(pendingCount)}</span>
-          </div>
-          <span className="text-secondary">
-            已选 {selectedIds.length}
-          </span>
-        </div>
-      )}
+      <TranslationCostKpiGrid summary={costSummary} loading={costLoading} />
 
-      {errorMessage && (
-        <p className="rounded border border-error/30 bg-error-container px-3 py-2 text-[14px] text-on-error-container">
+      {errorMessage ? (
+        <p className="translation-queue-alert translation-queue-alert-error" role="alert">
           {errorMessage}
         </p>
-      )}
+      ) : null}
 
       {isEmpty ? (
-        <div className="flex flex-col items-center justify-center rounded border border-outline-variant bg-surface px-6 py-16 text-center">
-          <span className="material-symbols-outlined mb-3 text-[48px] text-outline" aria-hidden>
+        <div className="translation-queue-empty">
+          <span className="material-symbols-outlined translation-queue-empty-icon" aria-hidden>
             check_circle
           </span>
-          <h2 className="text-[24px] font-semibold text-on-surface">
-            {translationMessages.emptyHeading}
-          </h2>
-          <p className="mt-2 max-w-md text-[15px] text-secondary">
-            {translationMessages.emptyBody}
-          </p>
+          <h2 className="translation-queue-empty-title">{translationMessages.emptyHeading}</h2>
+          <p className="translation-queue-empty-body">{translationMessages.emptyBody}</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded border border-outline-variant bg-surface">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left text-[14px]">
-              <thead className="border-b border-outline-variant bg-surface-container-low text-[12px] uppercase tracking-wide text-secondary">
-                <tr>
-                  <th className="w-10 p-4 text-center">
-                    <input
-                      type="checkbox"
-                      checked={items.length > 0 && selectedIds.length === items.length}
-                      onChange={toggleSelectAll}
-                      className="accent-primary"
-                      aria-label="Select all"
-                    />
-                  </th>
-                  <th className="p-4 font-medium">{translationMessages.tableListing}</th>
-                  <th className="p-4 font-medium">{translationMessages.tableStatus}</th>
-                  <th className="p-4 font-medium">{translationMessages.tableAttempts}</th>
-                  <th className="p-4 font-medium">{translationMessages.tableError}</th>
-                  <th className="p-4 text-right font-medium">{translationMessages.tableActions}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-outline-variant">
-                {items.map((item) => {
-                  const isLoading = loadingId === item.listingId;
-                  const isSelected = selectedIds.includes(item.listingId);
-                  return (
-                    <tr
-                      key={item.listingId}
-                      className={cn(
-                        'hover:bg-surface-container-lowest',
-                        isSelected && 'bg-surface-container-low',
-                      )}
-                    >
-                      <td className="p-4 text-center">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleSelect(item.listingId)}
-                          className="accent-primary"
-                          aria-label={`Select ${item.title}`}
-                        />
-                      </td>
-                      <td className="p-4">
-                        <p className="font-medium text-on-surface">{item.title}</p>
-                        <p className="mt-0.5 font-mono text-[12px] text-secondary">
-                          {item.externalId ?? item.listingId.slice(0, 8)}
-                        </p>
-                        <p className="mt-0.5 text-[12px] text-secondary">
-                          {sourceLabel(item.source)}
-                        </p>
-                      </td>
-                      <td className="p-4">
-                        <span
-                          className={cn(
-                            'inline-flex rounded px-2 py-0.5 text-[12px] font-medium',
-                            item.status === 'failed'
-                              ? 'bg-error-container text-on-error-container'
-                              : 'bg-surface-container-high text-on-surface',
-                          )}
-                        >
-                          {item.statusLabel}
-                        </span>
-                      </td>
-                      <td className="p-4 text-center font-mono text-secondary">{item.attempts}</td>
-                      <td className="p-4 max-w-xs">
-                        {item.lastError ? (
-                          <div className="flex items-start gap-1 text-error">
-                            <span className="material-symbols-outlined text-[16px]" aria-hidden>
-                              warning
-                            </span>
-                            <span className="line-clamp-2 text-[13px]">{item.lastError}</span>
-                          </div>
-                        ) : (
-                          <span className="text-secondary">—</span>
-                        )}
-                      </td>
-                      <td className="p-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => handleRetry(item.listingId)}
-                          disabled={isLoading}
-                          className="inline-flex items-center gap-1 rounded border border-outline-variant px-2 py-1 text-[12px] hover:bg-surface-container-low disabled:opacity-50"
-                        >
-                          <span
-                            className={cn(
-                              'material-symbols-outlined text-[16px]',
-                              isLoading && 'animate-spin',
-                            )}
-                            aria-hidden
-                          >
-                            replay
-                          </span>
-                          {isLoading ? translationMessages.retrying : translationMessages.retry}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        <>
+          <div className="translation-queue-batch-bar">
+            <label className="translation-queue-batch-select">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={toggleSelectAll}
+                className="translation-queue-checkbox"
+              />
+              <span className="translation-queue-batch-label tabular-nums">
+                {translationMessages.batchSelection(selectedIds.length, pendingCount)}
+              </span>
+            </label>
+            <div className="translation-queue-batch-actions">
+              <button
+                type="button"
+                onClick={handleBatchRetry}
+                disabled={!hasSelection || isBatchRetrying}
+                className="translation-queue-accent-btn"
+              >
+                {isBatchRetrying
+                  ? translationMessages.batchRetrying(selectedIds.length)
+                  : translationMessages.batchRetry}
+              </button>
+              <button
+                type="button"
+                onClick={clearSelection}
+                disabled={!hasSelection}
+                className="translation-queue-ghost-btn"
+              >
+                {translationMessages.clearSelection}
+              </button>
+            </div>
           </div>
-        </div>
+
+          <div className="translation-queue-list">
+            {items.map((item) => (
+              <TranslationQueueCard
+                key={item.listingId}
+                item={item}
+                sourceLabel={sourceLabel(item.source)}
+                selected={selectedIds.includes(item.listingId)}
+                isLoading={loadingId === item.listingId}
+                onToggleSelect={() => toggleSelect(item.listingId)}
+                onRetry={() => handleRetry(item.listingId)}
+              />
+            ))}
+          </div>
+        </>
       )}
 
-      {notification && (
-        <div
-          role="status"
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-high px-4 py-3 text-[14px] font-medium text-on-surface shadow-lg"
-        >
-          <span className="material-symbols-outlined text-[18px] text-primary" aria-hidden>
+      {notification ? (
+        <div role="status" className="translation-queue-toast">
+          <span className="material-symbols-outlined text-[18px]" aria-hidden>
             check_circle
           </span>
           {notification}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

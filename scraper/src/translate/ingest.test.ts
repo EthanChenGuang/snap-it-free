@@ -8,6 +8,10 @@ vi.mock('./engine.js', () => ({
   translateListingFields: vi.fn(),
 }));
 
+vi.mock('../../../lib/admin/translation-usage-log.js', () => ({
+  recordTranslationSuccess: vi.fn().mockResolvedValue(undefined),
+}));
+
 const mockedTranslateListingFields = vi.mocked(translateListingFields);
 
 const FIXED_TRANSLATION = {
@@ -17,6 +21,20 @@ const FIXED_TRANSLATION = {
   description_zh: '一盏灯',
   category_en: 'Home',
   category_zh: '家居',
+};
+
+const SUCCESS_TRANSLATION = {
+  ok: true as const,
+  translations: FIXED_TRANSLATION,
+  provider: 'gemini' as const,
+  durationMs: 12,
+  usage: {
+    provider: 'gemini' as const,
+    model: 'gemini-flash-latest',
+    inputTokens: 100,
+    outputTokens: 130,
+    costUsd: 0.0001,
+  },
 };
 
 function createMockSupabase(config: {
@@ -116,7 +134,7 @@ describe('translateBatch', () => {
       dailyCap: 100,
       translationsToday: 0,
     });
-    mockedTranslateListingFields.mockResolvedValue({ ok: true, translations: FIXED_TRANSLATION });
+    mockedTranslateListingFields.mockResolvedValue(SUCCESS_TRANSLATION);
 
     await translateBatch(supabase, items);
 
@@ -163,7 +181,7 @@ describe('translateBatch', () => {
     mockedTranslateListingFields.mockImplementation(
       () =>
         new Promise((resolve) => {
-          setTimeout(() => resolve({ ok: true, translations: FIXED_TRANSLATION }), 5);
+          setTimeout(() => resolve(SUCCESS_TRANSLATION), 5);
         }),
     );
 
@@ -209,7 +227,7 @@ describe('translateBatch', () => {
       maxInFlight = Math.max(maxInFlight, inFlight);
       await new Promise((resolve) => setTimeout(resolve, 5));
       inFlight -= 1;
-      return { ok: true, translations: FIXED_TRANSLATION };
+      return SUCCESS_TRANSLATION;
     });
 
     await translateBatch(supabase, items, 3);

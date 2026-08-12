@@ -8,10 +8,21 @@ import type {
   ScrapeRunDetail,
   ScrapeRunListItem,
   ScrapeRunStatus,
+  ScrapeRunTrigger,
   SourceDetail,
+  SourceLastFullSuccess,
   SourceWithLastRun,
+  TranslationCostSummary,
   TranslationQueueItem,
 } from '@/lib/admin/types';
+import { parseUrlBreakdown } from '@/lib/admin/format';
+import { localizeFailureReason } from '@/lib/admin/run-status';
+import { estimateListingCost } from '@/lib/admin/translation-cost';
+import {
+  buildEstimatedCostSummary,
+  collectTranslationCostSummary,
+  getListingUsageTotals,
+} from '@/lib/admin/translation-usage-log';
 
 type ScrapeRunRow = {
   id: string;
@@ -21,7 +32,15 @@ type ScrapeRunRow = {
   finished_at: string | null;
   listings_found: number;
   failure_reason: string | null;
+  crawl_mode: 'incremental' | 'full' | null;
 };
+
+function mapLastFullSuccess(row: ScrapeRunRow): SourceLastFullSuccess {
+  return {
+    finishedAt: row.finished_at!,
+    listingsFound: row.listings_found,
+  };
+}
 
 function computeShowDegradedBanner(params: {
   proxyConfigured: boolean;
@@ -76,18 +95,29 @@ export async function getSourcesWithLastRun(): Promise<SourceWithLastRun[]> {
 
     const { data: runs, error: runsError } = await supabase
       .from('scrape_runs')
-      .select('id, source, status, started_at, finished_at, listings_found, failure_reason')
+      .select(
+        'id, source, status, started_at, finished_at, listings_found, failure_reason, crawl_mode',
+      )
       .order('started_at', { ascending: false })
-      .limit(200);
+      .limit(500);
 
     if (runsError) {
       return [];
     }
 
     const latestBySource = new Map<string, ScrapeRunRow>();
+    const latestFullSuccessBySource = new Map<string, SourceLastFullSuccess>();
     for (const run of (runs ?? []) as ScrapeRunRow[]) {
       if (!latestBySource.has(run.source)) {
         latestBySource.set(run.source, run);
+      }
+      if (
+        run.crawl_mode === 'full' &&
+        run.status === 'success' &&
+        run.finished_at &&
+        !latestFullSuccessBySource.has(run.source)
+      ) {
+        latestFullSuccessBySource.set(run.source, mapLastFullSuccess(run));
       }
     }
 
@@ -101,6 +131,7 @@ export async function getSourcesWithLastRun(): Promise<SourceWithLastRun[]> {
       lastRun: latestBySource.has(source.slug)
         ? mapLastRun(latestBySource.get(source.slug)!)
         : null,
+      lastFullSuccess: latestFullSuccessBySource.get(source.slug as string) ?? null,
     }));
   } catch {
     return [];
@@ -125,16 +156,23 @@ export async function getSourceBySlug(slug: string): Promise<SourceDetail | null
 
     const { data: runs, error: runsError } = await supabase
       .from('scrape_runs')
-      .select('id, source, status, started_at, finished_at, listings_found, failure_reason')
+      .select(
+        'id, source, status, started_at, finished_at, listings_found, failure_reason, crawl_mode',
+      )
       .eq('source', slug)
       .order('started_at', { ascending: false })
-      .limit(1);
+      .limit(200);
 
     if (runsError) {
       return null;
     }
 
-    const lastRunRow = (runs?.[0] ?? null) as ScrapeRunRow | null;
+    const runRows = (runs ?? []) as ScrapeRunRow[];
+    const lastRunRow = runRows[0] ?? null;
+    const lastFullSuccessRow =
+      runRows.find(
+        (row) => row.crawl_mode === 'full' && row.status === 'success' && row.finished_at,
+      ) ?? null;
 
     return {
       slug: source.slug as string,
@@ -145,6 +183,7 @@ export async function getSourceBySlug(slug: string): Promise<SourceDetail | null
       antiBlockPreset: source.anti_block_preset as string,
       targetUrls: (source.target_urls as string[] | null) ?? [],
       lastRun: lastRunRow ? mapLastRun(lastRunRow) : null,
+      lastFullSuccess: lastFullSuccessRow ? mapLastFullSuccess(lastFullSuccessRow) : null,
     };
   } catch {
     return null;
@@ -169,7 +208,7 @@ export async function getRecentAlerts(limit = 5): Promise<AdminAlert[]> {
     return (data ?? []).map((row) => ({
       id: row.id as string,
       source: row.source as string,
-      message: (row.failure_reason as string | null) ?? '运行未完成',
+      message: localizeFailureReason(row.failure_reason as string | null) ?? '运行未完成',
       timestamp: row.started_at as string,
       status: row.status as 'failed' | 'partial',
     }));
@@ -293,6 +332,88 @@ export async function getOperatorAllowlist(): Promise<string[]> {
   }
 }
 
+function monthRange(offsetMonths = 0): { start: string; end: string } {
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - offsetMonths, 1));
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - offsetMonths + 1, 1));
+  return { start: start.toISOString(), end: end.toISOString() };
+}
+
+async function countTranslatedListingsSince(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  startIso: string,
+  endIso: string,
+): Promise<number> {
+  const { count, error } = await supabase
+    .from('listings')
+    .select('*', { count: 'exact', head: true })
+    .not('title_en', 'is', null)
+    .gte('scraped_at', startIso)
+    .lt('scraped_at', endIso);
+
+  if (error) {
+    return 0;
+  }
+  return count ?? 0;
+}
+
+export async function getTranslationCostSummary(): Promise<TranslationCostSummary> {
+  try {
+    const supabase = await createClient();
+    const thisMonth = monthRange(0);
+    const lastMonth = monthRange(1);
+
+    const [
+      { data: configRow, error: configError },
+      translatedThisMonth,
+      translatedLastMonth,
+    ] = await Promise.all([
+      supabase
+        .from('scraper_global_config')
+        .select('translation_provider, translations_today')
+        .eq('id', 1)
+        .maybeSingle(),
+      countTranslatedListingsSince(supabase, thisMonth.start, thisMonth.end),
+      countTranslatedListingsSince(supabase, lastMonth.start, lastMonth.end),
+    ]);
+
+    const primaryProvider =
+      (configRow?.translation_provider as 'gemini' | 'openrouter' | undefined) ?? 'gemini';
+
+    const estimatedFallback = buildEstimatedCostSummary({
+      translatedThisMonth,
+      translatedLastMonth,
+      translationsToday: (configRow?.translations_today as number | undefined) ?? 0,
+      primaryProvider,
+      geminiModel: process.env.GEMINI_MODEL,
+      openRouterModel: process.env.OPENROUTER_FALLBACK_MODEL,
+    });
+
+    if (configError) {
+      return estimatedFallback;
+    }
+
+    const loggedSummary = await collectTranslationCostSummary(supabase, {
+      primaryProvider,
+      geminiModel: process.env.GEMINI_MODEL,
+      openRouterModel: process.env.OPENROUTER_FALLBACK_MODEL,
+    });
+
+    if (!loggedSummary || loggedSummary.translatedThisMonth === 0) {
+      return estimatedFallback;
+    }
+
+    return loggedSummary;
+  } catch {
+    return buildEstimatedCostSummary({
+      translatedThisMonth: 0,
+      translatedLastMonth: 0,
+      translationsToday: 0,
+      primaryProvider: 'gemini',
+    });
+  }
+}
+
 export async function getPendingTranslationCount(): Promise<number> {
   try {
     const supabase = await createClient();
@@ -349,31 +470,78 @@ function resolveListingJoin(
 export async function getTranslationQueue(): Promise<TranslationQueueItem[]> {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('translation_queue')
-      .select(
-        'listing_id, status, attempts, last_error, updated_at, listings(title, source, external_id)',
-      )
-      .in('status', ['pending', 'failed'])
-      .order('updated_at', { ascending: false })
-      .limit(500);
+    const [{ data, error }, { data: configRow }] = await Promise.all([
+      supabase
+        .from('translation_queue')
+        .select(
+          'listing_id, status, attempts, last_error, updated_at, listings(title, source, external_id)',
+        )
+        .in('status', ['pending', 'failed'])
+        .order('updated_at', { ascending: false })
+        .limit(500),
+      supabase
+        .from('scraper_global_config')
+        .select('translation_provider')
+        .eq('id', 1)
+        .maybeSingle(),
+    ]);
 
     if (error) {
       return [];
     }
 
-    return ((data ?? []) as TranslationQueueRow[]).map((row) => {
+    const primaryProvider =
+      (configRow?.translation_provider as 'gemini' | 'openrouter' | undefined) ?? 'gemini';
+
+    const rows = ((data ?? []) as TranslationQueueRow[]).map((row) => {
       const listing = resolveListingJoin(row);
+      const title = listing?.title ?? row.listing_id;
+      const effectiveAttempts = row.status === 'failed' ? Math.max(1, row.attempts) : 1;
+      const costEstimate = estimateListingCost({
+        title,
+        attempts: effectiveAttempts,
+        provider: primaryProvider,
+        geminiModel: process.env.GEMINI_MODEL,
+        openRouterModel: process.env.OPENROUTER_FALLBACK_MODEL,
+      });
+
       return {
         listingId: row.listing_id,
         externalId: listing?.external_id ?? null,
-        title: listing?.title ?? row.listing_id,
+        title,
         source: listing?.source ?? '—',
         status: row.status,
         statusLabel: STATUS_LABELS[row.status] ?? row.status,
         attempts: row.attempts,
         lastError: row.last_error,
         updatedAt: row.updated_at,
+        cost: {
+          costUsd: costEstimate.costUsd,
+          inputTokens: costEstimate.inputTokens,
+          outputTokens: costEstimate.outputTokens,
+          modelLabel: costEstimate.modelLabel,
+          provider: costEstimate.provider,
+        },
+      };
+    });
+
+    const listingIds = rows.map((row) => row.listingId);
+    const usageTotals = await getListingUsageTotals(supabase, listingIds);
+
+    return rows.map((row) => {
+      const logged = usageTotals.get(row.listingId);
+      if (!logged) {
+        return row;
+      }
+      return {
+        ...row,
+        cost: {
+          costUsd: logged.costUsd,
+          inputTokens: logged.inputTokens,
+          outputTokens: logged.outputTokens,
+          modelLabel: logged.modelLabel,
+          provider: logged.provider,
+        },
       };
     });
   } catch {
@@ -441,6 +609,10 @@ type ScrapeRunListRow = {
   listings_inserted: number;
   listings_rejected: number;
   selector_hit_rate: number | null;
+  failure_reason: string | null;
+  crawl_mode: 'incremental' | 'full' | null;
+  trigger_type: 'cron' | 'manual' | null;
+  wall_time_seconds: number | string | null;
 };
 
 function mapScrapeRunListItem(row: ScrapeRunListRow): ScrapeRunListItem {
@@ -455,6 +627,11 @@ function mapScrapeRunListItem(row: ScrapeRunListRow): ScrapeRunListItem {
     listingsRejected: row.listings_rejected,
     selectorHitRate:
       row.selector_hit_rate != null ? Number(row.selector_hit_rate) : null,
+    failureReason: row.failure_reason,
+    crawlMode: row.crawl_mode,
+    triggerType: row.trigger_type,
+    wallTimeSeconds:
+      row.wall_time_seconds != null ? Number(row.wall_time_seconds) : null,
   };
 }
 
@@ -462,17 +639,21 @@ export async function getScrapeRuns(options?: {
   source?: string;
   limit?: number;
   offset?: number;
+  sinceDays?: number;
 }): Promise<ScrapeRunListItem[]> {
   const limit = options?.limit ?? 100;
   const offset = options?.offset ?? 0;
+  const sinceDays = options?.sinceDays ?? 7;
+  const sinceIso = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000).toISOString();
 
   try {
     const supabase = await createClient();
     let query = supabase
       .from('scrape_runs')
       .select(
-        'id, started_at, finished_at, source, status, listings_found, listings_inserted, listings_rejected, selector_hit_rate',
+        'id, started_at, finished_at, source, status, listings_found, listings_inserted, listings_rejected, selector_hit_rate, failure_reason, crawl_mode, trigger_type, wall_time_seconds',
       )
+      .gte('started_at', sinceIso)
       .order('started_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -483,11 +664,13 @@ export async function getScrapeRuns(options?: {
     const { data, error } = await query;
 
     if (error) {
+      console.error('[getScrapeRuns]', error.message);
       return [];
     }
 
     return ((data ?? []) as ScrapeRunListRow[]).map(mapScrapeRunListItem);
-  } catch {
+  } catch (err) {
+    console.error('[getScrapeRuns]', err);
     return [];
   }
 }
@@ -498,7 +681,7 @@ export async function getScrapeRunById(id: string): Promise<ScrapeRunDetail | nu
     const { data, error } = await supabase
       .from('scrape_runs')
       .select(
-        'id, started_at, finished_at, source, status, listings_found, listings_inserted, listings_updated, listings_skipped, listings_skipped_at_crawl, listings_rejected, selector_hit_rate, failure_reason, http_requests, wall_time_seconds, crawl_mode, degraded, json_field_completeness',
+        'id, started_at, finished_at, source, status, listings_found, listings_inserted, listings_updated, listings_skipped, listings_skipped_at_crawl, listings_rejected, selector_hit_rate, failure_reason, http_requests, wall_time_seconds, crawl_mode, degraded, json_field_completeness, trigger_type, job_id, target_urls_snapshot, blocked_url_count, url_breakdown',
       )
       .eq('id', id)
       .maybeSingle();
@@ -513,10 +696,13 @@ export async function getScrapeRunById(id: string): Promise<ScrapeRunDetail | nu
       listings_skipped_at_crawl: number;
       failure_reason: string | null;
       http_requests: number | null;
-      wall_time_seconds: number | string | null;
-      crawl_mode: 'incremental' | 'full' | null;
       degraded: boolean;
       json_field_completeness: number | string | null;
+      trigger_type: ScrapeRunTrigger | null;
+      job_id: string | null;
+      target_urls_snapshot: string[] | null;
+      blocked_url_count: number;
+      url_breakdown: unknown;
     };
 
     return {
@@ -526,14 +712,15 @@ export async function getScrapeRunById(id: string): Promise<ScrapeRunDetail | nu
       failureReason: row.failure_reason,
       listingsSkippedAtCrawl: row.listings_skipped_at_crawl ?? 0,
       httpRequests: row.http_requests != null ? Number(row.http_requests) : null,
-      wallTimeSeconds:
-        row.wall_time_seconds != null ? Number(row.wall_time_seconds) : null,
-      crawlMode: row.crawl_mode,
       degraded: Boolean(row.degraded),
       jsonFieldCompleteness:
         row.json_field_completeness != null
           ? Number(row.json_field_completeness)
           : null,
+      jobId: row.job_id,
+      targetUrlsSnapshot: row.target_urls_snapshot ?? [],
+      blockedUrlCount: row.blocked_url_count ?? 0,
+      urlBreakdown: parseUrlBreakdown(row.url_breakdown),
     };
   } catch {
     return null;

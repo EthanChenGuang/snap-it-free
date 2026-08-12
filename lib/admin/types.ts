@@ -9,6 +9,11 @@ export type SourceLastRun = {
   failureReason: string | null;
 };
 
+export type SourceLastFullSuccess = {
+  finishedAt: string;
+  listingsFound: number;
+};
+
 export type SourceWithLastRun = {
   slug: string;
   displayName: string;
@@ -17,6 +22,7 @@ export type SourceWithLastRun = {
   intervalMinutes: number;
   antiBlockPreset: string;
   lastRun: SourceLastRun | null;
+  lastFullSuccess: SourceLastFullSuccess | null;
 };
 
 export type SourceDetail = SourceWithLastRun & {
@@ -66,6 +72,17 @@ export type FooterStats = {
   avgSelectorRate: number | null;
 };
 
+export type ScrapeRunTrigger = 'cron' | 'manual';
+
+export type ScrapeRunUrlBreakdownItem = {
+  url: string;
+  label: string;
+  listingsFound: number;
+  listingsSkippedAtCrawl: number;
+  blocked: boolean;
+  earlyStopTriggered: boolean;
+};
+
 export type ScrapeRunListItem = {
   id: string;
   startedAt: string;
@@ -76,6 +93,10 @@ export type ScrapeRunListItem = {
   listingsInserted: number;
   listingsRejected: number;
   selectorHitRate: number | null;
+  failureReason: string | null;
+  crawlMode: CrawlMode | null;
+  triggerType: ScrapeRunTrigger | null;
+  wallTimeSeconds: number | null;
 };
 
 export type ScrapeRunDetail = ScrapeRunListItem & {
@@ -84,10 +105,12 @@ export type ScrapeRunDetail = ScrapeRunListItem & {
   failureReason: string | null;
   listingsSkippedAtCrawl: number;
   httpRequests: number | null;
-  wallTimeSeconds: number | null;
-  crawlMode: CrawlMode | null;
   degraded: boolean;
   jsonFieldCompleteness: number | null;
+  jobId: string | null;
+  targetUrlsSnapshot: string[];
+  blockedUrlCount: number;
+  urlBreakdown: ScrapeRunUrlBreakdownItem[];
 };
 
 export type ScrapeRejectItem = {
@@ -100,6 +123,16 @@ export type ScrapeRejectItem = {
   source: string | null;
 };
 
+import type { TranslationCostSummary } from '@/lib/admin/translation-cost';
+
+export type TranslationListingCostDetail = {
+  costUsd: number;
+  inputTokens: number;
+  outputTokens: number;
+  modelLabel: string;
+  provider: 'gemini' | 'openrouter';
+};
+
 export type TranslationQueueItem = {
   listingId: string;
   externalId: string | null;
@@ -110,4 +143,7 @@ export type TranslationQueueItem = {
   attempts: number;
   lastError: string | null;
   updatedAt: string;
+  cost: TranslationListingCostDetail;
 };
+
+export type { TranslationCostSummary };

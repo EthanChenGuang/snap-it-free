@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireOperatorSession } from '@/lib/admin/operator-route';
 import { checkAndIncrementUsage } from '@/lib/admin/translation-cap';
 import { translateListingFields } from '@/lib/admin/translate';
+import { recordTranslationSuccess } from '@/lib/admin/translation-usage-log';
 import { TranslationRetrySchema } from '@/lib/admin/schemas';
 import { createServiceClient } from '@/lib/supabase/service';
 
@@ -22,7 +23,11 @@ function descriptionFromPayload(rawPayload: Record<string, unknown> | null): str
 async function retryListingTranslation(
   supabase: ReturnType<typeof createServiceClient>,
   listingId: string,
-): Promise<{ ok: true } | { ok: false; error: string }> {
+  translationProvider: 'gemini' | 'openrouter',
+): Promise<
+  | { ok: true; provider: 'gemini' | 'openrouter'; durationMs: number }
+  | { ok: false; error: string }
+> {
   const usage = await checkAndIncrementUsage(supabase);
   if (!usage.allowed) {
     return { ok: false, error: 'Daily translation cap reached' };
@@ -45,11 +50,12 @@ async function retryListingTranslation(
       description: descriptionFromPayload(row.raw_payload),
       category: row.category,
     },
-    'gemini',
+    translationProvider,
     {
       geminiApiKey: process.env.GEMINI_API_KEY?.trim(),
       openRouterApiKey: process.env.OPENROUTER_API_KEY?.trim(),
       openRouterModel: process.env.OPENROUTER_FALLBACK_MODEL?.trim(),
+      geminiModel: process.env.GEMINI_MODEL?.trim(),
     },
   );
 
@@ -92,7 +98,8 @@ async function retryListingTranslation(
   }
 
   await supabase.from('translation_queue').delete().eq('listing_id', listingId);
-  return { ok: true };
+  await recordTranslationSuccess(supabase, listingId, result, 'retry');
+  return { ok: true, provider: result.provider, durationMs: result.durationMs };
 }
 
 export async function POST(request: Request) {
@@ -114,6 +121,15 @@ export async function POST(request: Request) {
   }
 
   const supabase = createServiceClient();
+
+  const { data: configRow } = await supabase
+    .from('scraper_global_config')
+    .select('translation_provider')
+    .eq('id', 1)
+    .maybeSingle();
+  const translationProvider =
+    (configRow?.translation_provider as 'gemini' | 'openrouter' | undefined) ?? 'gemini';
+
   let listingIds = parsed.data.listing_ids ?? [];
 
   if (parsed.data.all_pending) {
@@ -129,13 +145,27 @@ export async function POST(request: Request) {
     listingIds = (data ?? []).map((row) => row.listing_id as string);
   }
 
-  const processed: string[] = [];
+  const processed: Array<{
+    listingId: string;
+    provider: 'gemini' | 'openrouter';
+    durationMs: number;
+  }> = [];
   const failures: Array<{ listingId: string; error: string }> = [];
 
-  for (const listingId of listingIds) {
-    const outcome = await retryListingTranslation(supabase, listingId);
+  const outcomes = await Promise.all(
+    listingIds.map(async (listingId) => ({
+      listingId,
+      outcome: await retryListingTranslation(supabase, listingId, translationProvider),
+    })),
+  );
+
+  for (const { listingId, outcome } of outcomes) {
     if (outcome.ok) {
-      processed.push(listingId);
+      processed.push({
+        listingId,
+        provider: outcome.provider,
+        durationMs: outcome.durationMs,
+      });
     } else {
       failures.push({ listingId, error: outcome.error });
     }

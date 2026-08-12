@@ -1,3 +1,5 @@
+import { resolveTranslationCostUsd } from '../../../lib/admin/translation-cost.js';
+
 export type TranslationInput = {
   title: string;
   description?: string | null;
@@ -13,8 +15,24 @@ export type TranslationOutput = {
   category_zh: string;
 };
 
+export type TranslationProviderId = 'gemini' | 'openrouter';
+
+export type TranslationUsage = {
+  provider: TranslationProviderId;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  costUsd: number;
+};
+
 export type TranslateResult =
-  | { ok: true; translations: TranslationOutput }
+  | {
+      ok: true;
+      translations: TranslationOutput;
+      provider: TranslationProviderId;
+      durationMs: number;
+      usage: TranslationUsage;
+    }
   | { ok: false; queue: true; error: string };
 
 const SYSTEM_PROMPT =
@@ -58,14 +76,48 @@ function parseJson(raw: string): TranslationOutput | null {
   }
 }
 
+const DEFAULT_GEMINI_MODEL = 'gemini-flash-latest';
+const DEFAULT_OPENROUTER_MODEL = 'google/gemini-2.5-flash';
+
+function resolveGeminiModel(explicit?: string): string {
+  return explicit?.trim() || process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL;
+}
+
+function resolveOpenRouterModel(explicit?: string): string {
+  return explicit?.trim() || process.env.OPENROUTER_FALLBACK_MODEL?.trim() || DEFAULT_OPENROUTER_MODEL;
+}
+
+function buildUsage(
+  provider: TranslationProviderId,
+  model: string,
+  inputTokens: number,
+  outputTokens: number,
+): TranslationUsage {
+  return {
+    provider,
+    model,
+    inputTokens,
+    outputTokens,
+    costUsd: resolveTranslationCostUsd(provider, inputTokens, outputTokens),
+  };
+}
+
+type ProviderFetchResult = {
+  raw: string | null;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+};
+
 async function geminiFetch(
   apiKey: string,
+  model: string,
   prompt: string,
   fetchFn: typeof fetch,
-): Promise<string | null> {
+): Promise<ProviderFetchResult | null> {
   try {
     const response = await fetchFn(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -79,8 +131,17 @@ async function geminiFetch(
     if (!response.ok) return null;
     const body = (await response.json()) as {
       candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      usageMetadata?: {
+        promptTokenCount?: number;
+        candidatesTokenCount?: number;
+        totalTokenCount?: number;
+      };
     };
-    return body.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
+    const raw = body.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
+    if (!raw) return null;
+    const inputTokens = body.usageMetadata?.promptTokenCount ?? 0;
+    const outputTokens = body.usageMetadata?.candidatesTokenCount ?? 0;
+    return { raw, model, inputTokens, outputTokens };
   } catch {
     return null;
   }
@@ -91,7 +152,7 @@ async function openRouterFetch(
   model: string,
   prompt: string,
   fetchFn: typeof fetch,
-): Promise<string | null> {
+): Promise<ProviderFetchResult | null> {
   try {
     const response = await fetchFn('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -110,8 +171,17 @@ async function openRouterFetch(
     if (!response.ok) return null;
     const body = (await response.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
+      usage?: {
+        prompt_tokens?: number;
+        completion_tokens?: number;
+        total_tokens?: number;
+      };
     };
-    return body.choices?.[0]?.message?.content ?? null;
+    const raw = body.choices?.[0]?.message?.content ?? null;
+    if (!raw) return null;
+    const inputTokens = body.usage?.prompt_tokens ?? 0;
+    const outputTokens = body.usage?.completion_tokens ?? 0;
+    return { raw, model, inputTokens, outputTokens };
   } catch {
     return null;
   }
@@ -124,34 +194,59 @@ export async function translateListingFields(
     geminiApiKey?: string;
     openRouterApiKey?: string;
     openRouterModel?: string;
+    geminiModel?: string;
     fetchFn?: typeof fetch;
   } = {},
 ): Promise<TranslateResult> {
   const fetchFn = options.fetchFn ?? fetch;
   const prompt = buildPrompt(input);
-  const openRouterModel = options.openRouterModel ?? 'google/gemini-2.0-flash-001';
+  const geminiModel = resolveGeminiModel(options.geminiModel);
+  const openRouterModel = resolveOpenRouterModel(options.openRouterModel);
+  const startedAt = Date.now();
 
   if (options.geminiApiKey) {
-    const geminiRaw = await geminiFetch(options.geminiApiKey, prompt, fetchFn);
-    if (geminiRaw) {
-      const parsed = parseJson(geminiRaw);
+    const geminiResult = await geminiFetch(options.geminiApiKey, geminiModel, prompt, fetchFn);
+    if (geminiResult) {
+      const parsed = parseJson(geminiResult.raw);
       if (parsed) {
-        return { ok: true, translations: parsed };
+        return {
+          ok: true,
+          translations: parsed,
+          provider: 'gemini',
+          durationMs: Date.now() - startedAt,
+          usage: buildUsage(
+            'gemini',
+            geminiModel,
+            geminiResult.inputTokens,
+            geminiResult.outputTokens,
+          ),
+        };
       }
     }
   }
 
   if (options.openRouterApiKey) {
-    const openRouterRaw = await openRouterFetch(
+    const openRouterResult = await openRouterFetch(
       options.openRouterApiKey,
       openRouterModel,
       prompt,
       fetchFn,
     );
-    if (openRouterRaw) {
-      const parsed = parseJson(openRouterRaw);
+    if (openRouterResult) {
+      const parsed = parseJson(openRouterResult.raw);
       if (parsed) {
-        return { ok: true, translations: parsed };
+        return {
+          ok: true,
+          translations: parsed,
+          provider: 'openrouter',
+          durationMs: Date.now() - startedAt,
+          usage: buildUsage(
+            'openrouter',
+            openRouterModel,
+            openRouterResult.inputTokens,
+            openRouterResult.outputTokens,
+          ),
+        };
       }
     }
   }

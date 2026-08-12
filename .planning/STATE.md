@@ -195,6 +195,7 @@ Progress: [██████████] 95% v2.0 (0/7 phases)
 
 | Date | Slug | Summary |
 |------|------|---------|
+| 2026-08-12 | translation-queue-cost-dashboard | Translation Queue KPI cost cards + per-listing cost pills with token tooltip |
 | 2026-08-10 | interruptible-rubberband-spring | Interruptible spring overscroll with stretch-base tracking and full gesture reset |
 | 2026-08-10 | rubberband-scroll-lock-fix | Fix repeat pull lock by stopping Motion animations and resetting gesture state |
 | 2026-08-10 | ios-rubberband-scroll | iOS rubberband overscroll on feed + favorites via RubberbandScroll + Motion spring fallback |
@@ -220,6 +221,8 @@ Progress: [██████████] 95% v2.0 (0/7 phases)
 | 2026-08-12 | translation-queue-error-badge | Translation queue: inline error badge + macOS tooltip replaces yellow alert box |
 | 2026-08-12 | source-card-run-stats | Source cards: micro stats panel for recent run + last full success count |
 | 2026-08-12 | source-card-run-stats-redesign | Source cards: refined run stats layout, pill badges, failure tooltip |
+| 2026-08-12 | dashboard-source-card-compact | Overview dashboard: compact source cards (name, status, last run, actions only) |
+| 2026-08-12 | dashboard-macos-grid | Overview: macOS Dashboard Grid — 4-col metrics, sources grid, 2-col services + alerts |
 
 ## Accumulated Context
 

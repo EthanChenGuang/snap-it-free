@@ -1,3 +1,6 @@
+import { resolveGeminiModel, resolveOpenRouterModel } from './translation-models';
+import { resolveTranslationCostUsd } from './translation-cost';
+
 export type TranslationInput = {
   title: string;
   description?: string | null;
@@ -13,8 +16,24 @@ export type TranslationOutput = {
   category_zh: string;
 };
 
+export type TranslationProviderId = 'gemini' | 'openrouter';
+
+export type TranslationUsage = {
+  provider: TranslationProviderId;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  costUsd: number;
+};
+
 export type TranslateResult =
-  | { ok: true; translations: TranslationOutput }
+  | {
+      ok: true;
+      translations: TranslationOutput;
+      provider: TranslationProviderId;
+      durationMs: number;
+      usage: TranslationUsage;
+    }
   | { ok: false; queue: true; error: string };
 
 export type TranslateDeps = {
@@ -27,8 +46,66 @@ export const TRANSLATION_SYSTEM_PROMPT =
 
 const MAX_INPUT_CHARS = 2000;
 
+/** Interactive admin retry — allow slow OpenRouter models while still failing fast on hard errors. */
 export const OPENROUTER_TIMEOUT_MS = 8000;
 export const GEMINI_TIMEOUT_MS = 8000;
+
+type ProviderAttempt = {
+  raw: string | null;
+  error?: string;
+  model?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  reportedCostUsd?: number | null;
+};
+
+function parseGeminiUsage(body: {
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    totalTokenCount?: number;
+  };
+}): { inputTokens: number; outputTokens: number } {
+  const inputTokens = body.usageMetadata?.promptTokenCount ?? 0;
+  const outputTokens = body.usageMetadata?.candidatesTokenCount ?? 0;
+  if (inputTokens > 0 || outputTokens > 0) {
+    return { inputTokens, outputTokens };
+  }
+  const total = body.usageMetadata?.totalTokenCount ?? 0;
+  return { inputTokens: total, outputTokens: 0 };
+}
+
+function parseOpenRouterUsage(body: {
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
+}): { inputTokens: number; outputTokens: number } {
+  const inputTokens = body.usage?.prompt_tokens ?? 0;
+  const outputTokens = body.usage?.completion_tokens ?? 0;
+  if (inputTokens > 0 || outputTokens > 0) {
+    return { inputTokens, outputTokens };
+  }
+  const total = body.usage?.total_tokens ?? 0;
+  return { inputTokens: total, outputTokens: 0 };
+}
+
+function buildUsage(
+  provider: TranslationProviderId,
+  model: string,
+  inputTokens: number,
+  outputTokens: number,
+  reportedCostUsd?: number | null,
+): TranslationUsage {
+  return {
+    provider,
+    model,
+    inputTokens,
+    outputTokens,
+    costUsd: resolveTranslationCostUsd(provider, inputTokens, outputTokens, reportedCostUsd),
+  };
+}
 
 export function truncateTranslationInput(value: string | null | undefined): string {
   if (!value) {
@@ -72,12 +149,99 @@ function parseTranslationJson(raw: string): TranslationOutput | null {
   }
 }
 
+function extractApiErrorMessage(bodyText: string, fallback: string): string {
+  try {
+    const parsed = JSON.parse(bodyText) as { error?: { message?: string } };
+    if (parsed.error?.message) {
+      return parsed.error.message;
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return fallback;
+}
+
+type ProviderCallOptions = {
+  geminiApiKey?: string;
+  openRouterApiKey?: string;
+  openRouterModel?: string;
+  geminiModel?: string;
+  fetchFn?: typeof fetch;
+};
+
+/** Fetch-based Gemini — avoids @google/genai cold import in admin retry path (D-55). */
+async function callGeminiProvider(
+  prompt: string,
+  options: ProviderCallOptions,
+): Promise<ProviderAttempt> {
+  if (!options.geminiApiKey) {
+    return { raw: null, error: 'Gemini API key not configured' };
+  }
+
+  const model = resolveGeminiModel(options.geminiModel);
+  const fetchFn = options.fetchFn ?? fetch;
+
+  try {
+    const response = await fetchFn(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(options.geminiApiKey)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: TRANSLATION_SYSTEM_PROMPT }] },
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.2 },
+        }),
+        signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
+      },
+    );
+
+    const bodyText = await response.text();
+    if (!response.ok) {
+      return {
+        raw: null,
+        error: `Gemini (${model}): ${extractApiErrorMessage(bodyText, `HTTP ${response.status}`)}`,
+      };
+    }
+
+    const body = JSON.parse(bodyText) as {
+      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      usageMetadata?: {
+        promptTokenCount?: number;
+        candidatesTokenCount?: number;
+        totalTokenCount?: number;
+      };
+    };
+    const raw = body.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
+    if (!raw) {
+      return { raw: null, error: `Gemini (${model}): empty response` };
+    }
+    const usage = parseGeminiUsage(body);
+    return {
+      raw,
+      model,
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+    };
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      return { raw: null, error: `Gemini (${model}): request timed out` };
+    }
+    return { raw: null, error: `Gemini (${model}): network request failed` };
+  }
+}
+
 async function callOpenRouterProvider(
   prompt: string,
-  options: { openRouterApiKey?: string; openRouterModel?: string; fetchFn?: typeof fetch },
-): Promise<string | null> {
-  if (!options.openRouterApiKey) return null;
+  options: ProviderCallOptions,
+): Promise<ProviderAttempt> {
+  if (!options.openRouterApiKey) {
+    return { raw: null, error: 'OpenRouter API key not configured' };
+  }
+
+  const model = resolveOpenRouterModel(options.openRouterModel);
   const fetchFn = options.fetchFn ?? fetch;
+
   try {
     const response = await fetchFn('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -86,7 +250,7 @@ async function callOpenRouterProvider(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: options.openRouterModel ?? 'google/gemini-3.5-flash',
+        model,
         messages: [
           { role: 'system', content: TRANSLATION_SYSTEM_PROMPT },
           { role: 'user', content: prompt },
@@ -94,39 +258,89 @@ async function callOpenRouterProvider(
       }),
       signal: AbortSignal.timeout(OPENROUTER_TIMEOUT_MS),
     });
-    if (!response.ok) return null;
-    const body = (await response.json()) as {
+
+    const bodyText = await response.text();
+    if (!response.ok) {
+      return {
+        raw: null,
+        error: `OpenRouter (${model}): ${extractApiErrorMessage(bodyText, `HTTP ${response.status}`)}`,
+      };
+    }
+
+    const body = JSON.parse(bodyText) as {
       choices?: Array<{ message?: { content?: string } }>;
+      usage?: {
+        prompt_tokens?: number;
+        completion_tokens?: number;
+        total_tokens?: number;
+      };
     };
-    return body.choices?.[0]?.message?.content ?? null;
-  } catch {
-    return null;
+    const raw = body.choices?.[0]?.message?.content ?? null;
+    if (!raw) {
+      return { raw: null, error: `OpenRouter (${model}): empty response` };
+    }
+    const usage = parseOpenRouterUsage(body);
+    return {
+      raw,
+      model,
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+    };
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      return { raw: null, error: `OpenRouter (${model}): request timed out` };
+    }
+    return { raw: null, error: `OpenRouter (${model}): network request failed` };
   }
 }
 
-async function callGeminiProvider(
-  prompt: string,
-  options: { geminiApiKey?: string },
-): Promise<string | null> {
-  if (!options.geminiApiKey) return null;
+async function runProvider(
+  provider: TranslationProviderId,
+  label: string,
+  generate: () => Promise<ProviderAttempt>,
+): Promise<{ result: TranslateResult | null; error?: string }> {
+  const startedAt = Date.now();
+  let attempt: ProviderAttempt;
   try {
-    const { GoogleGenAI } = await import('@google/genai');
-    const ai = new GoogleGenAI({ apiKey: options.geminiApiKey });
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: prompt,
-      config: {
-        systemInstruction: TRANSLATION_SYSTEM_PROMPT,
-        temperature: 0.2,
-        httpOptions: { timeout: GEMINI_TIMEOUT_MS },
-      },
-    });
-    return response.text ?? null;
+    attempt = await generate();
   } catch {
-    return null;
+    return { result: null, error: `${label}: unexpected failure` };
   }
+
+  if (attempt.error) {
+    return { result: null, error: attempt.error };
+  }
+
+  if (attempt.raw == null || !attempt.model) {
+    return { result: null, error: `${label}: no response` };
+  }
+
+  const parsed = parseTranslationJson(attempt.raw);
+  if (!parsed) {
+    return { result: null, error: `${label}: invalid translation JSON` };
+  }
+
+  const inputTokens = attempt.inputTokens ?? 0;
+  const outputTokens = attempt.outputTokens ?? 0;
+
+  return {
+    result: {
+      ok: true,
+      translations: parsed,
+      provider,
+      durationMs: Date.now() - startedAt,
+      usage: buildUsage(
+        provider,
+        attempt.model,
+        inputTokens,
+        outputTokens,
+        attempt.reportedCostUsd,
+      ),
+    },
+  };
 }
 
+/** Legacy sequential helper — kept for unit tests. */
 export async function translateListing(
   _input: TranslationInput,
   deps: TranslateDeps,
@@ -140,7 +354,13 @@ export async function translateListing(
   if (openRouterRaw != null) {
     const parsed = parseTranslationJson(openRouterRaw);
     if (parsed) {
-      return { ok: true, translations: parsed };
+      return {
+        ok: true,
+        translations: parsed,
+        provider: 'openrouter',
+        durationMs: 0,
+        usage: buildUsage('openrouter', resolveOpenRouterModel(), 0, 0),
+      };
     }
   }
 
@@ -153,49 +373,114 @@ export async function translateListing(
   if (geminiRaw != null) {
     const parsed = parseTranslationJson(geminiRaw);
     if (parsed) {
-      return { ok: true, translations: parsed };
+      return {
+        ok: true,
+        translations: parsed,
+        provider: 'gemini',
+        durationMs: 0,
+        usage: buildUsage('gemini', resolveGeminiModel(), 0, 0),
+      };
     }
   }
 
   return { ok: false, queue: true, error: 'All translation providers failed' };
 }
 
-/** Production wrapper — OpenRouter primary, Gemini fallback */
-export async function translateListingWithProviders(
+async function translateListingParallel(
   input: TranslationInput,
-  options: {
-    geminiApiKey?: string;
-    openRouterApiKey?: string;
-    openRouterModel?: string;
-    fetchFn?: typeof fetch;
-  } = {},
+  options: ProviderCallOptions & { preferredProvider?: 'gemini' | 'openrouter' },
 ): Promise<TranslateResult> {
   const prompt = buildPromptPayload(input);
+  const tasks: Array<{
+    provider: TranslationProviderId;
+    run: () => Promise<{ result: TranslateResult | null; error?: string }>;
+  }> = [];
 
-  return translateListing(input, {
-    geminiGenerate: async () => callGeminiProvider(prompt, options),
-    openRouterGenerate: async () => callOpenRouterProvider(prompt, options),
+  if (options.geminiApiKey) {
+    tasks.push({
+      provider: 'gemini',
+      run: () => runProvider('gemini', 'Gemini', () => callGeminiProvider(prompt, options)),
+    });
+  }
+  if (options.openRouterApiKey) {
+    tasks.push({
+      provider: 'openrouter',
+      run: () =>
+        runProvider('openrouter', 'OpenRouter', () => callOpenRouterProvider(prompt, options)),
+    });
+  }
+
+  const orderedTasks =
+    options.preferredProvider === 'openrouter'
+      ? [...tasks].sort((a, b) =>
+          a.provider === 'openrouter' ? -1 : b.provider === 'openrouter' ? 1 : 0,
+        )
+      : [...tasks].sort((a, b) =>
+          a.provider === 'gemini' ? -1 : b.provider === 'gemini' ? 1 : 0,
+        );
+
+  if (tasks.length === 0) {
+    return { ok: false, queue: true, error: 'No translation API keys configured' };
+  }
+
+  return new Promise((resolve) => {
+    let remaining = orderedTasks.length;
+    let settled = false;
+    const errors: string[] = [];
+
+    const finishFailure = (error?: string) => {
+      if (error) {
+        errors.push(error);
+      }
+      remaining -= 1;
+      if (remaining === 0 && !settled) {
+        settled = true;
+        resolve({
+          ok: false,
+          queue: true,
+          error: errors.length > 0 ? errors.join(' · ') : 'All translation providers failed',
+        });
+      }
+    };
+
+    for (const task of orderedTasks) {
+      task
+        .run()
+        .then(({ result, error }) => {
+          if (settled) {
+            return;
+          }
+          if (result?.ok) {
+            settled = true;
+            resolve(result);
+            return;
+          }
+          finishFailure(error);
+        })
+        .catch(() => {
+          finishFailure('Unexpected provider failure');
+        });
+    }
   });
+}
+
+/** Production wrapper — providers run in parallel; first valid JSON wins. */
+export async function translateListingWithProviders(
+  input: TranslationInput,
+  options: ProviderCallOptions & { preferredProvider?: 'gemini' | 'openrouter' } = {},
+): Promise<TranslateResult> {
+  return translateListingParallel(input, options);
 }
 
 /** Alias used by ingest hook and retry API (D-24) */
 export async function translateListingFields(
   input: TranslationInput,
   provider: 'gemini' | 'openrouter' = 'gemini',
-  options: {
-    geminiApiKey?: string;
-    openRouterApiKey?: string;
-    openRouterModel?: string;
-    fetchFn?: typeof fetch;
-  } = {},
+  options: ProviderCallOptions = {},
 ): Promise<TranslateResult> {
   if (provider === 'openrouter') {
-    const prompt = buildPromptPayload(input);
-    return translateListing(input, {
-      geminiGenerate: async () => null,
-      openRouterGenerate: async () => callOpenRouterProvider(prompt, options),
-    });
+    return translateListingParallel(input, { ...options, preferredProvider: 'openrouter' });
   }
 
-  return translateListingWithProviders(input, options);
+  return translateListingParallel(input, { ...options, preferredProvider: 'gemini' });
 }

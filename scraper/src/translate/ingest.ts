@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SUBITO_REGALO_CATALOG } from '../../../lib/admin/subito-regalo-catalog.js';
+import { recordTranslationSuccess } from '../../../lib/admin/translation-usage-log.js';
 import { translateListingFields } from './engine.js';
 
 export type ListingTranslationFields = {
@@ -142,6 +143,7 @@ async function translateOneListing(
       geminiApiKey: process.env.GEMINI_API_KEY?.trim(),
       openRouterApiKey: process.env.OPENROUTER_API_KEY?.trim(),
       openRouterModel: process.env.OPENROUTER_FALLBACK_MODEL?.trim(),
+      geminiModel: process.env.GEMINI_MODEL?.trim(),
     },
   );
 
@@ -165,6 +167,7 @@ async function translateOneListing(
     }
 
     await supabase.from('translation_queue').delete().eq('listing_id', listingId);
+    await recordTranslationSuccess(supabase, listingId, result, 'ingest');
     return;
   }
 
