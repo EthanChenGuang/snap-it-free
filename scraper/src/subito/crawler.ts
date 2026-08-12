@@ -1,4 +1,5 @@
 import { HttpCrawler, PlaywrightCrawler, ProxyConfiguration } from 'crawlee';
+import { getProxyFatalFailure, ProxyQuotaFatalError } from '../shared/proxy-errors.js';
 import { presetToCrawleeOptions, type AntiBlockPreset } from '../admin/presets.js';
 import { getProxyUrl, getUseHttpCrawlerMode, isHttpCrawlerEnabled, type UseHttpCrawlerMode } from '../config.js';
 import { applyEarlyStop, type EarlyStopListing } from './early-stop.js';
@@ -27,6 +28,14 @@ export type RunSubitoCrawlerOptions = {
   mode?: CrawlMode;
 };
 
+export type CategoryUrlStats = {
+  url: string;
+  listingsFound: number;
+  listingsSkippedAtCrawl: number;
+  blocked: boolean;
+  earlyStopTriggered: boolean;
+};
+
 export type CrawlResult = {
   rawListings: RawListing[];
   selectorHitRate: number;
@@ -36,6 +45,7 @@ export type CrawlResult = {
   blockedUrlCount: number;
   detailCapDeferred: number;
   crawlMode: CrawlMode;
+  urlBreakdown: CategoryUrlStats[];
 };
 
 type FallbackRequestKind = 'block-retry' | 'detail';
@@ -52,7 +62,81 @@ type CategoryProcessResult = {
   listingsSkippedAtCrawl: number;
   jsonFieldCompleteness: number;
   blocked: boolean;
+  stoppedEarly: boolean;
 };
+
+function initUrlStats(categoryUrls: readonly string[]): Map<string, CategoryUrlStats> {
+  const map = new Map<string, CategoryUrlStats>();
+  for (const url of categoryUrls) {
+    map.set(url, {
+      url,
+      listingsFound: 0,
+      listingsSkippedAtCrawl: 0,
+      blocked: false,
+      earlyStopTriggered: false,
+    });
+  }
+  return map;
+}
+
+function recordCategorySuccess(
+  urlStats: Map<string, CategoryUrlStats>,
+  categoryUrl: string,
+  result: CategoryProcessResult,
+): void {
+  const stats = urlStats.get(categoryUrl);
+  if (!stats) {
+    return;
+  }
+  stats.listingsFound += result.workQueue.length + result.touchCandidates.length;
+  stats.listingsSkippedAtCrawl += result.listingsSkippedAtCrawl;
+  if (result.stoppedEarly) {
+    stats.earlyStopTriggered = true;
+  }
+}
+
+function recordCategoryBlocked(
+  urlStats: Map<string, CategoryUrlStats>,
+  categoryUrl: string,
+): void {
+  const stats = urlStats.get(categoryUrl);
+  if (!stats) {
+    return;
+  }
+  stats.blocked = true;
+}
+
+function buildUrlBreakdownFromListings(
+  categoryUrls: readonly string[],
+  rawListings: RawListing[],
+  failedUrls: Set<string>,
+): CategoryUrlStats[] {
+  return categoryUrls.map((url) => {
+    const listingsFound = rawListings.filter(
+      (listing) => listing.source_category_url === url,
+    ).length;
+    return {
+      url,
+      listingsFound,
+      listingsSkippedAtCrawl: 0,
+      blocked: failedUrls.has(url) || listingsFound === 0,
+      earlyStopTriggered: false,
+    };
+  });
+}
+
+function proxyErrorHandler(
+  request: { noRetry?: boolean },
+  error: unknown,
+): void {
+  const fatalReason = getProxyFatalFailure(error);
+  if (!fatalReason) {
+    return;
+  }
+
+  request.noRetry = true;
+  throw new ProxyQuotaFatalError(fatalReason);
+}
 
 function maskProxyHost(proxyUrl: string): string {
   try {
@@ -108,6 +192,7 @@ function processCategoryHtml(
       listingsSkippedAtCrawl: early.listingsSkippedAtCrawl,
       jsonFieldCompleteness: parsed.jsonFieldCompleteness,
       blocked: false,
+      stoppedEarly: early.stoppedEarly,
     };
   } catch (error) {
     if (error instanceof CategoryParseError) {
@@ -117,6 +202,7 @@ function processCategoryHtml(
         listingsSkippedAtCrawl: 0,
         jsonFieldCompleteness: 0,
         blocked: true,
+        stoppedEarly: false,
       };
     }
     throw error;
@@ -214,13 +300,17 @@ async function runHttpHybridCrawler(
   const blockRetryUrls = new Set<string>();
   const blockRetriedUrls = new Set<string>();
   const failedUrls = new Set<string>();
+  const urlStats = initUrlStats(categoryUrls);
 
   const httpCrawler = new HttpCrawler({
     proxyConfiguration,
-    useSessionPool: Boolean(proxyConfiguration),
+    useSessionPool: true,
     persistCookiesPerSession: true,
     maxRequestRetries: crawleeOpts.maxRequestRetries,
     minConcurrency: crawleeOpts.minConcurrency,
+    errorHandler({ request }, error) {
+      proxyErrorHandler(request, error);
+    },
     async requestHandler({ request, body, session, response }) {
       httpRequests += 1;
       const html = typeof body === 'string' ? body : body.toString();
@@ -248,6 +338,7 @@ async function runHttpHybridCrawler(
       listingsSkippedAtCrawl += result.listingsSkippedAtCrawl;
       listingsSeenThisRun += ingestCategoryResults(result, rawListings, detailCandidatePool);
       jsonCompletenessSamples.push(result.jsonFieldCompleteness);
+      recordCategorySuccess(urlStats, request.url, result);
     },
   });
 
@@ -302,6 +393,7 @@ async function runHttpHybridCrawler(
 
         if (result.blocked) {
           failedUrls.add(request.url);
+          recordCategoryBlocked(urlStats, request.url);
           return;
         }
 
@@ -309,6 +401,7 @@ async function runHttpHybridCrawler(
         listingsSkippedAtCrawl += result.listingsSkippedAtCrawl;
         listingsSeenThisRun += ingestCategoryResults(result, rawListings, detailCandidatePool);
         jsonCompletenessSamples.push(result.jsonFieldCompleteness);
+        recordCategorySuccess(urlStats, request.url, result);
       },
     });
 
@@ -317,6 +410,7 @@ async function runHttpHybridCrawler(
 
   for (const url of blockRetryUrls) {
     failedUrls.add(url);
+    recordCategoryBlocked(urlStats, url);
   }
 
   const detailBudget = detailBudgetCap(listingsSeenThisRun);
@@ -421,6 +515,7 @@ async function runHttpHybridCrawler(
     blockedUrlCount: failedUrls.size,
     detailCapDeferred: detailDeferred.length,
     crawlMode,
+    urlBreakdown: [...urlStats.values()],
   };
 }
 
@@ -442,6 +537,7 @@ export async function runSubitoCrawler(
       blockedUrlCount: 0,
       detailCapDeferred: 0,
       crawlMode,
+      urlBreakdown: buildUrlBreakdownFromListings(categoryUrls, legacy.rawListings, new Set()),
     };
   }
 

@@ -21,7 +21,7 @@ import { persistBatch } from './shared/persist.js';
 import { validateBatch, validateBatchHttp } from './shared/validate-run.js';
 import { loadZonePolygons, tagZone } from './shared/zone-tag.js';
 import { runSchedulerTick, TICK_INTERVAL_MS } from './scheduler.js';
-import { runSubitoCrawler } from './subito/crawler.js';
+import { runSubitoCrawler, type CategoryUrlStats } from './subito/crawler.js';
 import { loadKnownListingSet } from './subito/known-set.js';
 import { resolveSourceRun } from './worker-placeholder.js';
 import {
@@ -30,6 +30,7 @@ import {
   isProductionSoftProxyContext,
   type CrawlMode,
 } from './worker-proxy-gate.js';
+import { runSubitoCrawlWithProxyFallback } from './worker-proxy-fallback.js';
 
 const COMING_SOON_MESSAGE = '该数据源尚未接入';
 
@@ -41,6 +42,12 @@ type ScrapeRunOptions = {
 type ScrapeRunRecord = {
   id: string;
   startedAt: Date;
+};
+
+type StartScrapeRunParams = {
+  triggerType?: 'cron' | 'manual';
+  jobId?: string;
+  targetUrlsSnapshot?: string[];
 };
 
 type FinishScrapeRunParams = {
@@ -58,7 +65,36 @@ type FinishScrapeRunParams = {
   crawlMode?: CrawlMode;
   degraded?: boolean;
   jsonFieldCompleteness?: number;
+  blockedUrlCount?: number;
+  urlBreakdown?: CategoryUrlStats[];
 };
+
+export function categoryUrlLabel(url: string): string {
+  try {
+    const parts = new URL(url).pathname.split('/').filter(Boolean);
+    const regaloIdx = parts.indexOf('regalo');
+    if (regaloIdx >= 0 && parts[regaloIdx + 1]) {
+      return parts[regaloIdx + 1].replace(/-/g, ' ');
+    }
+    return parts[parts.length - 3] ?? parts[parts.length - 1] ?? url;
+  } catch {
+    return url;
+  }
+}
+
+function serializeUrlBreakdown(breakdown: CategoryUrlStats[] | undefined) {
+  if (!breakdown?.length) {
+    return null;
+  }
+  return breakdown.map((entry) => ({
+    url: entry.url,
+    label: categoryUrlLabel(entry.url),
+    listingsFound: entry.listingsFound,
+    listingsSkippedAtCrawl: entry.listingsSkippedAtCrawl,
+    blocked: entry.blocked,
+    earlyStopTriggered: entry.earlyStopTriggered,
+  }));
+}
 
 async function updateScrapeJob(
   supabase: SupabaseClient,
@@ -97,11 +133,19 @@ export async function getTrailingMedians(supabase: SupabaseClient): Promise<numb
 export async function startScrapeRun(
   supabase: SupabaseClient,
   source: string,
+  params?: StartScrapeRunParams,
 ): Promise<ScrapeRunRecord> {
   const startedAt = new Date();
   const { data, error } = await supabase
     .from('scrape_runs')
-    .insert({ started_at: startedAt.toISOString(), status: 'partial', source })
+    .insert({
+      started_at: startedAt.toISOString(),
+      status: 'partial',
+      source,
+      trigger_type: params?.triggerType ?? null,
+      job_id: params?.jobId ?? null,
+      target_urls_snapshot: params?.targetUrlsSnapshot ?? null,
+    })
     .select('id')
     .single();
 
@@ -136,6 +180,8 @@ export async function finishScrapeRun(
       crawl_mode: params.crawlMode ?? null,
       degraded: params.degraded ?? false,
       json_field_completeness: params.jsonFieldCompleteness ?? null,
+      blocked_url_count: params.blockedUrlCount ?? 0,
+      url_breakdown: serializeUrlBreakdown(params.urlBreakdown),
     })
     .eq('id', runId);
 
@@ -201,17 +247,24 @@ export async function runSourceScrape(
     throw new Error(`Unknown source: ${sourceSlug}`);
   }
 
-  const decision = resolveSourceRun({
-    implementation_status: config.implementationStatus,
-    enabled: config.enabled,
-  });
+  const decision = resolveSourceRun(
+    {
+      implementation_status: config.implementationStatus,
+      enabled: config.enabled,
+    },
+    { manual: trigger === 'manual' },
+  );
 
   if (decision.action === 'skipped') {
     const message =
       config.implementationStatus === 'coming_soon' ? COMING_SOON_MESSAGE : decision.message;
     console.log(`Skipping ${sourceSlug}: ${message}`);
 
-    const run = await startScrapeRun(supabase, sourceSlug);
+    const run = await startScrapeRun(supabase, sourceSlug, {
+      triggerType: trigger,
+      jobId,
+      targetUrlsSnapshot: config.urls,
+    });
     await finishScrapeRun(supabase, run.id, {
       status: 'partial',
       listingsFound: 0,
@@ -225,12 +278,20 @@ export async function runSourceScrape(
     return;
   }
 
-  if (config.globalPause) {
-    console.log(`Global pause active — skipping ${sourceSlug}`);
+  if (config.globalPause && trigger !== 'manual') {
+    console.log(`Global pause active — skipping scheduled ${sourceSlug}`);
     if (jobId) {
       await updateScrapeJob(supabase, jobId, 'skipped', 'Global pause active');
     }
     return;
+  }
+
+  if (config.globalPause && trigger === 'manual') {
+    console.log(`Global pause active — running manual override for ${sourceSlug}`);
+  }
+
+  if (!config.enabled && trigger === 'manual') {
+    console.log(`Source ${sourceSlug} disabled — running manual override`);
   }
 
   const jobCrawlMode = jobId ? await loadJobCrawlMode(supabase, jobId) : null;
@@ -250,7 +311,11 @@ export async function runSourceScrape(
   }
   const runDegraded = proxyGate.degraded;
 
-  const run = await startScrapeRun(supabase, sourceSlug);
+  const run = await startScrapeRun(supabase, sourceSlug, {
+    triggerType: trigger,
+    jobId,
+    targetUrlsSnapshot: config.urls,
+  });
   console.log(
     `Scrape run ${run.id} (${sourceSlug}) started at ${run.startedAt.toISOString()} mode=${crawlMode} degraded=${runDegraded}`,
   );
@@ -268,14 +333,23 @@ export async function runSourceScrape(
     console.log(`Crawling ${config.urls.length} URL(s) for ${sourceSlug} (mode=${crawlMode})`);
     const crawlStartedAt = Date.now();
     let crawlResult;
+    let fallbackDegraded = false;
 
     if (sourceSlug === 'subito') {
-      crawlResult = await runSubitoCrawler(config.urls, config.preset, config.proxyUrl, {
-        knownMap,
-        earlyStopK: config.earlyStopK,
-        isFullRefresh,
-        mode: crawlMode,
-      });
+      const fallbackResult = await runSubitoCrawlWithProxyFallback(
+        runSubitoCrawler,
+        config.urls,
+        config.preset,
+        config.proxyUrl,
+        {
+          knownMap,
+          earlyStopK: config.earlyStopK,
+          isFullRefresh,
+          mode: crawlMode,
+        },
+      );
+      crawlResult = fallbackResult.crawlResult;
+      fallbackDegraded = fallbackResult.fallbackDegraded;
     } else {
       throw new Error(`No crawler implementation for source: ${sourceSlug}`);
     }
@@ -288,6 +362,7 @@ export async function runSourceScrape(
       listingsSkippedAtCrawl,
       jsonFieldCompleteness,
       blockedUrlCount,
+      urlBreakdown,
     } = crawlResult;
 
     console.log(
@@ -350,8 +425,6 @@ export async function runSourceScrape(
           jsonFieldCompleteness,
           crawlMode,
           listingsSkippedAtCrawl,
-          geoResolutionRate,
-          minGeoResolutionRate: SCRAPE_MIN_GEO_RESOLUTION_RATE,
         })
       : validateBatch(
           rawListings,
@@ -370,8 +443,10 @@ export async function runSourceScrape(
       httpRequests,
       wallTimeSeconds,
       crawlMode,
-      degraded: runDegraded || blockedRatio > 0.5,
+      degraded: runDegraded || fallbackDegraded || blockedRatio > 0.5,
       jsonFieldCompleteness,
+      blockedUrlCount,
+      urlBreakdown,
     };
 
     if (!validation.ok) {
@@ -442,6 +517,7 @@ export async function runSourceScrape(
       listingsFound: 0,
       failureReason: message,
       selectorHitRate: 0,
+      crawlMode,
       degraded: runDegraded,
     }).catch((finishErr) => {
       console.error('Failed to finish scrape run after error:', finishErr);
