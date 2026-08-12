@@ -220,8 +220,9 @@ function runSpike({ direct, proxyUrl, label, outPath }) {
 function readDecisionGateRecommendation() {
   try {
     const content = readFileSync(decisionGatePath, 'utf-8');
-    const recMatch = content.match(/\|\s*Recommendation\s*\|\s*(\S+)\s*\|/);
-    return recMatch?.[1] ?? 'UNKNOWN';
+    const verdictSection = content.match(/## Current verdict[\s\S]*?(?=##|$)/)?.[0] ?? content;
+    const recMatch = verdictSection.match(/\|\s*Recommendation\s*\|\s*([^|]+?)\s*\|/);
+    return recMatch?.[1]?.trim() ?? 'UNKNOWN';
   } catch {
     return 'UNKNOWN';
   }
@@ -325,9 +326,9 @@ function buildProviderRuns(skipDirect) {
 function updateArtifact(rows, gateRecommendation, generatedAt) {
   let content = readFileSync(artifactPath, 'utf-8');
 
-  content = content.replace('**Date:** _pending_', `**Date:** ${generatedAt}`);
+  content = content.replace(/\*\*Date:\*\*[^\n]*/u, `**Date:** ${generatedAt}`);
   content = content.replace(
-    '**Decision gate:** _pending_ (see `16-DECISION-GATE.md`)',
+    /\*\*Decision gate:\*\*[^\n]*/u,
     `**Decision gate:** ${gateRecommendation} (see \`16-DECISION-GATE.md\`)`,
   );
 
@@ -339,10 +340,13 @@ function updateArtifact(rows, gateRecommendation, generatedAt) {
   const separatorIdx = content.indexOf('\n', content.indexOf('|---', headerIdx));
   const notesIdx = content.indexOf('\n## Recommended provider', separatorIdx);
   const tableRows = rows.map((r) => formatRow(r)).join('\n');
-  content = `${content.slice(0, separatorIdx + 1)}\n${tableRows}\n${content.slice(notesIdx)}`;
+  content = `${content.slice(0, separatorIdx + 1)}${tableRows}\n${content.slice(notesIdx)}`;
 
   const recommendation = computeRecommendation(rows, gateRecommendation);
-  content = content.replace('## Recommended provider\n\n_pending_', `## Recommended provider\n\n${recommendation}`);
+  content = content.replace(
+    /## Recommended provider\n\n[\s\S]*?(?=\n## Notes)/u,
+    `## Recommended provider\n\n${recommendation}\n`,
+  );
 
   if (gateRecommendation === 'STAY_DIRECT') {
     const optionalNote =
