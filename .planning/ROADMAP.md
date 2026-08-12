@@ -381,7 +381,7 @@ Snag-style interaction reference screenshots (feed grid, filter sheet, favorites
 
 **Depends on:** Phase 15
 
-**Plans:** 2/5 plans executed
+**Plans:** 3/5 plans executed
 
 Plans:
 **Wave 1**
@@ -392,7 +392,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [ ] 16-03-PLAN.md — 7-day direct production spike + decision gate (PROXY-C02)
-- [ ] 16-04-PLAN.md — Webshare/IPRoyal vs Decodo provider comparison (PROXY-C03)
+- [x] 16-04-PLAN.md — Webshare/IPRoyal vs Decodo provider comparison (PROXY-C03)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 

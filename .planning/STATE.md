@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 16
 current_phase_name: proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper
-current_plan: 3
+current_plan: 5
 status: executing
-stopped_at: Completed 16-02-PLAN.md
-last_updated: "2026-08-12T14:58:44.153Z"
+stopped_at: Completed 16-04-PLAN.md
+last_updated: "2026-08-12T15:11:33.982Z"
 progress:
   total_phases: 10
   completed_phases: 8
   total_plans: 44
-  completed_plans: 41
+  completed_plans: 42
   percent: 80
 last_activity: 2026-08-11
 last_activity_desc: "Quick task 260811-nwf: scraper translation pipeline batch-scoped config/cap + bounded-concurrency dispatch, 80 round trips → 2-3 per batch of 20"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 16 (proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper) — EXECUTING
-**Current Plan:** 3
+**Current Plan:** 5
 **Total Plans in Phase:** 5
 Status: Ready to execute
 
-Progress: [█████████░] 93% v2.0 (0/7 phases)
+Progress: [██████████] 95% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -96,6 +96,7 @@ Progress: [█████████░] 93% v2.0 (0/7 phases)
 | Phase 15 P06 | 18 | 3 tasks | 12 files |
 | Phase 16 P01 | 2min | 2 tasks | 8 files |
 | Phase 16-proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper P02 | 5min | 3 tasks | 5 files |
+| Phase 16 P04 | 12min | 3 tasks | 2 files |
 
 ## Deferred Items (from v1.0)
 
@@ -115,8 +116,8 @@ Progress: [█████████░] 93% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-12T14:58:44.139Z
-**Stopped at:** Completed 16-02-PLAN.md
+**Last session:** 2026-08-12T15:11:12.715Z
+**Stopped at:** Completed 16-04-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -187,6 +188,8 @@ Progress: [█████████░] 93% v2.0 (0/7 phases)
 - [Phase ?]: PROXY-C01: no sustainable free residential pool; OSS managers need paid upstream IPs
 - [Phase ?]: ADR 015 cost ladder draft: direct default; residential recommended when blocked_ratio_7d ≥ 0.5
 - [Phase ?]: Human approved 16-PROXY-COST-VERDICT and ADR cost ladder draft (Plan 16-02 task 3)
+- [Phase ?]: Operator skipped-direct-pass: STAY_DIRECT acceptable; residential provider compare deferred until NEED_RESIDENTIAL
+- [Phase ?]: PROXY-C03 tooling ready (run-provider-compare-spike.mjs); execution deferred until 7-day direct gate fails
 
 ## Quick Tasks Completed
 
