@@ -348,7 +348,7 @@ Plans:
 | 13. Select Location | v2.0 | 5/5 | Verified | 2026-08-10 |
 | 14. Settings Parity | v2.0 | 8/8 | Complete | 2026-08-10 |
 | 15. Scraper Crawl Efficiency | v2.0 | 6/6 | Complete | 2026-08-11 |
-| 16. Proxy Cost Optimization | v2.0 | 0/TBD | Planned | — |
+| 16. Proxy Cost Optimization | v2.0 | 0/5 | Ready | — |
 | 7. Production Deploy | v2.0 | 0/4 | Planned | — |
 
 ## Execution Order
