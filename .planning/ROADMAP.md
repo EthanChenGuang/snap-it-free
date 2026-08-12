@@ -348,7 +348,7 @@ Plans:
 | 13. Select Location | v2.0 | 5/5 | Verified | 2026-08-10 |
 | 14. Settings Parity | v2.0 | 8/8 | Complete | 2026-08-10 |
 | 15. Scraper Crawl Efficiency | v2.0 | 6/6 | Complete | 2026-08-11 |
-| 16. Proxy Cost Optimization | v2.0 | 0/5 | Ready | — |
+| 16. Proxy Cost Optimization | v2.0 | 0/5 | In Progress|  |
 | 7. Production Deploy | v2.0 | 0/4 | Planned | — |
 
 ## Execution Order
@@ -381,12 +381,12 @@ Snag-style interaction reference screenshots (feed grid, filter sheet, favorites
 
 **Depends on:** Phase 15
 
-**Plans:** 5 plans
+**Plans:** 1/5 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 16-01-PLAN.md — Tracer: proxy quota fatal → direct fallback + degraded metrics (PROXY-C04)
+- [x] 16-01-PLAN.md — Tracer: proxy quota fatal → direct fallback + degraded metrics (PROXY-C04)
 - [ ] 16-02-PLAN.md — Research verdict + ADR cost ladder draft + spike scripts (PROXY-C01)
 
 **Wave 2** *(blocked on Wave 1 completion)*

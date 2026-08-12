@@ -74,7 +74,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 - [ ] **PROXY-C01**: Research artifact — free/OSS proxy options verdict documented (no free residential pool; OSS managers require paid upstream IPs)
 - [ ] **PROXY-C02**: 7-day direct-crawl production spike with block-rate metrics and decision gate (STAY_DIRECT vs NEED_RESIDENTIAL at 50% threshold)
 - [ ] **PROXY-C03**: Provider comparison spike — Webshare (or IPRoyal) vs Decodo on same URL matrix with cost-aware recommendation
-- [ ] **PROXY-C04**: Worker proxy-quota fatal → direct fallback + degraded run (no hard abort on quota exhaustion)
+- [x] **PROXY-C04**: Worker proxy-quota fatal → direct fallback + degraded run (no hard abort on quota exhaustion)
 - [ ] **PROXY-C05**: ADR 015 cost ladder addendum + admin Settings proxy cost tier recommendation from measured 7-day block rate
 
 ### Production Deploy
@@ -183,7 +183,7 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | PROXY-C01 | Phase 16 | Pending |
 | PROXY-C02 | Phase 16 | Pending |
 | PROXY-C03 | Phase 16 | Pending |
-| PROXY-C04 | Phase 16 | Pending |
+| PROXY-C04 | Phase 16 | Complete |
 | PROXY-C05 | Phase 16 | Pending |
 
 **Coverage:**

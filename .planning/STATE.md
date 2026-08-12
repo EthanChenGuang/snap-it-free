@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
-current_phase: 15
-current_phase_name: scraper-incremental-crawl-and-search-efficiency
-current_plan: 6
+current_phase: 16
+current_phase_name: proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper
+current_plan: 2
 status: executing
-stopped_at: Completed 15-06-PLAN.md
-last_updated: "2026-08-12T14:49:40.849Z"
+stopped_at: Completed 16-01-PLAN.md
+last_updated: "2026-08-12T14:54:29.236Z"
 progress:
   total_phases: 10
   completed_phases: 8
   total_plans: 44
-  completed_plans: 39
-  percent: 89
+  completed_plans: 40
+  percent: 80
 last_activity: 2026-08-11
 last_activity_desc: "Quick task 260811-nwf: scraper translation pipeline batch-scoped config/cap + bounded-concurrency dispatch, 80 round trips → 2-3 per batch of 20"
 ---
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
 
-**Current focus:** Phase 15 — scraper-incremental-crawl-and-search-efficiency
+**Current focus:** Phase 16 — proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper
 
 ## Current Position
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
-Phase: 15 (scraper-incremental-crawl-and-search-efficiency) — EXECUTING
-**Current Plan:** 6
+Phase: 16 (proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper) — EXECUTING
+**Current Plan:** 2
 **Total Plans in Phase:** 5
 Status: Ready to execute
 
-Progress: [██████████] 100% v2.0 (0/7 phases)
+Progress: [█████████░] 91% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -94,6 +94,7 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | Phase 15 P04 | 480 | 2 tasks | 5 files |
 | Phase 15 P05 | 12 | 2 tasks | 7 files |
 | Phase 15 P06 | 18 | 3 tasks | 12 files |
+| Phase 16 P01 | 2min | 2 tasks | 8 files |
 
 ## Deferred Items (from v1.0)
 
@@ -113,8 +114,8 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-11T18:14:39.367Z
-**Stopped at:** Completed 15-06-PLAN.md
+**Last session:** 2026-08-12T14:54:29.223Z
+**Stopped at:** Completed 16-01-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -180,6 +181,8 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 - [Phase ?]: Blocked-ratio alerts use notifyOperator emailOnly — no new Telegram in Phase 15
 - [Phase ?]: Admin degraded banner when proxy unset with degraded activity or latest Subito run degraded=true
 - [Phase ?]: Full crawl admin trigger POSTs subito job with crawl_mode full (D-15-08)
+- [Phase ?]: ProxyQuotaFatalError enables single direct retry on quota exhaustion without hard-aborting runs
+- [Phase ?]: recordDegradedRun skipped for blocked-ratio when fallback already recorded to avoid double degraded_run_count
 
 ## Quick Tasks Completed
 
