@@ -22,7 +22,7 @@ Plan 16-03 remains open until operator returns final gate verdict. Plan 16-04 cl
 
 Before starting the spike window:
 
-- [ ] Clear proxy in Admin → Settings → Proxy card (remove URL), **or** set `proxy_enc` null via `scraper/scripts/configure-proxy.mjs` with empty value / admin DB update
+- [x] Clear proxy in Admin → Settings → Proxy card (remove URL), **or** set `proxy_enc` null via `scraper/scripts/configure-proxy.mjs` with empty value / admin DB update — **2026-08-12:** `scraper/.env` PROXY_URL commented; DB `proxy_enc` null
 - [ ] Confirm worker `evaluateProxyGate` marks runs `degraded=true` when proxy unset (expected)
 - [ ] Verify incremental cron active (`scraper_sources.interval_minutes` ≈ 30, Fly cron enabled)
 - [ ] Note Fly app name in **Environment** row below
@@ -43,8 +43,7 @@ Monitor admin degraded banner and operator email when blocked ratio exceeds 50% 
 | Fly app | _(operator: fill from `fly apps list`)_ |
 | Proxy cleared | ☐ confirmed |
 | Incremental cadence | ~30 min |
-| Spike start | 2026-08-12 |
-| Spike end | _(7 days after start)_ |
+| Spike start | 2026-08-12 | 1000 | 2.5% | 0 | Day 0 baseline (auto) |
 
 ## Daily metrics
 
@@ -77,7 +76,20 @@ _Appended automatically by `run-direct-production-spike.mjs`. Do not edit dated 
 
 
 
+
+
 ### 2026-08-12 — direct spike snapshot
+
+- **Generated:** 2026-08-12T15:23:24.329Z
+- **Window:** last 7 days (since 2026-08-05T15:23:23.754Z)
+- **Runs:** 1000 (6 with target URLs)
+- **blocked_ratio_7d:** 2.5% (5/204 URLs)
+- **Mean per-run ratio:** 2.5%
+- **Median per-run ratio:** 0.0%
+- **Degraded runs:** 0
+- **Gate (50%):** STAY_DIRECT
+
+
 
 - **Generated:** 2026-08-12T15:01:05.483Z
 - **Window:** last 7 days (since 2026-08-05T15:01:05.150Z)
