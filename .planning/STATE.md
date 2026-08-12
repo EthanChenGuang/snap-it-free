@@ -5,13 +5,13 @@ milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 15
 current_phase_name: scraper-incremental-crawl-and-search-efficiency
 current_plan: 6
-status: verifying
+status: executing
 stopped_at: Completed 15-06-PLAN.md
-last_updated: "2026-08-11T18:14:39.379Z"
+last_updated: "2026-08-12T14:49:40.849Z"
 progress:
-  total_phases: 9
+  total_phases: 10
   completed_phases: 8
-  total_plans: 39
+  total_plans: 44
   completed_plans: 39
   percent: 89
 last_activity: 2026-08-11
@@ -33,8 +33,8 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 15 (scraper-incremental-crawl-and-search-efficiency) — EXECUTING
 **Current Plan:** 6
-**Total Plans in Phase:** 6
-Status: Phase complete — ready for verification
+**Total Plans in Phase:** 5
+Status: Ready to execute
 
 Progress: [██████████] 100% v2.0 (0/7 phases)
 
@@ -202,6 +202,14 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 | 2026-08-11 | make-the-filter-sheet-apply-instantly-in | Removed draft-then-Apply model; 城市/分类 chip taps commit instantly to applied filters, 应用 is now close-only |
 | 2026-08-11 | rename-the-subito-catch-all-category-lab | usato chip label "All categories" → "Other"/"Altro"/"其他"; matchesSubitoCategory now matches unresolved listings as the true catch-all (not just literal usato) |
 | 2026-08-11 | speed-up-the-scraper-s-post-persist-tran | Scraper translation pipeline: batch-scoped config/cap load (was per-listing) + hand-rolled 4x bounded-concurrency LLM dispatch; 8 new tests, 95/95 scraper tests pass |
+| 2026-08-12 | runs-macos-master-detail | Admin runs page: macOS master-detail layout, segmented filters, detail panel with metrics + copyable log |
+| 2026-08-12 | sources-macos-grid | Admin sources page: macOS grid cards, iOS toggles, inline pause banner, header refresh |
+| 2026-08-12 | source-detail-macos-settings | Subito source detail: macOS two-column settings layout, chip matrix, code-editor URLs, sidebar controls |
+| 2026-08-12 | source-detail-chip-url-editor-fix | Chip blue accent selected state + URL editor fixed height, content-only line numbers |
+| 2026-08-12 | translation-queue-macos-cards | Translation queue: macOS inset grouped cards, batch bar, error chips |
+| 2026-08-12 | translation-queue-error-badge | Translation queue: inline error badge + macOS tooltip replaces yellow alert box |
+| 2026-08-12 | source-card-run-stats | Source cards: micro stats panel for recent run + last full success count |
+| 2026-08-12 | source-card-run-stats-redesign | Source cards: refined run stats layout, pill badges, failure tooltip |
 
 ## Accumulated Context
 
@@ -212,3 +220,4 @@ Progress: [██████████] 100% v2.0 (0/7 phases)
 - Phase 12.1 executed: trilingual messages.feed.subitoCategories + locale-aware filter/chip/pill labels; UAT 5/5, unit 36/36
 - Phase 12.1 verified (self-tested, no human in the loop per user request): UAT 5/5, security review 6/6 threats closed (retroactive STRIDE, no threat model authored at plan time), goal-backward verification 11/11 after fixing one gap — `scripts/phase12-uat-automation.mjs`'s selector had gone stale when an unrelated quick task (260810-tb5, commit 47d5259) swapped FilterSheet's checkbox list for a button chip grid 2 min after the UAT commit. Fixed and re-confirmed 5/5 against current HEAD. Phase marked complete in ROADMAP/STATE.
 - Phase 13 verified: `/gsd-verify-work 13` — 20/20 automated must-haves, Plan 05 gap closure (cherry-pick 9d7dfae) green test:lib 287/287 + build; 13-VERIFICATION.md created; 4 human UAT items + D-12 PostForm field-loss documented open
+- Phase 16 added: Proxy cost optimization — evaluate free/self-hosted vs cheaper providers (Decodo quota exhaustion trigger); 16-RESEARCH.md pre-populated with provider comparison

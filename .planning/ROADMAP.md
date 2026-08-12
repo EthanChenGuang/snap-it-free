@@ -347,13 +347,14 @@ Plans:
 | 12. Canonical Category Mapping | v2.0 | 4/4 | Complete | 2026-08-10 |
 | 13. Select Location | v2.0 | 5/5 | Verified | 2026-08-10 |
 | 14. Settings Parity | v2.0 | 8/8 | Complete | 2026-08-10 |
-| 15. Scraper Crawl Efficiency | v2.0 | 0/TBD | In Progress|  |
+| 15. Scraper Crawl Efficiency | v2.0 | 6/6 | Complete | 2026-08-11 |
+| 16. Proxy Cost Optimization | v2.0 | 0/TBD | Planned | — |
 | 7. Production Deploy | v2.0 | 0/4 | Planned | — |
 
 ## Execution Order
 
 ```
-Phase 9 → 10 → 11 → 12 → 13 → 14 → 15 → 7
+Phase 9 → 10 → 11 → 12 → 13 → 14 → 15 → 16 → 7
 ```
 
 UX phases first; **scraper efficiency before production deploy**; deploy last.
@@ -371,6 +372,42 @@ Snag-style interaction reference screenshots (feed grid, filter sheet, favorites
 | `/favorites` | category folder grid |
 | `/settings` | expanded consumer settings |
 | `/post` | drawer/menu entry (not bottom tab) |
+
+### Phase 16: Proxy Cost Optimization — evaluate free/self-hosted vs cheaper providers
+
+**Goal:** Reduce or eliminate recurring proxy spend while keeping Subito incremental crawl reliable. Evaluate whether direct/degraded crawl (already supported) is sufficient; if not, switch to the cheapest residential provider with measured block-rate comparison.
+
+**Requirements:** PROXY-C01, PROXY-C02, PROXY-C03, PROXY-C04, PROXY-C05
+
+**Depends on:** Phase 15
+
+**Plans:** 5 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 16-01-PLAN.md — Tracer: proxy quota fatal → direct fallback + degraded metrics (PROXY-C04)
+- [ ] 16-02-PLAN.md — Research verdict + ADR cost ladder draft + spike scripts (PROXY-C01)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 16-03-PLAN.md — 7-day direct production spike + decision gate (PROXY-C02)
+- [ ] 16-04-PLAN.md — Webshare/IPRoyal vs Decodo provider comparison (PROXY-C03)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 16-05-PLAN.md — Admin cost tier UI + ADR finalization + phase gate (PROXY-C05)
+
+**Success criteria:**
+
+1. Research artifact documents free/OSS options with honest verdict (no free residential pool exists)
+2. 7-day production spike: direct crawl block rate measured; decision gate documented
+3. If residential needed: Webshare (or IPRoyal) trial compared against Decodo on same URL matrix
+4. Worker implements proxy-quota fatal → direct fallback + degraded (optional but recommended)
+5. ADR 015 addendum: cost ladder + when residential is optional vs required
+6. Admin settings show proxy cost tier recommendation based on measured block rate
+
+**Context:** [phases/16-proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper/16-RESEARCH.md](phases/16-proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper/16-RESEARCH.md)
 
 ---
 *Roadmap updated: 2026-08-11 — Phase 15 expanded (incremental + proxy + stack ADR)*
