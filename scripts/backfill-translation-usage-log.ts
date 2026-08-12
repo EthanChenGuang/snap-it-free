@@ -7,6 +7,7 @@
  * Usage:
  *   npx tsx scripts/backfill-translation-usage-log.ts
  *   npx tsx scripts/backfill-translation-usage-log.ts --dry-run
+ *   npx tsx scripts/backfill-translation-usage-log.ts --force
  *
  * Env: SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (.env.local or scraper/.env)
  */
@@ -24,6 +25,7 @@ const OUTPUT_TOKENS = 130;
 const BATCH_SIZE = 200;
 
 const dryRun = process.argv.includes('--dry-run');
+const force = process.argv.includes('--force');
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 function loadEnvFile(path: string) {
@@ -120,22 +122,34 @@ if (backfillCountError) {
   process.exit(1);
 }
 
-if ((existingBackfillCount ?? 0) > 0 && !process.argv.includes('--force')) {
+if ((existingBackfillCount ?? 0) > 0 && !force) {
   console.log(
     JSON.stringify({
       event: 'backfill_skipped',
       reason: 'backfill rows already exist',
       existing_backfill_rows: existingBackfillCount,
-      hint: 'Pass --force to run again (skips listings that already have any log row)',
+      hint: 'Pass --force to delete prior backfill rows and re-estimate',
     }),
   );
   process.exit(0);
 }
 
+if (force && (existingBackfillCount ?? 0) > 0 && !dryRun) {
+  const { error: deleteError } = await supabase
+    .from('translation_usage_log')
+    .delete()
+    .eq('source', 'backfill');
+  if (deleteError) {
+    console.error(JSON.stringify({ event: 'backfill_error', message: deleteError.message }));
+    process.exit(1);
+  }
+}
+
 const { data: loggedListingRows, error: loggedError } = await supabase
   .from('translation_usage_log')
   .select('listing_id')
-  .not('listing_id', 'is', null);
+  .not('listing_id', 'is', null)
+  .neq('source', 'backfill');
 
 if (loggedError) {
   console.error(JSON.stringify({ event: 'backfill_error', message: loggedError.message }));
@@ -236,6 +250,8 @@ console.log(
   JSON.stringify(
     {
       event: dryRun ? 'backfill_dry_run' : 'backfill_complete',
+      force,
+      deleted_backfill_rows: force ? existingBackfillCount ?? 0 : 0,
       provider,
       model,
       scanned,
