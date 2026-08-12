@@ -381,13 +381,13 @@ Snag-style interaction reference screenshots (feed grid, filter sheet, favorites
 
 **Depends on:** Phase 15
 
-**Plans:** 1/5 plans executed
+**Plans:** 2/5 plans executed
 
 Plans:
 **Wave 1**
 
 - [x] 16-01-PLAN.md — Tracer: proxy quota fatal → direct fallback + degraded metrics (PROXY-C04)
-- [ ] 16-02-PLAN.md — Research verdict + ADR cost ladder draft + spike scripts (PROXY-C01)
+- [x] 16-02-PLAN.md — Research verdict + ADR cost ladder draft + spike scripts (PROXY-C01)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

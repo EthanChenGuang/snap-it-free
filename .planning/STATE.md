@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 16
 current_phase_name: proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: Completed 16-01-PLAN.md
-last_updated: "2026-08-12T14:54:29.236Z"
+stopped_at: Completed 16-02-PLAN.md
+last_updated: "2026-08-12T14:58:44.153Z"
 progress:
   total_phases: 10
   completed_phases: 8
   total_plans: 44
-  completed_plans: 40
+  completed_plans: 41
   percent: 80
 last_activity: 2026-08-11
 last_activity_desc: "Quick task 260811-nwf: scraper translation pipeline batch-scoped config/cap + bounded-concurrency dispatch, 80 round trips → 2-3 per batch of 20"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 16 (proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper) — EXECUTING
-**Current Plan:** 2
+**Current Plan:** 3
 **Total Plans in Phase:** 5
 Status: Ready to execute
 
-Progress: [█████████░] 91% v2.0 (0/7 phases)
+Progress: [█████████░] 93% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -95,6 +95,7 @@ Progress: [█████████░] 91% v2.0 (0/7 phases)
 | Phase 15 P05 | 12 | 2 tasks | 7 files |
 | Phase 15 P06 | 18 | 3 tasks | 12 files |
 | Phase 16 P01 | 2min | 2 tasks | 8 files |
+| Phase 16-proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper P02 | 5min | 3 tasks | 5 files |
 
 ## Deferred Items (from v1.0)
 
@@ -114,8 +115,8 @@ Progress: [█████████░] 91% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-12T14:54:29.223Z
-**Stopped at:** Completed 16-01-PLAN.md
+**Last session:** 2026-08-12T14:58:44.139Z
+**Stopped at:** Completed 16-02-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -183,6 +184,9 @@ Progress: [█████████░] 91% v2.0 (0/7 phases)
 - [Phase ?]: Full crawl admin trigger POSTs subito job with crawl_mode full (D-15-08)
 - [Phase ?]: ProxyQuotaFatalError enables single direct retry on quota exhaustion without hard-aborting runs
 - [Phase ?]: recordDegradedRun skipped for blocked-ratio when fallback already recorded to avoid double degraded_run_count
+- [Phase ?]: PROXY-C01: no sustainable free residential pool; OSS managers need paid upstream IPs
+- [Phase ?]: ADR 015 cost ladder draft: direct default; residential recommended when blocked_ratio_7d ≥ 0.5
+- [Phase ?]: Human approved 16-PROXY-COST-VERDICT and ADR cost ladder draft (Plan 16-02 task 3)
 
 ## Quick Tasks Completed
 

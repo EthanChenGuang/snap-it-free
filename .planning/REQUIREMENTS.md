@@ -71,7 +71,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Proxy Cost Optimization (Phase 16)
 
-- [ ] **PROXY-C01**: Research artifact — free/OSS proxy options verdict documented (no free residential pool; OSS managers require paid upstream IPs)
+- [x] **PROXY-C01**: Research artifact — free/OSS proxy options verdict documented (no free residential pool; OSS managers require paid upstream IPs)
 - [ ] **PROXY-C02**: 7-day direct-crawl production spike with block-rate metrics and decision gate (STAY_DIRECT vs NEED_RESIDENTIAL at 50% threshold)
 - [ ] **PROXY-C03**: Provider comparison spike — Webshare (or IPRoyal) vs Decodo on same URL matrix with cost-aware recommendation
 - [x] **PROXY-C04**: Worker proxy-quota fatal → direct fallback + degraded run (no hard abort on quota exhaustion)
@@ -180,7 +180,7 @@ Deferred beyond v2.0. Tracked but not in current roadmap.
 | SCRP-E06 | Phase 15 | Complete |
 | SCRP-E07 | Phase 15 | Complete |
 | SCRP-E08 | Phase 15 | Complete |
-| PROXY-C01 | Phase 16 | Pending |
+| PROXY-C01 | Phase 16 | Complete |
 | PROXY-C02 | Phase 16 | Pending |
 | PROXY-C03 | Phase 16 | Pending |
 | PROXY-C04 | Phase 16 | Complete |
