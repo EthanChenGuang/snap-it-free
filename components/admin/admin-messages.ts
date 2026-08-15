@@ -1,6 +1,7 @@
 export const adminNav = {
   dashboard: '概览',
   sources: '数据源',
+  billing: '平台费用',
   runs: '运行记录',
   rejects: '拒绝记录',
   translation: '翻译队列',
@@ -92,6 +93,23 @@ export const sourcesMessages = {
   validateUrlsFormatError: '格式错误',
   validateUrlsReachError: '不可达',
   validateUrlsRequestError: '无法完成 URL 验证，请稍后重试。',
+  facebookSessionLabel: 'Facebook 会话 Cookie',
+  facebookSessionHelp:
+    '粘贴 Playwright storageState 或 cookie JSON。保存前请先测试会话是否有效。',
+  facebookSessionConfigured: '已配置会话（加密存储）',
+  facebookSessionNotConfigured: '未配置会话',
+  facebookSessionPlaceholder: '[{"name":"c_user","value":"…","domain":".facebook.com","path":"/"}]',
+  facebookTestSession: '测试会话',
+  facebookTestSessionRunning: '测试中…',
+  facebookTestSessionSuccess: '会话有效，可保存。',
+  facebookTestSessionExpired: '会话已过期或无效，请重新登录 Facebook 后导出 cookie。',
+  facebookTestSessionInvalid: '会话 JSON 格式无效。',
+  facebookProxyLabel: '共享代理',
+  facebookProxyConfigured: '已配置',
+  facebookProxyNotConfigured: '未配置',
+  facebookProxyHelp:
+    'Facebook 抓取需要住宅代理。请在系统设置中配置 proxy_enc。',
+  facebookProxySettingsLink: '打开代理设置',
 } as const;
 
 export const antiBlockPresetLabels: Record<string, string> = {
@@ -108,6 +126,14 @@ export const sourceDisplayNames: Record<string, string> = {
   vinted: 'Vinted',
   wallapop: 'Wallapop',
   ebay: 'eBay.it',
+};
+
+export const sourceIcons: Record<string, string> = {
+  subito: 'storefront',
+  facebook: 'groups',
+  vinted: 'checkroom',
+  wallapop: 'local_mall',
+  ebay: 'gavel',
 };
 
 export const runsMessages = {
@@ -287,12 +313,17 @@ export const translationMessages = {
   pageTitle: '翻译队列',
   pageSubtitle: '监控待翻译与失败的 listing，支持单条或批量重试。',
   pendingBanner: (n: number) => `${n} 条 listing 等待翻译`,
+  pendingBannerSuffix: '条 listing 等待翻译',
   pendingBannerTruncated: (shown: number, total: number) =>
     `${total} 条 listing 等待翻译（仅显示前 ${shown} 条，请重试后刷新查看剩余）`,
+  pendingBannerTruncatedSuffix: (shown: number) =>
+    `条 listing 等待翻译（仅显示前 ${shown} 条，请重试后刷新查看剩余）`,
   retry: '重试',
   retryAll: '重新翻译',
   retrying: '翻译中…',
   retryAllPending: '重新翻译全部待处理',
+  retryAllPendingProcessing: '批量处理中…',
+  retryAllPendingComplete: '全量待处理 Translation 任务已完成',
   batchSelection: (selected: number, total: number) =>
     `已选 ${selected} 项 / 共 ${total} 条待翻译`,
   batchRetry: '批量重试',
@@ -414,6 +445,7 @@ export const adminNavItems: Array<{
 }> = [
   { key: 'dashboard', href: '/admin', icon: 'dashboard' },
   { key: 'sources', href: '/admin/sources', icon: 'source' },
+  { key: 'billing', href: '/admin/billing', icon: 'credit_card' },
   { key: 'runs', href: '/admin/runs', icon: 'play_arrow' },
   { key: 'rejects', href: '/admin/rejects', icon: 'block', badge: 'rejects' },
   { key: 'translation', href: '/admin/translation', icon: 'translate', badge: 'pendingTranslations' },

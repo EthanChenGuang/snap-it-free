@@ -8,11 +8,13 @@ import { adminShellMessages, sourcesMessages } from '@/components/admin/admin-me
 import { isRunNowActivePhase } from '@/lib/admin/use-run-now';
 import { RegaloUrlMatrix } from '@/components/admin/RegaloUrlMatrix';
 import { VintedUrlMatrix } from '@/components/admin/VintedUrlMatrix';
+import { FacebookUrlMatrix } from '@/components/admin/FacebookUrlMatrix';
 import { ReplaceUrlsConfirmDialog } from '@/components/admin/ReplaceUrlsConfirmDialog';
 import { TargetUrlEditor } from '@/components/admin/TargetUrlEditor';
 import { dedupeUrls } from '@/lib/admin/subito-regalo-catalog';
 import { RECOMMENDED_SUBITO_SEED_URLS } from '@/lib/admin/subito-recommended-seed';
 import { RECOMMENDED_VINTED_SEED_URLS } from '@/lib/admin/vinted-recommended-seed';
+import { RECOMMENDED_FACEBOOK_SEED_URLS } from '@/lib/admin/facebook-recommended-seed';
 import type { AntiBlockPreset, SourceDetail } from '@/lib/admin/types';
 import {
   formatThresholdPercent,
@@ -84,10 +86,16 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
   const [seedConfirmOpen, setSeedConfirmOpen] = useState(false);
   const [matrixResetToken, setMatrixResetToken] = useState(0);
   const [runPhase, setRunPhase] = useState<RunNowPhase>('idle');
+  const [sessionJsonText, setSessionJsonText] = useState('');
+  const [showSessionJson, setShowSessionJson] = useState(false);
+  const [sessionTesting, setSessionTesting] = useState(false);
+  const [sessionTestMessage, setSessionTestMessage] = useState<string | null>(null);
+  const [sessionTestError, setSessionTestError] = useState(false);
 
   const isSubito = initialSource.slug === 'subito';
   const isVinted = initialSource.slug === 'vinted';
-  const hasUrlMatrix = isSubito || isVinted;
+  const isFacebook = initialSource.slug === 'facebook';
+  const hasUrlMatrix = isSubito || isVinted || isFacebook;
 
   const currentUrlCount = useMemo(
     () =>
@@ -99,7 +107,11 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
   );
 
   const applyRecommendedSeed = () => {
-    const seedUrls = isVinted ? RECOMMENDED_VINTED_SEED_URLS : RECOMMENDED_SUBITO_SEED_URLS;
+    const seedUrls = isFacebook
+      ? RECOMMENDED_FACEBOOK_SEED_URLS
+      : isVinted
+        ? RECOMMENDED_VINTED_SEED_URLS
+        : RECOMMENDED_SUBITO_SEED_URLS;
     setTargetUrlsText(seedUrls.join('\n'));
     setMatrixResetToken((token) => token + 1);
   };
@@ -136,17 +148,23 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
         .filter(Boolean),
     );
 
+    const payload: Record<string, unknown> = {
+      enabled,
+      interval_minutes: interval,
+      anti_block_preset: antiBlock,
+      target_urls: urls,
+    };
+
+    if (isFacebook && sessionJsonText.trim()) {
+      payload.session_json = sessionJsonText.trim();
+    }
+
     setSaving(true);
     try {
       const response = await fetch(`/api/admin/sources/${initialSource.slug}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          enabled,
-          interval_minutes: interval,
-          anti_block_preset: antiBlock,
-          target_urls: urls,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -160,6 +178,9 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
       }
 
       setSuccess(true);
+      if (isFacebook && sessionJsonText.trim()) {
+        setSessionJsonText('');
+      }
       router.refresh();
     } catch {
       setError(adminShellMessages.loadError);
@@ -170,6 +191,50 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
 
   const handleRunComplete = () => {
     router.refresh();
+  };
+
+  const handleTestSession = async () => {
+    setSessionTestMessage(null);
+    setSessionTestError(false);
+
+    if (!sessionJsonText.trim()) {
+      setSessionTestError(true);
+      setSessionTestMessage(sourcesMessages.facebookTestSessionInvalid);
+      return;
+    }
+
+    setSessionTesting(true);
+    try {
+      const response = await fetch(`/api/admin/sources/${initialSource.slug}/test-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_json: sessionJsonText.trim() }),
+      });
+
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        reason?: 'session_expired' | 'invalid_format';
+        error?: string;
+      };
+
+      if (payload.ok) {
+        setSessionTestError(false);
+        setSessionTestMessage(sourcesMessages.facebookTestSessionSuccess);
+        return;
+      }
+
+      setSessionTestError(true);
+      if (payload.reason === 'invalid_format') {
+        setSessionTestMessage(sourcesMessages.facebookTestSessionInvalid);
+      } else {
+        setSessionTestMessage(sourcesMessages.facebookTestSessionExpired);
+      }
+    } catch {
+      setSessionTestError(true);
+      setSessionTestMessage(adminShellMessages.loadError);
+    } finally {
+      setSessionTesting(false);
+    }
   };
 
   return (
@@ -243,6 +308,91 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
             />
           ) : null}
 
+          {isFacebook ? (
+            <FacebookUrlMatrix
+              targetUrlsText={targetUrlsText}
+              onTargetUrlsChange={setTargetUrlsText}
+              onApplyRecommendedSeedClick={handleApplyRecommendedSeedClick}
+              resetToAllChecked={matrixResetToken}
+            />
+          ) : null}
+
+          {isFacebook ? (
+            <section className="source-detail-card">
+              <header className="source-detail-card-header">
+                <div>
+                  <h2 className="source-detail-card-title">{sourcesMessages.facebookSessionLabel}</h2>
+                  <p className="source-detail-card-subtitle">{sourcesMessages.facebookSessionHelp}</p>
+                </div>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-high px-2.5 py-0.5 text-[12px]">
+                  <span
+                    className={`h-2 w-2 rounded-full ${initialSource.sessionConfigured ? 'bg-primary' : 'bg-outline-variant'}`}
+                    aria-hidden
+                  />
+                  {initialSource.sessionConfigured
+                    ? sourcesMessages.facebookSessionConfigured
+                    : sourcesMessages.facebookSessionNotConfigured}
+                </span>
+              </header>
+
+              <div className="relative rounded border border-outline-variant bg-surface-container-low">
+                <textarea
+                  value={sessionJsonText}
+                  onChange={(event) => {
+                    setSessionJsonText(event.target.value);
+                    setSessionTestMessage(null);
+                  }}
+                  rows={6}
+                  spellCheck={false}
+                  placeholder={sourcesMessages.facebookSessionPlaceholder}
+                  className={cn(
+                    'w-full resize-y bg-transparent px-3 py-2 font-mono text-[13px] leading-relaxed focus:outline-none',
+                    !showSessionJson && sessionJsonText ? 'text-transparent caret-on-surface' : 'text-on-surface',
+                  )}
+                  style={
+                    !showSessionJson && sessionJsonText
+                      ? { WebkitTextSecurity: 'disc' } as React.CSSProperties
+                      : undefined
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSessionJson((current) => !current)}
+                  className="absolute right-2 top-2 text-secondary hover:text-on-surface"
+                  aria-label={showSessionJson ? 'Hide session JSON' : 'Show session JSON'}
+                >
+                  <span className="material-symbols-outlined text-[20px]" aria-hidden>
+                    {showSessionJson ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  disabled={sessionTesting}
+                  onClick={handleTestSession}
+                  className="source-detail-btn-secondary"
+                >
+                  {sessionTesting
+                    ? sourcesMessages.facebookTestSessionRunning
+                    : sourcesMessages.facebookTestSession}
+                </button>
+                {sessionTestMessage ? (
+                  <p
+                    className={cn(
+                      'text-[13px]',
+                      sessionTestError ? 'text-error' : 'text-secondary',
+                    )}
+                    role="status"
+                  >
+                    {sessionTestMessage}
+                  </p>
+                ) : null}
+              </div>
+            </section>
+          ) : null}
+
           <TargetUrlEditor
             value={targetUrlsText}
             onChange={setTargetUrlsText}
@@ -269,6 +419,42 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
                 label={sourcesMessages.sourceStatusLabel}
               />
             </div>
+
+            {isFacebook ? (
+              <>
+                <div className="source-detail-divider" />
+                <div className="source-detail-field">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <h3 className="source-detail-card-title">{sourcesMessages.facebookProxyLabel}</h3>
+                      <p className="source-detail-card-subtitle">{sourcesMessages.facebookProxyHelp}</p>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-high px-2.5 py-0.5 text-[12px]">
+                      <span
+                        className={`h-2 w-2 rounded-full ${initialSource.proxyConfigured ? 'bg-primary' : 'bg-outline-variant'}`}
+                        aria-hidden
+                      />
+                      {initialSource.proxyConfigured
+                        ? sourcesMessages.facebookProxyConfigured
+                        : sourcesMessages.facebookProxyNotConfigured}
+                    </span>
+                  </div>
+                  {!initialSource.proxyConfigured ? (
+                    <p className="source-detail-inline-banner source-detail-inline-banner-warning mt-3">
+                      <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                        warning
+                      </span>
+                      <span>
+                        {sourcesMessages.facebookProxyHelp}{' '}
+                        <Link href="/admin/settings" className="underline underline-offset-2">
+                          {sourcesMessages.facebookProxySettingsLink}
+                        </Link>
+                      </span>
+                    </p>
+                  ) : null}
+                </div>
+              </>
+            ) : null}
 
             <div className="source-detail-divider" />
 
