@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 17
 current_phase_name: configure-vinted-scraping-and-integrate-free-items-into-curr
-current_plan: 6
+current_plan: 7
 status: executing
-stopped_at: Completed 17-04-PLAN.md
-last_updated: "2026-08-15T14:17:27.223Z"
+stopped_at: Completed 17-05-PLAN.md
+last_updated: "2026-08-15T14:20:41.189Z"
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 51
-  completed_plans: 47
+  completed_plans: 48
   percent: 73
 last_activity: 2026-08-15
 last_activity_desc: "Quick task 260815-fjs: 扩展意大利城市搜索范围（米兰、佛罗伦萨、罗马、那不勒斯、佩鲁贾、都灵、普拉托）"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 17 (configure-vinted-scraping-and-integrate-free-items-into-curr) — EXECUTING
-**Current Plan:** 6
+**Current Plan:** 7
 **Total Plans in Phase:** 7
 Status: Ready to execute
 
-Progress: [█████████░] 92% v2.0 (0/7 phases)
+Progress: [█████████░] 94% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -101,6 +101,7 @@ Progress: [█████████░] 92% v2.0 (0/7 phases)
 | Phase 17 P03 | 2min | 3 tasks | 12 files |
 | Phase 17-configure-vinted-scraping-and-integrate-free-items-into-curr P06 | 2min | 2 tasks | 7 files |
 | Phase 17-configure-vinted-scraping-and-integrate-free-items-into-curr P04 | 3min | 3 tasks | 7 files |
+| Phase 17-configure-vinted-scraping-and-integrate-free-items-into-curr P05 | 6min | 3 tasks | 7 files |
 
 ## Deferred Items (from v1.0)
 
@@ -120,8 +121,8 @@ Progress: [█████████░] 92% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-15T14:17:27.211Z
-**Stopped at:** Completed 17-04-PLAN.md
+**Last session:** 2026-08-15T14:20:41.177Z
+**Stopped at:** Completed 17-05-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -203,6 +204,7 @@ Progress: [█████████░] 92% v2.0 (0/7 phases)
 - [Phase ?]: No FilterSheet source filter added — D-17-27 deferred per CONTEXT
 - [Phase ?]: D-17-17 option-a: vinted branch in resolveCanonicalCategorySlug (map → inference → null)
 - [Phase ?]: D-17-21 option-a: FilterSheet unchanged — Vinted matches via persisted canonical slug only
+- [Phase ?]: D-17-05/19 option-a: Full 17×2 Vinted catalog URL matrix (34 seeds)
 
 ## Quick Tasks Completed
 

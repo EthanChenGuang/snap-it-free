@@ -418,7 +418,7 @@ Plans:
 
 **Depends on:** Phase 16
 
-**Plans:** 5/7 plans executed
+**Plans:** 6/7 plans executed
 
 Plans:
 
@@ -440,7 +440,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3)*
 
-- [ ] 17-05-PLAN.md — Admin source detail parity + 34 URL seed matrix (D-17-37, D-17-34)
+- [x] 17-05-PLAN.md — Admin source detail parity + 34 URL seed matrix (D-17-37, D-17-34)
 
 **Wave 5** *(blocked on Wave 1 — consumer paths)*
 
