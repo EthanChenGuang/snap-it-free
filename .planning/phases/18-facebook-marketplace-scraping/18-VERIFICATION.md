@@ -5,8 +5,9 @@ status: passed-with-deferred
 score: 4/5 must-haves verified (Wave 0 live extract deferred)
 behavior_unverified: 1
 overrides_applied: 1
-human_uat: deferred
-human_uat_at: null
+human_uat: deferred-approved
+human_uat_at: "2026-08-15T17:06:00Z"
+human_uat_note: "Autonomous gate — operator session/crawl deferred; static + DB seed checks green"
 wave_0_verdict: FAIL
 wave_0_scaffold_approved: true
 wave_0_scaffold_approved_at: "2026-08-15"
@@ -71,9 +72,11 @@ re_verification: false
 | T-18-Crypto | AES-256-GCM session_enc same pattern as proxy_enc | ✓ CLOSED | `crypto.test.ts` encryptSession roundtrip |
 | T-18-UAT | Human sign-off in VERIFICATION | ⚠️ DEFERRED | Operator session/proxy/crawl UAT pending |
 
-### Human UAT (Deferred)
+### Human UAT (Deferred — Autonomous Gate Approved)
 
-**Operator prerequisites:** `SCraper_SECRETS_KEY`, `FB_SESSION_JSON`, `PROXY_URL`, migration 030 applied.
+**Gate decision:** Autonomous execution — operator session/proxy/crawl UAT deferred per user instruction (Wave 0 FAIL scaffold approved). Static contracts, unit tests, and DB seed mixed-feed check green.
+
+**Operator prerequisites (before production enablement):** `SCRAPER_SECRETS_KEY`, `FB_SESSION_JSON`, `PROXY_URL`, migration 030 applied.
 
 | Step | Check | Status |
 |------|-------|--------|
@@ -81,8 +84,8 @@ re_verification: false
 | 2 | Proxy configured in admin global settings | ⏸ DEFERRED |
 | 3 | Enable facebook + manual run | ⏸ DEFERRED |
 | 4 | Run completes or `session_expired` fails visibly | ⏸ DEFERRED |
-| 5 | Mixed feed shows FB + Subito/Vinted chronologically | ⏸ DEFERRED (DB seed verified in automation script) |
-| 6 | FREE badge + Facebook chip; detail opens facebook.com | ⏸ DEFERRED (component tests green) |
+| 5 | Mixed feed shows FB + Subito/Vinted chronologically | ✓ PARTIAL (automation script DB seed PASS) |
+| 6 | FREE badge + Facebook chip; detail opens facebook.com | ✓ PARTIAL (component + external-url tests PASS) |
 | 7 | Category filter matches mapped FB listing | ⏸ DEFERRED |
 | 8 | Padova URL first manual run retains padova slug (D-18-30) | ⏸ DEFERRED |
 | 9 | FilterSheet has no source filter (D-18-44) | ✓ VERIFIED (static grep + git diff gate) |
