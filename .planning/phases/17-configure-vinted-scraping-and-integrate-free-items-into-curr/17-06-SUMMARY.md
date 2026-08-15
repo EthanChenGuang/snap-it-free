@@ -126,7 +126,7 @@ Each task was committed atomically:
 1. **Task 1: Source chip on ListListingCard + external URL allowlist** - `a57c8f7` (feat)
 2. **Task 2: Feed search + favorites contract tests** - `da1ddbe` (test)
 
-**Plan metadata:** pending (docs commit)
+**Plan metadata:** `b2bed82` (docs: complete plan)
 
 ## Files Created/Modified
 
