@@ -25,6 +25,8 @@ export type RawListing = {
   image_urls?: string[];
   /** Category listing URL this listing was scraped from (D-20). */
   source_category_url?: string;
+  /** Vinted leaf catalog_id from detail enrichment (D-17-16). */
+  catalog_id?: number | null;
 };
 
 export type SelectorHitRate = { hits: number; total: number };

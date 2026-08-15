@@ -1,13 +1,39 @@
+import { inferListingCategory } from '../../../lib/listings/categories.js';
+import { computeScrapedListingExpiresAt as computeExpiresAt } from '../../../lib/listings/scraped-listing-ttl.js';
+import { mapVintedCatalogToSlug } from '../../../lib/listings/vinted-category-map.js';
 import { contentHash } from '../shared/dedupe.js';
 import { CanonicalListingSchema, type CanonicalListing } from '../shared/schema.js';
 import { loadZonePolygons, tagZone } from '../shared/zone-tag.js';
 import type { RawListing } from '../subito/extract.js';
-import { computeScrapedListingExpiresAt as computeExpiresAt } from '../../../lib/listings/scraped-listing-ttl.js';
 import { isFreePrice } from './filters.js';
 
 export type NormalizeResult = CanonicalListing | { reject: string };
 
 const zonePolygons = loadZonePolygons();
+
+/** Keep in sync with INFERRED_CATEGORY_TO_SLUG in lib/listings/canonical-categories.ts */
+const INFERRED_CATEGORY_TO_SLUG = {
+  furniture: 'arredamento-casalinghi',
+  tech: 'informatica',
+  apparel: 'abbigliamento-accessori',
+  books: 'libri-riviste',
+  home_decor: 'arredamento-casalinghi',
+} as const;
+
+function parseCatalogIdFromDescription(description?: string): number | null {
+  if (!description?.startsWith('catalog_id:')) return null;
+  const id = Number(description.slice('catalog_id:'.length));
+  return Number.isFinite(id) ? id : null;
+}
+
+function resolveVintedCategorySlug(raw: RawListing): string | null {
+  const catalogId = raw.catalog_id ?? parseCatalogIdFromDescription(raw.description);
+  const fromMap = mapVintedCatalogToSlug(catalogId);
+  if (fromMap) return fromMap;
+  const inferred = inferListingCategory(raw.title);
+  if (inferred) return INFERRED_CATEGORY_TO_SLUG[inferred];
+  return null;
+}
 
 /**
  * Normalize a Vinted raw listing to a canonical listing for persist.
@@ -39,6 +65,7 @@ export function normalizeVintedRawListing(raw: RawListing): NormalizeResult {
   }
   const expiresAt = computeExpiresAt(postedAt);
   const zone = raw.lat != null && raw.lng != null ? tagZone(raw.lat, raw.lng, zonePolygons) : null;
+  const category = resolveVintedCategorySlug(raw);
 
   const candidate = {
     source: 'vinted' as const,
@@ -55,7 +82,7 @@ export function normalizeVintedRawListing(raw: RawListing): NormalizeResult {
     posted_at: postedAt,
     expires_at: expiresAt,
     content_hash: '',
-    category: null,
+    category,
     raw_payload: { description: raw.description },
   };
 

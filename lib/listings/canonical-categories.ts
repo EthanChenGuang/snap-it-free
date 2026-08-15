@@ -7,11 +7,16 @@
 import { SUBITO_REGALO_CATALOG, type SubitoRegaloSlug } from '@/lib/admin/subito-regalo-catalog';
 import { inferListingCategory, type ListingCategory } from './categories';
 import type { ListingSource } from './types';
+import { mapVintedCatalogToSlug } from './vinted-category-map';
+
+export { mapVintedCatalogToSlug, VINTED_CATALOG_TO_SUBITO_SLUG } from './vinted-category-map';
 
 export type CanonicalCategoryInput = {
   source: ListingSource;
   title: string;
   category?: string | null;
+  /** Vinted item catalog_id from detail enrichment (D-17-16). */
+  vintedCatalogId?: number | null;
 };
 
 /** PostCategory values from PostForm — keep in sync with components/ugc/PostForm.tsx (D-11). */
@@ -75,6 +80,14 @@ export function resolveCanonicalCategorySlug(
   if (fromDb) return fromDb;
 
   if (input.source === 'facebook') return null;
+
+  if (input.source === 'vinted') {
+    const fromVinted = mapVintedCatalogToSlug(input.vintedCatalogId);
+    if (fromVinted) return fromVinted;
+    const inferred = inferListingCategory(input.title);
+    if (inferred) return INFERRED_CATEGORY_TO_SLUG[inferred];
+    return null;
+  }
 
   const inferred = inferListingCategory(input.title);
   if (inferred) return INFERRED_CATEGORY_TO_SLUG[inferred];

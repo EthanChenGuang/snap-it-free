@@ -276,6 +276,7 @@ export async function enrichListingDetail(
       price: listing.price,
       image_urls: listing.image_urls,
       source_category_url: listing.source_category_url,
+      catalog_id: detail.catalog_id,
       description: detail.catalog_id != null ? `catalog_id:${detail.catalog_id}` : undefined,
     };
 

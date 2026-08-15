@@ -37,6 +37,16 @@ describe('normalizeVintedRawListing (tracer row-shape gate)', () => {
     expect(result.expires_at > result.posted_at).toBe(true);
   });
 
+  it('persists canonical category slug from enriched catalog_id at normalize (D-17-16)', () => {
+    const result = normalizeVintedRawListing(
+      freeVintedRaw({ catalog_id: 1918, title: 'Oggetto generico' }),
+    );
+
+    expect('reject' in result).toBe(false);
+    if ('reject' in result) return;
+    expect(result.category).toBe('arredamento-casalinghi');
+  });
+
   it('rejects a non-free listing with reason not_free (D-17-04)', () => {
     const result = normalizeVintedRawListing(freeVintedRaw({ price: '4.35' }));
     expect(result).toEqual({ reject: 'not_free' });
