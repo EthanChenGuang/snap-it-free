@@ -117,7 +117,7 @@ status: complete
 2. **Task 2: Seed module, migration, URL validation** — `1044b42`
 3. **Task 3: VintedUrlMatrix + SourceDetailClient branch** — `e6a1028`
 
-**Plan metadata:** pending final docs commit
+**Plan metadata:** `d89538a` (docs: complete plan)
 
 ## Files Created/Modified
 
