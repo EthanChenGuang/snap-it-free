@@ -70,8 +70,8 @@ validated: 2026-08-15
 | Behavior | Requirement | Why Manual | Test Instructions | Status |
 |----------|-------------|------------|-------------------|--------|
 | Live 3-URL Vinted catalog spike | Wave 0 gate (D-17-36) | Live vinted.it; session cookies | Run spike script; record in `17-SPIKE-VINTED-CATALOG.md` | ✅ PASS |
-| Admin source flip + manual first run | D-17-34 | Operator workflow | Flip vinted to live, review seeded URLs, trigger manual run | ⬜ UAT pending |
-| Mixed feed with Vinted + Subito | D-17-25 | Needs persisted listings | Verify chronological sort in dev feed after crawl | ⬜ UAT pending |
+| Admin source flip + manual first run | D-17-34 | Operator workflow | Flip vinted to live, review seeded URLs, trigger manual run | ✅ PASS (`17-UAT.md` step 5) |
+| Mixed feed with Vinted + Subito | D-17-25 | Needs persisted listings | Verify chronological sort in dev feed after crawl | ✅ PASS (`17-UAT.md` step 6) |
 
 ---
 
@@ -84,6 +84,24 @@ validated: 2026-08-15
 - [x] Feedback latency < 120s
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Automated gate:** `npm run test:lib` 416/416 + `cd scraper && npm test` 183/183 — exit 0 (2026-08-15, Plan 17-07 Task 1)
+**Automated gate:** `npm run test:lib` 418/418 + `cd scraper && npm test -- src/vinted/` 30/30 — exit 0 (2026-08-15 re-audit)
 
-**Approval:** automated PASS; human UAT pending (Plan 17-07 Task 2)
+**Phase-scoped suite:** All Phase 17 automated requirements green. Full scraper suite (`cd scraper && npm test`) may include Phase 18 work-in-progress failures outside this phase scope.
+
+**Approval:** automated PASS + human UAT approved 2026-08-15 (`17-UAT.md`, `17-VERIFICATION.md`)
+
+---
+
+## Validation Audit 2026-08-15
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+| Requirements audited | SCRP-E01–E08, CAT-01, CAT-03, CARD-03, D-17-01–37 |
+| Lib tests | 418/418 green |
+| Vinted scraper tests | 30/30 green |
+| Manual-only (Wave 0 + UAT) | 3/3 PASS |
+
+_Re-audit: gsd-validate-phase orchestrator — no Nyquist gaps; nyquist_compliant confirmed._
