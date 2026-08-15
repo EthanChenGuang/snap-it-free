@@ -96,3 +96,21 @@ export async function runCrawlWithProxyFallback(
     };
   }
 }
+
+/**
+ * Run Facebook crawl with proxy — no direct-IP fallback (D-18-08/37, SCRP-E05).
+ */
+export async function runFacebookCrawlWithProxyFallback(
+  runFacebookCrawler: RunCrawlerFn,
+  urls: readonly string[],
+  preset: AntiBlockPreset,
+  proxyUrl: string | undefined,
+  options: RunSubitoCrawlerOptions,
+): Promise<ProxyFallbackResult> {
+  if (!proxyUrl) {
+    throw new Error('Facebook crawl requires residential proxy (D-18-08)');
+  }
+
+  const crawlResult = await runFacebookCrawler(urls, preset, proxyUrl, options);
+  return { crawlResult, fallbackDegraded: false };
+}

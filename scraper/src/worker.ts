@@ -18,7 +18,7 @@ import {
   updateNextRunAt,
 } from './config-loader.js';
 import { persistBatch } from './shared/persist.js';
-import { validateBatch, validateBatchHttp, VINTED_MIN_COUNT_RATIO_FULL, VINTED_MIN_COUNT_RATIO_INCREMENTAL } from './shared/validate-run.js';
+import { validateBatch, validateBatchHttp, VINTED_MIN_COUNT_RATIO_FULL, VINTED_MIN_COUNT_RATIO_INCREMENTAL, FACEBOOK_MIN_COUNT_RATIO_FULL, FACEBOOK_MIN_COUNT_RATIO_INCREMENTAL } from './shared/validate-run.js';
 import { loadZonePolygons, tagZone } from './shared/zone-tag.js';
 import { reconcileOrphanScrapeRuns } from './orphan-runs.js';
 import { runSchedulerTick, TICK_INTERVAL_MS } from './scheduler.js';
@@ -37,7 +37,7 @@ import {
   isProductionSoftProxyContext,
   type CrawlMode,
 } from './worker-proxy-gate.js';
-import { runCrawlWithProxyFallback, runSubitoCrawlWithProxyFallback, runVintedCrawlWithProxyFallback, PROXY_QUOTA_FALLBACK_REASON } from './worker-proxy-fallback.js';
+import { runCrawlWithProxyFallback, runSubitoCrawlWithProxyFallback, runVintedCrawlWithProxyFallback, runFacebookCrawlWithProxyFallback, PROXY_QUOTA_FALLBACK_REASON } from './worker-proxy-fallback.js';
 import {
   acquireManualJobExecution,
   DuplicateJobRunError,
@@ -413,8 +413,9 @@ export async function runSourceScrape(
       }
       const session = await loadFacebookSession(supabase, sourceSlug);
       await probeFacebookSessionOrThrow(session, config.proxyUrl);
-      crawlResult = await runFacebookCrawler(
-        config.urls.slice(0, 1),
+      const fallbackResult = await runFacebookCrawlWithProxyFallback(
+        runFacebookCrawler,
+        config.urls,
         config.preset,
         config.proxyUrl,
         {
@@ -426,6 +427,8 @@ export async function runSourceScrape(
           runId: run.id,
         },
       );
+      crawlResult = fallbackResult.crawlResult;
+      fallbackDegraded = fallbackResult.fallbackDegraded;
     } else {
       throw new Error(`No crawler implementation for source: ${sourceSlug}`);
     }
@@ -514,7 +517,12 @@ export async function runSourceScrape(
                 minCountRatioFull: VINTED_MIN_COUNT_RATIO_FULL,
                 minCountRatioIncremental: VINTED_MIN_COUNT_RATIO_INCREMENTAL,
               }
-            : {}),
+            : sourceSlug === 'facebook'
+              ? {
+                  minCountRatioFull: FACEBOOK_MIN_COUNT_RATIO_FULL,
+                  minCountRatioIncremental: FACEBOOK_MIN_COUNT_RATIO_INCREMENTAL,
+                }
+              : {}),
         })
       : validateBatch(
           rawListings,
@@ -608,13 +616,23 @@ export async function runSourceScrape(
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
+    const isSessionExpired = message === 'session_expired';
+
+    if (isSessionExpired) {
+      await recordDegradedRun(supabase, 'Facebook session expired — operator re-auth required').catch(
+        (recordErr) => {
+          console.error('Failed to record session_expired degraded run:', recordErr);
+        },
+      );
+    }
+
     await finishScrapeRun(supabase, run.id, {
       status: 'failed',
       listingsFound: 0,
       failureReason: message,
       selectorHitRate: 0,
       crawlMode,
-      degraded: runDegraded,
+      degraded: runDegraded || isSessionExpired,
     }).catch((finishErr) => {
       console.error('Failed to finish scrape run after error:', finishErr);
     });
@@ -626,7 +644,7 @@ export async function runSourceScrape(
       minCount: computeMinCount(await getTrailingMedians(supabase).catch(() => [])),
       medianCount: 50,
       selectorPct: 0,
-      failureCode: 'WORKER_ERROR',
+      failureCode: isSessionExpired ? 'SESSION_EXPIRED' : 'WORKER_ERROR',
       failureDetail: message,
     }).catch((notifyErr) => {
       console.error('Failed to send operator alert:', notifyErr);

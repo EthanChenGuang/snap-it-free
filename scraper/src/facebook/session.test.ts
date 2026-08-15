@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   classifySessionProbeUrl,
+  classifySessionProbePage,
   hasAuthCookie,
   loadFacebookSession,
   type SessionProbeResult,
@@ -25,6 +26,32 @@ describe('classifySessionProbeUrl (D-18-09)', () => {
   it('detects checkpoint URLs as session_expired', () => {
     expect(
       classifySessionProbeUrl('https://www.facebook.com/checkpoint/?next=marketplace'),
+    ).toBe('session_expired');
+  });
+});
+
+describe('classifySessionProbePage (D-18-09/12)', () => {
+  const cookies = [{ name: 'c_user', value: '123', domain: '.facebook.com', path: '/' }];
+
+  it('detects checkpoint page title as session_expired', () => {
+    expect(
+      classifySessionProbePage(
+        'https://www.facebook.com/marketplace/venice/search/?query=gratis',
+        'Security Check Required',
+        cookies,
+        1,
+      ),
+    ).toBe('session_expired');
+  });
+
+  it('detects missing c_user as session_expired', () => {
+    expect(
+      classifySessionProbePage(
+        'https://www.facebook.com/marketplace/venice/search/?query=gratis',
+        'Marketplace',
+        [{ name: 'xs', value: '1', domain: '.facebook.com', path: '/' }],
+        1,
+      ),
     ).toBe('session_expired');
   });
 });

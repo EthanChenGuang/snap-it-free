@@ -15,11 +15,34 @@ import { ProxyConfiguration, PlaywrightCrawler } from 'crawlee';
 
 export type SessionProbeResult = 'valid' | 'session_expired';
 
+const CHECKPOINT_TITLE_PATTERNS = [
+  /checkpoint/i,
+  /confirm your identity/i,
+  /security check/i,
+];
+
 export function classifySessionProbeUrl(finalUrl: string): SessionProbeResult {
   if (!finalUrl) return 'session_expired';
   if (/\/login\/?(\?|$)/i.test(finalUrl)) return 'session_expired';
   if (/facebook\.com\/login/i.test(finalUrl)) return 'session_expired';
   if (/\/checkpoint\/?(\?|$)/i.test(finalUrl)) return 'session_expired';
+  return 'valid';
+}
+
+export function classifySessionProbePage(
+  finalUrl: string,
+  pageTitle: string,
+  cookies: SessionCookie[],
+  graphqlBodiesCaptured: number,
+): SessionProbeResult {
+  if (!hasAuthCookie(cookies)) return 'session_expired';
+  if (classifySessionProbeUrl(finalUrl) === 'session_expired') return 'session_expired';
+  if (CHECKPOINT_TITLE_PATTERNS.some((pattern) => pattern.test(pageTitle))) {
+    return 'session_expired';
+  }
+  if (graphqlBodiesCaptured === 0 && /login|checkpoint/i.test(finalUrl)) {
+    return 'session_expired';
+  }
   return 'valid';
 }
 
@@ -124,8 +147,26 @@ export async function probeFacebookSession(
     launchContext: { launchOptions: { headless: true } },
     async requestHandler({ page, request }) {
       await applySessionToContext(page.context(), session);
+      let graphqlBodiesCaptured = 0;
+      page.on('response', async (response) => {
+        if (!response.url().includes('/api/graphql')) return;
+        try {
+          const text = await response.text();
+          if (text.includes('feed_units') || text.includes('marketplace_search')) {
+            graphqlBodiesCaptured += 1;
+          }
+        } catch {
+          // ignore
+        }
+      });
       await page.goto(request.url, { waitUntil: 'domcontentloaded', timeout: 20000 });
-      probeResult = probeSessionFromNavigation(page.url(), session.cookies);
+      const pageTitle = await page.title();
+      probeResult = classifySessionProbePage(
+        page.url(),
+        pageTitle,
+        session.cookies,
+        graphqlBodiesCaptured,
+      );
     },
   });
 

@@ -53,6 +53,12 @@ export const MIN_COUNT_RATIO_INCREMENTAL = 0.2;
  */
 export const VINTED_MIN_COUNT_RATIO_INCREMENTAL = 0;
 export const VINTED_MIN_COUNT_RATIO_FULL = 0.2;
+/**
+ * Facebook free listings are sparse on marketplace search (18-RESEARCH) —
+ * incremental count floor near zero so validation does not fail healthy runs (SCRP-E08).
+ */
+export const FACEBOOK_MIN_COUNT_RATIO_INCREMENTAL = 0;
+export const FACEBOOK_MIN_COUNT_RATIO_FULL = 0.2;
 
 export type ValidateBatchHttpParams = {
   listings: unknown[];
