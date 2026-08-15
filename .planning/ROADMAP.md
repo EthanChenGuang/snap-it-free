@@ -418,7 +418,7 @@ Plans:
 
 **Depends on:** Phase 16
 
-**Plans:** 1/7 plans executed
+**Plans:** 2/7 plans executed
 
 Plans:
 
@@ -428,7 +428,7 @@ Plans:
 
 **Wave 1** *(blocked on Wave 0 PASS)*
 
-- [ ] 17-02-PLAN.md — Tracer: enum migration + extract/filters + one-URL crawl→persist→feed (D-17-23, D-17-01/25)
+- [x] 17-02-PLAN.md — Tracer: enum migration + extract/filters + one-URL crawl→persist→feed (D-17-23, D-17-01/25)
 
 **Wave 2** *(blocked on Wave 1)*
 
