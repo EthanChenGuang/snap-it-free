@@ -418,7 +418,7 @@ Plans:
 
 **Depends on:** Phase 16
 
-**Plans:** 3/7 plans executed
+**Plans:** 4/7 plans executed
 
 Plans:
 
@@ -444,7 +444,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 1 — consumer paths)*
 
-- [ ] 17-06-PLAN.md — Consumer source chip, external URL, feed search (D-17-26–31)
+- [x] 17-06-PLAN.md — Consumer source chip, external URL, feed search (D-17-26–31)
 
 **Wave 6** *(blocked on Waves 3–5)*
 

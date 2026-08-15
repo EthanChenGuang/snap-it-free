@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 17
 current_phase_name: configure-vinted-scraping-and-integrate-free-items-into-curr
-current_plan: 4
+current_plan: 5
 status: executing
-stopped_at: Completed 17-03-PLAN.md
-last_updated: "2026-08-15T14:10:53.280Z"
+stopped_at: Completed 17-06-PLAN.md
+last_updated: "2026-08-15T14:13:17.856Z"
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 51
-  completed_plans: 45
+  completed_plans: 46
   percent: 73
 last_activity: 2026-08-15
 last_activity_desc: "Quick task 260815-fjs: 扩展意大利城市搜索范围（米兰、佛罗伦萨、罗马、那不勒斯、佩鲁贾、都灵、普拉托）"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 17 (configure-vinted-scraping-and-integrate-free-items-into-curr) — EXECUTING
-**Current Plan:** 4
+**Current Plan:** 5
 **Total Plans in Phase:** 7
 Status: Ready to execute
 
-Progress: [█████████░] 88% v2.0 (0/7 phases)
+Progress: [█████████░] 90% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -99,6 +99,7 @@ Progress: [█████████░] 88% v2.0 (0/7 phases)
 | Phase 16 P04 | 12min | 3 tasks | 2 files |
 | Phase 17 P02 | 12min | 3 tasks | 17 files |
 | Phase 17 P03 | 2min | 3 tasks | 12 files |
+| Phase 17-configure-vinted-scraping-and-integrate-free-items-into-curr P06 | 2min | 2 tasks | 7 files |
 
 ## Deferred Items (from v1.0)
 
@@ -118,8 +119,8 @@ Progress: [█████████░] 88% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-15T14:10:53.268Z
-**Stopped at:** Completed 17-03-PLAN.md
+**Last session:** 2026-08-15T14:13:17.843Z
+**Stopped at:** Completed 17-06-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -197,6 +198,8 @@ Progress: [█████████░] 88% v2.0 (0/7 phases)
 - [Phase ?]: D-17-32 option-a: new vinted/ module mirroring Subito HttpCrawler + incremental orchestration
 - [Phase ?]: D-17-15 option-a: reject shipping.type === shipping without pickup signal at enrich layer
 - [Phase ?]: Vinted incremental validateBatchHttp minCountRatio 0 for sparse €0 yield (SCRP-E08)
+- [Phase ?]: sourceVinted chip label localized via messages.listing.sourceVinted (Vinted in all locales)
+- [Phase ?]: No FilterSheet source filter added — D-17-27 deferred per CONTEXT
 
 ## Quick Tasks Completed
 
