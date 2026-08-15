@@ -135,7 +135,7 @@ Each implementation task was committed atomically:
 2. **Task 2: Confirm €0-only free item definition (D-17-01)** — decision recorded (option-a); no code commit
 3. **Task 3: Migration + fixture extract/filters + minimal crawler→persist tracer** — `92cc875` (feat)
 
-**Plan metadata:** pending (docs commit)
+**Plan metadata:** `8a11953` (docs: complete plan)
 
 ## Files Created/Modified
 
