@@ -724,22 +724,19 @@ Facebook exposes marketplace category IDs on listing JSON (exact key confirmed i
 | A6 | Playwright `storageState` cookie export from operator browser is upload format | Session upload | Admin UX friction — document export steps |
 | A7 | Free listings exist in Venice gratis/regalo/free queries | Supply | Zero yield OK for spike but operator expectations — sparse feed like Vinted €0 |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Exact Padova marketplace slug**
+1. **Exact Padova marketplace slug** — **RESOLVED per D-18-30**
    - What we know: Migration uses `venice`; Subito uses `padova` slug [VERIFIED: codebase]
-   - What's unclear: FB canonical slug for Padova, Italy
-   - Recommendation: Wave 0 documents Venice; first Padova manual run captures final URL; update seed if 302
+   - Resolution: Wave 0 gates Venice only (3 URLs). Padova URLs ship in migration 029 with assumed slug `padova`; validated on first manual run / phase gate UAT (D-18-30). Update seed if 302 redirects to generic search.
 
-2. **Pickup / delivery enum strings on FB Italy listings**
+2. **Pickup / delivery enum strings on FB Italy listings** — **RESOLVED → Wave 0 spike**
    - What we know: URL supports `deliveryMethod=local_pick_up` filter param [CITED: browse.sh marketplace skill]
-   - What's unclear: Listing JSON values for meet-up vs shipping on Italian listings
-   - Recommendation: Wave 0 detail fixture + `isFacebookLocalPickup()` unit tests
+   - Resolution: Wave 0 spike captures delivery/pickup field names on ≥1 listing (detail OK); `scraper/fixtures/facebook-item-detail-fragment.json` + `isFacebookLocalPickup()` unit tests in Wave 0 (D-18-04). Not blocking implementation start after spike PASS.
 
-3. **SSR-only path without GraphQL intercept**
+3. **SSR-only path without GraphQL intercept** — **RESOLVED → Wave 0 spike**
    - What we know: SparkProxy documents Relay bootstrap in page HTML for some surfaces [CITED: sparkproxy.io]
-   - What's unclear: Whether Venice search SSR alone suffices without intercept
-   - Recommendation: Spike tries intercept first; document SSR fallback in artifact
+   - Resolution: Wave 0 spike tries GraphQL intercept first (primary path per D-18-07/15); documents SSR bootstrap fallback in `18-SPIKE-FACEBOOK-MARKETPLACE.md` artifact if intercept insufficient. HTTP replay without browser remains out of scope unless spike proves embedded JSON path.
 
 ## Environment Availability
 
