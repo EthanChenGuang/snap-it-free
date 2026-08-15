@@ -418,7 +418,7 @@ Plans:
 
 **Depends on:** Phase 16
 
-**Plans:** 2/7 plans executed
+**Plans:** 3/7 plans executed
 
 Plans:
 
@@ -432,7 +432,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 17-03-PLAN.md — Full Vinted crawler + worker routing + incremental + proxy fallback (SCRP-E02–E08, D-17-32)
+- [x] 17-03-PLAN.md — Full Vinted crawler + worker routing + incremental + proxy fallback (SCRP-E02–E08, D-17-32)
 
 **Wave 3** *(blocked on Wave 2)*
 

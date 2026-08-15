@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 17
 current_phase_name: configure-vinted-scraping-and-integrate-free-items-into-curr
-current_plan: 3
+current_plan: 4
 status: executing
-stopped_at: Completed 17-02-PLAN.md
-last_updated: "2026-08-15T14:07:37.014Z"
+stopped_at: Completed 17-03-PLAN.md
+last_updated: "2026-08-15T14:10:53.280Z"
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 51
-  completed_plans: 44
+  completed_plans: 45
   percent: 73
 last_activity: 2026-08-15
 last_activity_desc: "Quick task 260815-fjs: 扩展意大利城市搜索范围（米兰、佛罗伦萨、罗马、那不勒斯、佩鲁贾、都灵、普拉托）"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 17 (configure-vinted-scraping-and-integrate-free-items-into-curr) — EXECUTING
-**Current Plan:** 3
+**Current Plan:** 4
 **Total Plans in Phase:** 7
 Status: Ready to execute
 
-Progress: [█████████░] 86% v2.0 (0/7 phases)
+Progress: [█████████░] 88% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -98,6 +98,7 @@ Progress: [█████████░] 86% v2.0 (0/7 phases)
 | Phase 16-proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper P02 | 5min | 3 tasks | 5 files |
 | Phase 16 P04 | 12min | 3 tasks | 2 files |
 | Phase 17 P02 | 12min | 3 tasks | 17 files |
+| Phase 17 P03 | 2min | 3 tasks | 12 files |
 
 ## Deferred Items (from v1.0)
 
@@ -117,8 +118,8 @@ Progress: [█████████░] 86% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-15T14:07:25.465Z
-**Stopped at:** Completed 17-02-PLAN.md
+**Last session:** 2026-08-15T14:10:53.268Z
+**Stopped at:** Completed 17-03-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -193,6 +194,9 @@ Progress: [█████████░] 86% v2.0 (0/7 phases)
 - [Phase ?]: PROXY-C03 tooling ready (run-provider-compare-spike.mjs); execution deferred until 7-day direct gate fails
 - [Phase ?]: D-17-23 option-a: ALTER TYPE listing_source ADD VALUE vinted (migration 028 + TS enums)
 - [Phase ?]: D-17-01 option-a: strict €0 price.amount gate only — no gratis/regalo title fallback
+- [Phase ?]: D-17-32 option-a: new vinted/ module mirroring Subito HttpCrawler + incremental orchestration
+- [Phase ?]: D-17-15 option-a: reject shipping.type === shipping without pickup signal at enrich layer
+- [Phase ?]: Vinted incremental validateBatchHttp minCountRatio 0 for sparse €0 yield (SCRP-E08)
 
 ## Quick Tasks Completed
 
