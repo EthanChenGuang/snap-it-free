@@ -117,7 +117,7 @@ status: complete
 2. **Task 2: Confirm FilterSheet unchanged contract (D-17-21)** — option-a recorded; no code commit
 3. **Task 3: Vinted→Subito map, resolver branch, normalize wiring, tests** — `16a9f39` (test) + `a872bab` (feat)
 
-**Plan metadata:** `1f9d889` (docs: complete plan)
+**Plan metadata:** `9ed1ce1` (docs: complete plan)
 
 ## Files Created/Modified
 
