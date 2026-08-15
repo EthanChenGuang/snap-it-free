@@ -348,13 +348,14 @@ Plans:
 | 13. Select Location | v2.0 | 5/5 | Verified | 2026-08-10 |
 | 14. Settings Parity | v2.0 | 8/8 | Complete | 2026-08-10 |
 | 15. Scraper Crawl Efficiency | v2.0 | 6/6 | Complete | 2026-08-11 |
-| 16. Proxy Cost Optimization | v2.0 | 0/5 | In Progress|  |
+| 16. Proxy Cost Optimization | v2.0 | 3/5 | In Progress | — |
+| 17. Vinted Scraping & Category Integration | v2.0 | 0/7 | In Progress|  |
 | 7. Production Deploy | v2.0 | 0/4 | Planned | — |
 
 ## Execution Order
 
 ```
-Phase 9 → 10 → 11 → 12 → 13 → 14 → 15 → 16 → 7
+Phase 9 → 10 → 11 → 12 → 13 → 14 → 15 → 16 → 17 → 7
 ```
 
 UX phases first; **scraper efficiency before production deploy**; deploy last.
@@ -408,6 +409,54 @@ Plans:
 6. Admin settings show proxy cost tier recommendation based on measured block rate
 
 **Context:** [phases/16-proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper/16-RESEARCH.md](phases/16-proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper/16-RESEARCH.md)
+
+### Phase 17: Vinted Scraping & Subito Category Integration
+
+**Goal:** Configure Vinted scraping and integrate free (€0) Vinted listings into the existing Subito canonical category system (17 regalo slugs). Venice + Padova scope. Mixed feed. Admin parity with Subito.
+
+**Requirements:** SCRP-E01–E08, CAT-01, CAT-03, CARD-03, I18N-01 (partial)
+
+**Depends on:** Phase 16
+
+**Plans:** 1/7 plans executed
+
+Plans:
+
+**Wave 0**
+
+- [x] 17-01-PLAN.md — Wave 0 Vinted catalog API spike hard gate + fixtures (D-17-36, SCRP-E01)
+
+**Wave 1** *(blocked on Wave 0 PASS)*
+
+- [ ] 17-02-PLAN.md — Tracer: enum migration + extract/filters + one-URL crawl→persist→feed (D-17-23, D-17-01/25)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 17-03-PLAN.md — Full Vinted crawler + worker routing + incremental + proxy fallback (SCRP-E02–E08, D-17-32)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 17-04-PLAN.md — Vinted→Subito category map + resolveCanonicalCategorySlug branch (CAT-01/03, D-17-17)
+
+**Wave 4** *(blocked on Wave 3)*
+
+- [ ] 17-05-PLAN.md — Admin source detail parity + 34 URL seed matrix (D-17-37, D-17-34)
+
+**Wave 5** *(blocked on Wave 1 — consumer paths)*
+
+- [ ] 17-06-PLAN.md — Consumer source chip, external URL, feed search (D-17-26–31)
+
+**Wave 6** *(blocked on Waves 3–5)*
+
+- [ ] 17-07-PLAN.md — Phase gate verification + human UAT (D-17-01–37 audit)
+
+**Success criteria:**
+
+1. Wave 0 spike PASS proves Vinted session-warmed `/api/v2/catalog/items` extract on 3 live URLs
+2. €0-only Vinted listings persist as `source=vinted` and appear in mixed chronological feed
+3. Category filters match Vinted listings via canonical Subito slugs (FilterSheet unchanged)
+4. Admin `/admin/sources/vinted` mirrors Subito matrix UI; source live but disabled by default
+5. Grid cards show FREE badge + Vinted source chip; detail opens external_url on vinted.it
 
 ---
 *Roadmap updated: 2026-08-11 — Phase 15 expanded (incremental + proxy + stack ADR)*
