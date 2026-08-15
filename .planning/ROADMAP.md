@@ -466,7 +466,7 @@ Plans:
 
 **Depends on:** Phase 16 (proxy posture), Phase 15 (crawl stack), Phase 17 (Vinted integration template)
 
-**Plans:** 5/7 plans executed
+**Plans:** 6/7 plans executed
 
 Plans:
 
@@ -492,7 +492,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 1 + 3)*
 
-- [ ] 18-06-PLAN.md — Consumer source chip, external URL, feed search (D-18-42–47, CARD-03, I18N-01)
+- [x] 18-06-PLAN.md — Consumer source chip, external URL, feed search (D-18-42–47, CARD-03, I18N-01)
 
 **Wave 6** *(blocked on Waves 3–5)*
 

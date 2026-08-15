@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 18
 current_phase_name: Facebook Marketplace Scraping & Source Configuration
-current_plan: 6
+current_plan: 7
 status: executing
-stopped_at: Completed 18-05-PLAN.md
-last_updated: "2026-08-15T16:45:12.021Z"
+stopped_at: Completed 18-06-PLAN.md
+last_updated: "2026-08-15T16:50:24.641Z"
 progress:
   total_phases: 12
   completed_phases: 9
   total_plans: 58
-  completed_plans: 54
+  completed_plans: 55
   percent: 75
 last_activity: 2026-08-15
 last_activity_desc: "Quick task 260815-fjs: 扩展意大利城市搜索范围（米兰、佛罗伦萨、罗马、那不勒斯、佩鲁贾、都灵、普拉托）"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 18 — Facebook Marketplace Scraping & Source Configuration
-**Current Plan:** 6
+**Current Plan:** 7
 **Total Plans in Phase:** 7
 Status: Ready to execute
 
-Progress: [█████████░] 93% v2.0 (0/7 phases)
+Progress: [██████████] 95% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -108,6 +108,7 @@ Progress: [█████████░] 93% v2.0 (0/7 phases)
 | Phase 18-facebook-marketplace-scraping P03 | 3min | 3 tasks | 11 files |
 | Phase 18-facebook-marketplace-scraping P04 | 3min | 3 tasks | 11 files |
 | Phase 18-facebook-marketplace-scraping P05 | 18min | 3 tasks | 14 files |
+| Phase 18-facebook-marketplace-scraping P06 | 5min | 3 tasks | 5 files |
 
 ## Deferred Items (from v1.0)
 
@@ -127,8 +128,8 @@ Progress: [█████████░] 93% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-15T16:45:12.001Z
-**Stopped at:** Completed 18-05-PLAN.md
+**Last session:** 2026-08-15T16:50:24.621Z
+**Stopped at:** Completed 18-06-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -224,6 +225,8 @@ Progress: [█████████░] 93% v2.0 (0/7 phases)
 - [Phase ?]: D-18-62 option-a: FilterSheet unchanged — facebook matches via persisted canonical slug (Plan 18-04 auto-selected)
 - [Phase ?]: D-18-22 option-a: 6-URL Venice+Padova×query matrix (Plan 18-05 auto-selected)
 - [Phase ?]: Facebook session probe via scraper subprocess (crawlee not in Next bundle)
+- [Phase ?]: No FilterSheet source filter — D-18-44 deferred, verified unchanged
+- [Phase ?]: feed-search.ts is canonical search module (plan referenced search.ts)
 
 ## Quick Tasks Completed
 
