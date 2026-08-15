@@ -418,7 +418,7 @@ Plans:
 
 **Depends on:** Phase 16
 
-**Plans:** 6/7 plans executed
+**Plans:** 7/7 plans executed
 
 Plans:
 
@@ -448,7 +448,7 @@ Plans:
 
 **Wave 6** *(blocked on Waves 3–5)*
 
-- [ ] 17-07-PLAN.md — Phase gate verification + human UAT (D-17-01–37 audit)
+- [x] 17-07-PLAN.md — Phase gate verification + human UAT (D-17-01–37 audit)
 
 **Success criteria:**
 
