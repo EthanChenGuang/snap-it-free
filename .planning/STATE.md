@@ -4,18 +4,18 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 16
 current_phase_name: proxy-cost-optimization-evaluate-free-self-hosted-vs-cheaper
-current_plan: 3
+current_plan: 3 (awaiting 7-day direct spike gate)
 status: paused
-stopped_at: "16-03 checkpoint — operator running 7-day direct spike (2026-08-12 → 2026-08-19)"
-last_updated: "2026-08-12T15:15:00.000Z"
+stopped_at: Phase 17 context gathered
+last_updated: "2026-08-15T09:20:32.204Z"
 progress:
-  total_phases: 10
+  total_phases: 11
   completed_phases: 8
   total_plans: 44
   completed_plans: 42
-  percent: 80
-last_activity: 2026-08-11
-last_activity_desc: "Quick task 260811-nwf: scraper translation pipeline batch-scoped config/cap + bounded-concurrency dispatch, 80 round trips → 2-3 per batch of 20"
+  percent: 73
+last_activity: 2026-08-15
+last_activity_desc: "Quick task 260815-fjs: 扩展意大利城市搜索范围（米兰、佛罗伦萨、罗马、那不勒斯、佩鲁贾、都灵、普拉托）"
 ---
 
 # Project State
@@ -116,9 +116,9 @@ Progress: [██████████] 95% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-12T15:11:12.715Z
-**Stopped at:** Completed 16-04-PLAN.md
-**Resume file:** None
+**Last session:** 2026-08-15T09:20:32.192Z
+**Stopped at:** Phase 17 context gathered
+**Resume file:** .planning/phases/17-configure-vinted-scraping-and-integrate-free-items-into-curr/17-CONTEXT.md
 
 ## Decisions
 
@@ -195,6 +195,8 @@ Progress: [██████████] 95% v2.0 (0/7 phases)
 
 | Date | Slug | Summary |
 |------|------|---------|
+| 2026-08-13 | translation-queue-polling | Real-time 2s polling on retry-all; syncs sidebar/navbar/page pending counts with AnimatedCount + completion toast |
+| 2026-08-13 | platform-usage-threshold-alerts | Overview: 5-card platform usage grid, threshold alert banner, Telegram/Resend notification engine |
 | 2026-08-12 | translation-queue-cost-dashboard | Translation Queue KPI cost cards + per-listing cost pills with token tooltip |
 | 2026-08-10 | interruptible-rubberband-spring | Interruptible spring overscroll with stretch-base tracking and full gesture reset |
 | 2026-08-10 | rubberband-scroll-lock-fix | Fix repeat pull lock by stopping Motion animations and resetting gesture state |
@@ -223,6 +225,9 @@ Progress: [██████████] 95% v2.0 (0/7 phases)
 | 2026-08-12 | source-card-run-stats-redesign | Source cards: refined run stats layout, pill badges, failure tooltip |
 | 2026-08-12 | dashboard-source-card-compact | Overview dashboard: compact source cards (name, status, last run, actions only) |
 | 2026-08-12 | dashboard-macos-grid | Overview: macOS Dashboard Grid — 4-col metrics, sources grid, 2-col services + alerts |
+| 2026-08-13 | dashboard-tri-section | Overview: tri-section layout — core health, platform billing grid, sources; deduped cards |
+| 2026-08-13 | admin-billing-page | /admin/billing page + split Vercel/Fly.io cards on overview |
+| 2026-08-15 | italian-cities | 9-city catalog: Milano/Firenze/Roma/Napoli/Perugia/Torino/Prato + Venezia/Padova — scraper URLs, bbox validation, consumer filter chips, 153 seed URLs |
 
 ## Accumulated Context
 
@@ -234,3 +239,4 @@ Progress: [██████████] 95% v2.0 (0/7 phases)
 - Phase 12.1 verified (self-tested, no human in the loop per user request): UAT 5/5, security review 6/6 threats closed (retroactive STRIDE, no threat model authored at plan time), goal-backward verification 11/11 after fixing one gap — `scripts/phase12-uat-automation.mjs`'s selector had gone stale when an unrelated quick task (260810-tb5, commit 47d5259) swapped FilterSheet's checkbox list for a button chip grid 2 min after the UAT commit. Fixed and re-confirmed 5/5 against current HEAD. Phase marked complete in ROADMAP/STATE.
 - Phase 13 verified: `/gsd-verify-work 13` — 20/20 automated must-haves, Plan 05 gap closure (cherry-pick 9d7dfae) green test:lib 287/287 + build; 13-VERIFICATION.md created; 4 human UAT items + D-12 PostForm field-loss documented open
 - Phase 16 added: Proxy cost optimization — evaluate free/self-hosted vs cheaper providers (Decodo quota exhaustion trigger); 16-RESEARCH.md pre-populated with provider comparison
+- Phase 17 added: configure Vinted scraping, and integrate free items into current categories of Subito
