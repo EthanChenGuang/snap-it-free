@@ -6,8 +6,8 @@ current_phase: 17
 current_phase_name: configure-vinted-scraping-and-integrate-free-items-into-curr
 current_plan: 7
 status: executing
-stopped_at: Completed 17-05-PLAN.md
-last_updated: "2026-08-15T14:20:41.189Z"
+stopped_at: Phase 18 context gathered
+last_updated: "2026-08-15T14:29:47.439Z"
 progress:
   total_phases: 11
   completed_phases: 8
@@ -121,9 +121,9 @@ Progress: [█████████░] 94% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-15T14:20:41.177Z
-**Stopped at:** Completed 17-05-PLAN.md
-**Resume file:** None
+**Last session:** 2026-08-15T14:29:47.425Z
+**Stopped at:** Phase 18 context gathered
+**Resume file:** .planning/phases/18-facebook-marketplace-scraping/18-CONTEXT.md
 
 ## Decisions
 
