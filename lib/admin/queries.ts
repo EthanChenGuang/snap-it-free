@@ -142,13 +142,16 @@ export async function getSourceBySlug(slug: string): Promise<SourceDetail | null
   try {
     const supabase = await createClient();
 
-    const { data: source, error: sourceError } = await supabase
-      .from('scraper_sources')
-      .select(
-        'slug, display_name, implementation_status, enabled, interval_minutes, anti_block_preset, target_urls',
-      )
-      .eq('slug', slug)
-      .maybeSingle();
+    const [{ data: source, error: sourceError }, { data: globalConfig }] = await Promise.all([
+      supabase
+        .from('scraper_sources')
+        .select(
+          'slug, display_name, implementation_status, enabled, interval_minutes, anti_block_preset, target_urls, session_enc',
+        )
+        .eq('slug', slug)
+        .maybeSingle(),
+      supabase.from('scraper_global_config').select('proxy_enc').eq('id', 1).maybeSingle(),
+    ]);
 
     if (sourceError || !source) {
       return null;
@@ -182,6 +185,8 @@ export async function getSourceBySlug(slug: string): Promise<SourceDetail | null
       intervalMinutes: source.interval_minutes as number,
       antiBlockPreset: source.anti_block_preset as string,
       targetUrls: (source.target_urls as string[] | null) ?? [],
+      sessionConfigured: source.session_enc != null,
+      proxyConfigured: globalConfig?.proxy_enc != null,
       lastRun: lastRunRow ? mapLastRun(lastRunRow) : null,
       lastFullSuccess: lastFullSuccessRow ? mapLastFullSuccess(lastFullSuccessRow) : null,
     };
@@ -613,6 +618,7 @@ type ScrapeRunListRow = {
   crawl_mode: 'incremental' | 'full' | null;
   trigger_type: 'cron' | 'manual' | null;
   wall_time_seconds: number | string | null;
+  target_urls_snapshot: string[] | null;
 };
 
 function mapScrapeRunListItem(row: ScrapeRunListRow): ScrapeRunListItem {
@@ -632,6 +638,9 @@ function mapScrapeRunListItem(row: ScrapeRunListRow): ScrapeRunListItem {
     triggerType: row.trigger_type,
     wallTimeSeconds:
       row.wall_time_seconds != null ? Number(row.wall_time_seconds) : null,
+    targetUrlCount: Array.isArray(row.target_urls_snapshot)
+      ? row.target_urls_snapshot.length
+      : null,
   };
 }
 
@@ -651,7 +660,7 @@ export async function getScrapeRuns(options?: {
     let query = supabase
       .from('scrape_runs')
       .select(
-        'id, started_at, finished_at, source, status, listings_found, listings_inserted, listings_rejected, selector_hit_rate, failure_reason, crawl_mode, trigger_type, wall_time_seconds',
+        'id, started_at, finished_at, source, status, listings_found, listings_inserted, listings_rejected, selector_hit_rate, failure_reason, crawl_mode, trigger_type, wall_time_seconds, target_urls_snapshot',
       )
       .gte('started_at', sinceIso)
       .order('started_at', { ascending: false })

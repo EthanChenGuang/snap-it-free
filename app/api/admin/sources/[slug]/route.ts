@@ -1,10 +1,39 @@
 import { NextResponse } from 'next/server';
+import { encryptSession } from '@/lib/admin/crypto';
 import { getSourceBySlug } from '@/lib/admin/queries';
 import { canEnableSource, getOperatorSession } from '@/lib/admin/require-operator';
 import { UpdateSourceSchema } from '@/lib/admin/schemas';
+import {
+  hasFacebookAuthCookie,
+  parseFacebookSessionJson,
+} from '@/lib/admin/facebook-session';
 import { validateTargetUrls } from '@/lib/admin/url-validate';
 
 type RouteContext = { params: Promise<{ slug: string }> };
+
+type SourceRow = {
+  slug: string;
+  display_name: string;
+  implementation_status: string;
+  enabled: boolean;
+  interval_minutes: number;
+  anti_block_preset: string;
+  target_urls: string[] | null;
+  session_enc: unknown;
+};
+
+function serializeSource(row: SourceRow) {
+  return {
+    slug: row.slug,
+    displayName: row.display_name,
+    implementationStatus: row.implementation_status,
+    enabled: row.enabled,
+    intervalMinutes: row.interval_minutes,
+    antiBlockPreset: row.anti_block_preset,
+    targetUrls: row.target_urls ?? [],
+    sessionConfigured: row.session_enc != null,
+  };
+}
 
 export async function GET(_request: Request, context: RouteContext) {
   const session = await getOperatorSession();
@@ -73,16 +102,39 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
   }
 
+  const { session_json, ...rest } = parsed.data;
+  const updatePayload: Record<string, unknown> = { ...rest, enabled: nextEnabled };
+
+  if (session_json !== undefined) {
+    let sessionPayload;
+    try {
+      sessionPayload = parseFacebookSessionJson(session_json);
+    } catch {
+      return NextResponse.json({ error: 'Invalid Facebook session JSON format' }, { status: 400 });
+    }
+
+    if (!hasFacebookAuthCookie(sessionPayload.cookies)) {
+      return NextResponse.json({ error: 'Facebook session must include c_user cookie' }, { status: 400 });
+    }
+
+    const secretsKey = process.env.SCRAPER_SECRETS_KEY?.trim();
+    if (!secretsKey) {
+      return NextResponse.json({ error: 'SCRAPER_SECRETS_KEY not configured' }, { status: 500 });
+    }
+
+    // Never persist plaintext cookies — encrypt before DB write (T-18-SessionUpload).
+    updatePayload.session_enc = encryptSession(session_json.trim(), secretsKey);
+  }
+
   const { data, error } = await session.supabase
     .from('scraper_sources')
     .update({
-      ...parsed.data,
-      enabled: nextEnabled,
+      ...updatePayload,
       updated_at: new Date().toISOString(),
     })
     .eq('slug', slug)
     .select(
-      'slug, display_name, implementation_status, enabled, interval_minutes, anti_block_preset, target_urls',
+      'slug, display_name, implementation_status, enabled, interval_minutes, anti_block_preset, target_urls, session_enc',
     )
     .single();
 
@@ -91,14 +143,6 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   return NextResponse.json({
-    source: {
-      slug: data.slug,
-      displayName: data.display_name,
-      implementationStatus: data.implementation_status,
-      enabled: data.enabled,
-      intervalMinutes: data.interval_minutes,
-      antiBlockPreset: data.anti_block_preset,
-      targetUrls: data.target_urls ?? [],
-    },
+    source: serializeSource(data as SourceRow),
   });
 }

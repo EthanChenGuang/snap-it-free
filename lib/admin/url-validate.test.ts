@@ -63,6 +63,36 @@ describe('validateTargetUrl', () => {
       expect(result.error).toMatch(/catalog/i);
     }
   });
+
+  it('accepts facebook marketplace search URL with query (D-18-24)', () => {
+    const result = validateTargetUrl(
+      'https://www.facebook.com/marketplace/venice/search/?query=gratis&sortBy=creation_time_descend',
+      'facebook',
+    );
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('rejects facebook URLs without query param (D-18-24)', () => {
+    const result = validateTargetUrl(
+      'https://www.facebook.com/marketplace/venice/search/',
+      'facebook',
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/query param/i);
+    }
+  });
+
+  it('rejects non-marketplace facebook paths (T-18-SSRF)', () => {
+    const result = validateTargetUrl(
+      'https://www.facebook.com/marketplace/item/123456789/',
+      'facebook',
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/marketplace/i);
+    }
+  });
 });
 
 describe('validateTargetUrls', () => {

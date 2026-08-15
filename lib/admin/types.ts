@@ -27,6 +27,8 @@ export type SourceWithLastRun = {
 
 export type SourceDetail = SourceWithLastRun & {
   targetUrls: string[];
+  sessionConfigured: boolean;
+  proxyConfigured: boolean;
 };
 
 export type AntiBlockPreset = 'conservative' | 'standard' | 'aggressive';
@@ -97,6 +99,7 @@ export type ScrapeRunListItem = {
   crawlMode: CrawlMode | null;
   triggerType: ScrapeRunTrigger | null;
   wallTimeSeconds: number | null;
+  targetUrlCount: number | null;
 };
 
 export type ScrapeRunDetail = ScrapeRunListItem & {

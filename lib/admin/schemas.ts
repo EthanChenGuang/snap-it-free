@@ -11,6 +11,12 @@ export const UpdateSourceSchema = z.object({
   interval_minutes: z.number().int().min(30).max(1440).optional(),
   anti_block_preset: antiBlockPresetSchema.optional(),
   target_urls: z.array(z.string().url()).min(1).optional(),
+  /** Operator Facebook cookie JSON — encrypted to session_enc on PATCH (D-18-10/11). */
+  session_json: z.string().max(65536).optional(),
+});
+
+export const TestFacebookSessionSchema = z.object({
+  session_json: z.string().min(1).max(65536),
 });
 
 export const translationProviderSchema = z.enum(['gemini', 'openrouter']);
@@ -46,6 +52,11 @@ export const TranslationRetrySchema = z
 
 export const ExecuteCleanupSchema = z.object({
   confirm: z.literal(true),
+});
+
+export const ValidateTargetUrlsSchema = z.object({
+  urls: z.array(z.string()).min(1).max(50),
+  probe: z.boolean().default(true),
 });
 
 export type UpdateSourceInput = z.infer<typeof UpdateSourceSchema>;
