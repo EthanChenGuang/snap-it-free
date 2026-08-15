@@ -150,7 +150,7 @@ status: complete
 2. **Task 2: Confirm shipping-only rejection policy (D-17-15)** — decision option-a recorded; no code commit
 3. **Task 3: Full crawler, enrichment, incremental, proxy fallback, validation** — `9ec129c` (test) + `4ce5ac0` (feat)
 
-**Plan metadata:** pending final docs commit
+**Plan metadata:** `2782d2b` (docs: complete plan)
 
 ## Files Created/Modified
 

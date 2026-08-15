@@ -104,7 +104,7 @@ Each task was committed atomically:
 1. **Task 1 (tracer): End-to-end proxy quota fatal → direct fallback** - `4b9850c` (test), `9e00a67` (feat)
 2. **Task 2: Degraded metrics + admin last_block_reason** - `ce111f4` (feat)
 
-**Plan metadata:** pending (docs commit follows)
+**Plan metadata:** `88d34b3` (docs: complete plan)
 
 ## Files Created/Modified
 

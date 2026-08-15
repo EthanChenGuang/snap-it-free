@@ -12,9 +12,9 @@
 
 | Label | URL | Status | Wall ms | Listings | Fields OK | Pass |
 |-------|-----|--------|---------|----------|-----------|------|
-| Venezia arredamento-casalinghi | https://www.subito.it/annunci-veneto/regalo/arredamento-casalinghi/venezia/venezia/ | 200 | 429 | 30 | yes | ✓ |
-| Padova arredamento-casalinghi | https://www.subito.it/annunci-veneto/regalo/arredamento-casalinghi/padova/padova/ | 200 | 313 | 30 | yes | ✓ |
-| Veneto elettrodomestici (high volume) | https://www.subito.it/annunci-veneto/regalo/elettrodomestici/ | 200 | 440 | 30 | yes | ✓ |
+| Venezia arredamento-casalinghi | https://www.subito.it/annunci-veneto/regalo/arredamento-casalinghi/venezia/venezia/ | 200 | 1086 | 30 | yes | ✓ |
+| Padova arredamento-casalinghi | https://www.subito.it/annunci-veneto/regalo/arredamento-casalinghi/padova/padova/ | 200 | 253 | 30 | yes | ✓ |
+| Veneto elettrodomestici (high volume) | https://www.subito.it/annunci-veneto/regalo/elettrodomestici/ | 200 | 246 | 30 | yes | ✓ |
 
 ## Field map (__NEXT_DATA__)
 
@@ -88,9 +88,9 @@
 
 | URL | Wall time (ms) | ≤2s gate (D-15-02) |
 |-----|----------------|---------------------|
-| Venezia arredamento-casalinghi | 429 | PASS |
-| Padova arredamento-casalinghi | 313 | PASS |
-| Veneto elettrodomestici (high volume) | 440 | PASS |
+| Venezia arredamento-casalinghi | 1086 | PASS |
+| Padova arredamento-casalinghi | 253 | PASS |
+| Veneto elettrodomestici (high volume) | 246 | PASS |
 
 ## TLS / got-scraping fingerprint note (D-15-22)
 
@@ -121,7 +121,7 @@ This generates Chrome 120+ desktop headers and browser-like TLS for plain HTTP c
 ## Listing order (newest-first?)
 
 Venezia arredamento-casalinghi: yes (first=2026-08-11 13:00:50 last=2026-07-15 12:40:54)
-Padova arredamento-casalinghi: yes (first=2026-08-11 19:45:16 last=2026-07-11 17:15:19)
+Padova arredamento-casalinghi: yes (first=2026-08-11 19:45:16 last=2026-07-11 14:11:34)
 Veneto elettrodomestici (high volume): yes (first=2026-08-11 19:43:45 last=2026-06-20 17:23:25)
 
 **Implementation note:** Treat category card order as **newest-first** when dates are monotonic descending; Plan 15-03 early-stop walks listings in array order.

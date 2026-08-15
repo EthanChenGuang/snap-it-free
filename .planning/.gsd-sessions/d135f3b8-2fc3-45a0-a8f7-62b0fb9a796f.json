@@ -1,0 +1,12 @@
+{
+  "session_id": "d135f3b8-2fc3-45a0-a8f7-62b0fb9a796f",
+  "command": null,
+  "phase": "13",
+  "phase_name": "select-location-flow",
+  "status": "executing",
+  "milestone": "v2.0",
+  "progress": null,
+  "stopped_at": "Completed 13-04-PLAN.md",
+  "updated_at": "2026-08-10T21:57:17.490Z",
+  "cwd": "/home/guang/Projects/Experiments/snap-it-free"
+}
