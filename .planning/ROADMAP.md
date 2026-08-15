@@ -466,7 +466,7 @@ Plans:
 
 **Depends on:** Phase 16 (proxy posture), Phase 15 (crawl stack), Phase 17 (Vinted integration template)
 
-**Plans:** 4/7 plans executed
+**Plans:** 5/7 plans executed
 
 Plans:
 
@@ -488,7 +488,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 2–3)*
 
-- [ ] 18-05-PLAN.md — Admin source detail parity + 6-URL seed matrix + session upload UI (D-18-22/34/10)
+- [x] 18-05-PLAN.md — Admin source detail parity + 6-URL seed matrix + session upload UI (D-18-22/34/10)
 
 **Wave 5** *(blocked on Wave 1 + 3)*
 
