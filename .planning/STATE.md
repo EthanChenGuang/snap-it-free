@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 18
 current_phase_name: Facebook Marketplace Scraping & Source Configuration
-current_plan: 4
+current_plan: 5
 status: executing
-stopped_at: Completed 18-03-PLAN.md
-last_updated: "2026-08-15T16:37:57.237Z"
+stopped_at: Completed 18-04-PLAN.md
+last_updated: "2026-08-15T16:40:55.720Z"
 progress:
   total_phases: 12
   completed_phases: 9
   total_plans: 58
-  completed_plans: 52
+  completed_plans: 53
   percent: 75
 last_activity: 2026-08-15
 last_activity_desc: "Quick task 260815-fjs: 扩展意大利城市搜索范围（米兰、佛罗伦萨、罗马、那不勒斯、佩鲁贾、都灵、普拉托）"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 18 — Facebook Marketplace Scraping & Source Configuration
-**Current Plan:** 4
+**Current Plan:** 5
 **Total Plans in Phase:** 7
 Status: Ready to execute
 
-Progress: [█████████░] 90% v2.0 (0/7 phases)
+Progress: [█████████░] 91% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -106,6 +106,7 @@ Progress: [█████████░] 90% v2.0 (0/7 phases)
 | Phase 18-facebook-marketplace-scraping P01 | 35min | 3 tasks | 10 files |
 | Phase 18-facebook-marketplace-scraping P02 | 45 | 4 tasks | 18 files |
 | Phase 18-facebook-marketplace-scraping P03 | 3min | 3 tasks | 11 files |
+| Phase 18-facebook-marketplace-scraping P04 | 3min | 3 tasks | 11 files |
 
 ## Deferred Items (from v1.0)
 
@@ -125,8 +126,8 @@ Progress: [█████████░] 90% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-15T16:37:57.219Z
-**Stopped at:** Completed 18-03-PLAN.md
+**Last session:** 2026-08-15T16:40:55.703Z
+**Stopped at:** Completed 18-04-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -218,6 +219,8 @@ Progress: [█████████░] 90% v2.0 (0/7 phases)
 - [Phase ?]: D-18-01 option-a: price field only free gate — no title gratis fallback (Plan 18-02 auto-selected)
 - [Phase ?]: D-18-04 option-a: reject shipping-only via delivery_types at enrich layer (Plan 18-03 auto-selected)
 - [Phase ?]: Stable FB crawl_content_hash excludes synthetic posted_at for incremental early-stop (Plan 18-03)
+- [Phase ?]: D-18-50 option-a: central resolver facebook branch + FACEBOOK_CATEGORY_TO_SLUG (Plan 18-04 auto-selected)
+- [Phase ?]: D-18-62 option-a: FilterSheet unchanged — facebook matches via persisted canonical slug (Plan 18-04 auto-selected)
 
 ## Quick Tasks Completed
 

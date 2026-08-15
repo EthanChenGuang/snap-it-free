@@ -466,7 +466,7 @@ Plans:
 
 **Depends on:** Phase 16 (proxy posture), Phase 15 (crawl stack), Phase 17 (Vinted integration template)
 
-**Plans:** 3/7 plans executed
+**Plans:** 4/7 plans executed
 
 Plans:
 
@@ -484,7 +484,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 18-04-PLAN.md — Facebook→Subito category map + resolveCanonicalCategorySlug branch (CAT-01/03, D-18-49–61)
+- [x] 18-04-PLAN.md — Facebook→Subito category map + resolveCanonicalCategorySlug branch (CAT-01/03, D-18-49–61)
 
 **Wave 4** *(blocked on Wave 2–3)*
 
