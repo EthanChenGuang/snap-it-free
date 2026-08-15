@@ -458,5 +458,53 @@ Plans:
 4. Admin `/admin/sources/vinted` mirrors Subito matrix UI; source live but disabled by default
 5. Grid cards show FREE badge + Vinted source chip; detail opens external_url on vinted.it
 
+### Phase 18: Facebook Marketplace Scraping & Source Configuration
+
+**Goal:** Add Facebook Marketplace as configured scraper source (Wave 0 hard gate), integrate free listings into mixed feed via 17 Subito canonical slugs. Playwright-first, logged-in session, residential proxy, operator cookies via admin.
+
+**Requirements:** SCRP-E01, SCRP-E02, SCRP-E03, SCRP-E04, SCRP-E05, SCRP-E06, SCRP-E07, SCRP-E08, CAT-01, CAT-03, CARD-03, I18N-01 (partial)
+
+**Depends on:** Phase 16 (proxy posture), Phase 15 (crawl stack), Phase 17 (Vinted integration template)
+
+**Plans:** 7 plans
+
+Plans:
+
+**Wave 0**
+
+- [ ] 18-01-PLAN.md — Wave 0 Facebook Marketplace Playwright spike hard gate + fixtures (D-18-19/20, SCRP-E01)
+
+**Wave 1** *(blocked on Wave 0 PASS)*
+
+- [ ] 18-02-PLAN.md — Tracer: session_enc migration + graphql extract/filters + one-URL crawl→persist→feed + chip (D-18-11, D-18-40, D-18-01/02/03)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 18-03-PLAN.md — Full FB Playwright crawler + worker routing + incremental early-stop + session probe (SCRP-E02–E08, D-18-12/13/18)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 18-04-PLAN.md — Facebook→Subito category map + resolveCanonicalCategorySlug branch (CAT-01/03, D-18-49–61)
+
+**Wave 4** *(blocked on Wave 2–3)*
+
+- [ ] 18-05-PLAN.md — Admin source detail parity + 6-URL seed matrix + session upload UI (D-18-22/34/10)
+
+**Wave 5** *(blocked on Wave 1 + 3)*
+
+- [ ] 18-06-PLAN.md — Consumer source chip, external URL, feed search (D-18-42–47, CARD-03, I18N-01)
+
+**Wave 6** *(blocked on Waves 3–5)*
+
+- [ ] 18-07-PLAN.md — Phase gate verification + human UAT (audit D-18-01–63)
+
+**Success criteria:**
+
+1. Wave 0 spike PASS proves Playwright + GraphQL intercept on 3 Venice URLs with session + residential proxy
+2. Price-field-only free listings persist as `source=facebook` and appear in mixed chronological feed
+3. Category filters match Facebook listings via canonical Subito slugs (FilterSheet unchanged)
+4. Admin `/admin/sources/facebook` mirrors Subito matrix UI + session upload/test; source live but disabled by default
+5. Grid cards show FREE badge + Facebook source chip; detail opens external_url on facebook.com
+
 ---
-*Roadmap updated: 2026-08-11 — Phase 15 expanded (incremental + proxy + stack ADR)*
+*Roadmap updated: 2026-08-15 — Phase 18 planned (Facebook Marketplace scraping)*
