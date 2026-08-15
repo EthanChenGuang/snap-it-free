@@ -8,6 +8,9 @@ const HOST_ALLOWLIST: Record<string, RegExp> = {
   ebay: /(^|\.)ebay\.it$/i,
 };
 
+/** Vinted admin URLs must target catalog pages (T-17-SSRF). */
+const VINTED_CATALOG_PATH_REGEX = /^\/catalog\/\d+/i;
+
 function hostMatchesSlug(hostname: string, slug: string): boolean {
   const pattern = HOST_ALLOWLIST[slug];
   return pattern != null && pattern.test(hostname);
@@ -35,6 +38,10 @@ export function validateTargetUrl(
 
   if (slug === 'subito' && !REGALO_CATEGORY_URL_REGEX.test(parsed.pathname)) {
     return { ok: false, error: 'Subito URLs must match Veneto regalo city template' };
+  }
+
+  if (slug === 'vinted' && !VINTED_CATALOG_PATH_REGEX.test(parsed.pathname)) {
+    return { ok: false, error: 'Vinted URLs must use /catalog/{id} path' };
   }
 
   return { ok: true };

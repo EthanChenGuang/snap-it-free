@@ -36,6 +36,25 @@ describe('validateTargetUrl', () => {
       expect(result.error).toMatch(/not allowed/i);
     }
   });
+
+  it('accepts vinted.it catalog URL (D-17-03)', () => {
+    const result = validateTargetUrl(
+      'https://www.vinted.it/catalog/1918-casa?order=newest_first&city=venezia',
+      'vinted',
+    );
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('rejects non-catalog vinted paths (T-17-SSRF)', () => {
+    const result = validateTargetUrl(
+      'https://www.vinted.it/catalog?search_text=gratis',
+      'vinted',
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/catalog/i);
+    }
+  });
 });
 
 describe('validateTargetUrls', () => {
