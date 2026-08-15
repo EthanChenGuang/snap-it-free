@@ -1,0 +1,16 @@
+{
+  "_meta": {
+    "source": "https://www.facebook.com/marketplace/item/9876543210123456/",
+    "capturedAt": "2026-08-15T15:00:00.000Z",
+    "note": "Sanitized mock detail fragment for Plan 18-02 enrich tests — pickup/category field names"
+  },
+  "marketplace_listing_category_id": "847807938447238",
+  "delivery_types": ["IN_PERSON"],
+  "pickup_info": {
+    "location_text": "Venice, Metropolitan City of Venice, Italy"
+  },
+  "listing_price": {
+    "amount": "0",
+    "formatted_amount": "Gratis"
+  }
+}

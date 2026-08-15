@@ -1,0 +1,64 @@
+{
+  "_meta": {
+    "source": "https://www.facebook.com/marketplace/venice/search/?query=gratis&sortBy=creation_time_descend",
+    "capturedAt": "2026-08-15T15:00:00.000Z",
+    "endpoint": "POST /api/graphql/ (MarketplaceSearch feed_units)",
+    "note": "Sanitized mock GraphQL fragment for Plan 18-02 unit tests — research-shaped sample; PII redacted"
+  },
+  "data": {
+    "marketplace_search": {
+      "feed_units": {
+        "edges": [
+          {
+            "node": {
+              "listing": {
+                "id": "9876543210123456",
+                "marketplace_listing_title": "Sedia ufficio gratis Venezia",
+                "listing_price": {
+                  "amount": "0",
+                  "formatted_amount": "Gratis"
+                },
+                "primary_listing_photo": {
+                  "image": {
+                    "uri": "https://scontent.xx.fbcdn.net/v/t39.30808-6/sample-chair.jpg"
+                  }
+                },
+                "location": {
+                  "reverse_geocode": {
+                    "city": "Venice"
+                  }
+                },
+                "marketplace_listing_category_id": "847807938447238",
+                "delivery_types": ["IN_PERSON"]
+              }
+            }
+          },
+          {
+            "node": {
+              "listing": {
+                "id": "1122334455667788",
+                "marketplace_listing_title": "Libri vari regalo",
+                "listing_price": {
+                  "amount": "15",
+                  "formatted_amount": "15 €"
+                },
+                "primary_listing_photo": {
+                  "image": {
+                    "uri": "https://scontent.xx.fbcdn.net/v/t39.30808-6/sample-books.jpg"
+                  }
+                },
+                "location": {
+                  "reverse_geocode": {
+                    "city": "Venice"
+                  }
+                },
+                "marketplace_listing_category_id": "847807938447239",
+                "delivery_types": ["IN_PERSON", "SHIPPING_ON_SITE"]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
