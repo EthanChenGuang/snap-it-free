@@ -1,8 +1,10 @@
 import { computeScrapedListingExpiresAt as computeExpiresAt } from '../../../lib/listings/scraped-listing-ttl.js';
+import { getCityBySubitoSlug, inCityBbox } from '../geo/italian-cities.js';
 import { contentHash } from '../shared/dedupe.js';
 import { CanonicalListingSchema, type CanonicalListing } from '../shared/schema.js';
 import { loadZonePolygons, tagZone } from '../shared/zone-tag.js';
 import type { RawListing } from '../subito/extract.js';
+import { crawlHashForListing } from '../subito/crawl-hash.js';
 import { rejectReasonIfNotFacebookFree } from './filters.js';
 import type { NormalizeResult } from '../shared/normalize.js';
 
@@ -43,6 +45,15 @@ export function normalizeFacebookRawListing(raw: RawListing): NormalizeResult {
     return { reject: 'invalid_posted_at' };
   }
 
+  if (raw.lat != null && raw.lng != null) {
+    const citySlug = raw.city?.toLowerCase();
+    const bboxCity =
+      citySlug && getCityBySubitoSlug(citySlug) ? citySlug : 'venezia';
+    if (!inCityBbox(raw.lat, raw.lng, bboxCity as Parameters<typeof inCityBbox>[2])) {
+      return { reject: 'out_of_bbox' };
+    }
+  }
+
   const expiresAt = computeExpiresAt(postedAt);
   const zone =
     raw.lat != null && raw.lng != null ? tagZone(raw.lat, raw.lng, zonePolygons) : null;
@@ -71,5 +82,11 @@ export function normalizeFacebookRawListing(raw: RawListing): NormalizeResult {
   };
 
   candidate.content_hash = contentHash(candidate);
+  candidate.crawl_content_hash = crawlHashForListing({
+    title: raw.title,
+    price: raw.price ?? '',
+    photo_url: raw.photo_url,
+    posted_at: '',
+  });
   return CanonicalListingSchema.parse(candidate);
 }
