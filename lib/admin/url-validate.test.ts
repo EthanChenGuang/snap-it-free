@@ -18,14 +18,22 @@ describe('validateTargetUrl', () => {
     expect(result).toEqual({ ok: true });
   });
 
-  it('rejects non-Veneto regalo paths for subito', () => {
+  it('accepts Milano regalo URL after italian-cities expansion (260815-fjs)', () => {
     const result = validateTargetUrl(
       'https://www.subito.it/annunci-lombardia/regalo/informatica/milano/milano/',
       'subito',
     );
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('rejects malformed regalo paths for subito', () => {
+    const result = validateTargetUrl(
+      'https://www.subito.it/annunci-lombardia/regalo/informatica/milano/',
+      'subito',
+    );
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error).toMatch(/Veneto regalo city template/i);
+      expect(result.error).toMatch(/regalo city template/i);
     }
   });
 
