@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const ListingSourceSchema = z.enum(['subito', 'facebook', 'ugc']);
+export const ListingSourceSchema = z.enum(['subito', 'facebook', 'ugc', 'vinted']);
 export const VeniceZoneSchema = z.enum(['centro_storico', 'mestre_marghera', 'lido_murano']);
 
 export const ListingReadSchema = z.object({

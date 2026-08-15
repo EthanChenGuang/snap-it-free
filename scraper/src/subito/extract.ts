@@ -3,6 +3,10 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseRegaloCategoryUrl } from './url-context.js';
+import {
+  inCityBbox as inCatalogCityBbox,
+  type SubitoCitySlug,
+} from '../geo/italian-cities.js';
 
 export type RawListing = {
   external_id: string;
@@ -12,6 +16,8 @@ export type RawListing = {
   lat: number | null;
   lng: number | null;
   posted_at: string;
+  /** Source of the listing. Defaults to 'subito' for legacy callers (Phase 15-era normalize). */
+  source?: 'subito' | 'vinted';
   description?: string;
   /** HTTP category JSON price field (crawl hash input). */
   price?: string;
@@ -55,37 +61,37 @@ const VENICE_LAT_MAX = 45.7;
 const VENICE_LNG_MIN = 12.1;
 const VENICE_LNG_MAX = 12.6;
 
-/** Padova bbox from 08-PADOVA-SPIKE.md fallback (no sample coords in spike). */
+/** @deprecated Import from italian-cities — kept for existing tests. */
 export const PADOVA_LAT_MIN = 45.3;
 export const PADOVA_LAT_MAX = 45.5;
 export const PADOVA_LNG_MIN = 11.7;
 export const PADOVA_LNG_MAX = 12.0;
 
-export type ScrapeCity = 'venezia' | 'padova';
+export type ScrapeCity = SubitoCitySlug;
 
 function cityFromSourceCategoryUrl(sourceCategoryUrl: string): ScrapeCity {
   const parsed = parseRegaloCategoryUrl(sourceCategoryUrl);
-  if (parsed?.city === 'padova') return 'padova';
+  if (parsed?.city && isScrapeCity(parsed.city)) return parsed.city;
   return 'venezia';
+}
+
+function isScrapeCity(value: string): value is ScrapeCity {
+  return (
+    value === 'venezia' ||
+    value === 'padova' ||
+    value === 'milano' ||
+    value === 'firenze' ||
+    value === 'roma' ||
+    value === 'napoli' ||
+    value === 'perugia' ||
+    value === 'torino' ||
+    value === 'prato'
+  );
 }
 
 /** City-aware bounding box gate — replaces Venice-only inVeniceBbox (D-21). */
 export function inCityBbox(lat: number, lng: number, city: ScrapeCity): boolean {
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
-  if (city === 'padova') {
-    return (
-      lat >= PADOVA_LAT_MIN &&
-      lat <= PADOVA_LAT_MAX &&
-      lng >= PADOVA_LNG_MIN &&
-      lng <= PADOVA_LNG_MAX
-    );
-  }
-  return (
-    lat >= VENICE_LAT_MIN &&
-    lat <= VENICE_LAT_MAX &&
-    lng >= VENICE_LNG_MIN &&
-    lng <= VENICE_LNG_MAX
-  );
+  return inCatalogCityBbox(lat, lng, city);
 }
 
 function inVeniceBbox(lat: number, lng: number): boolean {

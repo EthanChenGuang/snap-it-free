@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { RawListing } from '../subito/extract.js';
 import { computeExpiresAt, normalizeRawListing } from './normalize.js';
+import { normalizeVintedRawListing } from '../vinted/normalize.js';
 import type { CanonicalListing } from './schema.js';
 import { translateBatch, type TranslationWorkItem } from '../translate/ingest.js';
 
@@ -135,13 +136,23 @@ export async function persistBatch(
   const translationWork: TranslationWorkItem[] = [];
 
   for (const raw of rawListings) {
-    const result = normalizeRawListing(raw);
+    const result =
+      raw.source === 'vinted'
+        ? normalizeVintedRawListing(raw)
+        : normalizeRawListing(raw);
 
     if ('reject' in result) {
       await logReject(supabase, scrapeRunId, raw.external_id, result.reject, {
         title: raw.title,
         description: raw.description,
         external_url: raw.external_url,
+        photo_url: raw.photo_url,
+        posted_at: raw.posted_at,
+        lat: raw.lat,
+        lng: raw.lng,
+        price: raw.price,
+        image_urls: raw.image_urls,
+        source_category_url: raw.source_category_url,
       });
       stats.rejected += 1;
       continue;

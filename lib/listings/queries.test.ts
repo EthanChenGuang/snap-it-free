@@ -51,6 +51,43 @@ describe('getActiveListings', () => {
     expect(mockNot).not.toHaveBeenCalled();
     expect(mockOrder).toHaveBeenCalledWith('posted_at', { ascending: false });
   });
+
+  it('returns a mixed feed that preserves vinted-source rows (D-17-25)', async () => {
+    const vintedRow = {
+      id: '11111111-1111-4111-8111-111111111111',
+      source: 'vinted',
+      title: 'Free chair',
+      title_en: null,
+      title_zh: null,
+      description: null,
+      description_en: null,
+      description_zh: null,
+      photo_url: 'https://images1.vinted.net/t/x/f800/1.jpeg?s=a',
+      external_url: 'https://www.vinted.it/items/1-free-chair',
+      lat: null,
+      lng: null,
+      zone: null,
+      city: null,
+      region: null,
+      category: null,
+      category_en: null,
+      category_zh: null,
+      posted_at: '2026-08-15T10:00:00.000Z',
+      expires_at: '2026-09-15T10:00:00.000Z',
+      status: 'active',
+    };
+    mockOrder.mockReturnValue({ data: [vintedRow], error: null });
+
+    const { getActiveListings } = await import('./queries');
+    const result = await getActiveListings();
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.source).toBe('vinted');
+    expect(result[0]?.external_url).toBe('https://www.vinted.it/items/1-free-chair');
+    // No source exclusion filter — mixed chronological feed includes Vinted (D-17-25).
+    expect(mockNot).not.toHaveBeenCalled();
+    expect(mockEq).not.toHaveBeenCalled();
+  });
 });
 
 describe('getListingById', () => {

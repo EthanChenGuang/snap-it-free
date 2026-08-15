@@ -1,18 +1,8 @@
 import { z } from 'zod';
-import {
-  PADOVA_LAT_MAX,
-  PADOVA_LAT_MIN,
-  PADOVA_LNG_MAX,
-  PADOVA_LNG_MIN,
-} from '../subito/extract.js';
+import { getCityBySubitoSlug, inCityBbox } from '../geo/italian-cities.js';
 
-export const ListingSource = z.enum(['subito', 'facebook', 'ugc']);
+export const ListingSource = z.enum(['subito', 'facebook', 'ugc', 'vinted']);
 export const VeniceZone = z.enum(['centro_storico', 'mestre_marghera', 'lido_murano']);
-
-const VENICE_LAT_MIN = 45.0;
-const VENICE_LAT_MAX = 45.7;
-const VENICE_LNG_MIN = 12.1;
-const VENICE_LNG_MAX = 12.6;
 
 export const CanonicalListingSchema = z
   .object({
@@ -37,29 +27,20 @@ export const CanonicalListingSchema = z
   .superRefine((data, ctx) => {
     if (data.lat == null || data.lng == null) return;
 
-    const city = data.city?.toLowerCase();
-    if (city === 'padova') {
-      if (
-        data.lat < PADOVA_LAT_MIN ||
-        data.lat > PADOVA_LAT_MAX ||
-        data.lng < PADOVA_LNG_MIN ||
-        data.lng > PADOVA_LNG_MAX
-      ) {
+    const citySlug = data.city?.toLowerCase();
+    if (citySlug && getCityBySubitoSlug(citySlug)) {
+      if (!inCityBbox(data.lat, data.lng, citySlug as Parameters<typeof inCityBbox>[2])) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Coordinates outside Padova bounding box',
+          message: `Coordinates outside ${citySlug} bounding box`,
           path: ['lat'],
         });
       }
       return;
     }
 
-    if (
-      data.lat < VENICE_LAT_MIN ||
-      data.lat > VENICE_LAT_MAX ||
-      data.lng < VENICE_LNG_MIN ||
-      data.lng > VENICE_LNG_MAX
-    ) {
+    // Venice zone-tagged listings without explicit city still use Venice bbox.
+    if (!inCityBbox(data.lat, data.lng, 'venezia')) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'Coordinates outside Venice bounding box',

@@ -12,6 +12,14 @@ export type RunSubitoCrawlerFn = (
   options?: RunSubitoCrawlerOptions,
 ) => Promise<CrawlResult>;
 
+/** Generalized crawler signature shared by Subito and Vinted (Phase 17). */
+export type RunCrawlerFn = (
+  categoryUrls: readonly string[],
+  preset: AntiBlockPreset,
+  proxyUrlOverride?: string,
+  options?: RunSubitoCrawlerOptions,
+) => Promise<CrawlResult>;
+
 export type ProxyFallbackResult = {
   crawlResult: CrawlResult;
   fallbackDegraded: boolean;
@@ -37,8 +45,22 @@ export async function runSubitoCrawlWithProxyFallback(
   proxyUrl: string | undefined,
   options: RunSubitoCrawlerOptions,
 ): Promise<ProxyFallbackResult> {
+  return runCrawlWithProxyFallback(runSubitoCrawler, urls, preset, proxyUrl, options);
+}
+
+/**
+ * Generic proxy fallback for any crawler returning CrawlResult (Phase 17 —
+ * Subito and Vinted share this path).
+ */
+export async function runCrawlWithProxyFallback(
+  runCrawler: RunCrawlerFn,
+  urls: readonly string[],
+  preset: AntiBlockPreset,
+  proxyUrl: string | undefined,
+  options: RunSubitoCrawlerOptions,
+): Promise<ProxyFallbackResult> {
   try {
-    const crawlResult = await runSubitoCrawler(urls, preset, proxyUrl, options);
+    const crawlResult = await runCrawler(urls, preset, proxyUrl, options);
     return { crawlResult, fallbackDegraded: false };
   } catch (error) {
     if (!isProxyQuotaFatalError(error)) {
@@ -53,7 +75,7 @@ export async function runSubitoCrawlWithProxyFallback(
       }),
     );
 
-    const crawlResult = await runSubitoCrawler(urls, preset, undefined, options);
+    const crawlResult = await runCrawler(urls, preset, undefined, options);
     return {
       crawlResult,
       fallbackDegraded: true,

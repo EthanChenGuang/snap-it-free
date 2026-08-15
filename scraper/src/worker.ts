@@ -20,9 +20,11 @@ import {
 import { persistBatch } from './shared/persist.js';
 import { validateBatch, validateBatchHttp } from './shared/validate-run.js';
 import { loadZonePolygons, tagZone } from './shared/zone-tag.js';
+import { reconcileOrphanScrapeRuns } from './orphan-runs.js';
 import { runSchedulerTick, TICK_INTERVAL_MS } from './scheduler.js';
 import { runSubitoCrawler, type CategoryUrlStats } from './subito/crawler.js';
 import { loadKnownListingSet } from './subito/known-set.js';
+import { runVintedCrawler } from './vinted/crawler.js';
 import { resolveSourceRun } from './worker-placeholder.js';
 import {
   decideCrawlMode,
@@ -30,7 +32,13 @@ import {
   isProductionSoftProxyContext,
   type CrawlMode,
 } from './worker-proxy-gate.js';
-import { runSubitoCrawlWithProxyFallback, PROXY_QUOTA_FALLBACK_REASON } from './worker-proxy-fallback.js';
+import { runCrawlWithProxyFallback, runSubitoCrawlWithProxyFallback, PROXY_QUOTA_FALLBACK_REASON } from './worker-proxy-fallback.js';
+import {
+  acquireManualJobExecution,
+  DuplicateJobRunError,
+  isActiveJobRunUniqueViolation,
+  isDuplicateJobRunError,
+} from './scrape-job-lock.js';
 
 const COMING_SOON_MESSAGE = '该数据源尚未接入';
 
@@ -150,6 +158,9 @@ export async function startScrapeRun(
     .single();
 
   if (error || !data) {
+    if (params?.jobId && isActiveJobRunUniqueViolation(error, params.jobId)) {
+      throw new DuplicateJobRunError(params.jobId);
+    }
     throw error ?? new Error('Failed to create scrape run');
   }
 
@@ -239,7 +250,11 @@ export async function runSourceScrape(
   const { trigger = 'cron', jobId } = options;
 
   if (jobId) {
-    await updateScrapeJob(supabase, jobId, 'running');
+    const lock = await acquireManualJobExecution(supabase, jobId);
+    if (!lock.acquired) {
+      console.log(`[worker] Skipping job ${jobId}: ${lock.reason}`);
+      return;
+    }
   }
 
   const config = await loadSourceConfig(supabase, sourceSlug);
@@ -260,11 +275,20 @@ export async function runSourceScrape(
       config.implementationStatus === 'coming_soon' ? COMING_SOON_MESSAGE : decision.message;
     console.log(`Skipping ${sourceSlug}: ${message}`);
 
-    const run = await startScrapeRun(supabase, sourceSlug, {
-      triggerType: trigger,
-      jobId,
-      targetUrlsSnapshot: config.urls,
-    });
+    let run: ScrapeRunRecord;
+    try {
+      run = await startScrapeRun(supabase, sourceSlug, {
+        triggerType: trigger,
+        jobId,
+        targetUrlsSnapshot: config.urls,
+      });
+    } catch (err) {
+      if (isDuplicateJobRunError(err)) {
+        console.log(`[worker] Skipping duplicate scrape run for job ${err.jobId}`);
+        return;
+      }
+      throw err;
+    }
     await finishScrapeRun(supabase, run.id, {
       status: 'partial',
       listingsFound: 0,
@@ -311,11 +335,20 @@ export async function runSourceScrape(
   }
   const runDegraded = proxyGate.degraded;
 
-  const run = await startScrapeRun(supabase, sourceSlug, {
-    triggerType: trigger,
-    jobId,
-    targetUrlsSnapshot: config.urls,
-  });
+  let run: ScrapeRunRecord;
+  try {
+    run = await startScrapeRun(supabase, sourceSlug, {
+      triggerType: trigger,
+      jobId,
+      targetUrlsSnapshot: config.urls,
+    });
+  } catch (err) {
+    if (isDuplicateJobRunError(err)) {
+      console.log(`[worker] Skipping duplicate scrape run for job ${err.jobId}`);
+      return;
+    }
+    throw err;
+  }
   console.log(
     `Scrape run ${run.id} (${sourceSlug}) started at ${run.startedAt.toISOString()} mode=${crawlMode} degraded=${runDegraded}`,
   );
@@ -328,7 +361,9 @@ export async function runSourceScrape(
       : 50;
 
     const knownMap =
-      sourceSlug === 'subito' ? await loadKnownListingSet(supabase, sourceSlug) : new Map();
+      sourceSlug === 'subito' || sourceSlug === 'vinted'
+        ? await loadKnownListingSet(supabase, sourceSlug)
+        : new Map();
 
     console.log(`Crawling ${config.urls.length} URL(s) for ${sourceSlug} (mode=${crawlMode})`);
     const crawlStartedAt = Date.now();
@@ -346,6 +381,22 @@ export async function runSourceScrape(
           earlyStopK: config.earlyStopK,
           isFullRefresh,
           mode: crawlMode,
+          runId: run.id,
+        },
+      );
+      crawlResult = fallbackResult.crawlResult;
+      fallbackDegraded = fallbackResult.fallbackDegraded;
+    } else if (sourceSlug === 'vinted') {
+      const fallbackResult = await runCrawlWithProxyFallback(
+        runVintedCrawler,
+        config.urls,
+        config.preset,
+        config.proxyUrl,
+        {
+          knownMap,
+          isFullRefresh,
+          mode: crawlMode,
+          runId: run.id,
         },
       );
       crawlResult = fallbackResult.crawlResult;
@@ -419,7 +470,14 @@ export async function runSourceScrape(
     );
 
     const useHttpValidation = isHttpCrawlerEnabled();
-    const validation = useHttpValidation
+    const validation =
+      useHttpValidation && httpRequests === 0 && config.urls.length > 0
+        ? {
+            ok: false as const,
+            reason:
+              'no category URLs fetched (0 HTTP requests — Crawlee deduped handled URLs on long-lived worker; redeploy worker after fix)',
+          }
+        : useHttpValidation
       ? validateBatchHttp({
           listings: rawListings,
           trailingMedians,
@@ -604,8 +662,17 @@ function parseWorkerArgs(argv: string[]): WorkerCliArgs {
 async function main(): Promise<void> {
   const { source, once } = parseWorkerArgs(process.argv.slice(2));
 
+  try {
+    const reconciled = await reconcileOrphanScrapeRuns(supabaseAdmin);
+    if (reconciled > 0) {
+      console.log(`Reconciled ${reconciled} orphaned scrape run(s)`);
+    }
+  } catch (err) {
+    console.error('Failed to reconcile orphaned scrape runs:', err);
+  }
+
   if (once || !CRON_ENABLED) {
-    await runSourceScrape(supabaseAdmin, source);
+    await runSourceScrape(supabaseAdmin, source, { trigger: 'manual' });
     return;
   }
 

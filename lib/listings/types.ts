@@ -1,4 +1,4 @@
-export type ListingSource = 'subito' | 'facebook' | 'ugc';
+export type ListingSource = 'subito' | 'facebook' | 'ugc' | 'vinted';
 export type ListingStatus = 'active' | 'claimed' | 'expired' | 'hidden';
 export type VeniceZone = 'centro_storico' | 'mestre_marghera' | 'lido_murano';
 
