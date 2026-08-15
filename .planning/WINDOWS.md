@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 13
+open_count: 15
 waived_count: 0
 fixed_count: 0
-total_count: 13
-last_updated: 2026-08-10T21:17:38.028Z
+total_count: 15
+last_updated: 2026-08-15T16:30:06.711Z
 ---
 
 # Broken Windows Ledger
@@ -28,6 +28,8 @@ last_updated: 2026-08-10T21:17:38.028Z
 | 11 | 12 | unrun-verify | lib/admin/subito-regalo-catalog.test.ts |  | 3 pre-existing failures in full npm run test:lib (Padova spike gate) | open |  | 2026-08-10T18:41:56.063Z |  |
 | 12 | 12 | unrun-verify | lib/admin/cleanup.ts |  | Pre-existing TS error blocks npm run build (Postgrest cast) | open |  | 2026-08-10T18:41:56.148Z |  |
 | 13 | 13 | deviation | .planning/phases/13-select-location-flow/13-VALIDATION.md |  | D-12 PostForm field loss across picker round trip — OPEN developer decision | open |  | 2026-08-10T21:17:38.028Z |  |
+| 14 | 17 | unrun-verify | npm run build |  | Build fails on pre-existing RunsListClient.tsx targetUrlCount type error | open |  | 2026-08-15T14:20:40.739Z |  |
+| 15 | 18 | unrun-verify | .planning/phases/18-facebook-marketplace-scraping/18-SPIKE-FACEBOOK-MARKETPLACE.md |  | Live Facebook Wave 0 spike not executed — FB_SESSION_JSON/PROXY_URL missing; Verdict FAIL | open |  | 2026-08-15T16:30:06.711Z |  |
 
 ````json
 [
@@ -185,6 +187,30 @@ last_updated: 2026-08-10T21:17:38.028Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-10T21:17:38.028Z",
+    "resolved_at": null
+  },
+  {
+    "id": 14,
+    "kind": "unrun-verify",
+    "phase": "17",
+    "file": "npm run build",
+    "line": null,
+    "description": "Build fails on pre-existing RunsListClient.tsx targetUrlCount type error",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-15T14:20:40.739Z",
+    "resolved_at": null
+  },
+  {
+    "id": 15,
+    "kind": "unrun-verify",
+    "phase": "18",
+    "file": ".planning/phases/18-facebook-marketplace-scraping/18-SPIKE-FACEBOOK-MARKETPLACE.md",
+    "line": null,
+    "description": "Live Facebook Wave 0 spike not executed — FB_SESSION_JSON/PROXY_URL missing; Verdict FAIL",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-15T16:30:06.711Z",
     "resolved_at": null
   }
 ]

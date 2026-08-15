@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 18
 current_phase_name: Facebook Marketplace Scraping & Source Configuration
-current_plan: Not started
-status: planning
-stopped_at: Completed 17-07-PLAN.md
-last_updated: "2026-08-15T15:04:34.944Z"
+current_plan: 2
+status: executing
+stopped_at: Completed 18-01-PLAN.md
+last_updated: "2026-08-15T16:30:06.381Z"
 progress:
   total_phases: 12
   completed_phases: 9
   total_plans: 58
-  completed_plans: 49
+  completed_plans: 50
   percent: 75
 last_activity: 2026-08-15
 last_activity_desc: "Quick task 260815-fjs: 扩展意大利城市搜索范围（米兰、佛罗伦萨、罗马、那不勒斯、佩鲁贾、都灵、普拉托）"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 18 — Facebook Marketplace Scraping & Source Configuration
-**Current Plan:** Not started
+**Current Plan:** 2
 **Total Plans in Phase:** 7
-Status: Ready to plan
+Status: Executing Phase 18 — Plan 01 complete
 
-Progress: [██████████] 96% v2.0 (0/7 phases)
+Progress: [█████████░] 86% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -103,6 +103,7 @@ Progress: [██████████] 96% v2.0 (0/7 phases)
 | Phase 17-configure-vinted-scraping-and-integrate-free-items-into-curr P04 | 3min | 3 tasks | 7 files |
 | Phase 17-configure-vinted-scraping-and-integrate-free-items-into-curr P05 | 6min | 3 tasks | 7 files |
 | Phase 17 P07 | 45min | 3 tasks | 8 files |
+| Phase 18-facebook-marketplace-scraping P01 | 35min | 3 tasks | 10 files |
 
 ## Deferred Items (from v1.0)
 
@@ -122,8 +123,8 @@ Progress: [██████████] 96% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-15T14:31:38.807Z
-**Stopped at:** Completed 17-07-PLAN.md
+**Last session:** 2026-08-15T16:30:06.366Z
+**Stopped at:** Completed 18-01-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -208,6 +209,8 @@ Progress: [██████████] 96% v2.0 (0/7 phases)
 - [Phase ?]: D-17-05/19 option-a: Full 17×2 Vinted catalog URL matrix (34 seeds)
 - [Phase ?]: Low €0 Vinted yield documented as operator success — high not_free rejects are not phase failure
 - [Phase ?]: Phase 17 human UAT approved via autonomous script against remote Supabase + browser checks
+- [Phase ?]: D-18-07 option-a: PlaywrightCrawler + GraphQL intercept (Wave 0 spike)
+- [Phase ?]: Task 3 approved: proceed with Facebook Wave 0 scaffold despite live Verdict FAIL — live PASS deferred to operator credentials
 
 ## Quick Tasks Completed
 

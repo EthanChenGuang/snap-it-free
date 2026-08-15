@@ -466,13 +466,13 @@ Plans:
 
 **Depends on:** Phase 16 (proxy posture), Phase 15 (crawl stack), Phase 17 (Vinted integration template)
 
-**Plans:** 7 plans
+**Plans:** 1/7 plans executed
 
 Plans:
 
 **Wave 0**
 
-- [ ] 18-01-PLAN.md — Wave 0 Facebook Marketplace Playwright spike hard gate + fixtures (D-18-19/20, SCRP-E01)
+- [x] 18-01-PLAN.md — Wave 0 Facebook Marketplace Playwright spike hard gate + fixtures (D-18-19/20, SCRP-E01)
 
 **Wave 1** *(blocked on Wave 0 PASS)*
 
