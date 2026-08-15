@@ -88,6 +88,43 @@ describe('getActiveListings', () => {
     expect(mockNot).not.toHaveBeenCalled();
     expect(mockEq).not.toHaveBeenCalled();
   });
+
+  it('returns a mixed feed that preserves facebook-source rows (D-18-41)', async () => {
+    const facebookRow = {
+      id: '22222222-2222-4222-8222-222222222222',
+      source: 'facebook',
+      title: 'Sedia gratis Venezia',
+      title_en: null,
+      title_zh: null,
+      description: null,
+      description_en: null,
+      description_zh: null,
+      photo_url: 'https://scontent.xx.fbcdn.net/v/t39.30808-6/sample-chair.jpg',
+      external_url: 'https://www.facebook.com/marketplace/item/9876543210123456/',
+      lat: null,
+      lng: null,
+      zone: null,
+      city: null,
+      region: null,
+      category: null,
+      category_en: null,
+      category_zh: null,
+      posted_at: '2026-08-15T11:00:00.000Z',
+      expires_at: '2026-09-15T11:00:00.000Z',
+      status: 'active',
+    };
+    mockOrder.mockReturnValue({ data: [facebookRow], error: null });
+
+    const { getActiveListings } = await import('./queries');
+    const result = await getActiveListings();
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.source).toBe('facebook');
+    expect(result[0]?.external_url).toBe(
+      'https://www.facebook.com/marketplace/item/9876543210123456/',
+    );
+    expect(mockNot).not.toHaveBeenCalled();
+  });
 });
 
 describe('getListingById', () => {

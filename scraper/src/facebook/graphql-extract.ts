@@ -96,7 +96,7 @@ export function mapFacebookCard(
   };
 }
 
-function fieldCompleteness(listings: FacebookCardListing[]): number {
+export function fieldCompleteness(listings: FacebookCardListing[]): number {
   if (listings.length === 0) return 0;
   const requiredPerListing = 5;
   let filled = 0;

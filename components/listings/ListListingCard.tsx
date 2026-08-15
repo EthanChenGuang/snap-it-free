@@ -72,6 +72,11 @@ export function ListListingCard({ listing, distanceMeters }: ListListingCardProp
               {messages.listing.sourceVinted}
             </span>
           )}
+          {listing.source === 'facebook' && (
+            <span className="rounded-md border border-outline-variant bg-[#f1f1f0] px-2 py-0.5 text-xs font-medium text-on-surface">
+              {messages.listing.sourceFacebook}
+            </span>
+          )}
         </div>
         <FavoriteButton
           listingId={listing.id}

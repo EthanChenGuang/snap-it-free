@@ -8,6 +8,9 @@ export type EncryptedProxyPayload = {
   data: string;
 };
 
+/** Same AES-256-GCM envelope as proxy_enc — stores operator session JSON (D-18-11). */
+export type EncryptedSessionPayload = EncryptedProxyPayload;
+
 function decodeKey(keyBase64: string): Buffer {
   const key = Buffer.from(keyBase64, 'base64');
   if (key.length !== 32) {
@@ -30,6 +33,10 @@ export function encryptProxy(plaintext: string, keyBase64: string): EncryptedPro
 }
 
 export function decryptProxy(payload: EncryptedProxyPayload, keyBase64: string): string {
+  return decryptSecret(payload, keyBase64);
+}
+
+function decryptSecret(payload: EncryptedProxyPayload, keyBase64: string): string {
   const key = decodeKey(keyBase64);
   const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(payload.iv, 'base64'));
   decipher.setAuthTag(Buffer.from(payload.tag, 'base64'));
@@ -37,4 +44,12 @@ export function decryptProxy(payload: EncryptedProxyPayload, keyBase64: string):
     decipher.update(Buffer.from(payload.data, 'base64')),
     decipher.final(),
   ]).toString('utf8');
+}
+
+export function encryptSession(plaintext: string, keyBase64: string): EncryptedSessionPayload {
+  return encryptProxy(plaintext, keyBase64);
+}
+
+export function decryptSession(payload: EncryptedSessionPayload, keyBase64: string): string {
+  return decryptSecret(payload, keyBase64);
 }

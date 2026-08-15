@@ -467,6 +467,7 @@ export const messages = {
   listing: {
     sourceSubito: 'Subito',
     sourceVinted: 'Vinted',
+    sourceFacebook: 'Facebook',
     sourceCommunity: 'Community',
     reserved: 'Riservato',
     free: 'Gratis',

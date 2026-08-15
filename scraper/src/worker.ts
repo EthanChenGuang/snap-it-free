@@ -25,6 +25,11 @@ import { runSchedulerTick, TICK_INTERVAL_MS } from './scheduler.js';
 import { runSubitoCrawler, type CategoryUrlStats } from './subito/crawler.js';
 import { loadKnownListingSet } from './subito/known-set.js';
 import { runVintedCrawler } from './vinted/crawler.js';
+import { runFacebookCrawler } from './facebook/crawler.js';
+import {
+  loadFacebookSession,
+  probeFacebookSessionOrThrow,
+} from './facebook/session.js';
 import { resolveSourceRun } from './worker-placeholder.js';
 import {
   decideCrawlMode,
@@ -361,7 +366,7 @@ export async function runSourceScrape(
       : 50;
 
     const knownMap =
-      sourceSlug === 'subito' || sourceSlug === 'vinted'
+      sourceSlug === 'subito' || sourceSlug === 'vinted' || sourceSlug === 'facebook'
         ? await loadKnownListingSet(supabase, sourceSlug)
         : new Map();
 
@@ -402,6 +407,25 @@ export async function runSourceScrape(
       );
       crawlResult = fallbackResult.crawlResult;
       fallbackDegraded = fallbackResult.fallbackDegraded;
+    } else if (sourceSlug === 'facebook') {
+      if (!config.proxyUrl) {
+        throw new Error('Facebook crawl requires residential proxy (D-18-08)');
+      }
+      const session = await loadFacebookSession(supabase, sourceSlug);
+      await probeFacebookSessionOrThrow(session, config.proxyUrl);
+      crawlResult = await runFacebookCrawler(
+        config.urls.slice(0, 1),
+        config.preset,
+        config.proxyUrl,
+        {
+          session,
+          knownMap,
+          earlyStopK: config.earlyStopK,
+          isFullRefresh,
+          mode: crawlMode,
+          runId: run.id,
+        },
+      );
     } else {
       throw new Error(`No crawler implementation for source: ${sourceSlug}`);
     }

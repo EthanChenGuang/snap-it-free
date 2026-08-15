@@ -17,10 +17,15 @@ export type RawListing = {
   lng: number | null;
   posted_at: string;
   /** Source of the listing. Defaults to 'subito' for legacy callers (Phase 15-era normalize). */
-  source?: 'subito' | 'vinted';
+  source?: 'subito' | 'vinted' | 'facebook';
   description?: string;
   /** HTTP category JSON price field (crawl hash input). */
   price?: string;
+  /** Facebook formatted_amount from GraphQL (D-18-02). */
+  price_formatted?: string | null;
+  /** Resolved city label when coords absent (Facebook location.reverse_geocode.city). */
+  city?: string | null;
+  region?: string | null;
   /** HTTP category JSON image URLs (crawl hash input). */
   image_urls?: string[];
   /** Category listing URL this listing was scraped from (D-20). */

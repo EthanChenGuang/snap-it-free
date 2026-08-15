@@ -450,6 +450,7 @@ export const messages: Messages = {
   listing: {
     sourceSubito: 'Subito',
     sourceVinted: 'Vinted',
+    sourceFacebook: 'Facebook',
     sourceCommunity: '社区',
     reserved: '已预订',
     free: '免费',
