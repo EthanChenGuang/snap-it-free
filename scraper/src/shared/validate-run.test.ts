@@ -102,4 +102,16 @@ describe('validateBatchHttp', () => {
       expect(result.reason).toMatch(/count 10 < min 20/);
     }
   });
+
+  it('passes vinted incremental with zero count floor (SCRP-E08)', () => {
+    const result = validateBatchHttp({
+      listings: [],
+      trailingMedians,
+      jsonFieldCompleteness: 0.95,
+      crawlMode: 'incremental',
+      listingsSkippedAtCrawl: 0,
+      minCountRatioIncremental: 0,
+    });
+    expect(result).toEqual({ ok: true });
+  });
 });

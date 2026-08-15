@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isFreePrice, rejectReasonIfNotFree } from './filters.js';
+import { isFreePrice, rejectReasonIfNotFree, isLocalPickup, matchesCityIntent, parseCityIntentFromUrl } from './filters.js';
 
 describe('isFreePrice (D-17-01/02)', () => {
   it('returns true for numeric zero', () => {
@@ -40,5 +40,23 @@ describe('rejectReasonIfNotFree (D-17-04)', () => {
   it('returns null for exactly zero', () => {
     expect(rejectReasonIfNotFree('0')).toBeNull();
     expect(rejectReasonIfNotFree(0)).toBeNull();
+  });
+});
+
+describe('isLocalPickup (D-17-15)', () => {
+  it('rejects shipping-only and accepts pickup types', () => {
+    expect(isLocalPickup('shipping')).toBe(false);
+    expect(isLocalPickup('pickup')).toBe(true);
+    expect(isLocalPickup('meet_up')).toBe(true);
+  });
+});
+
+describe('matchesCityIntent (D-17-10)', () => {
+  it('reads city intent from URL and validates seller city', () => {
+    const url =
+      'https://www.vinted.it/catalog/3474-piccoli-elettrodomestici?order=newest_first&city=padova';
+    expect(parseCityIntentFromUrl(url)).toBe('padova');
+    expect(matchesCityIntent('Padova', 'padova')).toBe(true);
+    expect(matchesCityIntent('Venezia', 'padova')).toBe(false);
   });
 });
