@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   INFERRED_CATEGORY_TO_SLUG,
+  mapFacebookCategoryToSlug,
   mapPostCategoryToSlug,
   mapVintedCatalogToSlug,
   normalizeCatalogSlug,
@@ -42,14 +43,57 @@ describe('resolveCanonicalCategorySlug', () => {
     ).toBe('informatica');
   });
 
-  it('returns null for facebook source stub (D-09)', () => {
+  it('maps known facebook category ID to Subito slug (D-18-51, CAT-03)', () => {
+    expect(mapFacebookCategoryToSlug('847807938447238')).toBe('arredamento-casalinghi');
     expect(
       resolveCanonicalCategorySlug({
         source: 'facebook',
-        title: 'Chair free',
+        title: 'Oggetto generico',
         category: null,
+        facebookCategoryId: '847807938447238',
+      }),
+    ).toBe('arredamento-casalinghi');
+  });
+
+  it('falls back to title inference for facebook when category ID unmapped (D-18-51)', () => {
+    expect(
+      resolveCanonicalCategorySlug({
+        source: 'facebook',
+        title: 'Sedia ikea',
+        category: null,
+        facebookCategoryId: null,
+      }),
+    ).toBe('arredamento-casalinghi');
+    expect(
+      resolveCanonicalCategorySlug({
+        source: 'facebook',
+        title: 'Monitor 24 pollici',
+        category: null,
+        facebookCategoryId: 'unknown',
+      }),
+    ).toBe('informatica');
+  });
+
+  it('returns null for unmapped facebook category without inference (D-18-52, D-18-61)', () => {
+    expect(
+      resolveCanonicalCategorySlug({
+        source: 'facebook',
+        title: 'Oggetto generico',
+        category: null,
+        facebookCategoryId: 'unknown',
       }),
     ).toBeNull();
+  });
+
+  it('prefers valid DB slug over facebook category map (D-18-51)', () => {
+    expect(
+      resolveCanonicalCategorySlug({
+        source: 'facebook',
+        title: 'Sedia ikea',
+        category: 'informatica',
+        facebookCategoryId: '847807938447238',
+      }),
+    ).toBe('informatica');
   });
 
   it('retries inference when DB slug unknown (D-18)', () => {

@@ -48,7 +48,7 @@ export async function persistListing(
 ): Promise<{ result: PersistResult; listingId: string | null }> {
   const { data: existing, error: selectError } = await supabase
     .from('listings')
-    .select('id, content_hash')
+    .select('id, content_hash, crawl_content_hash, category')
     .eq('source', listing.source)
     .eq('external_id', listing.external_id)
     .maybeSingle();
@@ -64,8 +64,14 @@ export async function persistListing(
       expires_at: computeExpiresAt(listing.posted_at, now).toISOString(),
       scraped_at: now.toISOString(),
     };
+    const crawlHashChanged =
+      listing.crawl_content_hash != null &&
+      listing.crawl_content_hash !== (existing.crawl_content_hash as string | null);
     if (listing.crawl_content_hash != null) {
       touchRow.crawl_content_hash = listing.crawl_content_hash;
+    }
+    if (crawlHashChanged && listing.category != null) {
+      touchRow.category = listing.category;
     }
     const { error: touchError } = await supabase
       .from('listings')

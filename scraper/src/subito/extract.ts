@@ -32,6 +32,8 @@ export type RawListing = {
   source_category_url?: string;
   /** Vinted leaf catalog_id from detail enrichment (D-17-16). */
   catalog_id?: number | null;
+  /** Facebook marketplace_listing_category_id from search/detail (D-18-57). */
+  facebook_category_id?: string | null;
 };
 
 export type SelectorHitRate = { hits: number; total: number };

@@ -1,4 +1,5 @@
 import { computeScrapedListingExpiresAt as computeExpiresAt } from '../../../lib/listings/scraped-listing-ttl.js';
+import { resolveCanonicalCategorySlug } from '../../../lib/listings/canonical-categories.js';
 import { getCityBySubitoSlug, inCityBbox } from '../geo/italian-cities.js';
 import { contentHash } from '../shared/dedupe.js';
 import { CanonicalListingSchema, type CanonicalListing } from '../shared/schema.js';
@@ -58,6 +59,14 @@ export function normalizeFacebookRawListing(raw: RawListing): NormalizeResult {
   const zone =
     raw.lat != null && raw.lng != null ? tagZone(raw.lat, raw.lng, zonePolygons) : null;
 
+  const facebookCategoryId = raw.facebook_category_id ?? null;
+  const category = resolveCanonicalCategorySlug({
+    source: 'facebook',
+    title: raw.title,
+    category: null,
+    facebookCategoryId,
+  });
+
   const candidate = {
     source: 'facebook' as const,
     external_id: raw.external_id,
@@ -73,11 +82,12 @@ export function normalizeFacebookRawListing(raw: RawListing): NormalizeResult {
     posted_at: postedAt,
     expires_at: expiresAt,
     content_hash: '',
-    category: null,
+    category,
     raw_payload: {
       description: raw.description,
       price_formatted: raw.price_formatted ?? null,
       source_category_url: raw.source_category_url ?? null,
+      facebook_category_id: facebookCategoryId,
     },
   };
 

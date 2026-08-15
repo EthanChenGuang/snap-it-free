@@ -27,6 +27,7 @@ const baseListing: CanonicalListing = {
 
 function createMockSupabase(options: {
   existingHash?: string | null;
+  existingCrawlHash?: string | null;
   existingId?: string;
   upsertError?: Error | null;
   touchError?: Error | null;
@@ -43,7 +44,12 @@ function createMockSupabase(options: {
   const maybeSingle = vi.fn().mockResolvedValue({
     data:
       options.existingHash != null
-        ? { id: upsertedId, content_hash: options.existingHash }
+        ? {
+            id: upsertedId,
+            content_hash: options.existingHash,
+            crawl_content_hash: options.existingCrawlHash ?? null,
+            category: 'informatica',
+          }
         : null,
     error: null,
   });
@@ -138,6 +144,24 @@ describe('persistListing', () => {
     expect(result.result).toBe('inserted');
     const [row] = upsert.mock.calls[0];
     expect(row.geom).toBeNull();
+  });
+
+  it('updates category on touch when crawl_content_hash changes (D-18-56)', async () => {
+    const { supabase, touchUpdate } = createMockSupabase({
+      existingHash: baseListing.content_hash,
+      existingCrawlHash: 'd'.repeat(64),
+    });
+    const newCrawlHash = 'e'.repeat(64);
+
+    await persistListing(supabase, {
+      ...baseListing,
+      category: 'arredamento-casalinghi',
+      crawl_content_hash: newCrawlHash,
+    });
+
+    const [touchRow] = touchUpdate.mock.calls[0];
+    expect(touchRow.crawl_content_hash).toBe(newCrawlHash);
+    expect(touchRow.category).toBe('arredamento-casalinghi');
   });
 
   it('returns updated when existing row hash differs', async () => {

@@ -21,6 +21,7 @@ describe('normalizeFacebookRawListing (tracer)', () => {
     source: 'facebook' as const,
     price: '0',
     price_formatted: 'Gratis',
+    facebook_category_id: '847807938447238',
   };
 
   it('accepts free price and sets source=facebook', () => {
@@ -29,7 +30,19 @@ describe('normalizeFacebookRawListing (tracer)', () => {
     if ('reject' in result) return;
     expect(result.source).toBe('facebook');
     expect(result.external_url).toBe(facebookExternalUrl(base.external_id));
-    expect(result.category).toBeNull();
+    expect(result.category).toBe('arredamento-casalinghi');
+    expect(result.raw_payload?.facebook_category_id).toBe('847807938447238');
+  });
+
+  it('falls back to title inference when facebook category unmapped', () => {
+    const result = normalizeFacebookRawListing({
+      ...base,
+      title: 'Monitor 24 pollici gratis',
+      facebook_category_id: null,
+    });
+    expect('reject' in result).toBe(false);
+    if ('reject' in result) return;
+    expect(result.category).toBe('informatica');
   });
 
   it('rejects non-free price', () => {

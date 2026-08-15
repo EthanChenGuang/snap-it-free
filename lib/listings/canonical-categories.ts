@@ -7,8 +7,13 @@
 import { SUBITO_REGALO_CATALOG, type SubitoRegaloSlug } from '@/lib/admin/subito-regalo-catalog';
 import { inferListingCategory, type ListingCategory } from './categories';
 import type { ListingSource } from './types';
+import { mapFacebookCategoryToSlug } from './facebook-category-map';
 import { mapVintedCatalogToSlug } from './vinted-category-map';
 
+export {
+  mapFacebookCategoryToSlug,
+  FACEBOOK_CATEGORY_TO_SUBITO_SLUG,
+} from './facebook-category-map';
 export { mapVintedCatalogToSlug, VINTED_CATALOG_TO_SUBITO_SLUG } from './vinted-category-map';
 
 export type CanonicalCategoryInput = {
@@ -17,6 +22,8 @@ export type CanonicalCategoryInput = {
   category?: string | null;
   /** Vinted item catalog_id from detail enrichment (D-17-16). */
   vintedCatalogId?: number | null;
+  /** Facebook marketplace_listing_category_id from search/detail (D-18-57). */
+  facebookCategoryId?: string | number | null;
 };
 
 /** PostCategory values from PostForm — keep in sync with components/ugc/PostForm.tsx (D-11). */
@@ -71,7 +78,8 @@ export function mapPostCategoryToSlug(postCategory: PostCategory): SubitoRegaloS
 
 /**
  * Single resolver API for filter, display, and future folder grouping (D-05).
- * Unknown DB slugs fall through to title inference (D-18); facebook returns null (D-09).
+ * Unknown DB slugs fall through to title inference (D-18).
+ * Facebook: DB slug → FACEBOOK_CATEGORY_TO_SLUG → inference → null (D-18-51).
  */
 export function resolveCanonicalCategorySlug(
   input: CanonicalCategoryInput,
@@ -79,7 +87,13 @@ export function resolveCanonicalCategorySlug(
   const fromDb = normalizeCatalogSlug(input.category);
   if (fromDb) return fromDb;
 
-  if (input.source === 'facebook') return null;
+  if (input.source === 'facebook') {
+    const fromFacebook = mapFacebookCategoryToSlug(input.facebookCategoryId);
+    if (fromFacebook) return fromFacebook;
+    const inferred = inferListingCategory(input.title);
+    if (inferred) return INFERRED_CATEGORY_TO_SLUG[inferred];
+    return null;
+  }
 
   if (input.source === 'vinted') {
     const fromVinted = mapVintedCatalogToSlug(input.vintedCatalogId);

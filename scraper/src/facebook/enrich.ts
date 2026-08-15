@@ -177,7 +177,7 @@ export function enrichFacebookCard(
       city: cityDef?.subitoSlug ?? city,
       region: cityDef?.region ?? null,
       source_category_url: card.source_category_url,
-      category: detail?.category_id ?? card.category_id,
+      facebook_category_id: detail?.category_id ?? card.category_id,
     },
   };
 }

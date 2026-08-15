@@ -23,10 +23,34 @@ describe('matchesSubitoCategory', () => {
     ).toBe(true);
   });
 
-  it('returns false for facebook source with null category (D-09)', () => {
+  it('matches facebook listing when persisted canonical slug matches filter (D-18-63)', () => {
+    expect(
+      matchesSubitoCategory(
+        { source: 'facebook', title: 'Sedia ufficio gratis', category: 'arredamento-casalinghi' },
+        'arredamento-casalinghi',
+      ),
+    ).toBe(true);
+    expect(
+      matchesSubitoCategory(
+        { source: 'facebook', title: 'Sedia ufficio gratis', category: 'arredamento-casalinghi' },
+        'informatica',
+      ),
+    ).toBe(false);
+  });
+
+  it('matches facebook via title inference when category null (D-18-63)', () => {
     expect(
       matchesSubitoCategory(
         { source: 'facebook', title: 'Monitor 24 pollici', category: null },
+        'informatica',
+      ),
+    ).toBe(true);
+  });
+
+  it('excludes uncategorized facebook listing when specific category filter active (D-18-63)', () => {
+    expect(
+      matchesSubitoCategory(
+        { source: 'facebook', title: 'Oggetto generico', category: null },
         'informatica',
       ),
     ).toBe(false);
