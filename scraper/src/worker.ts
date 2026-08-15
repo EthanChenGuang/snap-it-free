@@ -18,7 +18,7 @@ import {
   updateNextRunAt,
 } from './config-loader.js';
 import { persistBatch } from './shared/persist.js';
-import { validateBatch, validateBatchHttp } from './shared/validate-run.js';
+import { validateBatch, validateBatchHttp, VINTED_MIN_COUNT_RATIO_FULL, VINTED_MIN_COUNT_RATIO_INCREMENTAL } from './shared/validate-run.js';
 import { loadZonePolygons, tagZone } from './shared/zone-tag.js';
 import { reconcileOrphanScrapeRuns } from './orphan-runs.js';
 import { runSchedulerTick, TICK_INTERVAL_MS } from './scheduler.js';
@@ -32,7 +32,7 @@ import {
   isProductionSoftProxyContext,
   type CrawlMode,
 } from './worker-proxy-gate.js';
-import { runCrawlWithProxyFallback, runSubitoCrawlWithProxyFallback, PROXY_QUOTA_FALLBACK_REASON } from './worker-proxy-fallback.js';
+import { runCrawlWithProxyFallback, runSubitoCrawlWithProxyFallback, runVintedCrawlWithProxyFallback, PROXY_QUOTA_FALLBACK_REASON } from './worker-proxy-fallback.js';
 import {
   acquireManualJobExecution,
   DuplicateJobRunError,
@@ -387,13 +387,14 @@ export async function runSourceScrape(
       crawlResult = fallbackResult.crawlResult;
       fallbackDegraded = fallbackResult.fallbackDegraded;
     } else if (sourceSlug === 'vinted') {
-      const fallbackResult = await runCrawlWithProxyFallback(
+      const fallbackResult = await runVintedCrawlWithProxyFallback(
         runVintedCrawler,
         config.urls,
         config.preset,
         config.proxyUrl,
         {
           knownMap,
+          earlyStopK: config.earlyStopK,
           isFullRefresh,
           mode: crawlMode,
           runId: run.id,
@@ -484,6 +485,12 @@ export async function runSourceScrape(
           jsonFieldCompleteness,
           crawlMode,
           listingsSkippedAtCrawl,
+          ...(sourceSlug === 'vinted'
+            ? {
+                minCountRatioFull: VINTED_MIN_COUNT_RATIO_FULL,
+                minCountRatioIncremental: VINTED_MIN_COUNT_RATIO_INCREMENTAL,
+              }
+            : {}),
         })
       : validateBatch(
           rawListings,

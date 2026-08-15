@@ -22,6 +22,8 @@ export type VintedCatalogListing = RawListing & {
   image_urls: string[];
   /** Vinted numeric item id. */
   external_id: string;
+  /** Seller user id for /api/v2/users/{id} enrichment (D-17-07). */
+  user_id?: string;
 };
 
 export type ParseCatalogResult = {
@@ -89,6 +91,8 @@ export function mapCatalogItem(
     return null;
   }
 
+  const userId = item.user?.id != null ? String(item.user.id) : undefined;
+
   return {
     source: 'vinted',
     external_id,
@@ -101,6 +105,7 @@ export function mapCatalogItem(
     price,
     image_urls,
     source_category_url: sourceCategoryUrl || undefined,
+    user_id: userId,
   };
 }
 

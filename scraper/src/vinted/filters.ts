@@ -27,3 +27,9 @@ export function rejectReasonIfNotFree(
 ): RejectReason | null {
   return isFreePrice(amount) ? null : 'not_free';
 }
+
+export {
+  isLocalPickup,
+  matchesCityIntent,
+  parseCityIntentFromUrl,
+} from './enrich.js';

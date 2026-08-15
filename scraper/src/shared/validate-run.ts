@@ -47,6 +47,12 @@ export function validateBatch(
 export const JSON_FIELD_COMPLETENESS_MIN = 0.9;
 export const MIN_COUNT_RATIO_FULL = 0.5;
 export const MIN_COUNT_RATIO_INCREMENTAL = 0.2;
+/**
+ * Vinted €0 listings are sparse on vinted.it (17-RESEARCH) — incremental count floor
+ * near zero so validation does not fail healthy incremental runs (SCRP-E08).
+ */
+export const VINTED_MIN_COUNT_RATIO_INCREMENTAL = 0;
+export const VINTED_MIN_COUNT_RATIO_FULL = 0.2;
 
 export type ValidateBatchHttpParams = {
   listings: unknown[];

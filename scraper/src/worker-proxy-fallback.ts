@@ -49,6 +49,19 @@ export async function runSubitoCrawlWithProxyFallback(
 }
 
 /**
+ * Run Vinted crawl with proxy; on fatal quota exhaustion retry once without proxy (D-17-33).
+ */
+export async function runVintedCrawlWithProxyFallback(
+  runVintedCrawler: RunCrawlerFn,
+  urls: readonly string[],
+  preset: AntiBlockPreset,
+  proxyUrl: string | undefined,
+  options: RunSubitoCrawlerOptions,
+): Promise<ProxyFallbackResult> {
+  return runCrawlWithProxyFallback(runVintedCrawler, urls, preset, proxyUrl, options);
+}
+
+/**
  * Generic proxy fallback for any crawler returning CrawlResult (Phase 17 —
  * Subito and Vinted share this path).
  */
