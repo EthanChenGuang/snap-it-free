@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   INFERRED_CATEGORY_TO_SLUG,
   mapPostCategoryToSlug,
+  mapVintedCatalogToSlug,
   normalizeCatalogSlug,
   POST_CATEGORY_TO_SLUG,
   resolveCanonicalCategorySlug,
@@ -69,6 +70,56 @@ describe('resolveCanonicalCategorySlug', () => {
         category: null,
       }),
     ).toBeNull();
+  });
+
+  it('maps Wave 0 verified Vinted catalog ID 1918 to arredamento-casalinghi (CAT-03, D-17-17)', () => {
+    expect(mapVintedCatalogToSlug(1918)).toBe('arredamento-casalinghi');
+    expect(
+      resolveCanonicalCategorySlug({
+        source: 'vinted',
+        title: 'Oggetto generico',
+        category: null,
+        vintedCatalogId: 1918,
+      }),
+    ).toBe('arredamento-casalinghi');
+  });
+
+  it('prefers valid DB slug over Vinted catalog map (D-17-17)', () => {
+    expect(
+      resolveCanonicalCategorySlug({
+        source: 'vinted',
+        title: 'Divano in ottime condizioni',
+        category: 'informatica',
+        vintedCatalogId: 1918,
+      }),
+    ).toBe('informatica');
+  });
+
+  it('falls back to title inference for vinted when catalog ID unmapped (D-17-17)', () => {
+    expect(
+      resolveCanonicalCategorySlug({
+        source: 'vinted',
+        title: 'Monitor 24 pollici',
+        category: null,
+        vintedCatalogId: 999999,
+      }),
+    ).toBe('informatica');
+  });
+
+  it('returns null for unmapped Vinted catalog ID without inference — never usato (D-17-18)', () => {
+    expect(
+      resolveCanonicalCategorySlug({
+        source: 'vinted',
+        title: 'Oggetto generico',
+        category: null,
+        vintedCatalogId: 999999,
+      }),
+    ).toBeNull();
+  });
+
+  it('maps multiple Vinted apparel catalog IDs to abbigliamento-accessori (D-17-24)', () => {
+    expect(mapVintedCatalogToSlug(1904)).toBe('abbigliamento-accessori');
+    expect(mapVintedCatalogToSlug(1906)).toBe('abbigliamento-accessori');
   });
 });
 
