@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
-current_phase: 17
+current_phase: 18
+current_phase_name: Facebook Marketplace Scraping & Source Configuration
 current_plan: Not started
-status: completed
+status: planning
 stopped_at: Completed 17-07-PLAN.md
-last_updated: "2026-08-15T14:34:10.137Z"
+last_updated: "2026-08-15T15:04:34.944Z"
 progress:
-  total_phases: 11
+  total_phases: 12
   completed_phases: 9
-  total_plans: 51
+  total_plans: 58
   completed_plans: 49
-  percent: 82
-current_phase_name: configure-vinted-scraping-and-integrate-free-items-into-curr
+  percent: 75
 last_activity: 2026-08-15
 last_activity_desc: "Quick task 260815-fjs: 扩展意大利城市搜索范围（米兰、佛罗伦萨、罗马、那不勒斯、佩鲁贾、都灵、普拉托）"
 ---
@@ -26,15 +26,15 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 **Core value:** Users can find and claim real free items near them in Venice faster than by manually checking Subito/FB Marketplace/community groups themselves.
 
-**Current focus:** Phase 17 — configure-vinted-scraping-and-integrate-free-items-into-curr
+**Current focus:** Phase 18 — facebook-marketplace-scraping
 
 ## Current Position
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
-Phase: 17
+Phase: 18 — Facebook Marketplace Scraping & Source Configuration
 **Current Plan:** Not started
 **Total Plans in Phase:** 7
-Status: All phases complete
+Status: Ready to plan
 
 Progress: [██████████] 96% v2.0 (0/7 phases)
 
