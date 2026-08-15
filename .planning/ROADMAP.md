@@ -349,7 +349,7 @@ Plans:
 | 14. Settings Parity | v2.0 | 8/8 | Complete | 2026-08-10 |
 | 15. Scraper Crawl Efficiency | v2.0 | 6/6 | Complete | 2026-08-11 |
 | 16. Proxy Cost Optimization | v2.0 | 3/5 | In Progress | — |
-| 17. Vinted Scraping & Category Integration | v2.0 | 0/7 | In Progress|  |
+| 17. Vinted Scraping & Category Integration | v2.0 | 0/7 | Complete    | 2026-08-15 |
 | 7. Production Deploy | v2.0 | 0/4 | Planned | — |
 
 ## Execution Order
@@ -418,7 +418,7 @@ Plans:
 
 **Depends on:** Phase 16
 
-**Plans:** 7/7 plans executed
+**Plans:** 7/7 plans complete
 
 Plans:
 

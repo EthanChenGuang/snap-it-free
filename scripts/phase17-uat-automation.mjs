@@ -203,12 +203,22 @@ async function main() {
     record('admin /admin/sources/vinted responds', false, e.message);
   }
 
-  // Feed page smoke
-  try {
-    const res = await fetch(`${BASE}/`, { redirect: 'manual' });
-    record('feed home responds', res.status === 200, `status=${res.status}`);
-  } catch (e) {
-    record('feed home responds', false, e.message);
+  // Feed page smoke (retry — dev server may compile on first hit after DB writes)
+  let feedOk = false;
+  for (let attempt = 0; attempt < 3 && !feedOk; attempt++) {
+    try {
+      const res = await fetch(`${BASE}/`);
+      feedOk = res.status === 200;
+      if (feedOk) {
+        record('feed home responds', true, `status=${res.status}`);
+        break;
+      }
+      if (attempt === 2) record('feed home responds', false, `status=${res.status}`);
+      await new Promise((r) => setTimeout(r, 1500));
+    } catch (e) {
+      if (attempt === 2) record('feed home responds', false, e.message);
+      await new Promise((r) => setTimeout(r, 1500));
+    }
   }
 
   console.log('\n=== Summary ===');

@@ -1,6 +1,6 @@
 import type { ListingSource } from '@/lib/listings/types';
 
-export const THRESHOLDS = { subito: 2, facebook: 2, ugc: 3 } as const;
+export const THRESHOLDS = { subito: 2, facebook: 2, ugc: 3, vinted: 2 } as const;
 
 export type AutoHideResult = {
   hide: boolean;
