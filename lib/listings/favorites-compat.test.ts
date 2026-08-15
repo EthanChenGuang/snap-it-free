@@ -4,6 +4,7 @@ import { filterByZone } from './filters';
 import type { ListingRow } from './types';
 
 const VINTED_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const FACEBOOK_ID = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 
 const baseListing: ListingRow = {
   id: VINTED_ID,
@@ -44,5 +45,11 @@ describe('vinted favorites and filter compat (D-17-30)', () => {
     const afterAdd = toggleFavoriteId(VINTED_ID);
 
     expect(afterAdd).toEqual([VINTED_ID]);
+  });
+
+  it('toggleFavoriteId accepts facebook listing UUID — source-agnostic favorites (D-18-46)', () => {
+    const afterAdd = toggleFavoriteId(FACEBOOK_ID);
+
+    expect(afterAdd).toEqual([FACEBOOK_ID]);
   });
 });

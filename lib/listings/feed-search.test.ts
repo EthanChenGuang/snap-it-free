@@ -58,6 +58,19 @@ describe('matchesFeedSearch', () => {
     expect(matchesFeedSearch(listing, 'lampada', 'it', cityLabels)).toBe(true);
   });
 
+  it('finds Facebook listings by title and translated title (D-18-47)', () => {
+    const listing: ListingRow = {
+      ...baseListing,
+      source: 'facebook',
+      external_url: 'https://www.facebook.com/marketplace/item/9876543210123456/',
+      title: 'Regalo divano',
+      title_en: 'Free sofa',
+    };
+
+    expect(matchesFeedSearch(listing, 'regalo divano', 'it', cityLabels)).toBe(true);
+    expect(matchesFeedSearch(listing, 'free sofa', 'en', cityLabels)).toBe(true);
+  });
+
   it('matches consumer city label for Venice zone listings', () => {
     expect(matchesFeedSearch(baseListing, 'venice', 'en', cityLabels)).toBe(true);
 
