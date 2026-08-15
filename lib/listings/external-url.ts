@@ -3,6 +3,8 @@ const ALLOWED_HOSTS = new Set([
   'www.subito.it',
   'vinted.it',
   'www.vinted.it',
+  'facebook.com',
+  'www.facebook.com',
 ]);
 
 export function isAllowedExternalUrl(url: string): boolean {

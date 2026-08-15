@@ -22,6 +22,18 @@ describe('isAllowedExternalUrl', () => {
     expect(isAllowedExternalUrl('https://vinted.it/items/987654321')).toBe(true);
   });
 
+  it('allows https://www.facebook.com/marketplace/item/...', () => {
+    expect(
+      isAllowedExternalUrl('https://www.facebook.com/marketplace/item/123/'),
+    ).toBe(true);
+  });
+
+  it('allows https://facebook.com/marketplace/item/...', () => {
+    expect(
+      isAllowedExternalUrl('https://facebook.com/marketplace/item/9876543210123456/'),
+    ).toBe(true);
+  });
+
   it('rejects https://evil.example.com', () => {
     expect(isAllowedExternalUrl('https://evil.example.com/phish')).toBe(false);
   });
