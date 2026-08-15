@@ -3,11 +3,16 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { RunNowButton, type RunNowPhase } from '@/components/admin/RunNowButton';
 import { adminShellMessages, sourcesMessages } from '@/components/admin/admin-messages';
+import { isRunNowActivePhase } from '@/lib/admin/use-run-now';
 import { RegaloUrlMatrix } from '@/components/admin/RegaloUrlMatrix';
+import { VintedUrlMatrix } from '@/components/admin/VintedUrlMatrix';
 import { ReplaceUrlsConfirmDialog } from '@/components/admin/ReplaceUrlsConfirmDialog';
+import { TargetUrlEditor } from '@/components/admin/TargetUrlEditor';
 import { dedupeUrls } from '@/lib/admin/subito-regalo-catalog';
 import { RECOMMENDED_SUBITO_SEED_URLS } from '@/lib/admin/subito-recommended-seed';
+import { RECOMMENDED_VINTED_SEED_URLS } from '@/lib/admin/vinted-recommended-seed';
 import type { AntiBlockPreset, SourceDetail } from '@/lib/admin/types';
 import {
   formatThresholdPercent,
@@ -39,6 +44,32 @@ const PRESETS: Array<{ id: AntiBlockPreset; title: string; description: string }
   },
 ];
 
+function IosToggle({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (next: boolean) => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      onClick={() => onChange(!checked)}
+      className="sources-ios-toggle cursor-pointer"
+    >
+      <span
+        className={cn('sources-ios-toggle-track', checked && 'sources-ios-toggle-track-on')}
+        aria-hidden
+      />
+    </button>
+  );
+}
+
 export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
   const router = useRouter();
   const [enabled, setEnabled] = useState(initialSource.enabled);
@@ -52,8 +83,11 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
   const [success, setSuccess] = useState(false);
   const [seedConfirmOpen, setSeedConfirmOpen] = useState(false);
   const [matrixResetToken, setMatrixResetToken] = useState(0);
+  const [runPhase, setRunPhase] = useState<RunNowPhase>('idle');
 
   const isSubito = initialSource.slug === 'subito';
+  const isVinted = initialSource.slug === 'vinted';
+  const hasUrlMatrix = isSubito || isVinted;
 
   const currentUrlCount = useMemo(
     () =>
@@ -65,7 +99,8 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
   );
 
   const applyRecommendedSeed = () => {
-    setTargetUrlsText(RECOMMENDED_SUBITO_SEED_URLS.join('\n'));
+    const seedUrls = isVinted ? RECOMMENDED_VINTED_SEED_URLS : RECOMMENDED_SUBITO_SEED_URLS;
+    setTargetUrlsText(seedUrls.join('\n'));
     setMatrixResetToken((token) => token + 1);
   };
 
@@ -133,133 +168,63 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
     }
   };
 
-  const handleRunNow = async () => {
-    if (initialSource.implementationStatus === 'coming_soon') {
-      setError(sourcesMessages.comingSoonRunBlocked);
-      return;
-    }
-
-    setError(null);
-    try {
-      const response = await fetch('/api/admin/jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source_slug: initialSource.slug }),
-      });
-      if (!response.ok) {
-        throw new Error('run failed');
-      }
-    } catch {
-      setError(adminShellMessages.loadError);
-    }
+  const handleRunComplete = () => {
+    router.refresh();
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <nav className="flex items-center gap-2 text-[14px] text-secondary">
-        <Link href="/admin/sources" className="inline-flex items-center gap-1 hover:text-on-surface">
+    <div className="source-detail-page mx-auto max-w-6xl px-1 pb-8">
+      <nav className="source-detail-breadcrumb">
+        <Link href="/admin/sources" className="source-detail-breadcrumb-link">
           <span className="material-symbols-outlined text-[18px]" aria-hidden>
             chevron_left
           </span>
           {sourcesMessages.breadcrumbSources}
         </Link>
         <span aria-hidden>/</span>
-        <span className="font-semibold text-on-surface">{initialSource.displayName}</span>
+        <span className="source-detail-breadcrumb-current">{initialSource.displayName}</span>
       </nav>
 
-      <header className="border-b border-outline-variant pb-6">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <h1 className="text-[30px] font-semibold leading-[1.3] tracking-tight">
-              {sourcesMessages.detailTitle(initialSource.displayName)}
-            </h1>
-            <p className="mt-1 text-[15px] text-secondary">{sourcesMessages.detailSubtitle}</p>
-          </div>
-          {initialSource.implementationStatus === 'live' ? (
-            <button
-              type="button"
-              onClick={handleRunNow}
-              className="inline-flex items-center justify-center gap-2 rounded bg-primary px-4 py-2 text-[14px] font-semibold text-on-primary hover:opacity-90"
-            >
-              <span className="material-symbols-outlined text-[18px]" aria-hidden>
-                play_arrow
-              </span>
-              {sourcesMessages.runNow}
-            </button>
-          ) : (
-            <span className="inline-flex rounded-full border border-outline-variant bg-surface-container px-3 py-1 text-[14px]">
-              {sourcesMessages.statusComingSoon}
-            </span>
-          )}
+      <header className="source-detail-header">
+        <div className="source-detail-header-copy">
+          <h1 className="source-detail-title">
+            {sourcesMessages.detailTitle(initialSource.displayName)}
+          </h1>
+          <p className="source-detail-subtitle">{sourcesMessages.detailSubtitle}</p>
         </div>
+        {initialSource.implementationStatus === 'live' ? (
+          <div
+            className={cn(
+              isRunNowActivePhase(runPhase) && 'run-now-wrapper-active rounded p-1',
+              runPhase === 'running' && 'run-now-wrapper-running',
+            )}
+          >
+            <RunNowButton
+              slug={initialSource.slug}
+              variant="full"
+              showStatusLink
+              onComplete={handleRunComplete}
+              onPhaseChange={setRunPhase}
+            />
+          </div>
+        ) : (
+          <span className="source-detail-soon-badge">{sourcesMessages.statusComingSoon}</span>
+        )}
       </header>
 
       {error ? (
-        <p className="rounded border border-outline-variant bg-surface-container-low p-4 text-[15px] text-error">
+        <p className="source-detail-alert source-detail-alert-error" role="alert">
           {error}
         </p>
       ) : null}
       {success ? (
-        <p className="rounded border border-outline-variant bg-surface-container-low p-4 text-[15px] text-on-surface">
+        <p className="source-detail-alert source-detail-alert-success" role="status">
           {sourcesMessages.saveSuccess}
         </p>
       ) : null}
 
-      <div className="space-y-5 rounded border border-outline-variant bg-surface p-5 text-[15px]">
-        <div className="flex items-center justify-between border-b border-outline-variant pb-4">
-          <div>
-            <h2 className="font-semibold">{sourcesMessages.sourceStatusLabel}</h2>
-            <p className="mt-1 text-secondary">{sourcesMessages.sourceStatusHelp}</p>
-          </div>
-          <label className="relative inline-flex cursor-pointer items-center">
-            <input
-              type="checkbox"
-              checked={enabled}
-              onChange={(event) => setEnabled(event.target.checked)}
-              className="peer sr-only"
-            />
-            <span
-              className="h-5 w-10 rounded-full bg-surface-container-high after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-outline-variant after:bg-surface after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full"
-              aria-hidden
-            />
-          </label>
-        </div>
-
-        <div className="space-y-2 border-b border-outline-variant pb-4">
-          <label className="block font-semibold">{sourcesMessages.intervalLabel}</label>
-          <p className="text-[14px] text-secondary">{sourcesMessages.intervalHelp}</p>
-          <div className="flex items-center gap-3 pt-1">
-            <div className="flex items-center rounded border border-outline-variant bg-surface-container-low">
-              <button
-                type="button"
-                onClick={decreaseInterval}
-                className="rounded-l px-3 py-1 text-sm font-semibold hover:bg-surface-container-high"
-              >
-                -
-              </button>
-              <input
-                type="number"
-                min={30}
-                max={1440}
-                value={interval}
-                onChange={(event) => setInterval(Number(event.target.value))}
-                className="w-16 border-x border-outline-variant bg-surface py-1 text-center font-mono text-[14px] focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={increaseInterval}
-                className="rounded-r px-3 py-1 text-sm font-semibold hover:bg-surface-container-high"
-              >
-                +
-              </button>
-            </div>
-            <span className="font-mono text-[14px] text-secondary">
-              {sourcesMessages.intervalEvery(interval)}
-            </span>
-          </div>
-        </div>
-
-        <div className="space-y-2 border-b border-outline-variant pb-4">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="space-y-6 lg:col-span-8">
           {isSubito ? (
             <RegaloUrlMatrix
               targetUrlsText={targetUrlsText}
@@ -268,86 +233,161 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
               resetToAllChecked={matrixResetToken}
             />
           ) : null}
-          <div className="flex items-center justify-between gap-2">
-            <label className="block font-semibold">
-              {isSubito ? '目标 URL' : sourcesMessages.urlsLabel}
-            </label>
-            <span className="font-mono text-[14px] text-secondary">
-              {isSubito ? '每行一个 URL。可手动编辑或使用上方矩阵生成。' : sourcesMessages.urlsHelp}
-            </span>
-          </div>
-          <textarea
-            rows={5}
+
+          {isVinted ? (
+            <VintedUrlMatrix
+              targetUrlsText={targetUrlsText}
+              onTargetUrlsChange={setTargetUrlsText}
+              onApplyRecommendedSeedClick={handleApplyRecommendedSeedClick}
+              resetToAllChecked={matrixResetToken}
+            />
+          ) : null}
+
+          <TargetUrlEditor
             value={targetUrlsText}
-            onChange={(event) => setTargetUrlsText(event.target.value)}
-            className="max-h-48 w-full resize-y overflow-y-auto rounded border border-outline-variant bg-surface-container-low p-3 font-mono text-[14px] leading-relaxed focus:border-primary focus:outline-none"
-            placeholder="https://www.subito.it/annunci-veneto/..."
+            onChange={setTargetUrlsText}
+            sourceSlug={initialSource.slug}
+            title={hasUrlMatrix ? '目标 URL' : sourcesMessages.urlsLabel}
+            subtitle={
+              hasUrlMatrix
+                ? '每行一个 URL。可手动编辑或使用上方矩阵生成。'
+                : sourcesMessages.urlsHelp
+            }
           />
         </div>
 
-        <div className="space-y-3 border-b border-outline-variant pb-4">
-          <div>
-            <label className="block font-semibold">{sourcesMessages.antiBlockLabel}</label>
-            <p className="mt-1 text-[14px] text-secondary">{sourcesMessages.antiBlockHelp}</p>
-          </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            {PRESETS.map((preset) => (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => setAntiBlock(preset.id)}
-                className={cn(
-                  'rounded border p-3 text-left transition-colors',
-                  antiBlock === preset.id
-                    ? 'border-primary bg-surface-container ring-1 ring-primary'
-                    : 'border-outline-variant bg-surface hover:bg-surface-container-low',
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">{preset.title}</span>
-                  <input
-                    type="radio"
-                    name="antiBlock"
-                    checked={antiBlock === preset.id}
-                    onChange={() => setAntiBlock(preset.id)}
-                    className="accent-primary"
-                  />
-                </div>
-                <p className="mt-1 text-[14px] text-secondary">{preset.description}</p>
-              </button>
-            ))}
-          </div>
-        </div>
+        <aside className="flex flex-col gap-6 lg:col-span-4">
+          <section className="source-detail-card">
+            <div className="source-detail-toggle-row">
+              <div>
+                <h2 className="source-detail-card-title">{sourcesMessages.sourceStatusLabel}</h2>
+                <p className="source-detail-card-subtitle">{sourcesMessages.sourceStatusHelp}</p>
+              </div>
+              <IosToggle
+                checked={enabled}
+                onChange={setEnabled}
+                label={sourcesMessages.sourceStatusLabel}
+              />
+            </div>
 
-        <div className="space-y-2">
-          <div>
-            <label className="block font-semibold">{sourcesMessages.thresholdsLabel}</label>
-            <p className="mt-1 text-[14px] text-secondary">{sourcesMessages.thresholdsHelp}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded border border-outline-variant bg-surface-container-low px-2.5 py-1 font-mono text-[14px]">
-              <span className="material-symbols-outlined text-[18px] text-on-surface" aria-hidden>
-                check_circle
+            <div className="source-detail-divider" />
+
+            <div className="source-detail-field">
+              <label className="source-detail-card-title" htmlFor="source-interval">
+                {sourcesMessages.intervalLabel}
+              </label>
+              <p className="source-detail-card-subtitle">{sourcesMessages.intervalHelp}</p>
+              <div className="source-detail-stepper-row">
+                <div className="source-detail-stepper">
+                  <button type="button" onClick={decreaseInterval} aria-label="减少间隔">
+                    −
+                  </button>
+                  <input
+                    id="source-interval"
+                    type="number"
+                    min={30}
+                    max={1440}
+                    value={interval}
+                    onChange={(event) => setInterval(Number(event.target.value))}
+                    className="source-detail-stepper-input tabular-nums"
+                  />
+                  <button type="button" onClick={increaseInterval} aria-label="增加间隔">
+                    +
+                  </button>
+                </div>
+                <span className="source-detail-stepper-caption tabular-nums">
+                  {sourcesMessages.intervalEvery(interval)}
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <section className="source-detail-card">
+            <header className="source-detail-card-header">
+              <div>
+                <h2 className="source-detail-card-title">{sourcesMessages.antiBlockLabel}</h2>
+                <p className="source-detail-card-subtitle">{sourcesMessages.antiBlockHelp}</p>
+              </div>
+            </header>
+            <div className="source-detail-preset-list">
+              {PRESETS.map((preset) => {
+                const selected = antiBlock === preset.id;
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => setAntiBlock(preset.id)}
+                    aria-pressed={selected}
+                    className={cn(
+                      'source-detail-preset-card',
+                      selected && 'source-detail-preset-card-selected',
+                    )}
+                  >
+                    <div className="source-detail-preset-card-head">
+                      <span className="source-detail-preset-title">{preset.title}</span>
+                      {selected ? (
+                        <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                          check_circle
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="source-detail-preset-description">{preset.description}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="source-detail-card">
+            <header className="source-detail-card-header">
+              <div>
+                <h2 className="source-detail-card-title">{sourcesMessages.thresholdsLabel}</h2>
+                <p className="source-detail-card-subtitle">{sourcesMessages.thresholdsHelp}</p>
+              </div>
+            </header>
+            <div className="source-detail-threshold-tags">
+              <span className="source-detail-threshold-tag tabular-nums">
+                <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                  check_circle
+                </span>
+                {sourcesMessages.thresholdSelector} ≥{formatThresholdPercent(SCRAPE_MIN_SELECTOR_RATE)}
               </span>
-              {sourcesMessages.thresholdSelector} ≥{formatThresholdPercent(SCRAPE_MIN_SELECTOR_RATE)}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded border border-outline-variant bg-surface-container-low px-2.5 py-1 font-mono text-[14px]">
-              <span className="material-symbols-outlined text-[18px] text-on-surface" aria-hidden>
-                check_circle
+              <span className="source-detail-threshold-tag tabular-nums">
+                <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                  check_circle
+                </span>
+                {sourcesMessages.thresholdCount} ≥{formatThresholdPercent(SCRAPE_MIN_COUNT_RATIO)}
               </span>
-              {sourcesMessages.thresholdCount} ≥{formatThresholdPercent(SCRAPE_MIN_COUNT_RATIO)}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded border border-outline-variant bg-surface-container-low px-2.5 py-1 font-mono text-[14px]">
-              <span className="material-symbols-outlined text-[18px] text-on-surface" aria-hidden>
-                check_circle
+              <span className="source-detail-threshold-tag tabular-nums">
+                <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                  check_circle
+                </span>
+                {sourcesMessages.thresholdGeo} ≥
+                {formatThresholdPercent(SCRAPE_MIN_GEO_RESOLUTION_RATE)}
               </span>
-              {sourcesMessages.thresholdGeo} ≥{formatThresholdPercent(SCRAPE_MIN_GEO_RESOLUTION_RATE)}
-            </span>
-          </div>
-        </div>
+            </div>
+          </section>
+
+          <section className="source-detail-card source-detail-save-panel lg:sticky lg:top-6">
+            <p className="source-detail-save-note">{sourcesMessages.saveFooterNote}</p>
+            <div className="source-detail-save-actions">
+              <Link href="/admin/sources" className="source-detail-btn-ghost">
+                {sourcesMessages.cancel}
+              </Link>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={handleSave}
+                className="source-detail-btn-primary"
+              >
+                {sourcesMessages.save}
+              </button>
+            </div>
+          </section>
+        </aside>
       </div>
 
-      {isSubito ? (
+      {hasUrlMatrix ? (
         <ReplaceUrlsConfirmDialog
           open={seedConfirmOpen}
           onOpenChange={setSeedConfirmOpen}
@@ -355,29 +395,6 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
           onConfirmReplace={applyRecommendedSeed}
         />
       ) : null}
-
-      <div className="sticky bottom-4 flex items-center justify-between rounded border border-outline-variant bg-surface p-4">
-        <span className="text-[14px] text-secondary">{sourcesMessages.saveFooterNote}</span>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/admin/sources"
-            className="rounded border border-outline-variant bg-surface px-4 py-2 text-[14px] text-secondary hover:bg-surface-container-low"
-          >
-            {sourcesMessages.cancel}
-          </Link>
-          <button
-            type="button"
-            disabled={saving}
-            onClick={handleSave}
-            className="inline-flex items-center gap-2 rounded bg-primary px-4 py-2 text-[14px] font-semibold text-on-primary hover:opacity-90 disabled:opacity-50"
-          >
-            <span className="material-symbols-outlined text-[18px]" aria-hidden>
-              save
-            </span>
-            {sourcesMessages.save}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
