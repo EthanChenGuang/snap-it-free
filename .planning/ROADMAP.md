@@ -466,7 +466,7 @@ Plans:
 
 **Depends on:** Phase 16 (proxy posture), Phase 15 (crawl stack), Phase 17 (Vinted integration template)
 
-**Plans:** 6/7 plans executed
+**Plans:** 7/7 plans executed
 
 Plans:
 
@@ -496,7 +496,7 @@ Plans:
 
 **Wave 6** *(blocked on Waves 3–5)*
 
-- [ ] 18-07-PLAN.md — Phase gate verification + human UAT (audit D-18-01–63)
+- [x] 18-07-PLAN.md — Phase gate verification + human UAT (audit D-18-01–63)
 
 **Success criteria:**
 

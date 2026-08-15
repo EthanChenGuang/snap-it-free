@@ -5,15 +5,15 @@ milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 18
 current_phase_name: Facebook Marketplace Scraping & Source Configuration
 current_plan: 7
-status: executing
-stopped_at: Completed 18-06-PLAN.md
-last_updated: "2026-08-15T16:50:24.641Z"
+status: verifying
+stopped_at: Completed 18-07-PLAN.md
+last_updated: "2026-08-15T16:54:15.211Z"
 progress:
   total_phases: 12
-  completed_phases: 9
+  completed_phases: 10
   total_plans: 58
-  completed_plans: 55
-  percent: 75
+  completed_plans: 56
+  percent: 83
 last_activity: 2026-08-15
 last_activity_desc: "Quick task 260815-fjs: 扩展意大利城市搜索范围（米兰、佛罗伦萨、罗马、那不勒斯、佩鲁贾、都灵、普拉托）"
 ---
@@ -34,9 +34,9 @@ Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy
 Phase: 18 — Facebook Marketplace Scraping & Source Configuration
 **Current Plan:** 7
 **Total Plans in Phase:** 7
-Status: Ready to execute
+Status: Phase complete — ready for verification
 
-Progress: [██████████] 95% v2.0 (0/7 phases)
+Progress: [██████████] 97% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -109,6 +109,7 @@ Progress: [██████████] 95% v2.0 (0/7 phases)
 | Phase 18-facebook-marketplace-scraping P04 | 3min | 3 tasks | 11 files |
 | Phase 18-facebook-marketplace-scraping P05 | 18min | 3 tasks | 14 files |
 | Phase 18-facebook-marketplace-scraping P06 | 5min | 3 tasks | 5 files |
+| Phase 18 P07 | 18 | 3 tasks | 3 files |
 
 ## Deferred Items (from v1.0)
 
@@ -128,8 +129,8 @@ Progress: [██████████] 95% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-15T16:50:24.621Z
-**Stopped at:** Completed 18-06-PLAN.md
+**Last session:** 2026-08-15T16:54:15.196Z
+**Stopped at:** Completed 18-07-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -227,6 +228,8 @@ Progress: [██████████] 95% v2.0 (0/7 phases)
 - [Phase ?]: Facebook session probe via scraper subprocess (crawlee not in Next bundle)
 - [Phase ?]: No FilterSheet source filter — D-18-44 deferred, verified unchanged
 - [Phase ?]: feed-search.ts is canonical search module (plan referenced search.ts)
+- [Phase ?]: Phase 18 gate: Wave 0 live FAIL documented; scaffold approved; operator UAT deferred
+- [Phase ?]: nyquist_compliant true after 442+209+459 tests + phase18-uat-automation 23/23
 
 ## Quick Tasks Completed
 
