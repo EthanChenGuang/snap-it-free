@@ -6,7 +6,7 @@ UPDATE public.scraper_sources
 SET
   implementation_status = 'live',
   enabled = false,
-  crawl_interval_minutes = 90,
+  interval_minutes = 90,
   target_urls = array[
     'https://www.vinted.it/catalog/1918-casa?order=newest_first&city=venezia',
     'https://www.vinted.it/catalog/3474-piccoli-elettrodomestici-da-cucina?order=newest_first&city=venezia',

@@ -1,5 +1,5 @@
-import type { NextConfig } from 'next';
 import withSerwistInit from '@serwist/next';
+import type { NextConfig } from 'next';
 
 const withSerwist = withSerwistInit({
   swSrc: 'app/sw.ts',
@@ -46,7 +46,9 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.subito.it' },
       { protocol: 'https', hostname: '**.sbito.it' },
       { protocol: 'https', hostname: 'images.subito.it' },
+      { protocol: 'https', hostname: '**.vinted.net' },
       { protocol: 'https', hostname: '**.googleusercontent.com' },
+      { protocol: 'https', hostname: '**.supabase.co' },
     ],
   },
 };

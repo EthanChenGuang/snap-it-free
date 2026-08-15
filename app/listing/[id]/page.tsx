@@ -49,7 +49,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
     );
   }
 
-  if (listing.source === 'subito') {
+  if (listing.source === 'subito' || listing.source === 'vinted') {
     return <ScrapedListingShell listing={listing} similarListings={similarListings} />;
   }
 
