@@ -1,0 +1,94 @@
+{
+  "_meta": {
+    "source": "https://www.vinted.it/catalog/1918-casa?order=newest_first",
+    "capturedAt": "2026-08-15T11:47:02.006Z",
+    "endpoint": "/api/v2/catalog/items?per_page=96&page=1&order=newest_first&currency=EUR&catalog_ids=1918",
+    "note": "Sanitized Vinted catalog API fragment for Plan 17-02 unit tests — user ids/urls redacted"
+  },
+  "items": [
+    {
+      "id": 9667494078,
+      "title": "Ventilatore da soffitto",
+      "price": {
+        "amount": "15.0",
+        "currency_code": "EUR"
+      },
+      "url": "[redacted url]",
+      "path": "/items/9667494078-ventilatore-da-soffitto",
+      "photo": {
+        "url": "https://images1.vinted.net/t/02_00301_nzpkiRM6VYDkiLtPPUkESzfC/f800/1786794413.jpeg?s=53f546a630aea2e8911f98be6ac97d26822b7b53"
+      },
+      "photos": [
+        {
+          "url": "https://images1.vinted.net/t/02_00301_nzpkiRM6VYDkiLtPPUkESzfC/f800/1786794413.jpeg?s=53f546a630aea2e8911f98be6ac97d26822b7b53"
+        },
+        {
+          "url": "https://images1.vinted.net/t/06_00ee0_fR9gMytpEE2B9kC1a1ecVpyF/f800/1786794413.jpeg?s=f252d4687c43c69c6ef3aca2254641651a79c888"
+        }
+      ],
+      "user": {
+        "id": "[redacted]",
+        "login": "mariapaola0209",
+        "profile_url": "[redacted]"
+      },
+      "brand_title": "Summer",
+      "size_title": "",
+      "status": "Nuovo con cartellino"
+    },
+    {
+      "id": 9667493976,
+      "title": "Collier pour chien For Pets Only",
+      "price": {
+        "amount": "20.0",
+        "currency_code": "EUR"
+      },
+      "url": "[redacted url]",
+      "path": "/items/9667493976-collier-pour-chien-for-pets-only",
+      "photo": {
+        "url": "https://images1.vinted.net/t/01_0124b_FTw3FJpiERt9iKpSfXiJFcsr/f800/1786794412.jpeg?s=5565194aaaf6dca3db51a06fd1c876d1228aa7f1"
+      },
+      "photos": [
+        {
+          "url": "https://images1.vinted.net/t/01_0124b_FTw3FJpiERt9iKpSfXiJFcsr/f800/1786794412.jpeg?s=5565194aaaf6dca3db51a06fd1c876d1228aa7f1"
+        },
+        {
+          "url": "https://images1.vinted.net/t/02_01ef4_Mh8sxaC8SgA5Lo5gQGte14wH/f800/1786794412.jpeg?s=c43724885e2dbc43a154e99faada0fc041f4713c"
+        }
+      ],
+      "user": {
+        "id": "[redacted]",
+        "login": "cleanad",
+        "profile_url": "[redacted]"
+      },
+      "brand_title": "For Pets Only",
+      "size_title": "Altro",
+      "status": "Ottime"
+    },
+    {
+      "id": 9667493932,
+      "title": "Mini Vasen",
+      "price": {
+        "amount": "3.0",
+        "currency_code": "EUR"
+      },
+      "url": "[redacted url]",
+      "path": "/items/9667493932-mini-vasen",
+      "photo": {
+        "url": "https://images1.vinted.net/t/04_004ae_VMAvLWDn3z7YwPGHcmYQcYgg/f800/1786794412.jpeg?s=911fa41073e166ec62a5e845f92e7a44b05eefb0"
+      },
+      "photos": [
+        {
+          "url": "https://images1.vinted.net/t/04_004ae_VMAvLWDn3z7YwPGHcmYQcYgg/f800/1786794412.jpeg?s=911fa41073e166ec62a5e845f92e7a44b05eefb0"
+        }
+      ],
+      "user": {
+        "id": "[redacted]",
+        "login": "helibelli00",
+        "profile_url": "[redacted]"
+      },
+      "brand_title": "Søstrene Grene",
+      "size_title": "",
+      "status": "Nuovo con cartellino"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "_meta": {
+    "source": "https://www.vinted.it/items/9667494078-ventilatore-da-soffitto",
+    "capturedAt": "2026-08-15T11:47:02.740Z",
+    "note": "Sanitized Vinted item-detail RSC JSON fragment for Plan 17-03 enrich.ts tests — extracted via escaped-RSC regex"
+  },
+  "catalog_id": 3529,
+  "shipping": {
+    "type": "shipping"
+  },
+  "posted_at": "scrape run time (A3 — not in RSC payload)"
+}
