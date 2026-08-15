@@ -418,7 +418,7 @@ Plans:
 
 **Depends on:** Phase 16
 
-**Plans:** 4/7 plans executed
+**Plans:** 5/7 plans executed
 
 Plans:
 
@@ -436,7 +436,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 17-04-PLAN.md — Vinted→Subito category map + resolveCanonicalCategorySlug branch (CAT-01/03, D-17-17)
+- [x] 17-04-PLAN.md — Vinted→Subito category map + resolveCanonicalCategorySlug branch (CAT-01/03, D-17-17)
 
 **Wave 4** *(blocked on Wave 3)*
 
