@@ -4,15 +4,15 @@ milestone: v2.0
 milestone_name: Snag-style Consumer UX + Production Deploy
 current_phase: 18
 current_phase_name: Facebook Marketplace Scraping & Source Configuration
-current_plan: 3
+current_plan: 4
 status: executing
-stopped_at: Completed 18-02-PLAN.md
-last_updated: "2026-08-15T16:33:41.637Z"
+stopped_at: Completed 18-03-PLAN.md
+last_updated: "2026-08-15T16:37:57.237Z"
 progress:
   total_phases: 12
   completed_phases: 9
   total_plans: 58
-  completed_plans: 51
+  completed_plans: 52
   percent: 75
 last_activity: 2026-08-15
 last_activity_desc: "Quick task 260815-fjs: 扩展意大利城市搜索范围（米兰、佛罗伦萨、罗马、那不勒斯、佩鲁贾、都灵、普拉托）"
@@ -32,11 +32,11 @@ See: .planning/PROJECT.md (updated 2026-08-09)
 
 Milestone: **v2.0** — Snag-style Consumer UX + Production Deploy  
 Phase: 18 — Facebook Marketplace Scraping & Source Configuration
-**Current Plan:** 3
+**Current Plan:** 4
 **Total Plans in Phase:** 7
 Status: Ready to execute
 
-Progress: [█████████░] 88% v2.0 (0/7 phases)
+Progress: [█████████░] 90% v2.0 (0/7 phases)
 
 ## v2.0 Phase Queue
 
@@ -105,6 +105,7 @@ Progress: [█████████░] 88% v2.0 (0/7 phases)
 | Phase 17 P07 | 45min | 3 tasks | 8 files |
 | Phase 18-facebook-marketplace-scraping P01 | 35min | 3 tasks | 10 files |
 | Phase 18-facebook-marketplace-scraping P02 | 45 | 4 tasks | 18 files |
+| Phase 18-facebook-marketplace-scraping P03 | 3min | 3 tasks | 11 files |
 
 ## Deferred Items (from v1.0)
 
@@ -124,8 +125,8 @@ Progress: [█████████░] 88% v2.0 (0/7 phases)
 
 ## Session
 
-**Last session:** 2026-08-15T16:33:41.622Z
-**Stopped at:** Completed 18-02-PLAN.md
+**Last session:** 2026-08-15T16:37:57.219Z
+**Stopped at:** Completed 18-03-PLAN.md
 **Resume file:** None
 
 ## Decisions
@@ -215,6 +216,8 @@ Progress: [█████████░] 88% v2.0 (0/7 phases)
 - [Phase ?]: D-18-11 option-a: session_enc jsonb + encryptSession/decryptSession wrappers (Plan 18-02 auto-selected)
 - [Phase ?]: D-18-40 option-a: new facebook/ module + worker branch (Plan 18-02 auto-selected)
 - [Phase ?]: D-18-01 option-a: price field only free gate — no title gratis fallback (Plan 18-02 auto-selected)
+- [Phase ?]: D-18-04 option-a: reject shipping-only via delivery_types at enrich layer (Plan 18-03 auto-selected)
+- [Phase ?]: Stable FB crawl_content_hash excludes synthetic posted_at for incremental early-stop (Plan 18-03)
 
 ## Quick Tasks Completed
 

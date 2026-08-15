@@ -466,7 +466,7 @@ Plans:
 
 **Depends on:** Phase 16 (proxy posture), Phase 15 (crawl stack), Phase 17 (Vinted integration template)
 
-**Plans:** 2/7 plans executed
+**Plans:** 3/7 plans executed
 
 Plans:
 
@@ -480,7 +480,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 18-03-PLAN.md — Full FB Playwright crawler + worker routing + incremental early-stop + session probe (SCRP-E02–E08, D-18-12/13/18)
+- [x] 18-03-PLAN.md — Full FB Playwright crawler + worker routing + incremental early-stop + session probe (SCRP-E02–E08, D-18-12/13/18)
 
 **Wave 3** *(blocked on Wave 2)*
 
