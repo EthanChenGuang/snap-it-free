@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
+import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
 import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { buildCardMetadata } from '@/lib/listings/card-metadata';
 import { listingConsumerCityLabel } from '@/lib/listings/feed-search';
@@ -25,10 +26,7 @@ export function ListListingCard({ listing, distanceMeters }: ListListingCardProp
   const displayTitle = resolveListingTitle(listing, language);
   const router = useRouter();
   const isClaimed = listing.status === 'claimed';
-  const cityLabel = listingConsumerCityLabel(listing, {
-    venice: messages.feed.cityVenice,
-    padova: messages.feed.cityPadova,
-  });
+  const cityLabel = listingConsumerCityLabel(listing, consumerCityLabelsFromMessages(messages));
   const postedLabel = formatRelativeTime(listing.posted_at);
   const metadata = buildCardMetadata({
     distanceMeters,
@@ -65,9 +63,16 @@ export function ListListingCard({ listing, distanceMeters }: ListListingCardProp
           className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 rounded-t-2xl bg-gradient-to-b from-black/30 to-transparent"
           aria-hidden
         />
-        <span className="absolute left-3 top-3 z-20 rounded-full bg-emerald-500/80 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
-          {messages.listing.free}
-        </span>
+        <div className="absolute left-3 top-3 z-20 flex flex-wrap items-center gap-1.5">
+          <span className="rounded-full bg-emerald-500/80 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+            {messages.listing.free}
+          </span>
+          {listing.source === 'vinted' && (
+            <span className="rounded-md border border-outline-variant bg-[#f1f1f0] px-2 py-0.5 text-xs font-medium text-on-surface">
+              {messages.listing.sourceVinted}
+            </span>
+          )}
+        </div>
         <FavoriteButton
           listingId={listing.id}
           size="sm"

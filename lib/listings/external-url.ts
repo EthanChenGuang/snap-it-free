@@ -1,4 +1,9 @@
-const ALLOWED_HOSTS = new Set(['subito.it', 'www.subito.it']);
+const ALLOWED_HOSTS = new Set([
+  'subito.it',
+  'www.subito.it',
+  'vinted.it',
+  'www.vinted.it',
+]);
 
 export function isAllowedExternalUrl(url: string): boolean {
   try {
