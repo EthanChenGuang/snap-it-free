@@ -19,6 +19,13 @@ const baseListing: ListingRow = {
 const cityLabels: ConsumerCityLabels = {
   venice: 'Venice',
   padova: 'Padova',
+  milano: 'Milan',
+  firenze: 'Florence',
+  roma: 'Rome',
+  napoli: 'Naples',
+  perugia: 'Perugia',
+  torino: 'Turin',
+  prato: 'Prato',
 };
 
 describe('matchesFeedSearch', () => {
@@ -31,6 +38,19 @@ describe('matchesFeedSearch', () => {
     const listing: ListingRow = {
       ...baseListing,
       title: 'Lampada gratis',
+      title_en: 'Free lamp',
+    };
+
+    expect(matchesFeedSearch(listing, 'free lamp', 'en', cityLabels)).toBe(true);
+    expect(matchesFeedSearch(listing, 'lampada', 'it', cityLabels)).toBe(true);
+  });
+
+  it('finds Vinted listings by translated title fields (D-17-31)', () => {
+    const listing: ListingRow = {
+      ...baseListing,
+      source: 'vinted',
+      external_url: 'https://www.vinted.it/items/123456789',
+      title: 'Lampada',
       title_en: 'Free lamp',
     };
 
