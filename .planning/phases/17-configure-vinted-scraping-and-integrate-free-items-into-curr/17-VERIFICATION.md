@@ -6,12 +6,13 @@ score: 5/5 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
 human_uat: approved
-human_uat_at: 2026-08-15T14:30:00Z
+human_uat_at: "2026-08-15T15:05:00Z"
 re_verification: true
 re_verification:
   previous_status: complete
   previous_score: 37/37 decisions mapped
   gaps_closed:
+
     - "Standard gsd-verifier frontmatter and adversarial codebase re-check"
   gaps_remaining: []
   regressions: []
