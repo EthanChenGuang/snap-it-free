@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 15
+open_count: 17
 waived_count: 0
 fixed_count: 0
-total_count: 15
-last_updated: 2026-08-15T16:30:06.711Z
+total_count: 17
+last_updated: 2026-08-15T16:33:41.995Z
 ---
 
 # Broken Windows Ledger
@@ -30,6 +30,8 @@ last_updated: 2026-08-15T16:30:06.711Z
 | 13 | 13 | deviation | .planning/phases/13-select-location-flow/13-VALIDATION.md |  | D-12 PostForm field loss across picker round trip — OPEN developer decision | open |  | 2026-08-10T21:17:38.028Z |  |
 | 14 | 17 | unrun-verify | npm run build |  | Build fails on pre-existing RunsListClient.tsx targetUrlCount type error | open |  | 2026-08-15T14:20:40.739Z |  |
 | 15 | 18 | unrun-verify | .planning/phases/18-facebook-marketplace-scraping/18-SPIKE-FACEBOOK-MARKETPLACE.md |  | Live Facebook Wave 0 spike not executed — FB_SESSION_JSON/PROXY_URL missing; Verdict FAIL | open |  | 2026-08-15T16:30:06.711Z |  |
+| 16 | 18 | stub | scraper/src/worker.ts |  | Tracer uses config.urls.slice(0,1) — full matrix deferred to Plan 18-03 | open |  | 2026-08-15T16:33:41.914Z |  |
+| 17 | 18 | unrun-verify | .planning/phases/18-facebook-marketplace-scraping/18-SPIKE-FACEBOOK-MARKETPLACE.md |  | Live Venice URL crawl with operator session + proxy not run in 18-02 — fixture mock proves architecture | open |  | 2026-08-15T16:33:41.995Z |  |
 
 ````json
 [
@@ -211,6 +213,30 @@ last_updated: 2026-08-15T16:30:06.711Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-15T16:30:06.711Z",
+    "resolved_at": null
+  },
+  {
+    "id": 16,
+    "kind": "stub",
+    "phase": "18",
+    "file": "scraper/src/worker.ts",
+    "line": null,
+    "description": "Tracer uses config.urls.slice(0,1) — full matrix deferred to Plan 18-03",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-15T16:33:41.914Z",
+    "resolved_at": null
+  },
+  {
+    "id": 17,
+    "kind": "unrun-verify",
+    "phase": "18",
+    "file": ".planning/phases/18-facebook-marketplace-scraping/18-SPIKE-FACEBOOK-MARKETPLACE.md",
+    "line": null,
+    "description": "Live Venice URL crawl with operator session + proxy not run in 18-02 — fixture mock proves architecture",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-15T16:33:41.995Z",
     "resolved_at": null
   }
 ]

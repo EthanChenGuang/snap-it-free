@@ -466,7 +466,7 @@ Plans:
 
 **Depends on:** Phase 16 (proxy posture), Phase 15 (crawl stack), Phase 17 (Vinted integration template)
 
-**Plans:** 1/7 plans executed
+**Plans:** 2/7 plans executed
 
 Plans:
 
@@ -476,7 +476,7 @@ Plans:
 
 **Wave 1** *(blocked on Wave 0 PASS)*
 
-- [ ] 18-02-PLAN.md — Tracer: session_enc migration + graphql extract/filters + one-URL crawl→persist→feed + chip (D-18-11, D-18-40, D-18-01/02/03)
+- [x] 18-02-PLAN.md — Tracer: session_enc migration + graphql extract/filters + one-URL crawl→persist→feed + chip (D-18-11, D-18-40, D-18-01/02/03)
 
 **Wave 2** *(blocked on Wave 1)*
 
