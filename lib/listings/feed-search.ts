@@ -1,3 +1,4 @@
+import type { ConsumerCityKey } from '@/lib/geo/italian-cities';
 import {
   resolveListingDescription,
   resolveListingTitle,
@@ -6,10 +7,7 @@ import { listingConsumerCity } from '@/lib/listings/filters';
 import type { AppLanguage } from '@/lib/settings/preferences';
 import type { ListingRow } from './types';
 
-export type ConsumerCityLabels = {
-  venice: string;
-  padova: string;
-};
+export type ConsumerCityLabels = Record<ConsumerCityKey, string>;
 
 /** City-only consumer location label — never zone subdivisions (D-38). */
 export function listingConsumerCityLabel(
@@ -17,8 +15,7 @@ export function listingConsumerCityLabel(
   cityLabels: ConsumerCityLabels,
 ): string {
   const city = listingConsumerCity(listing);
-  if (city === 'venice') return cityLabels.venice;
-  if (city === 'padova') return cityLabels.padova;
+  if (city && cityLabels[city]) return cityLabels[city];
   if (listing.city) {
     return listing.city.charAt(0).toUpperCase() + listing.city.slice(1);
   }

@@ -54,8 +54,11 @@ export const ExecuteCleanupSchema = z.object({
   confirm: z.literal(true),
 });
 
+/** Full Subito regalo matrix is 17 categories × 9 cities = 153 URLs. */
+export const VALIDATE_TARGET_URLS_MAX = 200;
+
 export const ValidateTargetUrlsSchema = z.object({
-  urls: z.array(z.string()).min(1).max(50),
+  urls: z.array(z.string()).min(1).max(VALIDATE_TARGET_URLS_MAX),
   probe: z.boolean().default(true),
 });
 

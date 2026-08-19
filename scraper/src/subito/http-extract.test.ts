@@ -21,6 +21,7 @@ describe('parseCategoryNextData', () => {
     expect(first.external_id).toBe('656979545');
     expect(first.title).toBe('mobiletto legno');
     expect(first.photo_url).toContain('1f42c45e-b720-48ea-bc45-6f4dca904710');
+    expect(first.photo_url).toContain('rule=gallery-mobile-1x-auto');
     expect(first.external_url).toContain('656979545.htm');
     expect(first.posted_at).toMatch(/2026-08-11/);
     expect(first.price).toBe('0 €');
@@ -57,6 +58,33 @@ describe('parseCategoryNextData', () => {
     });
     const html = `<html><script id="__NEXT_DATA__">${emptyPayload}</script></html>`;
     expect(() => parseCategoryNextData(html, SOURCE_URL)).toThrow(CategoryParseError);
+  });
+
+  it('defaults empty price to 0 € on regalo category URLs (D-15-12)', () => {
+    const payload = JSON.stringify({
+      props: {
+        pageProps: {
+          initialState: {
+            items: {
+              originalList: [
+                {
+                  subject: 'regalo divano',
+                  date: '2026-08-11 12:00:00',
+                  features: {},
+                  images: [{ cdnBaseUrl: 'https://images.sbito.it/x.jpg' }],
+                  urls: { default: 'https://www.subito.it/arredamento-casalinghi/divano-123.htm' },
+                  geo: { city: { value: 'Venezia', shortName: 'VE' } },
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+    const html = `<html><script id="__NEXT_DATA__">${payload}</script></html>`;
+    const { listings, jsonFieldCompleteness } = parseCategoryNextData(html, SOURCE_URL);
+    expect(listings[0]?.price).toBe('0 €');
+    expect(jsonFieldCompleteness).toBe(1);
   });
 });
 

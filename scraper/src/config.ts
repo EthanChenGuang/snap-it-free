@@ -1,5 +1,10 @@
 import 'dotenv/config';
+import { Configuration } from 'crawlee';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+
+// Long-lived workers (Fly) must not persist Crawlee queues to disk — otherwise
+// category URLs are deduped as "already handled" and http_requests stays 0.
+Configuration.getGlobalConfig().set('persistStorage', false);
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -33,6 +38,25 @@ export function getProxyUrl(): string | undefined {
     throw new Error('PROXY_URL must be an http(s) URL');
   }
   return url;
+}
+
+/**
+ * Resolve proxy for a crawl run.
+ * Empty string in options/param means explicit direct crawl (PROXY-C04 fallback).
+ */
+export function resolveCrawlerProxyUrl(
+  optionsOverride?: string,
+  paramOverride?: string,
+): string | undefined {
+  if (optionsOverride !== undefined) {
+    const trimmed = optionsOverride.trim();
+    return trimmed || undefined;
+  }
+  if (paramOverride !== undefined) {
+    const trimmed = paramOverride.trim();
+    return trimmed || undefined;
+  }
+  return getProxyUrl();
 }
 
 export type UseHttpCrawlerMode = 'off' | 'shadow' | 'on';

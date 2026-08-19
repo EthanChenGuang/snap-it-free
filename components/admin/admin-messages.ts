@@ -314,10 +314,11 @@ export const translationMessages = {
   pageSubtitle: '监控待翻译与失败的 listing，支持单条或批量重试。',
   pendingBanner: (n: number) => `${n} 条 listing 等待翻译`,
   pendingBannerSuffix: '条 listing 等待翻译',
-  pendingBannerTruncated: (shown: number, total: number) =>
-    `${total} 条 listing 等待翻译（仅显示前 ${shown} 条，请重试后刷新查看剩余）`,
-  pendingBannerTruncatedSuffix: (shown: number) =>
-    `条 listing 等待翻译（仅显示前 ${shown} 条，请重试后刷新查看剩余）`,
+  pageRange: (from: number, to: number, total: number) =>
+    `显示第 ${from}–${to} 条 / 共 ${total} 条`,
+  pageSummary: (page: number, totalPages: number) => `第 ${page} / ${totalPages} 页`,
+  pagePrev: '上一页',
+  pageNext: '下一页',
   retry: '重试',
   retryAll: '重新翻译',
   retrying: '翻译中…',
@@ -327,7 +328,7 @@ export const translationMessages = {
   batchSelection: (selected: number, total: number) =>
     `已选 ${selected} 项 / 共 ${total} 条待翻译`,
   batchRetry: '批量重试',
-  batchRetrying: (n: number) => `翻译中… (${n} 条，约需 8 秒)`,
+  batchRetrying: (n: number) => `翻译中… (${n} 条)`,
   clearSelection: '清空选中',
   attemptsLabel: (n: number) => `重试 ${n} 次`,
   tableListing: 'Listing',
@@ -339,12 +340,18 @@ export const translationMessages = {
   statusFailed: '失败',
   errorBadgeLabel: (error: string) => {
     const lower = error.toLowerCase();
+    if (lower.includes('daily translation cap')) {
+      return '已达每日上限';
+    }
     if (
       lower.includes('provider') ||
       lower.includes('api key') ||
       lower.includes('translation providers failed')
     ) {
       return 'Provider 异常';
+    }
+    if (lower.includes('timed out') || lower.includes('timeout')) {
+      return '请求超时';
     }
     return '翻译失败';
   },

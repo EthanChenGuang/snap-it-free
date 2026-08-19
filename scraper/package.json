@@ -7,7 +7,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "start": "node --import tsx src/worker.ts",
-    "scrape:once": "node --import tsx src/worker.ts -- --source subito --once"
+    "scrape:once": "node --import tsx src/worker.ts -- --source subito --once",
+    "configure:webshare": "node scripts/configure-webshare-proxy.mjs",
+    "configure:proxy": "node --import tsx scripts/configure-proxy.mjs",
+    "deploy:fly": "bash scripts/deploy-fly.sh",
+    "logs:fly": "fly logs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.0",

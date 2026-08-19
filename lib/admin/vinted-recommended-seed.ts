@@ -2,7 +2,7 @@
  * Vinted admin seed URL matrix (D-17-05, D-17-09, D-17-14, D-17-19).
  *
  * D-17-06 resolution: Vinted catalog URLs have no native geo/lat-lng filter params.
- * City scope is encoded as `?city=venezia|padova` matrix metadata on each seed URL;
+ * City scope is encoded as `?city={subitoSlug}` matrix metadata on each seed URL;
  * post-extract validation uses matchesCityIntent + seller JSON (D-17-10), not Vinted
  * location query params.
  *
@@ -11,14 +11,15 @@
  */
 import {
   SUBITO_REGALO_CATALOG,
+  SUBITO_CITY_SLUGS,
   type SubitoRegaloSlug,
 } from './subito-regalo-catalog';
 import type { SubitoCitySlug } from '@/lib/geo/italian-cities';
 
-/** Venice + Padova only — D-17-05 parity with Subito Veneto seeds. */
-export const VINTED_SEED_CITY_SLUGS = ['venezia', 'padova'] as const satisfies readonly SubitoCitySlug[];
+/** Same 9 cities as Subito regalo matrix (260815-fjs italian-cities). */
+export const VINTED_SEED_CITY_SLUGS = SUBITO_CITY_SLUGS;
 
-export type VintedSeedCitySlug = (typeof VINTED_SEED_CITY_SLUGS)[number];
+export type VintedSeedCitySlug = SubitoCitySlug;
 
 type VintedCatalogSeed = {
   catalogId: number;
@@ -66,7 +67,7 @@ function generateVintedSeedUrls(): string[] {
   return urls;
 }
 
-/** Recommended admin seed URLs — 17 categories × Venice + Padova (34 URLs). */
+/** Recommended admin seed URLs — 17 categories × 9 cities (153 URLs). */
 export const RECOMMENDED_VINTED_SEED_URLS: readonly string[] = generateVintedSeedUrls();
 
 export const RECOMMENDED_VINTED_SEED_COUNT = RECOMMENDED_VINTED_SEED_URLS.length;

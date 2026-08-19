@@ -3,8 +3,10 @@
 import Map, { Marker } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '@/lib/map/maplibreWorker';
-
-const OPENFREEMAP_LIBERTY = 'https://tiles.openfreemap.org/styles/liberty';
+import {
+  OPENFREEMAP_LIBERTY_STYLE_URL,
+  patchOpenFreeMapStyle,
+} from '@/lib/map/openfreemap-style';
 
 type DetailLocationMapProps = {
   lat: number;
@@ -21,7 +23,7 @@ export function DetailLocationMap({ lat, lng }: DetailLocationMapProps) {
           latitude: lat,
           zoom: 13,
         }}
-        mapStyle={OPENFREEMAP_LIBERTY}
+        mapStyle={OPENFREEMAP_LIBERTY_STYLE_URL}
         style={{ width: '100%', height: '100%' }}
         attributionControl={false}
         interactive={false}
@@ -29,6 +31,7 @@ export function DetailLocationMap({ lat, lng }: DetailLocationMapProps) {
         scrollZoom={false}
         doubleClickZoom={false}
         touchZoomRotate={false}
+        onLoad={(event) => patchOpenFreeMapStyle(event.target)}
       >
         <Marker longitude={lng} latitude={lat} anchor="center">
           <div className="h-4 w-4 rounded-full bg-primary ring-4 ring-surface-container-lowest" />

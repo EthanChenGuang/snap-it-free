@@ -1,9 +1,12 @@
 import { SourcesListClient } from '@/components/admin/SourcesListClient';
 import { adminShellMessages } from '@/components/admin/admin-messages';
-import { getSourcesWithLastRun } from '@/lib/admin/queries';
+import { getGlobalAdminStatus, getSourcesWithLastRun } from '@/lib/admin/queries';
 
 export default async function AdminSourcesPage() {
-  const sources = await getSourcesWithLastRun();
+  const [sources, globalStatus] = await Promise.all([
+    getSourcesWithLastRun(),
+    getGlobalAdminStatus(),
+  ]);
   const loadFailed = sources.length === 0;
 
   if (loadFailed) {
@@ -14,5 +17,12 @@ export default async function AdminSourcesPage() {
     );
   }
 
-  return <SourcesListClient initialSources={sources} />;
+  return (
+    <SourcesListClient
+      initialSources={sources}
+      initialGlobalStatus={
+        globalStatus ?? { globalPause: false, lastSyncAt: null, showDegradedBanner: false }
+      }
+    />
+  );
 }

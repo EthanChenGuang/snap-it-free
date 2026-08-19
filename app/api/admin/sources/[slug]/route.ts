@@ -7,6 +7,7 @@ import {
   hasFacebookAuthCookie,
   parseFacebookSessionJson,
 } from '@/lib/admin/facebook-session';
+import { isMissingSessionEncColumn, selectSourceBySlug } from '@/lib/admin/source-select';
 import { validateTargetUrls } from '@/lib/admin/url-validate';
 
 type RouteContext = { params: Promise<{ slug: string }> };
@@ -126,23 +127,30 @@ export async function PATCH(request: Request, context: RouteContext) {
     updatePayload.session_enc = encryptSession(session_json.trim(), secretsKey);
   }
 
-  const { data, error } = await session.supabase
+  const { error: updateError } = await session.supabase
     .from('scraper_sources')
     .update({
       ...updatePayload,
       updated_at: new Date().toISOString(),
     })
-    .eq('slug', slug)
-    .select(
-      'slug, display_name, implementation_status, enabled, interval_minutes, anti_block_preset, target_urls, session_enc',
-    )
-    .single();
+    .eq('slug', slug);
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (updateError) {
+    if (updatePayload.session_enc != null && isMissingSessionEncColumn(updateError)) {
+      return NextResponse.json(
+        { error: 'session_enc column missing — apply migration 030_facebook_session_enc.sql' },
+        { status: 500 },
+      );
+    }
+    return NextResponse.json({ error: updateError.message }, { status: 500 });
+  }
+
+  const { row } = await selectSourceBySlug(session.supabase, slug);
+  if (!row) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
   return NextResponse.json({
-    source: serializeSource(data as SourceRow),
+    source: serializeSource(row as SourceRow),
   });
 }

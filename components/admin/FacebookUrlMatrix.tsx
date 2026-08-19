@@ -8,16 +8,15 @@ import {
   type FacebookSearchQuery,
   type FacebookSeedCitySlug,
 } from '@/lib/admin/facebook-recommended-seed';
-import { dedupeUrls } from '@/lib/admin/subito-regalo-catalog';
+import { dedupeUrls, ITALIAN_CITIES } from '@/lib/admin/subito-regalo-catalog';
 import { cn } from '@/lib/utils';
 
 const ALL_CITIES = FACEBOOK_SEED_CITY_SLUGS;
 const ALL_QUERIES = FACEBOOK_SEARCH_QUERIES;
 
-const CITY_LABELS: Record<FacebookSeedCitySlug, string> = {
-  venice: 'Venezia',
-  padova: 'Padova',
-};
+const CITY_LABELS = Object.fromEntries(
+  ITALIAN_CITIES.map((city) => [city.consumerKey, city.labelIt]),
+) as Record<FacebookSeedCitySlug, string>;
 
 const QUERY_LABELS: Record<FacebookSearchQuery, string> = {
   gratis: 'gratis',
@@ -151,7 +150,8 @@ export function FacebookUrlMatrix({
         <div>
           <h2 className="source-detail-card-title">Facebook URL 矩阵</h2>
           <p className="source-detail-card-subtitle">
-            按城市与搜索词生成 Marketplace 搜索 URL。Padova slug 将在首次手动运行后验证（D-18-30）。
+            按城市与搜索词生成 Marketplace 搜索 URL。与 Subito 矩阵使用相同的 9 城（Venezia 路径 slug 为{' '}
+            <code className="text-xs">venice</code>）。
           </p>
         </div>
       </header>
@@ -201,7 +201,7 @@ export function FacebookUrlMatrix({
 
       <div className="source-detail-matrix-footer">
         <p className="source-detail-matrix-meta tabular-nums">
-          {selectedCount} URLs selected · Template: /marketplace/&#123;venice|padova&#125;/search/?query=&#123;gratis|regalo|free&#125;
+          {selectedCount} URLs selected · Template: /marketplace/&#123;city&#125;/search/?query=&#123;gratis|regalo|free&#125;
         </p>
         <div className="source-detail-matrix-actions">
           <button type="button" onClick={handleGenerate} className="source-detail-btn-secondary">

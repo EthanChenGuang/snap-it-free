@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isMislabeledFree } from './free-filter.js';
+import { computeScrapedListingExpiresAt, SCRAPED_LISTING_TTL_MS } from '../../../lib/listings/scraped-listing-ttl.js';
 import { computeExpiresAt, normalizeRawListing } from './normalize.js';
 import type { RawListing } from '../subito/extract.js';
 
@@ -42,16 +43,16 @@ describe('isMislabeledFree', () => {
 });
 
 describe('computeExpiresAt', () => {
-  it('uses posted_at plus 48 hours while still inside the window', () => {
+  it('uses posted_at plus 30 days while still inside the window', () => {
     const postedAt = new Date('2026-07-28T10:00:00.000Z');
     const now = new Date('2026-07-29T10:00:00.000Z');
-    expect(computeExpiresAt(postedAt, now).toISOString()).toBe('2026-07-30T10:00:00.000Z');
+    expect(computeExpiresAt(postedAt, now).toISOString()).toBe('2026-08-27T10:00:00.000Z');
   });
 
   it('extends from now when posted_at window has elapsed (re-seen listing)', () => {
     const postedAt = new Date('2026-07-28T10:00:00.000Z');
-    const now = new Date('2026-08-11T08:00:00.000Z');
-    expect(computeExpiresAt(postedAt, now).toISOString()).toBe('2026-08-13T08:00:00.000Z');
+    const now = new Date('2026-08-28T08:00:00.000Z');
+    expect(computeExpiresAt(postedAt, now).toISOString()).toBe('2026-09-27T08:00:00.000Z');
   });
 });
 
@@ -64,7 +65,7 @@ describe('normalizeRawListing', () => {
     expect(result).toEqual({ reject: expect.stringMatching(/price pattern/i) });
   });
 
-  it('accepts clean listings and sets expires_at to posted_at plus 48 hours', () => {
+  it('accepts clean listings and sets expires_at to posted_at plus 30 days', () => {
     const postedAt = new Date(Date.now() - 60 * 60 * 1000);
     const result = normalizeRawListing({
       ...baseRaw,
@@ -76,7 +77,7 @@ describe('normalizeRawListing', () => {
 
     expect(result.source).toBe('subito');
     expect(result.status).toBe('active');
-    expect(result.expires_at.getTime()).toBe(postedAt.getTime() + 48 * 60 * 60 * 1000);
+    expect(result.expires_at.getTime()).toBe(postedAt.getTime() + SCRAPED_LISTING_TTL_MS);
     expect(result.content_hash).toHaveLength(64);
     expect(result.crawl_content_hash).toHaveLength(64);
   });

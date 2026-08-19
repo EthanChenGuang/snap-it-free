@@ -2,7 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { AnimatedCount } from '@/components/admin/AnimatedCount';
 import { adminNav, adminNavItems, adminShellMessages } from '@/components/admin/admin-messages';
+import {
+  TranslationQueuePollingProvider,
+  useTranslationQueuePollingContext,
+} from '@/components/admin/TranslationQueuePollingProvider';
 import type { FooterStats } from '@/lib/admin/types';
 import { cn } from '@/lib/utils';
 
@@ -52,7 +57,27 @@ export function AdminShell({
   rejectsCount = 0,
   footerStats,
 }: AdminShellProps) {
+  return (
+    <TranslationQueuePollingProvider initialCount={pendingTranslationsCount}>
+      <AdminShellInner
+        operatorEmail={operatorEmail}
+        rejectsCount={rejectsCount}
+        footerStats={footerStats}
+      >
+        {children}
+      </AdminShellInner>
+    </TranslationQueuePollingProvider>
+  );
+}
+
+function AdminShellInner({
+  operatorEmail,
+  children,
+  rejectsCount = 0,
+  footerStats,
+}: Omit<AdminShellProps, 'pendingTranslationsCount'>) {
   const pathname = usePathname();
+  const { pendingCount: pendingTranslationsCount } = useTranslationQueuePollingContext();
 
   return (
     <div className="min-h-screen bg-background text-on-background">
@@ -90,7 +115,7 @@ export function AdminShell({
                 </span>
                 {count !== undefined && (
                   <span className="shrink-0 rounded-full border border-outline-variant bg-surface-container px-2 py-0.5 text-label-sm font-semibold text-primary">
-                    {count}
+                    <AnimatedCount value={count} />
                   </span>
                 )}
               </Link>
@@ -118,7 +143,7 @@ export function AdminShell({
                 prefetch={false}
                 className="hidden rounded-full border border-outline-variant bg-surface-container px-3 py-1 text-label-sm font-semibold text-primary hover:bg-surface-container-high sm:inline-flex"
               >
-                {adminNav.translation}: {pendingTranslationsCount}
+                {adminNav.translation}: <AnimatedCount value={pendingTranslationsCount} />
               </Link>
             )}
             <span className="hidden rounded-full bg-surface-container-high px-3 py-1 font-mono text-label-sm text-secondary sm:inline">

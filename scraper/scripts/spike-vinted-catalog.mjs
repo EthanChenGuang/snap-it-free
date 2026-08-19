@@ -7,7 +7,7 @@
 // id/title/price.amount/url/photo on >=90% of returned items, <=3s warm-up+API, plus
 // enrichment (catalog_id + shipping.type) and seller-location samples.
 
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gotScraping } from 'got-scraping';
@@ -278,8 +278,10 @@ for (const target of TARGET_URLS) {
         `(${complete}/${total}) free€0=${row.freeCount} cookies=${row.cookiesObtained} pass=${row.pass}`,
     );
 
-    // Capture catalog fixture (sanitized) if not yet written.
-    if (!catalogFixtureWritten && items.length > 0) {
+    // Capture catalog fixture (sanitized) if not yet written AND not already committed.
+    // Fixture is meant to be a stable snapshot for CI unit tests — never overwrite an
+    // existing committed fixture on re-run.
+    if (!catalogFixtureWritten && !existsSync(CATALOG_FIXTURE_PATH) && items.length > 0) {
       mkdirSync(FIXTURE_DIR, { recursive: true });
       const fragment = {
         _meta: {
@@ -363,7 +365,8 @@ for (const target of TARGET_URLS) {
         );
 
         // Persist detail fixture (sanitized) — keep just the relevant JSON fragments.
-        if (!detailFixtureWritten && (catalogIdMatch || shippingTypeMatch)) {
+        // Never overwrite an existing committed fixture on re-run.
+        if (!detailFixtureWritten && !existsSync(DETAIL_FIXTURE_PATH) && (catalogIdMatch || shippingTypeMatch)) {
           mkdirSync(FIXTURE_DIR, { recursive: true });
           const fragment = {
             _meta: {

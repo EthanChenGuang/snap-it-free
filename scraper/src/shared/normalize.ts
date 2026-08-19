@@ -6,19 +6,12 @@ import { crawlHashForListing } from '../subito/crawl-hash.js';
 import type { RawListing } from '../subito/extract.js';
 import { extractCategoryFromSubitoUrl } from '../subito/normalize.js';
 import { parseRegaloCategoryUrl } from '../subito/url-context.js';
+import { normalizeSubitoPhotoUrl } from '../../../lib/listings/subito-photo-url.js';
+import { computeScrapedListingExpiresAt as computeExpiresAt } from '../../../lib/listings/scraped-listing-ttl.js';
 
 export type NormalizeResult = CanonicalListing | { reject: string };
 
-const LISTING_TTL_MS = 48 * 60 * 60 * 1000;
-
-/** 48h from posted_at while still inside that window; otherwise extend from now when re-seen. */
-export function computeExpiresAt(postedAt: Date, now = new Date()): Date {
-  const fromPosted = postedAt.getTime() + LISTING_TTL_MS;
-  if (fromPosted > now.getTime()) {
-    return new Date(fromPosted);
-  }
-  return new Date(now.getTime() + LISTING_TTL_MS);
-}
+export { computeExpiresAt };
 
 const zonePolygons = loadZonePolygons();
 
@@ -40,7 +33,7 @@ export function normalizeRawListing(raw: RawListing): NormalizeResult {
     source: 'subito' as const,
     external_id: raw.external_id,
     title: raw.title,
-    photo_url: raw.photo_url,
+    photo_url: normalizeSubitoPhotoUrl(raw.photo_url),
     external_url: raw.external_url,
     lat: raw.lat,
     lng: raw.lng,

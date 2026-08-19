@@ -10,9 +10,9 @@ import { SUBITO_REGALO_CATALOG } from './subito-regalo-catalog';
 const VINTED_CATALOG_URL_REGEX = /^https:\/\/www\.vinted\.it\/catalog\/\d+/;
 
 describe('vinted-recommended-seed (D-17-05, D-17-19)', () => {
-  it('exports 34 seed URLs (17 slugs × 2 cities)', () => {
-    expect(RECOMMENDED_VINTED_SEED_COUNT).toBe(34);
-    expect(RECOMMENDED_VINTED_SEED_URLS).toHaveLength(34);
+  it('exports 153 seed URLs (17 slugs × 9 cities)', () => {
+    expect(RECOMMENDED_VINTED_SEED_COUNT).toBe(153);
+    expect(RECOMMENDED_VINTED_SEED_URLS).toHaveLength(153);
     expect(RECOMMENDED_VINTED_SEED_COUNT).toBe(
       SUBITO_REGALO_CATALOG.length * VINTED_SEED_CITY_SLUGS.length,
     );

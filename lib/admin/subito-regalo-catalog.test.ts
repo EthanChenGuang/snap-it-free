@@ -8,6 +8,7 @@ import {
   buildRegaloCategoryUrl,
   dedupeUrls,
   generateRegaloUrls,
+  mergeGeneratedRegaloUrls,
   parseRegaloCategoryUrl,
 } from './subito-regalo-catalog';
 
@@ -36,7 +37,7 @@ const SHARED_PARSE_VECTORS = [
   },
   {
     url: 'https://www.subito.it/annunci-lombardia/regalo/informatica/milano/milano/',
-    expected: null,
+    expected: { region: 'lombardia', city: 'milano', categorySlug: 'informatica' },
   },
 ] as const;
 
@@ -84,18 +85,43 @@ describe('dedupeUrls', () => {
   });
 });
 
+describe('mergeGeneratedRegaloUrls', () => {
+  it('drops deselected matrix URLs and keeps only custom manual lines (D-05)', () => {
+    const allSlugs = SUBITO_REGALO_CATALOG.map((entry) => entry.slug);
+    const fullSet = generateRegaloUrls(['venezia', 'padova'], allSlugs);
+    const withoutArredamento = generateRegaloUrls(
+      ['venezia', 'padova'],
+      allSlugs.filter((slug) => slug !== 'arredamento-casalinghi'),
+    );
+    const customUrl = 'https://example.com/custom-listing-feed';
+
+    const merged = mergeGeneratedRegaloUrls(
+      withoutArredamento,
+      [...fullSet, customUrl].join('\n'),
+    );
+
+    expect(merged).toHaveLength(withoutArredamento.length + 1);
+    expect(merged).toContain(customUrl);
+    expect(merged).not.toContain(
+      buildRegaloCategoryUrl('veneto', 'arredamento-casalinghi', 'venezia'),
+    );
+    expect(merged).not.toContain(
+      buildRegaloCategoryUrl('veneto', 'arredamento-casalinghi', 'padova'),
+    );
+  });
+});
+
 describe('RECOMMENDED_SUBITO_SEED_URLS', () => {
-  it('length matches Padova spike gate (D-15, D-16)', () => {
-    const expectedLength = spikeVerdictIsPass() ? 34 : 17;
-    expect(RECOMMENDED_SUBITO_SEED_URLS).toHaveLength(expectedLength);
+  it('includes 17 categories for each supported city', () => {
+    expect(RECOMMENDED_SUBITO_SEED_URLS).toHaveLength(17 * 9);
   });
 
-  it('contains only Venice URLs when spike FAIL', () => {
-    if (!spikeVerdictIsPass()) {
-      for (const url of RECOMMENDED_SUBITO_SEED_URLS) {
-        expect(url).toMatch(/\/venezia\/venezia\/?$/);
-        expect(url).not.toMatch(/\/padova\//);
-      }
+  it('contains multi-region URLs when spike PASS', () => {
+    if (spikeVerdictIsPass()) {
+      expect(RECOMMENDED_SUBITO_SEED_URLS.some((url) => url.includes('/milano/milano/'))).toBe(
+        true,
+      );
+      expect(RECOMMENDED_SUBITO_SEED_URLS.some((url) => url.includes('/roma/roma/'))).toBe(true);
     }
   });
 });

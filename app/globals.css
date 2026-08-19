@@ -686,6 +686,252 @@ body {
   color: #1d1d1f;
 }
 
+.dashboard-section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dashboard-section-header-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #1d1d1f;
+}
+
+.dashboard-section-header-subtitle {
+  margin-top: 2px;
+  font-size: 13px;
+  color: #86868b;
+}
+
+.dashboard-control-tile {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  padding: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 160ms ease;
+}
+
+.dashboard-control-tile:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-control-tile-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.dashboard-control-tile-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #86868b;
+}
+
+.dashboard-control-tile-icon {
+  font-size: 16px;
+  color: #aeaeb2;
+}
+
+.dashboard-control-tile-body {
+  flex: 1;
+}
+
+.dashboard-infra-shell {
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(249, 250, 251, 0.6);
+  padding: 20px;
+}
+
+.dashboard-platform-card {
+  display: flex;
+  min-height: 168px;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.dashboard-platform-card:hover {
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-platform-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.dashboard-platform-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.dashboard-platform-card-subtitle {
+  margin-top: 1px;
+  font-size: 11px;
+  color: #86868b;
+}
+
+.dashboard-platform-card-icon-wrap {
+  display: flex;
+  height: 32px;
+  width: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.dashboard-platform-card-body {
+  margin-top: 12px;
+  flex: 1;
+}
+
+/* Admin Billing — macOS single-page scroll */
+.billing-console {
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'SF Pro Display',
+    'SF Pro Text',
+    system-ui,
+    sans-serif;
+  font-feature-settings: 'tnum' 1;
+}
+
+.billing-summary-panel {
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  padding: 24px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.billing-summary-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #86868b;
+}
+
+.billing-anchor-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(243, 244, 246, 0.8);
+  padding: 6px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.billing-anchor-btn {
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #636366;
+  transition: background-color 120ms ease, color 120ms ease;
+  cursor: pointer;
+}
+
+.billing-anchor-btn:hover {
+  background: rgba(255, 255, 255, 0.85);
+  color: #1d1d1f;
+}
+
+.billing-panel {
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  padding: 24px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.billing-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.billing-panel-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #1d1d1f;
+}
+
+.billing-panel-subtitle {
+  margin-top: 2px;
+  font-size: 13px;
+  color: #86868b;
+}
+
+.billing-panel-icon-wrap {
+  display: flex;
+  height: 40px;
+  width: 40px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.billing-panel-body {
+  font-size: 14px;
+  color: #1d1d1f;
+}
+
+.billing-metric-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.billing-metric-label {
+  font-size: 13px;
+  color: #86868b;
+}
+
+.billing-metric-value {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: #1d1d1f;
+}
+
 .dashboard-metric-card {
   display: flex;
   flex-direction: column;
@@ -2026,6 +2272,66 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.translation-queue-pagination {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 16px;
+}
+
+@media (min-width: 768px) {
+  .translation-queue-pagination {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.translation-queue-pagination-range {
+  font-size: 13px;
+  color: #86868b;
+}
+
+.translation-queue-pagination-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.translation-queue-pagination-summary {
+  min-width: 88px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.translation-queue-pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1d1d1f;
+  transition: background-color 120ms ease;
+}
+
+.translation-queue-pagination-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.translation-queue-pagination-btn-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .translation-queue-card {

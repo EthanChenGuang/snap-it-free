@@ -4,10 +4,12 @@ import { useEffect, useMemo, useRef } from 'react';
 import Map, { Marker, Popup, type MapRef } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { ListingPopup } from '@/components/listings/ListingPopup';
+import {
+  OPENFREEMAP_LIBERTY_STYLE_URL,
+  patchOpenFreeMapStyle,
+} from '@/lib/map/openfreemap-style';
 import { LocateMeButton } from './LocateMeButton';
 import type { ListingRow } from '@/lib/listings/types';
-
-const OPENFREEMAP_LIBERTY = 'https://tiles.openfreemap.org/styles/liberty';
 
 type ListingMapProps = {
   listings: ListingRow[];
@@ -76,9 +78,10 @@ export function ListingMap({
         latitude: 45.44,
         zoom: 11,
       }}
-      mapStyle={OPENFREEMAP_LIBERTY}
+      mapStyle={OPENFREEMAP_LIBERTY_STYLE_URL}
       style={{ width: '100%', height: '100%' }}
       attributionControl={{ compact: true }}
+      onLoad={(event) => patchOpenFreeMapStyle(event.target)}
     >
       <LocateMeButton />
 

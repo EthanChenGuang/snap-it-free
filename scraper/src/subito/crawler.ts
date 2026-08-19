@@ -1,7 +1,17 @@
-import { HttpCrawler, PlaywrightCrawler, ProxyConfiguration } from 'crawlee';
+import {
+  HttpCrawler,
+  PlaywrightCrawler,
+  ProxyConfiguration,
+  RequestQueue,
+} from 'crawlee';
 import { getProxyFatalFailure, ProxyQuotaFatalError } from '../shared/proxy-errors.js';
 import { presetToCrawleeOptions, type AntiBlockPreset } from '../admin/presets.js';
-import { getProxyUrl, getUseHttpCrawlerMode, isHttpCrawlerEnabled, type UseHttpCrawlerMode } from '../config.js';
+import {
+  getUseHttpCrawlerMode,
+  isHttpCrawlerEnabled,
+  resolveCrawlerProxyUrl,
+  type UseHttpCrawlerMode,
+} from '../config.js';
 import { applyEarlyStop, type EarlyStopListing } from './early-stop.js';
 import {
   dismissCookieBanner,
@@ -20,12 +30,22 @@ import { CategoryParseError, parseCategoryNextData } from './http-extract.js';
 
 export type CrawlMode = 'incremental' | 'full';
 
+/** In-memory session pool only — avoids SDK_SESSION_POOL_STATE.json after storage purge. */
+function sessionPoolOptions(maxPoolSize: number) {
+  return {
+    maxPoolSize,
+    persistenceOptions: { enable: false },
+  };
+}
+
 export type RunSubitoCrawlerOptions = {
   knownMap?: Map<string, string>;
   earlyStopK?: number;
   isFullRefresh?: boolean;
   proxyUrlOverride?: string;
   mode?: CrawlMode;
+  /** Isolates Crawlee request queue per scrape run (avoids 0-request dedupe on long-lived workers). */
+  runId?: string;
 };
 
 export type CategoryUrlStats = {
@@ -147,6 +167,20 @@ function maskProxyHost(proxyUrl: string): string {
   }
 }
 
+async function openRunRequestQueue(runId?: string): Promise<RequestQueue> {
+  const suffix =
+    runId?.replace(/[^a-zA-Z0-9-]/g, '').slice(0, 36) ?? `${Date.now()}`;
+  return RequestQueue.open(`subito-run-${suffix}`);
+}
+
+async function dropRunRequestQueue(queue: RequestQueue): Promise<void> {
+  try {
+    await queue.drop();
+  } catch {
+    /* best-effort — ephemeral queue cleanup */
+  }
+}
+
 function toRawListing(entry: EarlyStopListing): RawListing {
   return entry;
 }
@@ -219,54 +253,61 @@ async function runLegacyPlaywrightCrawler(
   categoryUrls: readonly string[],
   preset: AntiBlockPreset,
   proxyUrlOverride?: string,
+  runId?: string,
 ): Promise<Pick<CrawlResult, 'rawListings' | 'selectorHitRate'>> {
   const rawListings: RawListing[] = [];
   let selectorHits = 0;
   let selectorTotal = 0;
 
   const crawleeOpts = presetToCrawleeOptions(preset);
-  const proxyUrl = proxyUrlOverride ?? getProxyUrl();
+  const proxyUrl = proxyUrlOverride;
   const proxyConfiguration = proxyUrl
     ? new ProxyConfiguration({ proxyUrls: [proxyUrl] })
     : undefined;
 
-  const crawler = new PlaywrightCrawler({
-    proxyConfiguration,
-    useSessionPool: true,
-    persistCookiesPerSession: true,
-    sessionPoolOptions: { maxPoolSize: crawleeOpts.maxPoolSize },
-    maxRequestRetries: crawleeOpts.maxRequestRetries,
-    minConcurrency: crawleeOpts.minConcurrency,
-    launchContext: {
-      launchOptions: {
-        headless: true,
+  const requestQueue = await openRunRequestQueue(runId);
+  try {
+    const crawler = new PlaywrightCrawler({
+      requestQueue,
+      proxyConfiguration,
+      useSessionPool: true,
+      persistCookiesPerSession: true,
+      sessionPoolOptions: sessionPoolOptions(crawleeOpts.maxPoolSize),
+      maxRequestRetries: crawleeOpts.maxRequestRetries,
+      minConcurrency: crawleeOpts.minConcurrency,
+      launchContext: {
+        launchOptions: {
+          headless: true,
+        },
       },
-    },
-    async requestHandler({ page, session, request }) {
-      const title = await page.title();
-      if (title.toLowerCase().includes('blocked')) {
-        session?.retire();
-        return;
-      }
-
-      const { listings, hitRate } = await extractListingsFromPage(page);
-      for (const listing of listings) {
-        if (!listing.source_category_url && isRegaloCategoryUrl(request.url)) {
-          listing.source_category_url = request.url;
+      async requestHandler({ page, session, request }) {
+        const title = await page.title();
+        if (title.toLowerCase().includes('blocked')) {
+          session?.retire();
+          return;
         }
-      }
-      rawListings.push(...listings);
-      selectorHits += hitRate.hits;
-      selectorTotal += hitRate.total;
-    },
-  });
 
-  await crawler.run([...categoryUrls]);
+        const { listings, hitRate } = await extractListingsFromPage(page);
+        for (const listing of listings) {
+          if (!listing.source_category_url && isRegaloCategoryUrl(request.url)) {
+            listing.source_category_url = request.url;
+          }
+        }
+        rawListings.push(...listings);
+        selectorHits += hitRate.hits;
+        selectorTotal += hitRate.total;
+      },
+    });
 
-  return {
-    rawListings,
-    selectorHitRate: selectorTotal > 0 ? selectorHits / selectorTotal : 0,
-  };
+    await crawler.run([...categoryUrls]);
+
+    return {
+      rawListings,
+      selectorHitRate: selectorTotal > 0 ? selectorHits / selectorTotal : 0,
+    };
+  } finally {
+    await dropRunRequestQueue(requestQueue);
+  }
 }
 
 async function runHttpHybridCrawler(
@@ -282,7 +323,7 @@ async function runHttpHybridCrawler(
   const crawlMode = options.mode ?? (isFullRefresh ? 'full' : 'incremental');
 
   const crawleeOpts = presetToCrawleeOptions(preset);
-  const proxyUrl = options.proxyUrlOverride ?? proxyUrlOverride ?? getProxyUrl();
+  const proxyUrl = proxyUrlOverride;
   if (proxyUrl) {
     console.log(`HTTP crawler proxy: ${maskProxyHost(proxyUrl)}`);
   }
@@ -301,11 +342,15 @@ async function runHttpHybridCrawler(
   const blockRetriedUrls = new Set<string>();
   const failedUrls = new Set<string>();
   const urlStats = initUrlStats(categoryUrls);
+  const categoryQueue = await openRunRequestQueue(options.runId);
 
+  try {
   const httpCrawler = new HttpCrawler({
+    requestQueue: categoryQueue,
     proxyConfiguration,
     useSessionPool: true,
     persistCookiesPerSession: true,
+    sessionPoolOptions: sessionPoolOptions(crawleeOpts.maxPoolSize),
     maxRequestRetries: crawleeOpts.maxRequestRetries,
     minConcurrency: crawleeOpts.minConcurrency,
     errorHandler({ request }, error) {
@@ -345,11 +390,16 @@ async function runHttpHybridCrawler(
   await httpCrawler.run([...categoryUrls]);
 
   if (blockRetryUrls.size > 0) {
+    const retryQueue = await openRunRequestQueue(
+      options.runId ? `${options.runId}-retry` : undefined,
+    );
+    try {
     const blockRetryCrawler = new PlaywrightCrawler({
+      requestQueue: retryQueue,
       proxyConfiguration,
       useSessionPool: true,
       persistCookiesPerSession: true,
-      sessionPoolOptions: { maxPoolSize: crawleeOpts.maxPoolSize },
+      sessionPoolOptions: sessionPoolOptions(crawleeOpts.maxPoolSize),
       maxRequestRetries: crawleeOpts.maxRequestRetries,
       minConcurrency: FALLBACK_CONCURRENCY,
       maxConcurrency: FALLBACK_CONCURRENCY,
@@ -406,6 +456,9 @@ async function runHttpHybridCrawler(
     });
 
     await blockRetryCrawler.run([...blockRetryUrls].map((url) => ({ url })));
+    } finally {
+      await dropRunRequestQueue(retryQueue);
+    }
   }
 
   for (const url of blockRetryUrls) {
@@ -450,11 +503,16 @@ async function runHttpHybridCrawler(
   let selectorTotal = 0;
 
   if (fallbackRequests.length > 0) {
+    const detailQueue = await openRunRequestQueue(
+      options.runId ? `${options.runId}-detail` : undefined,
+    );
+    try {
     const detailCrawler = new PlaywrightCrawler({
+      requestQueue: detailQueue,
       proxyConfiguration,
       useSessionPool: true,
       persistCookiesPerSession: true,
-      sessionPoolOptions: { maxPoolSize: crawleeOpts.maxPoolSize },
+      sessionPoolOptions: sessionPoolOptions(crawleeOpts.maxPoolSize),
       maxRequestRetries: crawleeOpts.maxRequestRetries,
       minConcurrency: FALLBACK_CONCURRENCY,
       maxConcurrency: FALLBACK_CONCURRENCY,
@@ -485,6 +543,9 @@ async function runHttpHybridCrawler(
     });
 
     await detailCrawler.run(fallbackRequests);
+    } finally {
+      await dropRunRequestQueue(detailQueue);
+    }
   }
 
   const jsonFieldCompleteness =
@@ -517,6 +578,9 @@ async function runHttpHybridCrawler(
     crawlMode,
     urlBreakdown: [...urlStats.values()],
   };
+  } finally {
+    await dropRunRequestQueue(categoryQueue);
+  }
 }
 
 export async function runSubitoCrawler(
@@ -526,9 +590,15 @@ export async function runSubitoCrawler(
   options: RunSubitoCrawlerOptions = {},
 ): Promise<CrawlResult> {
   const crawlMode = options.mode ?? (options.isFullRefresh ? 'full' : 'incremental');
+  const proxyUrl = resolveCrawlerProxyUrl(options.proxyUrlOverride, proxyUrlOverride);
 
   if (!isHttpCrawlerEnabled()) {
-    const legacy = await runLegacyPlaywrightCrawler(categoryUrls, preset, proxyUrlOverride);
+    const legacy = await runLegacyPlaywrightCrawler(
+      categoryUrls,
+      preset,
+      proxyUrl,
+      options.runId,
+    );
     return {
       ...legacy,
       httpRequests: 0,
@@ -544,7 +614,7 @@ export async function runSubitoCrawler(
   return runHttpHybridCrawler(
     categoryUrls,
     preset,
-    proxyUrlOverride,
+    proxyUrl,
     options,
     getUseHttpCrawlerMode(),
   );

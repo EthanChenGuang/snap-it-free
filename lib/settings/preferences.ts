@@ -30,7 +30,7 @@ function preferencesEqual(a: AppPreferences, b: AppPreferences): boolean {
 }
 
 function parsePreferences(raw: string | null): AppPreferences {
-  if (!raw) return DEFAULT_PREFERENCES;
+  if (!raw?.trim()) return DEFAULT_PREFERENCES;
   try {
     const parsed = JSON.parse(raw) as Partial<AppPreferences>;
     return {
@@ -46,6 +46,24 @@ function parsePreferences(raw: string | null): AppPreferences {
   }
 }
 
+function seedFirstVisitPreferences(): AppPreferences {
+  const seeded: AppPreferences = {
+    ...DEFAULT_PREFERENCES,
+    language: detectBrowserLanguage(),
+  };
+  cachedSnapshot = seeded;
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(APP_PREFERENCES_KEY, JSON.stringify(seeded));
+    // Defer store notification — dispatching during useSyncExternalStore read causes
+    // "state update on unmounted component" and Fast Refresh reload loops.
+    queueMicrotask(() => {
+      window.dispatchEvent(new CustomEvent(APP_PREFERENCES_CHANGE_EVENT, { detail: seeded }));
+      seedingFirstVisit = false;
+    });
+  }
+  return seeded;
+}
+
 function syncSnapshotFromStorage(): AppPreferences {
   if (typeof window === 'undefined') return DEFAULT_PREFERENCES;
 
@@ -53,12 +71,12 @@ function syncSnapshotFromStorage(): AppPreferences {
   if (raw === null) {
     if (!seedingFirstVisit) {
       seedingFirstVisit = true;
-      writeAppPreferences({ language: detectBrowserLanguage() });
-      seedingFirstVisit = false;
+      return seedFirstVisitPreferences();
     }
     return cachedSnapshot;
   }
 
+  seedingFirstVisit = false;
   const parsed = parsePreferences(raw);
   if (preferencesEqual(parsed, cachedSnapshot)) {
     return cachedSnapshot;

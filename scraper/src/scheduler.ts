@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { reconcileOrphanScrapeRuns } from './orphan-runs.js';
 
 export const STAGGER_MINUTES = 7;
 export const TICK_INTERVAL_MS = 60_000;
@@ -87,6 +88,15 @@ export async function runSchedulerTick(
   supabase: SupabaseClient,
   runSourceScrape: RunSourceScrapeFn,
 ): Promise<void> {
+  try {
+    const reconciled = await reconcileOrphanScrapeRuns(supabase);
+    if (reconciled > 0) {
+      console.log(`[scheduler] Reconciled ${reconciled} orphaned scrape run(s)`);
+    }
+  } catch (err) {
+    console.error('[scheduler] Failed to reconcile orphaned scrape runs:', err);
+  }
+
   const { data: globalConfig, error: globalError } = await supabase
     .from('scraper_global_config')
     .select('global_pause')
@@ -97,11 +107,7 @@ export async function runSchedulerTick(
     throw globalError;
   }
 
-  if (globalConfig?.global_pause) {
-    console.log('[scheduler] Global pause active — skipping tick');
-    return;
-  }
-
+  const globalPause = Boolean(globalConfig?.global_pause);
   const now = new Date();
 
   const [sourcesResult, jobsResult] = await Promise.all([
@@ -120,12 +126,19 @@ export async function runSchedulerTick(
     throw jobsResult.error;
   }
 
-  const dueSources = pickDueSources(sourcesResult.data ?? [], now, false);
+  const dueSources = pickDueSources(sourcesResult.data ?? [], now, globalPause);
   const pendingJobs = dequeuePendingJobs(jobsResult.data ?? []);
   const queue = mergeRunQueue(dueSources, pendingJobs);
 
   if (queue.length === 0) {
+    if (globalPause) {
+      console.log('[scheduler] Global pause active — skipping tick');
+    }
     return;
+  }
+
+  if (globalPause) {
+    console.log('[scheduler] Global pause active — running manual jobs only');
   }
 
   console.log(

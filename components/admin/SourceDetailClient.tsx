@@ -266,6 +266,7 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
           >
             <RunNowButton
               slug={initialSource.slug}
+              defaultCrawlMode={initialSource.slug === 'vinted' ? 'incremental' : undefined}
               variant="full"
               showStatusLink
               onComplete={handleRunComplete}

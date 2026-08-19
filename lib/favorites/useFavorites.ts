@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { getSupabaseEnv } from '@/lib/supabase/env';
 import {
   FAVORITES_CHANGE_EVENT,
   readFavoriteIds,
@@ -47,6 +48,18 @@ export function useFavorites() {
   }, []);
 
   useEffect(() => {
+    const syncLocal = () => setFavoriteIds(readFavoriteIds());
+    window.addEventListener(FAVORITES_CHANGE_EVENT, syncLocal);
+    window.addEventListener('storage', syncLocal);
+
+    if (!getSupabaseEnv()) {
+      void loadFavorites(false).then(() => setHydrated(true));
+      return () => {
+        window.removeEventListener(FAVORITES_CHANGE_EVENT, syncLocal);
+        window.removeEventListener('storage', syncLocal);
+      };
+    }
+
     const supabase = createClient();
 
     const init = async () => {
@@ -60,10 +73,6 @@ export function useFavorites() {
     };
 
     void init();
-
-    const syncLocal = () => setFavoriteIds(readFavoriteIds());
-    window.addEventListener(FAVORITES_CHANGE_EVENT, syncLocal);
-    window.addEventListener('storage', syncLocal);
 
     const {
       data: { subscription },

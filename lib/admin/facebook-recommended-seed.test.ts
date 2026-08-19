@@ -7,14 +7,26 @@ import {
   RECOMMENDED_FACEBOOK_SEED_COUNT,
 } from './facebook-recommended-seed';
 
+import {
+  buildDefaultFacebookUrl,
+  FACEBOOK_SEARCH_QUERIES,
+  FACEBOOK_SEED_CITY_SLUGS,
+  RECOMMENDED_FACEBOOK_SEED_URLS,
+  RECOMMENDED_FACEBOOK_SEED_COUNT,
+} from './facebook-recommended-seed';
+import { CONSUMER_CITY_KEYS } from '@/lib/geo/italian-cities';
+
 describe('facebook-recommended-seed (D-18-22/21)', () => {
-  it('exports 6 URLs for Venice + Padova × gratis/regalo/free', () => {
-    expect(RECOMMENDED_FACEBOOK_SEED_COUNT).toBe(6);
-    expect(RECOMMENDED_FACEBOOK_SEED_URLS).toHaveLength(6);
+  it('exports 27 URLs for 9 cities × gratis/regalo/free', () => {
+    expect(RECOMMENDED_FACEBOOK_SEED_COUNT).toBe(27);
+    expect(RECOMMENDED_FACEBOOK_SEED_URLS).toHaveLength(27);
+    expect(RECOMMENDED_FACEBOOK_SEED_COUNT).toBe(
+      CONSUMER_CITY_KEYS.length * FACEBOOK_SEARCH_QUERIES.length,
+    );
   });
 
-  it('includes venice and padova cities', () => {
-    expect(FACEBOOK_SEED_CITY_SLUGS).toEqual(['venice', 'padova']);
+  it('includes all nine marketplace city slugs', () => {
+    expect(FACEBOOK_SEED_CITY_SLUGS).toEqual(CONSUMER_CITY_KEYS);
     for (const city of FACEBOOK_SEED_CITY_SLUGS) {
       expect(RECOMMENDED_FACEBOOK_SEED_URLS.some((url) => url.includes(`/marketplace/${city}/`))).toBe(
         true,

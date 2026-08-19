@@ -6,7 +6,7 @@ import {
 } from 'crawlee';
 import { gotScraping } from 'got-scraping';
 import { presetToCrawleeOptions, type AntiBlockPreset } from '../admin/presets.js';
-import { getProxyUrl } from '../config.js';
+import { resolveCrawlerProxyUrl } from '../config.js';
 import { getProxyFatalFailure, ProxyQuotaFatalError } from '../shared/proxy-errors.js';
 import { applyEarlyStop, type EarlyStopListing } from '../subito/early-stop.js';
 import { FALLBACK_CONCURRENCY } from '../subito/fallback-queue.js';
@@ -51,6 +51,9 @@ type CategoryProcessResult = {
 function sessionPoolOptions(maxPoolSize: number) {
   return {
     maxPoolSize,
+    // Handle 429 in requestHandler (retire session + Playwright fallback) instead of
+    // Crawlee throwing before the handler runs.
+    blockedStatusCodes: [401, 403],
     persistenceOptions: { enable: false },
   };
 }
@@ -297,10 +300,12 @@ export async function runVintedCrawler(
   const isFullRefresh = options.isFullRefresh ?? false;
   const crawlMode: CrawlMode = options.mode ?? (isFullRefresh ? 'full' : 'incremental');
   const crawleeOpts = presetToCrawleeOptions(preset);
-  const proxyUrl = options.proxyUrlOverride ?? proxyUrlOverride ?? getProxyUrl();
+  const proxyUrl = resolveCrawlerProxyUrl(options.proxyUrlOverride, proxyUrlOverride);
 
   if (proxyUrl) {
     console.log(`Vinted HTTP crawler proxy: ${maskProxyHost(proxyUrl)}`);
+  } else {
+    console.log('Vinted HTTP crawler: direct (no proxy)');
   }
 
   const proxyConfiguration = proxyUrl
@@ -332,6 +337,7 @@ export async function runVintedCrawler(
       sessionPoolOptions: sessionPoolOptions(crawleeOpts.maxPoolSize),
       maxRequestRetries: crawleeOpts.maxRequestRetries,
       minConcurrency: crawleeOpts.minConcurrency,
+      maxConcurrency: crawleeOpts.maxConcurrency,
       errorHandler({ request }, error) {
         proxyErrorHandler(request, error);
       },

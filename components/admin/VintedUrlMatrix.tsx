@@ -4,22 +4,23 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   SUBITO_REGALO_CATALOG,
   dedupeUrls,
+  ITALIAN_CITIES,
+  SUBITO_CITY_SLUGS,
   type SubitoRegaloSlug,
+  type SubitoRegaloCity,
 } from '@/lib/admin/subito-regalo-catalog';
 import {
   buildDefaultVintedUrl,
-  VINTED_SEED_CITY_SLUGS,
   type VintedSeedCitySlug,
 } from '@/lib/admin/vinted-recommended-seed';
-import { getCityBySubitoSlug } from '@/lib/geo/italian-cities';
 import { cn } from '@/lib/utils';
 
-const ALL_CITIES = VINTED_SEED_CITY_SLUGS;
+const ALL_CITIES = SUBITO_CITY_SLUGS;
 const ALL_SLUGS = SUBITO_REGALO_CATALOG.map((entry) => entry.slug);
 
 const CITY_LABELS = Object.fromEntries(
-  ALL_CITIES.map((city) => [city, getCityBySubitoSlug(city)?.labelIt ?? city]),
-) as Record<VintedSeedCitySlug, string>;
+  ITALIAN_CITIES.map((city) => [city.subitoSlug, city.labelIt]),
+) as Record<SubitoRegaloCity, string>;
 
 function defaultCityState(): Record<VintedSeedCitySlug, boolean> {
   return Object.fromEntries(ALL_CITIES.map((city) => [city, true])) as Record<
@@ -148,7 +149,7 @@ export function VintedUrlMatrix({
           <h2 className="source-detail-card-title">Vinted URL 矩阵</h2>
           <p className="source-detail-card-subtitle">
             按城市与 Subito 分类生成 Vinted catalog URL；城市范围通过{' '}
-            <code className="text-xs">?city=</code> 元数据标记（D-17-06）。
+            <code className="text-xs">?city=</code> 元数据标记（D-17-06）。与 Subito 矩阵使用相同的 9 城。
           </p>
         </div>
       </header>
@@ -206,7 +207,7 @@ export function VintedUrlMatrix({
 
       <div className="source-detail-matrix-footer">
         <p className="source-detail-matrix-meta tabular-nums">
-          {selectedCount} URLs selected · Template: /catalog/&#123;id&#125;-slug?order=newest_first&amp;city=&#123;venezia|padova&#125;
+          {selectedCount} URLs selected · Template: /catalog/&#123;id&#125;-slug?order=newest_first&amp;city=&#123;city&#125;
         </p>
         <div className="source-detail-matrix-actions">
           <button

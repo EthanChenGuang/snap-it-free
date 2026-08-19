@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
+import { getSupabaseEnv } from '@/lib/supabase/env';
 
 type AuthSessionState = {
   user: User | null;
@@ -17,11 +18,18 @@ export function useAuthSession(): AuthSessionState {
   const [state, setState] = useState<AuthSessionState>(INITIAL);
 
   useEffect(() => {
+    if (!getSupabaseEnv()) {
+      setState({ user: null, email: null, loading: false });
+      return;
+    }
+
     const supabase = createClient();
     let settled = false;
+    let cancelled = false;
 
     const applySession = (session: Session | null) => {
       settled = true;
+      if (cancelled) return;
       setState({
         user: session?.user ?? null,
         email: session?.user?.email ?? null,
@@ -46,6 +54,7 @@ export function useAuthSession(): AuthSessionState {
     });
 
     return () => {
+      cancelled = true;
       window.clearTimeout(timeout);
       subscription.unsubscribe();
     };

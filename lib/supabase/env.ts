@@ -1,15 +1,16 @@
 const URL_KEY = 'NEXT_PUBLIC_SUPABASE_URL';
 const ANON_KEY = 'NEXT_PUBLIC_SUPABASE_ANON_KEY';
 
-function readEnv(name: string): string | undefined {
-  const value = process.env[name]?.trim();
-  return value && value.length > 0 ? value : undefined;
+function readPublicEnv(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : undefined;
 }
 
 /** Validates Supabase public env vars; returns null when unset (build/dev without DB). */
 export function getSupabaseEnv(): { url: string; anonKey: string } | null {
-  const url = readEnv(URL_KEY);
-  const anonKey = readEnv(ANON_KEY);
+  // Static property access so Next.js can inline NEXT_PUBLIC_* into the client bundle.
+  const url = readPublicEnv(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const anonKey = readPublicEnv(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   if (!url || !anonKey) {
     return null;

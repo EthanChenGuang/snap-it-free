@@ -41,6 +41,18 @@ describe('CanonicalListingSchema', () => {
     expect(result.lat).toBe(45.41);
   });
 
+  it('accepts Milano lat/lng when city is milano', () => {
+    const result = CanonicalListingSchema.parse({
+      ...validFixture,
+      city: 'milano',
+      region: 'lombardia',
+      lat: 45.46,
+      lng: 9.19,
+      zone: null,
+    });
+    expect(result.city).toBe('milano');
+  });
+
   it('rejects Padova coords when city is venezia (D-24)', () => {
     expect(() =>
       CanonicalListingSchema.parse({

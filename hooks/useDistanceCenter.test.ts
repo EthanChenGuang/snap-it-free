@@ -44,7 +44,17 @@ describe('resolveDistanceCenter', () => {
   });
 });
 
-const cityLabels = { venice: 'Venice', padova: 'Padova' };
+const cityLabels = {
+  venice: 'Venice',
+  padova: 'Padova',
+  milano: 'Milan',
+  firenze: 'Florence',
+  roma: 'Rome',
+  napoli: 'Naples',
+  perugia: 'Perugia',
+  torino: 'Turin',
+  prato: 'Prato',
+};
 
 describe('composeFeedListings pipeline', () => {
   const center = VENICE_DEFAULT_CENTER;

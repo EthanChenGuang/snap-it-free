@@ -1,15 +1,22 @@
+# Build context must be repo root (fly.toml: context = "..") so lib/ is available.
 FROM node:22-slim
 
-RUN npx playwright install-deps chromium
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends procps \
+  && rm -rf /var/lib/apt/lists/* \
+  && npx playwright install-deps chromium
 
-WORKDIR /app
+WORKDIR /app/scraper
 
-COPY package*.json ./
+COPY scraper/package*.json ./
 RUN npm ci
 
-COPY . .
+COPY lib /app/lib
+COPY scraper/ .
+
 RUN npx playwright install chromium
 
 ENV CRON_ENABLED=true
+ENV CRAWLEE_PERSIST_STORAGE=false
 
 CMD ["node", "--import", "tsx", "src/worker.ts"]

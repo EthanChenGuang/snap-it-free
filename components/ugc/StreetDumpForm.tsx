@@ -8,6 +8,7 @@ import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toaster';
 import { createClient } from '@/lib/supabase/client';
+import { getSupabaseEnv } from '@/lib/supabase/env';
 import { ZONE_CENTERS } from '@/lib/geo/zone-centers';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { getMessages } from '@/messages';
@@ -57,6 +58,11 @@ export function StreetDumpForm({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!getSupabaseEnv()) {
+      setIsLoggedIn(false);
+      return;
+    }
+
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       setIsLoggedIn(Boolean(user));

@@ -1,5 +1,5 @@
 import type { AntiBlockPreset } from './admin/presets.js';
-import { isProxyQuotaFatalError } from './shared/proxy-errors.js';
+import { findProxyQuotaFatalError } from './shared/proxy-errors.js';
 import type { CrawlResult, RunSubitoCrawlerOptions } from './subito/crawler.js';
 
 export const PROXY_QUOTA_FALLBACK_REASON =
@@ -76,19 +76,28 @@ export async function runCrawlWithProxyFallback(
     const crawlResult = await runCrawler(urls, preset, proxyUrl, options);
     return { crawlResult, fallbackDegraded: false };
   } catch (error) {
-    if (!isProxyQuotaFatalError(error)) {
+    const quotaError = findProxyQuotaFatalError(error);
+    if (!quotaError) {
       throw error;
     }
 
     console.log(
       JSON.stringify({
         event: 'proxy_quota_fallback',
-        reason: error.fatalReason,
+        reason: quotaError.fatalReason,
         proxy_host_masked: proxyUrl ? maskProxyHost(proxyUrl) : '[none]',
       }),
     );
 
-    const crawlResult = await runCrawler(urls, preset, undefined, options);
+    const directRunId = options.runId ? `${options.runId}-direct` : undefined;
+    console.log('[worker] Proxy quota exhausted — retrying crawl without proxy');
+
+    const crawlResult = await runCrawler(urls, preset, undefined, {
+      ...options,
+      // Empty string skips PROXY_URL env — crawlers must not reuse exhausted proxy.
+      proxyUrlOverride: '',
+      runId: directRunId,
+    });
     return {
       crawlResult,
       fallbackDegraded: true,

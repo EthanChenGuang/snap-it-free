@@ -1,13 +1,21 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AnimatedCount } from '@/components/admin/AnimatedCount';
 import {
   sourceDisplayNames,
   translationMessages,
 } from '@/components/admin/admin-messages';
 import { TranslationCostKpiGrid } from '@/components/admin/TranslationCostKpiGrid';
 import { TranslationListingCostPill } from '@/components/admin/TranslationListingCostPill';
+import { useTranslationQueuePollingContext } from '@/components/admin/TranslationQueuePollingProvider';
+import {
+  translationQueuePageHref,
+  translationQueuePageRange,
+  translationQueueTotalPages,
+} from '@/lib/admin/translation-queue-pagination';
 import type { TranslationCostSummary, TranslationQueueItem } from '@/lib/admin/types';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +23,8 @@ type TranslationQueueClientProps = {
   initialItems: TranslationQueueItem[];
   totalPending: number;
   initialCostSummary: TranslationCostSummary;
+  page: number;
+  pageSize: number;
 };
 
 function TranslationQueueCard({
@@ -131,14 +141,85 @@ type RetryResponse = {
   failures?: Array<{ listingId: string; error: string }>;
 };
 
+function TranslationQueuePagination({
+  page,
+  pageSize,
+  totalPending,
+}: {
+  page: number;
+  pageSize: number;
+  totalPending: number;
+}) {
+  const totalPages = translationQueueTotalPages(totalPending, pageSize);
+  if (totalPages <= 1) {
+    return null;
+  }
+
+  const { from, to } = translationQueuePageRange(page, totalPending, pageSize);
+  const prevHref = page > 1 ? translationQueuePageHref(page - 1) : null;
+  const nextHref = page < totalPages ? translationQueuePageHref(page + 1) : null;
+
+  return (
+    <nav className="translation-queue-pagination" aria-label="翻译队列分页">
+      <p className="translation-queue-pagination-range">
+        {translationMessages.pageRange(from, to, totalPending)}
+      </p>
+      <div className="translation-queue-pagination-controls">
+        {prevHref ? (
+          <Link href={prevHref} className="translation-queue-pagination-btn">
+            <span className="material-symbols-outlined text-[16px]" aria-hidden>
+              chevron_left
+            </span>
+            {translationMessages.pagePrev}
+          </Link>
+        ) : (
+          <span className="translation-queue-pagination-btn translation-queue-pagination-btn-disabled">
+            <span className="material-symbols-outlined text-[16px]" aria-hidden>
+              chevron_left
+            </span>
+            {translationMessages.pagePrev}
+          </span>
+        )}
+        <span className="translation-queue-pagination-summary">
+          {translationMessages.pageSummary(page, totalPages)}
+        </span>
+        {nextHref ? (
+          <Link href={nextHref} className="translation-queue-pagination-btn">
+            {translationMessages.pageNext}
+            <span className="material-symbols-outlined text-[16px]" aria-hidden>
+              chevron_right
+            </span>
+          </Link>
+        ) : (
+          <span className="translation-queue-pagination-btn translation-queue-pagination-btn-disabled">
+            {translationMessages.pageNext}
+            <span className="material-symbols-outlined text-[16px]" aria-hidden>
+              chevron_right
+            </span>
+          </span>
+        )}
+      </div>
+    </nav>
+  );
+}
+
 export function TranslationQueueClient({
   initialItems,
   totalPending,
   initialCostSummary,
+  page,
+  pageSize,
 }: TranslationQueueClientProps) {
   const router = useRouter();
+  const {
+    pendingCount,
+    setPendingCount,
+    isPolling,
+    startPolling,
+    stopPolling,
+    fetchPendingCount,
+  } = useTranslationQueuePollingContext();
   const [items, setItems] = useState(initialItems);
-  const [pendingCount, setPendingCount] = useState(totalPending);
   const [costSummary, setCostSummary] = useState(initialCostSummary);
   const [costLoading, setCostLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -149,9 +230,9 @@ export function TranslationQueueClient({
   const [notification, setNotification] = useState<string | null>(null);
   const notificationTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const isTruncated = items.length < pendingCount;
   const hasSelection = selectedIds.length > 0;
   const allSelected = items.length > 0 && selectedIds.length === items.length;
+  const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
   const refreshCostSummary = useCallback(async () => {
     setCostLoading(true);
@@ -171,16 +252,34 @@ export function TranslationQueueClient({
   }, []);
 
   useEffect(() => {
-    void refreshCostSummary();
-  }, [refreshCostSummary]);
+    setItems(initialItems);
+    setSelectedIds([]);
+    if (!isPolling && !isRetryAllPending) {
+      setPendingCount(totalPending);
+    }
+  }, [initialItems, totalPending, page, isPolling, isRetryAllPending, setPendingCount]);
 
-  const showNotification = (message: string) => {
+  const showNotification = useCallback((message: string) => {
     if (notificationTimeout.current) {
       clearTimeout(notificationTimeout.current);
     }
     setNotification(message);
     notificationTimeout.current = setTimeout(() => setNotification(null), 5000);
-  };
+  }, []);
+
+  const finishRetryAllPending = useCallback(
+    (showCompleteToast: boolean) => {
+      stopPolling();
+      setIsRetryAllPending(false);
+      if (showCompleteToast) {
+        showNotification(translationMessages.retryAllPendingComplete);
+      }
+      void router.refresh();
+      void refreshCostSummary();
+    },
+    [refreshCostSummary, router, showNotification, stopPolling],
+  );
+
 
   const showProcessedSuccess = (processed: ProcessedTranslation[]) => {
     if (processed.length === 0) {
@@ -295,16 +394,50 @@ export function TranslationQueueClient({
   const handleRetryAllPending = async () => {
     setErrorMessage(null);
     setIsRetryAllPending(true);
+
+    let completedViaPolling = false;
+
+    startPolling({
+      onZero: () => {
+        completedViaPolling = true;
+        finishRetryAllPending(true);
+      },
+      onError: () => {
+        if (!completedViaPolling) {
+          finishRetryAllPending(false);
+          setErrorMessage(translationMessages.retryAll);
+        }
+      },
+    });
+
     try {
       const result = await postRetry({ all_pending: true });
       refreshFromResponse(result.processed);
       applyFailures(result.failures);
-      showBatchResult(result.processed, result.failures);
-      void router.refresh();
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : translationMessages.retryAll);
-    } finally {
+
+      const latestCount = await fetchPendingCount();
+      if (latestCount !== null) {
+        setPendingCount(latestCount);
+      }
+
+      if (completedViaPolling) {
+        return;
+      }
+
+      stopPolling();
       setIsRetryAllPending(false);
+
+      if (latestCount === 0) {
+        showNotification(translationMessages.retryAllPendingComplete);
+      } else {
+        showBatchResult(result.processed, result.failures);
+      }
+
+      void router.refresh();
+      void refreshCostSummary();
+    } catch (error) {
+      finishRetryAllPending(false);
+      setErrorMessage(error instanceof Error ? error.message : translationMessages.retryAll);
     }
   };
 
@@ -342,9 +475,7 @@ export function TranslationQueueClient({
           <p className="translation-queue-subtitle">{translationMessages.pageSubtitle}</p>
           {!isEmpty ? (
             <p className="translation-queue-pending-hint">
-              {isTruncated
-                ? translationMessages.pendingBannerTruncated(items.length, pendingCount)
-                : translationMessages.pendingBanner(pendingCount)}
+              <AnimatedCount value={pendingCount} /> {translationMessages.pendingBannerSuffix}
             </p>
           ) : null}
         </div>
@@ -361,9 +492,11 @@ export function TranslationQueueClient({
             )}
             aria-hidden
           >
-            refresh
+            {isRetryAllPending ? 'progress_activity' : 'refresh'}
           </span>
-          {isRetryAllPending ? translationMessages.retrying : translationMessages.retryAllPending}
+          {isRetryAllPending
+            ? translationMessages.retryAllPendingProcessing
+            : translationMessages.retryAllPending}
         </button>
       </header>
 
@@ -393,8 +526,9 @@ export function TranslationQueueClient({
                 onChange={toggleSelectAll}
                 className="translation-queue-checkbox"
               />
-              <span className="translation-queue-batch-label tabular-nums">
-                {translationMessages.batchSelection(selectedIds.length, pendingCount)}
+              <span className="translation-queue-batch-label">
+                已选 <AnimatedCount value={selectedIds.length} /> 项 / 共{' '}
+                <AnimatedCount value={pendingCount} /> 条待翻译
               </span>
             </label>
             <div className="translation-queue-batch-actions">
@@ -425,13 +559,19 @@ export function TranslationQueueClient({
                 key={item.listingId}
                 item={item}
                 sourceLabel={sourceLabel(item.source)}
-                selected={selectedIds.includes(item.listingId)}
+                selected={selectedIdSet.has(item.listingId)}
                 isLoading={loadingId === item.listingId}
                 onToggleSelect={() => toggleSelect(item.listingId)}
                 onRetry={() => handleRetry(item.listingId)}
               />
             ))}
           </div>
+
+          <TranslationQueuePagination
+            page={page}
+            pageSize={pageSize}
+            totalPending={pendingCount}
+          />
         </>
       )}
 
@@ -443,6 +583,39 @@ export function TranslationQueueClient({
           {notification}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+export function TranslationQueueSkeleton() {
+  return (
+    <div
+      className="translation-queue-page mx-auto max-w-5xl space-y-6 pb-8"
+      aria-busy
+      aria-label={translationMessages.pageTitle}
+    >
+      <header className="translation-queue-header">
+        <div className="translation-queue-header-copy space-y-2">
+          <div className="admin-skeleton h-8 w-40" />
+          <div className="admin-skeleton h-4 w-72" />
+          <div className="admin-skeleton h-3 w-56" />
+        </div>
+        <div className="admin-skeleton h-10 w-44 rounded-lg" />
+      </header>
+
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3" aria-hidden>
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index} className="admin-skeleton h-[104px] rounded-xl" />
+        ))}
+      </section>
+
+      <div className="admin-skeleton h-[60px] rounded-xl" />
+
+      <div className="translation-queue-list" aria-hidden>
+        {Array.from({ length: 8 }).map((_, index) => (
+          <div key={index} className="admin-skeleton h-[74px] rounded-xl" />
+        ))}
+      </div>
     </div>
   );
 }

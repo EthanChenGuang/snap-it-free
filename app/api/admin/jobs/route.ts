@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { sourcesMessages } from '@/components/admin/admin-messages';
+import { dispatchScrapeJobSubprocess } from '@/lib/admin/execute-scrape-job';
 import { requireOperatorSession } from '@/lib/admin/operator-route';
 import { CreateJobSchema } from '@/lib/admin/schemas';
+
+const inlineJobsEnabled = process.env.SCRAPER_INLINE_JOBS !== 'false';
 
 export async function POST(request: Request) {
   const session = await requireOperatorSession();
@@ -56,5 +59,42 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 
-  return NextResponse.json({ job, message }, { status: 201 });
+  // Claim pending job and run locally so Admin manual triggers use latest scraper code
+  // (avoids stale Fly worker with old Crawlee dedupe bug). Fly cron still handles pending
+  // jobs when inline dispatch is disabled via SCRAPER_INLINE_JOBS=false.
+  if (inlineJobsEnabled && job.status === 'pending') {
+    const startedAt = new Date().toISOString();
+    const { data: claimed } = await session.supabase
+      .from('scrape_jobs')
+      .update({ status: 'running', started_at: startedAt })
+      .eq('id', job.id)
+      .eq('status', 'pending')
+      .select('id')
+      .maybeSingle();
+
+    if (claimed) {
+      try {
+        dispatchScrapeJobSubprocess(job.id);
+      } catch (dispatchErr) {
+        const detail =
+          dispatchErr instanceof Error ? dispatchErr.message : 'Failed to start scraper subprocess';
+        await session.supabase
+          .from('scrape_jobs')
+          .update({
+            status: 'failed',
+            message: detail,
+            completed_at: new Date().toISOString(),
+          })
+          .eq('id', job.id);
+        return NextResponse.json({ error: detail }, { status: 500 });
+      }
+
+      return NextResponse.json(
+        { job: { ...job, status: 'running', started_at: startedAt }, message },
+        { status: 201, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+  }
+
+  return NextResponse.json({ job, message }, { status: 201, headers: { 'Cache-Control': 'no-store' } });
 }

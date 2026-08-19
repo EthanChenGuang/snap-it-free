@@ -131,7 +131,19 @@ describe('listingConsumerCity', () => {
     ).toBe('padova');
   });
 
-  it('returns null for zone-null non-Padova rows', () => {
+  it('maps milano city to milano', () => {
+    expect(
+      listingConsumerCity({
+        ...baseListing,
+        zone: null,
+        city: 'milano',
+        lat: 45.46,
+        lng: 9.19,
+      }),
+    ).toBe('milano');
+  });
+
+  it('returns null for zone-null non-catalog rows', () => {
     expect(
       listingConsumerCity({
         ...baseListing,

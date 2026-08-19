@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Inter } from 'next/font/google';
 import { getMessages } from '@/messages';
 import { BrowseCenterProvider } from '@/lib/browse-center/context';
@@ -31,10 +32,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh" className={inter.variable} suppressHydrationWarning>
       <head>
-        {isDev ? (
-          <script dangerouslySetInnerHTML={{ __html: DEV_UNREGISTER_SW_SCRIPT }} />
-        ) : null}
-        <script dangerouslySetInnerHTML={{ __html: APPEARANCE_INIT_SCRIPT }} />
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
           rel="stylesheet"
@@ -44,6 +41,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className="overflow-hidden bg-background text-on-background"
         suppressHydrationWarning
       >
+        {isDev ? (
+          <Script
+            id="dev-unregister-sw"
+            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{ __html: DEV_UNREGISTER_SW_SCRIPT }}
+          />
+        ) : null}
+        <Script
+          id="appearance-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: APPEARANCE_INIT_SCRIPT }}
+        />
         <AppThemeProvider>
           <BrowseCenterProvider>
             <DocumentLang />

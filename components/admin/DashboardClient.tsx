@@ -1,11 +1,17 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { SourceCard } from '@/components/admin/SourceCard';
-import { MaintenanceCard } from '@/components/admin/MaintenanceCard';
+import { CoreHealthSection } from '@/components/admin/CoreHealthSection';
+import { DashboardSectionHeader } from '@/components/admin/DashboardSectionHeader';
+import { useMaintenance } from '@/components/admin/MaintenanceCard';
+import {
+  PlatformUsageGrid,
+  usePlatformUsage,
+} from '@/components/admin/PlatformUsageGrid';
 import { DegradedBanner } from '@/components/admin/DegradedBanner';
+import { ThresholdAlertBanner } from '@/components/admin/ThresholdAlertBanner';
 import { adminShellMessages } from '@/components/admin/admin-messages';
 import type { AdminAlert, GlobalAdminStatus, SourceWithLastRun } from '@/lib/admin/types';
 
@@ -15,13 +21,6 @@ type DashboardClientProps = {
   initialAlerts: AdminAlert[];
   pendingTranslationCount: number;
 };
-
-function formatUtcTimestamp(iso: string | null): string {
-  if (!iso) {
-    return '—';
-  }
-  return `${new Date(iso).toISOString().replace('T', ' ').slice(0, 19)} UTC`;
-}
 
 export function DashboardClient({
   initialSources,
@@ -35,6 +34,9 @@ export function DashboardClient({
   const showDegradedBanner = initialGlobalStatus.showDegradedBanner;
   const [sources, setSources] = useState(initialSources);
   const [pauseSaving, setPauseSaving] = useState(false);
+  const maintenance = useMaintenance(null);
+  const platformUsage = usePlatformUsage();
+  const [thresholdBannerDismissed, setThresholdBannerDismissed] = useState(false);
 
   const orderedSources = [...sources].sort((a, b) => {
     if (a.slug === 'subito') return -1;
@@ -86,142 +88,100 @@ export function DashboardClient({
     [router],
   );
 
-  const handleRunNow = useCallback(
-    async (slug: string): Promise<string | null> => {
-      const response = await fetch('/api/admin/jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source_slug: slug }),
-      });
-
-      const payload = (await response.json()) as { message?: string; error?: string };
-
-      if (!response.ok) {
-        return payload.error ?? '无法提交运行任务';
-      }
-
-      router.refresh();
-      return payload.message ?? null;
-    },
-    [router],
-  );
+  const handleRunComplete = useCallback(() => {
+    router.refresh();
+  }, [router]);
 
   return (
-    <>
-      <header className="mb-6 border-b border-outline-variant pb-6">
-        <h1 className="text-[30px] font-semibold leading-[1.3] tracking-tight">抓取管理</h1>
-        <p className="mt-1 text-[15px] text-secondary">Scraper Worker · Admin Console</p>
+    <div className="dashboard-console">
+      <header className="dashboard-page-header">
+        <h1 className="dashboard-page-title">抓取管理</h1>
+        <p className="dashboard-page-subtitle">Scraper Worker · Admin Console</p>
       </header>
 
       {showDegradedBanner ? (
-        <div className="mb-space-xl" data-testid="degraded-banner">
+        <div className="mb-6" data-testid="degraded-banner">
           <DegradedBanner showSettingsLink />
         </div>
       ) : null}
 
-      <section className="mb-space-xl flex flex-wrap items-center justify-between gap-4 rounded border border-outline-variant bg-surface p-space-md">
-        <div className="flex flex-wrap items-center gap-6">
-          <label className="flex cursor-pointer items-center gap-2">
-            <div className="relative">
-              <input
-                type="checkbox"
-                className="peer sr-only"
-                checked={globalPause}
-                disabled={pauseSaving}
-                onChange={handleGlobalPauseToggle}
-                aria-label="全局暂停"
-              />
-              <div className="h-6 w-10 rounded-full border border-outline-variant bg-surface-container-high after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-outline-variant after:bg-primary after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:bg-surface-dim peer-disabled:opacity-50" />
-            </div>
-            <span className="text-label-md font-semibold text-primary">全局暂停</span>
-          </label>
+      <ThresholdAlertBanner
+        alerts={platformUsage.alerts}
+        dismissed={thresholdBannerDismissed}
+        onDismiss={() => setThresholdBannerDismissed(true)}
+      />
 
-          <div className="hidden h-6 w-px bg-outline-variant sm:block" aria-hidden />
+      <CoreHealthSection
+        globalPause={globalPause}
+        pauseSaving={pauseSaving}
+        lastSyncAt={lastSyncAt}
+        pendingTranslationCount={pendingTranslationCount}
+        alerts={initialAlerts}
+        maintenance={maintenance}
+        onGlobalToggle={handleGlobalPauseToggle}
+      />
 
-          <p className="text-label-sm text-secondary">
-            上次同步：
-            <span className="font-medium text-primary">{formatUtcTimestamp(lastSyncAt)}</span>
-          </p>
-        </div>
+      <PlatformUsageGrid {...platformUsage} />
 
-        {pendingTranslationCount > 0 && (
-          <Link
-            href="/admin/translation"
-            className="text-label-sm text-primary underline decoration-outline-variant underline-offset-4 hover:decoration-primary"
-          >
-            待翻译：{pendingTranslationCount}
-          </Link>
-        )}
-      </section>
-
-      <MaintenanceCard initialPreview={null} />
-
-      <section className="mb-space-xl">
-        <h2 className="mb-space-md border-b border-outline-variant pb-2 text-h3 font-semibold">
-          数据源
-        </h2>
-
-        <div className="grid grid-cols-1 gap-space-lg lg:grid-cols-2 xl:grid-cols-3">
+      <section className="border-t border-black/[0.05] pt-8" aria-label="数据源">
+        <DashboardSectionHeader
+          title="数据源"
+          subtitle="监控各平台抓取 Worker 运行状态"
+        />
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {orderedSources.map((source) => (
             <SourceCard
               key={source.slug}
               source={source}
               globalPause={globalPause}
+              variant="compact"
               onToggleEnabled={handleToggleEnabled}
-              onRunNow={handleRunNow}
+              onRunComplete={handleRunComplete}
             />
           ))}
         </div>
       </section>
-
-      <section className="mb-space-xl space-y-3">
-        <h2 className="border-b border-outline-variant pb-2 text-h3 font-semibold">最近告警</h2>
-        {initialAlerts.length === 0 ? (
-          <p className="rounded border border-dashed border-outline-variant bg-surface-container-low p-4 text-body-md text-secondary">
-            暂无告警记录。
-          </p>
-        ) : (
-          <ul className="divide-y divide-outline-variant rounded border border-outline-variant bg-surface">
-            {initialAlerts.map((alert) => (
-              <li
-                key={alert.id}
-                className="flex flex-wrap items-center gap-3 p-space-md text-body-md"
-              >
-                <span className="material-symbols-outlined shrink-0 text-[20px] text-error" aria-hidden>
-                  error
-                </span>
-                <span className="shrink-0 font-mono font-semibold">{alert.source}</span>
-                <span className="max-w-md truncate text-error">{alert.message}</span>
-                <span className="ml-auto shrink-0 font-mono text-label-sm text-secondary">
-                  {formatUtcTimestamp(alert.timestamp)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </>
+    </div>
   );
 }
 
 export function DashboardSkeleton() {
   return (
-    <>
-      <div className="mb-6 h-16 animate-pulse rounded bg-surface-container-low" />
-      <div className="mb-space-xl h-14 animate-pulse rounded bg-surface-container-low" />
-      <div className="mb-space-xl grid grid-cols-1 gap-space-lg lg:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="h-48 animate-pulse rounded bg-surface-container-low" />
-        ))}
+    <div className="dashboard-console">
+      <div className="mb-6 h-14 animate-pulse rounded-xl bg-black/[0.04]" />
+      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="grid grid-cols-2 gap-3 lg:col-span-5">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className={`h-24 animate-pulse rounded-xl bg-black/[0.04] ${index === 2 ? 'col-span-2' : ''}`}
+            />
+          ))}
+        </div>
+        <div className="h-48 animate-pulse rounded-xl bg-black/[0.04] lg:col-span-7" />
       </div>
-      <div className="h-32 animate-pulse rounded bg-surface-container-low" />
-    </>
+      <div className="mb-8 rounded-2xl border border-black/[0.05] bg-black/[0.02] p-5">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="h-40 animate-pulse rounded-xl bg-black/[0.04]" />
+          ))}
+        </div>
+      </div>
+      <div className="border-t border-black/[0.05] pt-8">
+        <div className="mb-4 h-8 w-48 animate-pulse rounded bg-black/[0.04]" />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="h-28 animate-pulse rounded-xl bg-black/[0.04]" />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
 export function DashboardLoadError() {
   return (
-    <p className="rounded border border-outline-variant bg-surface-container-low p-4 text-body-md text-error">
+    <p className="rounded-xl border border-black/[0.05] bg-white p-4 text-[15px] text-[#ff3b30]">
       {adminShellMessages.loadError}
     </p>
   );

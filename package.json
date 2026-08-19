@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "next dev --webpack",
     "dev:tunnel": "bash scripts/dev-tunnel.sh",
+    "dev:tunnel:scraper": "WITH_SCRAPER=1 bash scripts/dev-tunnel.sh",
+    "stop:dev:tunnel": "bash scripts/stop-dev-tunnel.sh",
+    "stop:dev:tunnel:scraper": "bash scripts/stop-dev-tunnel.sh",
     "dev:vite": "vite --port=3000 --host=0.0.0.0",
     "postinstall": "node scripts/copy-maplibre-worker.mjs",
     "prebuild": "node scripts/copy-maplibre-worker.mjs",

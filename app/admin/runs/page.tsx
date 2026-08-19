@@ -1,7 +1,52 @@
+import { Suspense } from 'react';
 import { RunsListClient } from '@/components/admin/RunsListClient';
+import { reconcileOrphanScrapeRuns } from '@/lib/admin/orphan-runs';
 import { getScrapeRuns } from '@/lib/admin/queries';
+import { createServiceClient } from '@/lib/supabase/service';
 
-export default async function AdminRunsPage() {
-  const runs = await getScrapeRuns({ limit: 100 });
-  return <RunsListClient initialRuns={runs} />;
+type PageProps = {
+  searchParams: Promise<{ id?: string; days?: string }>;
+};
+
+function parseSinceDays(value: string | undefined): number {
+  const parsed = Number(value);
+  if (parsed === 14 || parsed === 30) {
+    return parsed;
+  }
+  return 7;
+}
+
+async function RunsPageContent({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const sinceDays = parseSinceDays(params.days);
+
+  try {
+    await reconcileOrphanScrapeRuns(createServiceClient());
+  } catch (err) {
+    console.error('[admin/runs] orphan reconcile failed:', err);
+  }
+
+  const runs = await getScrapeRuns({ limit: 100, sinceDays });
+
+  return (
+    <RunsListClient
+      initialRuns={runs}
+      initialSelectedId={params.id ?? null}
+      initialSinceDays={sinceDays}
+    />
+  );
+}
+
+export default function AdminRunsPage(props: PageProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[480px] items-center justify-center text-[14px] text-[#86868b]">
+          加载运行记录…
+        </div>
+      }
+    >
+      <RunsPageContent {...props} />
+    </Suspense>
+  );
 }

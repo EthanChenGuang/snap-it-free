@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { requireOperatorSession } from '@/lib/admin/operator-route';
-import { checkAndIncrementUsage } from '@/lib/admin/translation-cap';
+import {
+  ADMIN_TRANSLATION_RETRY_CONCURRENCY,
+  runWithConcurrencyLimit,
+} from '@/lib/admin/concurrency';
 import { translateListingFields } from '@/lib/admin/translate';
 import { recordTranslationSuccess } from '@/lib/admin/translation-usage-log';
 import { TranslationRetrySchema } from '@/lib/admin/schemas';
@@ -28,11 +31,6 @@ async function retryListingTranslation(
   | { ok: true; provider: 'gemini' | 'openrouter'; durationMs: number }
   | { ok: false; error: string }
 > {
-  const usage = await checkAndIncrementUsage(supabase);
-  if (!usage.allowed) {
-    return { ok: false, error: 'Daily translation cap reached' };
-  }
-
   const { data: listing, error: listingError } = await supabase
     .from('listings')
     .select('id, title, category, raw_payload')
@@ -152,24 +150,22 @@ export async function POST(request: Request) {
   }> = [];
   const failures: Array<{ listingId: string; error: string }> = [];
 
-  const outcomes = await Promise.all(
-    listingIds.map(async (listingId) => ({
-      listingId,
-      outcome: await retryListingTranslation(supabase, listingId, translationProvider),
-    })),
+  await runWithConcurrencyLimit(
+    listingIds,
+    ADMIN_TRANSLATION_RETRY_CONCURRENCY,
+    async (listingId) => {
+      const outcome = await retryListingTranslation(supabase, listingId, translationProvider);
+      if (outcome.ok) {
+        processed.push({
+          listingId,
+          provider: outcome.provider,
+          durationMs: outcome.durationMs,
+        });
+      } else {
+        failures.push({ listingId, error: outcome.error });
+      }
+    },
   );
-
-  for (const { listingId, outcome } of outcomes) {
-    if (outcome.ok) {
-      processed.push({
-        listingId,
-        provider: outcome.provider,
-        durationMs: outcome.durationMs,
-      });
-    } else {
-      failures.push({ listingId, error: outcome.error });
-    }
-  }
 
   return NextResponse.json({ processed, failures });
 }

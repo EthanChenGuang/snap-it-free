@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { normalizeSubitoPhotoUrl } from '@/lib/listings/subito-photo-url';
 import { cn } from '@/lib/utils';
 
 type ListingPhotoProps = {
@@ -20,8 +21,9 @@ export function ListingPhoto({
   sizes = '400px',
 }: ListingPhotoProps) {
   const [failed, setFailed] = useState(false);
+  const resolvedSrc = src ? normalizeSubitoPhotoUrl(src) : src;
 
-  if (!src || failed) {
+  if (!resolvedSrc || failed) {
     return (
       <div
         className={cn(
@@ -36,7 +38,7 @@ export function ListingPhoto({
 
   return (
     <Image
-      src={src}
+      src={resolvedSrc}
       alt={alt}
       fill
       sizes={sizes}

@@ -1,0 +1,17 @@
+app = "shoumanwu-scraper"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile"
+  context = ".."
+
+[env]
+  CRON_ENABLED = "true"
+  CRAWLEE_PERSIST_STORAGE = "false"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+kill_signal = "SIGTERM"
+kill_timeout = "120s"

@@ -15,6 +15,7 @@ import {
 } from '@/lib/admin/subito-rescue-fetch';
 import { RESCUE_PLACEHOLDER_PHOTO } from '@/lib/admin/rescue-placeholder';
 import { normalizeSubitoPhotoUrl } from '@/lib/listings/subito-photo-url';
+import { computeScrapedListingExpiresAt } from '@/lib/listings/scraped-listing-ttl';
 
 type VeniceZone = 'centro_storico' | 'mestre_marghera' | 'lido_murano';
 
@@ -48,8 +49,6 @@ function resolveRejectRun(row: RescueRejectRow): {
 export type RescueRejectResult =
   | { ok: true; listingId: string; externalId: string; offlineRescue: boolean }
   | { ok: false; error: string };
-
-const LISTING_TTL_MS = 48 * 60 * 60 * 1000;
 
 let cachedZones: ZonePolygon[] | null = null;
 
@@ -91,11 +90,7 @@ function tagZone(lat: number, lng: number): VeniceZone | null {
 }
 
 function computeExpiresAt(postedAt: Date, now = new Date()): Date {
-  const fromPosted = postedAt.getTime() + LISTING_TTL_MS;
-  if (fromPosted > now.getTime()) {
-    return new Date(fromPosted);
-  }
-  return new Date(now.getTime() + LISTING_TTL_MS);
+  return computeScrapedListingExpiresAt(postedAt, now);
 }
 
 function contentHash(listing: {

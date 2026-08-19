@@ -51,6 +51,17 @@ describe('decideCrawlMode', () => {
       }),
     ).toBe('full');
   });
+
+  it('jobCrawlMode incremental overrides missing lastFullRefreshAt', () => {
+    expect(
+      decideCrawlMode({
+        lastFullRefreshAt: null,
+        fullRefreshHours: 24,
+        jobCrawlMode: 'incremental',
+        now,
+      }),
+    ).toBe('incremental');
+  });
 });
 
 describe('evaluateProxyGate', () => {

@@ -16,6 +16,7 @@ describe('anti-block presets', () => {
       maxPoolSize: 5,
       maxRequestRetries: 3,
       minConcurrency: 1,
+      maxConcurrency: 1,
     });
   });
 });

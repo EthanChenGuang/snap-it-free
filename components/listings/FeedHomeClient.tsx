@@ -6,6 +6,7 @@ import { RubberbandScroll } from '@/components/ui/RubberbandScroll';
 import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import { useFeedScroll } from '@/components/shell/FeedScrollContext';
 import { composeFeedListings, useDistanceCenter } from '@/hooks/useDistanceCenter';
+import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
 import { excludeReportedIds } from '@/lib/listings/filters';
 import { useListingsPoll } from '@/lib/listings/useListingsPoll';
 import { readReportedIds, REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
@@ -39,6 +40,11 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
     return () => registerScrollContainer(null);
   }, [registerScrollContainer]);
 
+  const cityLabels = useMemo(
+    () => consumerCityLabelsFromMessages(messages),
+    [messages],
+  );
+
   const { filteredListings, distanceMap } = useMemo(() => {
     const visible = excludeReportedIds(listings, reportedIds);
     const { listings: filtered, distanceMap: distances } = composeFeedListings({
@@ -47,13 +53,10 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
       center,
       searchQuery,
       language,
-      cityLabels: {
-        venice: messages.feed.cityVenice,
-        padova: messages.feed.cityPadova,
-      },
+      cityLabels,
     });
     return { filteredListings: filtered, distanceMap: distances };
-  }, [listings, reportedIds, searchQuery, applied, center, language, messages.feed.cityVenice, messages.feed.cityPadova]);
+  }, [listings, reportedIds, searchQuery, applied, center, language, cityLabels]);
 
   const hasSearchQuery = searchQuery.trim().length > 0;
   const hasCategoryFilter = applied.categories.length > 0;

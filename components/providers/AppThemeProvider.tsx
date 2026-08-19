@@ -1,21 +1,19 @@
 'use client';
 
 import {
+  DEFAULT_PREFERENCES,
   readAppPreferences,
   subscribeAppPreferences,
-  type AppearanceMode,
 } from '@/lib/settings/preferences';
 import { forcedThemeFromAppearance } from '@/lib/settings/resolve-appearance';
 import { ThemeProvider } from 'next-themes';
 import { useSyncExternalStore } from 'react';
 
-const DEFAULT_APPEARANCE: AppearanceMode = 'light';
-
 export function AppThemeProvider({ children }: { children: React.ReactNode }) {
   const preferences = useSyncExternalStore(
     subscribeAppPreferences,
     readAppPreferences,
-    () => ({ language: 'zh', appearance: DEFAULT_APPEARANCE, soundAlerts: false }),
+    () => DEFAULT_PREFERENCES,
   );
 
   const forcedTheme = forcedThemeFromAppearance(preferences.appearance);

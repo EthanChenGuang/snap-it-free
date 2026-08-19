@@ -3,6 +3,8 @@ import {
   CreateJobSchema,
   UpdateGlobalConfigSchema,
   UpdateSourceSchema,
+  VALIDATE_TARGET_URLS_MAX,
+  ValidateTargetUrlsSchema,
 } from './schemas';
 
 describe('UpdateSourceSchema', () => {
@@ -82,6 +84,23 @@ describe('UpdateGlobalConfigSchema', () => {
 
   it('rejects max_pages above 3', () => {
     const result = UpdateGlobalConfigSchema.safeParse({ max_pages: 4 });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('ValidateTargetUrlsSchema', () => {
+  it('accepts full regalo matrix size (153 URLs)', () => {
+    const urls = Array.from({ length: 153 }, (_, index) => `https://example.com/${index}`);
+    const result = ValidateTargetUrlsSchema.safeParse({ urls });
+    expect(result.success).toBe(true);
+  });
+
+  it(`rejects more than ${VALIDATE_TARGET_URLS_MAX} URLs`, () => {
+    const urls = Array.from(
+      { length: VALIDATE_TARGET_URLS_MAX + 1 },
+      (_, index) => `https://example.com/${index}`,
+    );
+    const result = ValidateTargetUrlsSchema.safeParse({ urls });
     expect(result.success).toBe(false);
   });
 });

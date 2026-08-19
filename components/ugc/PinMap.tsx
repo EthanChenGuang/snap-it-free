@@ -4,9 +4,11 @@ import { useEffect, useRef } from 'react';
 import Map, { Marker, type MapRef } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { ZONE_CENTERS } from '@/lib/geo/zone-centers';
+import {
+  OPENFREEMAP_LIBERTY_STYLE_URL,
+  patchOpenFreeMapStyle,
+} from '@/lib/map/openfreemap-style';
 import type { VeniceZone } from '@/lib/listings/types';
-
-const OPENFREEMAP_LIBERTY = 'https://tiles.openfreemap.org/styles/liberty';
 
 type PinMapProps = {
   zone: VeniceZone;
@@ -37,9 +39,10 @@ export function PinMap({ zone, lat, lng, onPinChange }: PinMapProps) {
           latitude: lat,
           zoom: 13,
         }}
-        mapStyle={OPENFREEMAP_LIBERTY}
+        mapStyle={OPENFREEMAP_LIBERTY_STYLE_URL}
         style={{ width: '100%', height: '100%' }}
         attributionControl={{ compact: true }}
+        onLoad={(event) => patchOpenFreeMapStyle(event.target)}
       >
         <Marker
           longitude={lng}

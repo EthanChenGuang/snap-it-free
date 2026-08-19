@@ -5,6 +5,7 @@ import {
   lookupMunicipalityCentroid,
   type RawListing,
 } from './extract.js';
+import { normalizeSubitoPhotoUrl } from '../../../lib/listings/subito-photo-url.js';
 
 const LISTING_ARRAY_PATH = ['props', 'pageProps', 'initialState', 'items', 'originalList'] as const;
 
@@ -106,10 +107,14 @@ function mapAdItem(item: SubitoAdItem, sourceCategoryUrl: string): CategoryJsonL
   const title = item.subject?.trim() ?? '';
   const image_urls = (item.images ?? [])
     .map((img) => img.cdnBaseUrl)
-    .filter((url): url is string => Boolean(url));
+    .filter((url): url is string => Boolean(url))
+    .map(normalizeSubitoPhotoUrl);
   const photo_url = image_urls[0] ?? '';
   const posted_at = item.date ? parseSubitoPostedAt(item.date) : '';
-  const price = extractPrice(item.features);
+  let price = extractPrice(item.features);
+  if (!price && /\/regalo\//i.test(sourceCategoryUrl)) {
+    price = '0 €';
+  }
 
   if (!external_id || !title || !photo_url || !posted_at) {
     return null;
@@ -132,8 +137,8 @@ function mapAdItem(item: SubitoAdItem, sourceCategoryUrl: string): CategoryJsonL
   };
 }
 
-function fieldCompleteness(listings: CategoryJsonListing[], rawCount: number): number {
-  if (rawCount === 0) return 0;
+function fieldCompleteness(listings: CategoryJsonListing[]): number {
+  if (listings.length === 0) return 0;
   const requiredPerListing = 5;
   let filled = 0;
   for (const listing of listings) {
@@ -143,7 +148,7 @@ function fieldCompleteness(listings: CategoryJsonListing[], rawCount: number): n
     if (listing.posted_at) filled += 1;
     if (listing.price !== undefined && listing.price !== '') filled += 1;
   }
-  return filled / (rawCount * requiredPerListing);
+  return filled / (listings.length * requiredPerListing);
 }
 
 export function parseCategoryNextData(
@@ -165,7 +170,7 @@ export function parseCategoryNextData(
 
   return {
     listings,
-    jsonFieldCompleteness: fieldCompleteness(listings, rawItems.length),
+    jsonFieldCompleteness: fieldCompleteness(listings),
   };
 }
 

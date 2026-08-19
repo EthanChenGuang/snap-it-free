@@ -37,6 +37,32 @@ export function mapRejectReasonLabel(reason: string): string {
   return reason;
 }
 
+/** Parse reject reason for detail panel rule analysis. */
+export function extractRuleDetail(reason: string): {
+  strategy: string;
+  rawReason: string;
+  matchedPattern: string | null;
+} {
+  const strategy = mapRejectReasonLabel(reason);
+  const priceMatch = reason.match(/matched price pattern:\s*(.+)/i);
+  return {
+    strategy,
+    rawReason: reason,
+    matchedPattern: priceMatch?.[1]?.trim() ?? null,
+  };
+}
+
+export function extractSnippetText(raw: Record<string, unknown>): {
+  title: string | null;
+  description: string | null;
+  preview: string;
+} {
+  const title = typeof raw.title === 'string' ? raw.title : null;
+  const description = typeof raw.description === 'string' ? raw.description : null;
+  const preview = [title, description].filter(Boolean).join(' — ') || '—';
+  return { title, description, preview };
+}
+
 export function matchesReasonFilter(reason: string, filter: string): boolean {
   if (!filter) {
     return true;

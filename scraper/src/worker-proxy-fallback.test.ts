@@ -40,6 +40,10 @@ describe('runSubitoCrawlWithProxyFallback', () => {
     expect(runSubitoCrawler).toHaveBeenCalledTimes(2);
     expect(runSubitoCrawler.mock.calls[0]?.[2]).toBe('http://user:pass@proxy.example:8080');
     expect(runSubitoCrawler.mock.calls[1]?.[2]).toBeUndefined();
+    expect(runSubitoCrawler.mock.calls[1]?.[3]).toMatchObject({
+      proxyUrlOverride: '',
+      runId: undefined,
+    });
     expect(result.crawlResult).toBe(mockCrawlResult);
     expect(result.fallbackDegraded).toBe(true);
     expect(result.fallbackReason).toMatch(/direct fallback/i);
@@ -67,6 +71,32 @@ describe('runSubitoCrawlWithProxyFallback', () => {
     ).rejects.toThrow('connection reset');
 
     expect(runSubitoCrawler).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses a fresh request queue on direct fallback when runId is set', async () => {
+    const runSubitoCrawler = vi
+      .fn<
+        (
+          urls: readonly string[],
+          preset: AntiBlockPreset,
+          proxyUrl?: string,
+        ) => Promise<CrawlResult>
+      >()
+      .mockRejectedValueOnce(new ProxyQuotaFatalError('quota on proxy'))
+      .mockResolvedValueOnce(mockCrawlResult);
+
+    await runSubitoCrawlWithProxyFallback(
+      runSubitoCrawler,
+      ['https://www.subito.it/annunci-veneto/regalo/'],
+      'standard',
+      'http://proxy.example:8080',
+      { mode: 'incremental', runId: 'run-abc' },
+    );
+
+    expect(runSubitoCrawler.mock.calls[1]?.[3]).toMatchObject({
+      proxyUrlOverride: '',
+      runId: 'run-abc-direct',
+    });
   });
 
   it('propagates second ProxyQuotaFatalError without further retry', async () => {

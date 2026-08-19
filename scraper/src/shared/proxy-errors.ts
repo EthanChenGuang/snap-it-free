@@ -1,3 +1,5 @@
+import { CriticalError } from '@crawlee/core';
+
 const FATAL_PROXY_PATTERNS = [
   /traffic limit/i,
   /quota (exceeded|reached|limit)/i,
@@ -43,7 +45,7 @@ export function getProxyFatalFailure(error: unknown): string | null {
 }
 
 /** Fatal proxy quota/account exhaustion — worker may retry once without proxy (PROXY-C04). */
-export class ProxyQuotaFatalError extends Error {
+export class ProxyQuotaFatalError extends CriticalError {
   readonly fatalReason: string;
 
   constructor(fatalReason: string) {
@@ -53,6 +55,33 @@ export class ProxyQuotaFatalError extends Error {
   }
 }
 
+/** Walk error/cause chain — Crawlee may rethrow the same instance, but duck-type for safety. */
+export function findProxyQuotaFatalError(error: unknown): ProxyQuotaFatalError | null {
+  let current: unknown = error;
+  const seen = new Set<unknown>();
+
+  while (current && typeof current === 'object' && !seen.has(current)) {
+    seen.add(current);
+
+    if (current instanceof ProxyQuotaFatalError) {
+      return current;
+    }
+
+    if (
+      current instanceof Error &&
+      current.name === 'ProxyQuotaFatalError' &&
+      'fatalReason' in current &&
+      typeof (current as ProxyQuotaFatalError).fatalReason === 'string'
+    ) {
+      return current as ProxyQuotaFatalError;
+    }
+
+    current = current instanceof Error ? current.cause : undefined;
+  }
+
+  return null;
+}
+
 export function isProxyQuotaFatalError(error: unknown): error is ProxyQuotaFatalError {
-  return error instanceof ProxyQuotaFatalError;
+  return findProxyQuotaFatalError(error) !== null;
 }

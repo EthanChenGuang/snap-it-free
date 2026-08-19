@@ -8,11 +8,16 @@ type MaintenanceCardProps = {
   initialPreview: CleanupPreview | null;
 };
 
-function formatPreviewLine(label: string, count: number): string {
-  return `${label}: ${count}`;
-}
+export type MaintenanceState = {
+  preview: CleanupPreview | null;
+  result: CleanupResult | null;
+  loading: 'preview' | 'execute' | null;
+  error: string | null;
+  handlePreview: () => Promise<void>;
+  handleExecute: () => Promise<void>;
+};
 
-export function MaintenanceCard({ initialPreview }: MaintenanceCardProps) {
+export function useMaintenance(initialPreview: CleanupPreview | null): MaintenanceState {
   const router = useRouter();
   const [preview, setPreview] = useState<CleanupPreview | null>(initialPreview);
   const [result, setResult] = useState<CleanupResult | null>(null);
@@ -82,22 +87,80 @@ export function MaintenanceCard({ initialPreview }: MaintenanceCardProps) {
     }
   }, [preview, router]);
 
+  return { preview, result, loading, error, handlePreview, handleExecute };
+}
+
+function formatPreviewLine(label: string, count: number): string {
+  return `${label}: ${count}`;
+}
+
+export function MaintenanceMetric({
+  preview,
+  loading,
+  error,
+  handlePreview,
+}: Pick<MaintenanceState, 'preview' | 'loading' | 'error' | 'handlePreview'>) {
   return (
-    <section className="mb-space-xl rounded border border-outline-variant bg-surface p-space-md">
-      <div className="mb-space-md flex flex-wrap items-start justify-between gap-3 border-b border-outline-variant pb-space-md">
-        <div>
-          <h2 className="text-h3 font-semibold">Database cleanup</h2>
-          <p className="mt-1 text-body-md text-secondary">
-            Remove expired listings and audit rows older than 30 days.
-          </p>
-        </div>
-        <span className="material-symbols-outlined text-[24px] text-secondary" aria-hidden>
+    <div className="dashboard-metric-card">
+      <div className="dashboard-metric-card-head">
+        <span className="dashboard-metric-card-label">数据库维护</span>
+        <span className="material-symbols-outlined dashboard-metric-card-icon" aria-hidden>
           cleaning_services
         </span>
       </div>
 
-      {preview && (
-        <ul className="mb-space-md space-y-1 font-mono text-label-sm text-primary">
+      {preview ? (
+        <p className="mt-3 font-mono text-2xl font-bold tabular-nums text-[#1d1d1f]">{preview.total}</p>
+      ) : (
+        <p className="mt-3 text-[13px] text-[#86868b]">清理过期 listing 与审计记录</p>
+      )}
+
+      {preview ? (
+        <p className="mt-1 font-mono text-[11px] tabular-nums text-[#86868b]">待清理记录</p>
+      ) : null}
+
+      {error ? (
+        <p className="mt-2 font-mono text-[11px] text-[#ff3b30]" role="alert">
+          {error}
+        </p>
+      ) : null}
+
+      <button
+        type="button"
+        onClick={handlePreview}
+        disabled={loading !== null}
+        className="dashboard-metric-action mt-3"
+      >
+        {loading === 'preview' ? '加载中…' : 'Preview cleanup'}
+      </button>
+    </div>
+  );
+}
+
+export function MaintenancePanel({
+  preview,
+  result,
+  loading,
+  error,
+  handlePreview,
+  handleExecute,
+}: MaintenanceState) {
+  return (
+    <section className="dashboard-service-card">
+      <div className="dashboard-service-card-head">
+        <div>
+          <h2 className="dashboard-service-card-title">Database cleanup</h2>
+          <p className="dashboard-service-card-subtitle">
+            Remove expired listings and audit rows older than 30 days.
+          </p>
+        </div>
+        <span className="dashboard-service-card-icon-wrap" aria-hidden>
+          <span className="material-symbols-outlined text-[20px] text-[#ff9500]">delete_sweep</span>
+        </span>
+      </div>
+
+      {preview ? (
+        <ul className="mt-4 space-y-1 font-mono text-[11px] tabular-nums text-[#636366]">
           <li>{formatPreviewLine('Expired listings', preview.expiredListings)}</li>
           <li>
             {formatPreviewLine(
@@ -117,12 +180,12 @@ export function MaintenanceCard({ initialPreview }: MaintenanceCardProps) {
               preview.oldScrapeRuns,
             )}
           </li>
-          <li className="pt-2 font-semibold">Total: {preview.total}</li>
+          <li className="pt-2 font-semibold text-[#1d1d1f]">Total: {preview.total}</li>
         </ul>
-      )}
+      ) : null}
 
-      {result && (
-        <p className="mb-space-md text-body-md text-primary">
+      {result ? (
+        <p className="mt-3 text-[13px] text-[#1d1d1f]">
           Deleted{' '}
           {result.deletedExpiredListings +
             result.deletedHiddenScraperListings +
@@ -130,34 +193,39 @@ export function MaintenanceCard({ initialPreview }: MaintenanceCardProps) {
             result.deletedScrapeRuns}{' '}
           records.
         </p>
-      )}
+      ) : null}
 
-      {error && (
-        <p className="mb-space-md text-body-md text-error" role="alert">
+      {error ? (
+        <p className="mt-3 text-[13px] text-[#ff3b30]" role="alert">
           {error}
         </p>
-      )}
+      ) : null}
 
-      <div className="flex flex-wrap gap-3">
+      <div className="mt-4 flex flex-wrap gap-2">
         <button
           type="button"
           onClick={handlePreview}
           disabled={loading !== null}
-          className="rounded border border-outline-variant bg-surface px-4 py-2 text-label-md font-semibold text-primary hover:bg-surface-container-low disabled:opacity-50"
+          className="dashboard-metric-action"
         >
           {loading === 'preview' ? 'Loading…' : 'Preview cleanup'}
         </button>
-        {preview && preview.total > 0 && (
+        {preview && preview.total > 0 ? (
           <button
             type="button"
             onClick={handleExecute}
             disabled={loading !== null}
-            className="rounded border border-primary bg-primary px-4 py-2 text-label-md font-semibold text-on-primary hover:opacity-90 disabled:opacity-50"
+            className="dashboard-metric-action dashboard-metric-action-primary"
           >
             {loading === 'execute' ? 'Deleting…' : 'Delete out-of-date records'}
           </button>
-        )}
+        ) : null}
       </div>
     </section>
   );
+}
+
+export function MaintenanceCard({ initialPreview }: MaintenanceCardProps) {
+  const maintenance = useMaintenance(initialPreview);
+  return <MaintenancePanel {...maintenance} />;
 }

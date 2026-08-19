@@ -1,15 +1,31 @@
 import { z } from 'zod';
-import { POST_CATEGORIES, type PostCategory } from '@/lib/listings/canonical-categories';
+import type { SubitoRegaloSlug } from '@/lib/admin/subito-regalo-catalog';
+import { SUBITO_CATEGORY_SLUGS } from '@/lib/listings/subito-categories';
 
 const postCategoryEnum = z.enum(
-  POST_CATEGORIES as [PostCategory, ...PostCategory[]],
+  SUBITO_CATEGORY_SLUGS as [SubitoRegaloSlug, ...SubitoRegaloSlug[]],
 );
+
+/** UGC posts and DB RLS are Venice-only — matches migration 012 bounds. */
+export const UGC_VENICE_LAT_MIN = 45.0;
+export const UGC_VENICE_LAT_MAX = 45.7;
+export const UGC_VENICE_LNG_MIN = 12.1;
+export const UGC_VENICE_LNG_MAX = 12.6;
+
+export function isWithinUgcVeniceBounds(lat: number, lng: number): boolean {
+  return (
+    lat >= UGC_VENICE_LAT_MIN &&
+    lat <= UGC_VENICE_LAT_MAX &&
+    lng >= UGC_VENICE_LNG_MIN &&
+    lng <= UGC_VENICE_LNG_MAX
+  );
+}
 
 export const CreateListingSchema = z.object({
   title: z.string().trim().min(1).max(500),
   photoUrl: z.string().url(),
-  lat: z.number().min(45.0).max(45.7),
-  lng: z.number().min(12.1).max(12.6),
+  lat: z.number().min(UGC_VENICE_LAT_MIN).max(UGC_VENICE_LAT_MAX),
+  lng: z.number().min(UGC_VENICE_LNG_MIN).max(UGC_VENICE_LNG_MAX),
   description: z.string().max(2000).optional(),
   postCategory: postCategoryEnum,
 });

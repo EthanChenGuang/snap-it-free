@@ -12,6 +12,11 @@ export function decideCrawlMode(params: DecideCrawlModeParams): CrawlMode {
     return 'full';
   }
 
+  // Manual incremental jobs honor UI choice even before first successful full refresh.
+  if (params.jobCrawlMode === 'incremental') {
+    return 'incremental';
+  }
+
   if (params.lastFullRefreshAt == null) {
     return 'full';
   }

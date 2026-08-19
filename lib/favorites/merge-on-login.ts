@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { getSupabaseEnv } from '@/lib/supabase/env';
 import { readFavoriteIds, writeFavoriteIds } from './storage';
 
 async function mergeLocalFavorites(): Promise<boolean> {
@@ -25,6 +26,8 @@ export function useMergeFavoritesOnLogin() {
   const mergedRef = useRef(false);
 
   useEffect(() => {
+    if (!getSupabaseEnv()) return;
+
     const supabase = createClient();
 
     const tryMerge = async () => {

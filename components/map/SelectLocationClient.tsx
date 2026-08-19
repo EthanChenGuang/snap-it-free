@@ -17,6 +17,7 @@ import { readBrowseCenter } from '@/lib/browse-center/storage';
 import { resolveCityLabel, VENICE_CENTER } from '@/lib/geo/resolve-city-label';
 import { readPostDraft, writePostDraft } from '@/lib/post-draft/storage';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { isWithinUgcVeniceBounds } from '@/lib/ugc/schemas';
 
 const DEFAULT_ZOOM = 14;
 const GEO_OPTIONS: PositionOptions = { enableHighAccuracy: true, timeout: 10000 };
@@ -56,7 +57,16 @@ export function SelectLocationClient() {
   const { messages } = useMessages();
   const mapRef = useRef<MapRef>(null);
   const gpsRequested = useRef(false);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
   const [ready, setReady] = useState(false);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
   const [radiusKm, setRadiusKm] = useState(10);
   const [markerPosition, setMarkerPosition] = useState(VENICE_CENTER);
   const [initialViewState, setInitialViewState] = useState(() =>
@@ -97,12 +107,20 @@ export function SelectLocationClient() {
   useEffect(() => {
     setRadiusKm(resolveInitialRadiusKm());
 
-    const saved =
-      context === 'post' ? readPostDraft() : readBrowseCenter();
-    if (saved) {
-      applyMarkerPosition({ lat: saved.lat, lng: saved.lng });
-      setReady(true);
-      return;
+    if (context === 'post') {
+      const draft = readPostDraft();
+      if (draft?.lat != null && draft?.lng != null) {
+        applyMarkerPosition({ lat: draft.lat, lng: draft.lng });
+        setReady(true);
+        return;
+      }
+    } else {
+      const saved = readBrowseCenter();
+      if (saved) {
+        applyMarkerPosition({ lat: saved.lat, lng: saved.lng });
+        setReady(true);
+        return;
+      }
     }
 
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
@@ -114,8 +132,12 @@ export function SelectLocationClient() {
     if (gpsRequested.current) return;
     gpsRequested.current = true;
 
+    // getCurrentPosition can take up to GEO_OPTIONS.timeout to resolve, long
+    // enough to outlive this effect (dev StrictMode remount, fast navigation
+    // away). Both callbacks guard against firing into an unmounted instance.
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        if (!isMountedRef.current) return;
         applyMarkerPosition(
           {
             lat: position.coords.latitude,
@@ -126,6 +148,7 @@ export function SelectLocationClient() {
         setReady(true);
       },
       () => {
+        if (!isMountedRef.current) return;
         applyMarkerPosition(VENICE_CENTER);
         setReady(true);
       },
@@ -137,6 +160,7 @@ export function SelectLocationClient() {
 
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {
+      setConfirmError(null);
       setMarkerPosition({ lat, lng });
       triggerPinDrop();
     },
@@ -148,6 +172,8 @@ export function SelectLocationClient() {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        if (!isMountedRef.current) return;
+        setConfirmError(null);
         const coords = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
@@ -166,11 +192,16 @@ export function SelectLocationClient() {
   }, [context, radiusKm, triggerPinDrop]);
 
   const handleConfirm = () => {
+    setConfirmError(null);
     const label = resolveCityLabel(markerPosition.lat, markerPosition.lng, {
       venice: messages.feed.cityVenice,
       padova: messages.feed.cityPadova,
     });
     if (context === 'post') {
+      if (!isWithinUgcVeniceBounds(markerPosition.lat, markerPosition.lng)) {
+        setConfirmError(messages.post.pinOutsideVenice);
+        return;
+      }
       writePostDraft({
         lat: markerPosition.lat,
         lng: markerPosition.lng,
@@ -269,6 +300,11 @@ export function SelectLocationClient() {
                   : null}
               </span>
             </div>
+            {confirmError ? (
+              <p className="mb-space-md text-label-sm text-error" role="alert">
+                {confirmError}
+              </p>
+            ) : null}
             <button
               type="button"
               onClick={handleConfirm}

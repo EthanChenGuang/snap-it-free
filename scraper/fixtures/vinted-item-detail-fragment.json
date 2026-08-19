@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "source": "https://www.vinted.it/items/9667494078-ventilatore-da-soffitto",
-    "capturedAt": "2026-08-15T11:47:02.740Z",
-    "note": "Sanitized Vinted item-detail RSC JSON fragment for Plan 17-03 enrich.ts tests — extracted via escaped-RSC regex"
+    "source": "https://www.vinted.it/items/9667484636-arret-de-fenetre-arrets-de-porte-le-lot-de-2-marron",
+    "capturedAt": "2026-08-15T11:46:04.440Z",
+    "note": "Sanitized Vinted item-detail RSC JSON fragment for Plan 17-03 enrich.ts tests — pinned stable sample; extracted via escaped-RSC regex"
   },
-  "catalog_id": 3529,
+  "catalog_id": 3826,
   "shipping": {
     "type": "shipping"
   },

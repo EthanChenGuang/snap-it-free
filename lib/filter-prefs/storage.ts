@@ -1,10 +1,13 @@
+import type { ConsumerCityKey } from '@/lib/geo/italian-cities';
+import { CONSUMER_CITY_KEYS, isConsumerCityKey } from '@/lib/geo/italian-cities';
+
 export type FilterMode = 'city' | 'map';
 
 export type FilterPrefs = {
   mode: FilterMode;
   radiusKm: number;
   radiusEnabled: boolean;
-  city: 'all' | 'venice' | 'padova';
+  city: 'all' | ConsumerCityKey;
   categories: string[];
 };
 
@@ -19,7 +22,7 @@ export const DEFAULT_FILTER_PREFS: FilterPrefs = {
   categories: [],
 };
 
-const VALID_CITIES = new Set<FilterPrefs['city']>(['all', 'venice', 'padova']);
+const VALID_CITIES = new Set<FilterPrefs['city']>(['all', ...CONSUMER_CITY_KEYS]);
 const VALID_MODES = new Set<FilterMode>(['city', 'map']);
 const RADIUS_PRESETS = [5, 10, 50, 100] as const;
 export const SELECT_LOCATION_RADIUS_OPTIONS = RADIUS_PRESETS;
@@ -45,6 +48,10 @@ function parseMode(value: unknown, parsed: Record<string, unknown>): FilterMode 
 }
 
 function parseCity(value: unknown): FilterPrefs['city'] {
+  if (value === 'all') return 'all';
+  if (typeof value === 'string' && isConsumerCityKey(value)) {
+    return value;
+  }
   if (typeof value === 'string' && VALID_CITIES.has(value as FilterPrefs['city'])) {
     return value as FilterPrefs['city'];
   }

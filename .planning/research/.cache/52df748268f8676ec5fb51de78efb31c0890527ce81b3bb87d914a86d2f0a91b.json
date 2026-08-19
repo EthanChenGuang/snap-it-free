@@ -1,1 +1,0 @@
-{"content":"OpenRouter POST https://openrouter.ai/api/v1/chat/completions with Authorization Bearer, model slug, messages array. Supports models[] fallback routing. Use cheap multilingual slug from openrouter.ai/models catalog.","source":"web","provider":"websearch","confidence":"LOW","fetched_at":"2026-08-04T17:56:29.412Z","ttl":86400000,"kind":"web"}

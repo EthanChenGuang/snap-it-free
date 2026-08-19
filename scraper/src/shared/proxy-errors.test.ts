@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { CriticalError } from '@crawlee/core';
 import {
+  findProxyQuotaFatalError,
   getProxyFatalFailure,
   isProxyQuotaFatalError,
   ProxyQuotaFatalError,
@@ -39,6 +41,7 @@ describe('ProxyQuotaFatalError', () => {
     expect(err.fatalReason).toBe('Proxy quota or account limit reached');
     expect(err.message).toBe('Proxy quota or account limit reached');
     expect(err.name).toBe('ProxyQuotaFatalError');
+    expect(err).toBeInstanceOf(CriticalError);
   });
 });
 
@@ -54,5 +57,12 @@ describe('isProxyQuotaFatalError', () => {
   it('returns false for non-error values', () => {
     expect(isProxyQuotaFatalError(null)).toBe(false);
     expect(isProxyQuotaFatalError('quota')).toBe(false);
+  });
+
+  it('finds ProxyQuotaFatalError on error.cause chain', () => {
+    const quota = new ProxyQuotaFatalError('quota exhausted');
+    const wrapped = new Error('crawler failed', { cause: quota });
+    expect(findProxyQuotaFatalError(wrapped)).toBe(quota);
+    expect(isProxyQuotaFatalError(wrapped)).toBe(true);
   });
 });

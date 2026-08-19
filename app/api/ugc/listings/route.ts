@@ -1,7 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { loadZonePolygons, tagZone } from '@/lib/geo/zone-tag';
-import { mapPostCategoryToSlug } from '@/lib/listings/canonical-categories';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
 import { createListingSchemaForUser } from '@/lib/ugc/schemas';
@@ -74,7 +73,7 @@ export async function POST(request: Request) {
     content_hash: hash,
     owner_user_id: user.id,
     description: description ?? null,
-    category: mapPostCategoryToSlug(postCategory),
+    category: postCategory,
   });
 
   if (error) {

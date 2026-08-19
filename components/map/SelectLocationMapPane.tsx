@@ -19,9 +19,11 @@ import {
   createCirclePolygon,
   createRadarSector,
 } from '@/lib/geo/radius-circle';
+import {
+  OPENFREEMAP_LIBERTY_STYLE_URL,
+  patchOpenFreeMapStyle,
+} from '@/lib/map/openfreemap-style';
 import { cn } from '@/lib/utils';
-
-const OPENFREEMAP_LIBERTY = 'https://tiles.openfreemap.org/styles/liberty';
 
 export const SELECT_LOCATION_MAP_PADDING = { top: 56, bottom: 160, left: 24, right: 24 };
 
@@ -233,6 +235,7 @@ export const SelectLocationMapPane = forwardRef<MapRef, SelectLocationMapPanePro
 
     const handleMapLoad = useCallback(
       (event: { target: MapLibreMap }) => {
+        patchOpenFreeMapStyle(event.target);
         mapInstanceRef.current = event.target;
         setMapReady(true);
         onLoad?.();
@@ -265,7 +268,7 @@ export const SelectLocationMapPane = forwardRef<MapRef, SelectLocationMapPanePro
           <Map
             ref={ref}
             initialViewState={initialViewState}
-            mapStyle={OPENFREEMAP_LIBERTY}
+            mapStyle={OPENFREEMAP_LIBERTY_STYLE_URL}
             style={{ width: '100%', height: '100%' }}
             attributionControl={{ compact: true }}
             padding={SELECT_LOCATION_MAP_PADDING}

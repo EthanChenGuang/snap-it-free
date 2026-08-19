@@ -8,6 +8,8 @@ import {
 } from '@/components/ui/drawer';
 import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import type { FilterPrefs } from '@/lib/filter-prefs/storage';
+import { CONSUMER_CITY_FILTER_OPTIONS } from '@/lib/listings/filters';
+import { consumerCityFilterLabelsFromMessages } from '@/lib/i18n/city-labels';
 import { useMessages } from '@/lib/i18n/useMessages';
 import {
   getSubitoCategoryLabel,
@@ -15,7 +17,7 @@ import {
 } from '@/lib/listings/subito-categories';
 import { cn } from '@/lib/utils';
 
-const CITY_OPTIONS: FilterPrefs['city'][] = ['all', 'venice', 'padova'];
+const CITY_OPTIONS = CONSUMER_CITY_FILTER_OPTIONS;
 
 function ConsumerCityChipSelector({
   value,
@@ -25,12 +27,7 @@ function ConsumerCityChipSelector({
   onChange: (city: FilterPrefs['city']) => void;
 }) {
   const { messages } = useMessages();
-
-  const labels: Record<FilterPrefs['city'], string> = {
-    all: messages.feed.cityAll,
-    venice: messages.feed.cityVenice,
-    padova: messages.feed.cityPadova,
-  };
+  const labels = consumerCityFilterLabelsFromMessages(messages);
 
   return (
     <div className="flex flex-wrap gap-space-sm">

@@ -196,6 +196,13 @@ type ListingUsageRow = {
   latest_model: string;
 };
 
+/**
+ * PostgREST puts `.in()` values in the query string, so a large id list overflows the
+ * gateway URL limit — the request then hangs for ~8s and fails instead of returning 414.
+ * Empirically it breaks between 300 and 400 uuids; 150 keeps a wide margin.
+ */
+const USAGE_LOG_ID_CHUNK_SIZE = 150;
+
 export async function getListingUsageTotals(
   supabase: SupabaseClient,
   listingIds: string[],
@@ -205,13 +212,30 @@ export async function getListingUsageTotals(
     return result;
   }
 
-  const { data, error } = await supabase
-    .from('translation_usage_log')
-    .select('listing_id, cost_usd, input_tokens, output_tokens, provider, model, created_at')
-    .in('listing_id', listingIds)
-    .order('created_at', { ascending: false });
+  const chunks: string[][] = [];
+  for (let index = 0; index < listingIds.length; index += USAGE_LOG_ID_CHUNK_SIZE) {
+    chunks.push(listingIds.slice(index, index + USAGE_LOG_ID_CHUNK_SIZE));
+  }
 
-  if (error || !data?.length) {
+  const responses = await Promise.all(
+    chunks.map((chunk) =>
+      supabase
+        .from('translation_usage_log')
+        .select('listing_id, cost_usd, input_tokens, output_tokens, provider, model, created_at')
+        .in('listing_id', chunk)
+        .order('created_at', { ascending: false }),
+    ),
+  );
+
+  const data = responses.flatMap((response) => {
+    if (response.error) {
+      console.warn('[getListingUsageTotals]', response.error.message);
+      return [];
+    }
+    return response.data ?? [];
+  });
+
+  if (!data.length) {
     return result;
   }
 

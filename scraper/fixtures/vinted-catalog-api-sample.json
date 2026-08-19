@@ -1,94 +1,97 @@
 {
   "_meta": {
     "source": "https://www.vinted.it/catalog/1918-casa?order=newest_first",
-    "capturedAt": "2026-08-15T11:47:02.006Z",
+    "capturedAt": "2026-08-15T11:41:19.189Z",
     "endpoint": "/api/v2/catalog/items?per_page=96&page=1&order=newest_first&currency=EUR&catalog_ids=1918",
-    "note": "Sanitized Vinted catalog API fragment for Plan 17-02 unit tests — user ids/urls redacted"
+    "note": "Sanitized Vinted catalog API fixture for Plan 17-02 unit tests — pinned stable sample; user ids/urls redacted"
   },
   "items": [
     {
-      "id": 9667494078,
-      "title": "Ventilatore da soffitto",
+      "id": 9667196325,
+      "title": "Housse de couette basketball 220×240 cm",
+      "price": {
+        "amount": "10.0",
+        "currency_code": "EUR"
+      },
+      "url": "[redacted url]",
+      "path": "/items/9667196325-housse-de-couette-basketball-220x240-cm",
+      "photo": {
+        "url": "https://images1.vinted.net/t/01_02382_ZBHPymmFNvUVPe9LV4VhLf5S/f800/1786794069.jpeg?s=6cd34c17ae837d869f3dd7622b5aa8be914823b8"
+      },
+      "photos": [
+        {
+          "url": "https://images1.vinted.net/t/01_02382_ZBHPymmFNvUVPe9LV4VhLf5S/f800/1786794069.jpeg?s=6cd34c17ae837d869f3dd7622b5aa8be914823b8"
+        },
+        {
+          "url": "https://images1.vinted.net/t/06_01134_mXjUvBeRL1mLokzPXuLPvnxw/f800/1786794069.jpeg?s=cb2c4479d2d1954d4a8f211a2197e6e367495f5e"
+        }
+      ],
+      "user": {
+        "id": "[redacted]",
+        "login": "bebe__72",
+        "profile_url": "[redacted]"
+      },
+      "brand_title": "",
+      "size_title": "King size (220-240 cm x 220-260 cm)",
+      "status": "Ottime"
+    },
+    {
+      "id": 9667438470,
+      "title": "Quemador de aceite o waxmelts tulipanes",
+      "price": {
+        "amount": "19.9",
+        "currency_code": "EUR"
+      },
+      "url": "[redacted url]",
+      "path": "/items/9667438470-quemador-de-aceite-o-waxmelts-tulipanes",
+      "photo": {
+        "url": "https://images1.vinted.net/t/02_022fb_ReD86BuZqSgFm2sqcsfCUhVY/f800/1786794069.jpeg?s=2814ec1ae1dd382d34f875647d03b000f61fc5ae"
+      },
+      "photos": [
+        {
+          "url": "https://images1.vinted.net/t/02_022fb_ReD86BuZqSgFm2sqcsfCUhVY/f800/1786794069.jpeg?s=2814ec1ae1dd382d34f875647d03b000f61fc5ae"
+        },
+        {
+          "url": "https://images1.vinted.net/t/06_01aea_UGG9dHaMYzVQD2agVxfczp13/f800/1786794069.jpeg?s=660e24abb8642a62a0ea04de8a4358830ae29c28"
+        }
+      ],
+      "user": {
+        "id": "[redacted]",
+        "login": "alba927",
+        "profile_url": "[redacted]"
+      },
+      "brand_title": "Local",
+      "size_title": "",
+      "status": "Nuovo con cartellino"
+    },
+    {
+      "id": 9667438524,
+      "title": "Ronde spiegels voor aan de wand",
       "price": {
         "amount": "15.0",
         "currency_code": "EUR"
       },
       "url": "[redacted url]",
-      "path": "/items/9667494078-ventilatore-da-soffitto",
+      "path": "/items/9667438524-ronde-spiegels-voor-aan-de-wand",
       "photo": {
-        "url": "https://images1.vinted.net/t/02_00301_nzpkiRM6VYDkiLtPPUkESzfC/f800/1786794413.jpeg?s=53f546a630aea2e8911f98be6ac97d26822b7b53"
+        "url": "https://images1.vinted.net/t/01_01768_ZhjR5y5PjzxGkdGTpPGh7GP5/f800/1786794069.jpeg?s=b083a6ccbb8ac5cc047565e192e5eb862fde7e21"
       },
       "photos": [
         {
-          "url": "https://images1.vinted.net/t/02_00301_nzpkiRM6VYDkiLtPPUkESzfC/f800/1786794413.jpeg?s=53f546a630aea2e8911f98be6ac97d26822b7b53"
+          "url": "https://images1.vinted.net/t/01_01768_ZhjR5y5PjzxGkdGTpPGh7GP5/f800/1786794069.jpeg?s=b083a6ccbb8ac5cc047565e192e5eb862fde7e21"
         },
         {
-          "url": "https://images1.vinted.net/t/06_00ee0_fR9gMytpEE2B9kC1a1ecVpyF/f800/1786794413.jpeg?s=f252d4687c43c69c6ef3aca2254641651a79c888"
+          "url": "https://images1.vinted.net/t/01_0036d_U8ErmNrpTceR1wyBzodCNokV/f800/1786794069.jpeg?s=1a76989ab7a42fbc76891df220893d72d47b3c6e"
         }
       ],
       "user": {
         "id": "[redacted]",
-        "login": "mariapaola0209",
+        "login": "majorie77",
         "profile_url": "[redacted]"
       },
-      "brand_title": "Summer",
+      "brand_title": "",
       "size_title": "",
-      "status": "Nuovo con cartellino"
-    },
-    {
-      "id": 9667493976,
-      "title": "Collier pour chien For Pets Only",
-      "price": {
-        "amount": "20.0",
-        "currency_code": "EUR"
-      },
-      "url": "[redacted url]",
-      "path": "/items/9667493976-collier-pour-chien-for-pets-only",
-      "photo": {
-        "url": "https://images1.vinted.net/t/01_0124b_FTw3FJpiERt9iKpSfXiJFcsr/f800/1786794412.jpeg?s=5565194aaaf6dca3db51a06fd1c876d1228aa7f1"
-      },
-      "photos": [
-        {
-          "url": "https://images1.vinted.net/t/01_0124b_FTw3FJpiERt9iKpSfXiJFcsr/f800/1786794412.jpeg?s=5565194aaaf6dca3db51a06fd1c876d1228aa7f1"
-        },
-        {
-          "url": "https://images1.vinted.net/t/02_01ef4_Mh8sxaC8SgA5Lo5gQGte14wH/f800/1786794412.jpeg?s=c43724885e2dbc43a154e99faada0fc041f4713c"
-        }
-      ],
-      "user": {
-        "id": "[redacted]",
-        "login": "cleanad",
-        "profile_url": "[redacted]"
-      },
-      "brand_title": "For Pets Only",
-      "size_title": "Altro",
       "status": "Ottime"
-    },
-    {
-      "id": 9667493932,
-      "title": "Mini Vasen",
-      "price": {
-        "amount": "3.0",
-        "currency_code": "EUR"
-      },
-      "url": "[redacted url]",
-      "path": "/items/9667493932-mini-vasen",
-      "photo": {
-        "url": "https://images1.vinted.net/t/04_004ae_VMAvLWDn3z7YwPGHcmYQcYgg/f800/1786794412.jpeg?s=911fa41073e166ec62a5e845f92e7a44b05eefb0"
-      },
-      "photos": [
-        {
-          "url": "https://images1.vinted.net/t/04_004ae_VMAvLWDn3z7YwPGHcmYQcYgg/f800/1786794412.jpeg?s=911fa41073e166ec62a5e845f92e7a44b05eefb0"
-        }
-      ],
-      "user": {
-        "id": "[redacted]",
-        "login": "helibelli00",
-        "profile_url": "[redacted]"
-      },
-      "brand_title": "Søstrene Grene",
-      "size_title": "",
-      "status": "Nuovo con cartellino"
     }
   ]
 }

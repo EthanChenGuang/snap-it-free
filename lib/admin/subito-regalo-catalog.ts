@@ -20,20 +20,27 @@ export const SUBITO_REGALO_CATALOG = [
 ] as const;
 
 export type SubitoRegaloSlug = (typeof SUBITO_REGALO_CATALOG)[number]['slug'];
-export type SubitoRegaloCity = 'venezia' | 'padova';
-export type SubitoRegaloRegion = 'veneto';
 
-/** Canonical Veneto regalo path regex — must stay in sync with scraper/src/subito/url-context.ts (D-03). */
+export {
+  ITALIAN_CITIES,
+  SUBITO_CITY_SLUGS,
+  buildRegaloCategoryUrl,
+  getCityBySubitoSlug,
+  parseRegaloCategoryPath,
+  type SubitoCitySlug as SubitoRegaloCity,
+  type SubitoRegionSlug as SubitoRegaloRegion,
+} from '@/lib/geo/italian-cities';
+
+import {
+  buildRegaloCategoryUrl,
+  getCityBySubitoSlug,
+  parseRegaloCategoryPath,
+  type SubitoCitySlug,
+} from '@/lib/geo/italian-cities';
+
+/** @deprecated Use REGALO_CATEGORY_PATH_REGEX from italian-cities — kept for legacy imports. */
 export const REGALO_CATEGORY_URL_REGEX =
-  /^\/annunci-veneto\/regalo\/[^/]+\/(venezia|padova)\/(venezia|padova)\/?$/i;
-
-export function buildRegaloCategoryUrl(
-  region: SubitoRegaloRegion,
-  slug: string,
-  city: SubitoRegaloCity,
-): string {
-  return `https://www.subito.it/annunci-${region}/regalo/${slug}/${city}/${city}/`;
-}
+  /^\/annunci-([^/]+)\/regalo\/([^/]+)\/([^/]+)\/\3\/?$/i;
 
 export function parseRegaloCategoryUrl(url: string): {
   region: string;
@@ -42,14 +49,9 @@ export function parseRegaloCategoryUrl(url: string): {
 } | null {
   try {
     const { pathname } = new URL(url);
-    const m = pathname.match(REGALO_CATEGORY_URL_REGEX);
-    if (!m) return null;
-    const parts = pathname.split('/').filter(Boolean);
-    // /annunci-veneto/regalo/{slug}/{city}/{city}
-    const region = parts[0]?.replace(/^annunci-/i, '').toLowerCase() ?? '';
-    const categorySlug = parts[2] ?? '';
-    const city = (parts[3] ?? '').toLowerCase();
-    return { region, city, categorySlug };
+    const parsed = parseRegaloCategoryPath(pathname);
+    if (!parsed) return null;
+    return parsed;
   } catch {
     return null;
   }
@@ -59,15 +61,26 @@ export function dedupeUrls(urls: string[]): string[] {
   return [...new Set(urls.map((u) => u.trim()).filter(Boolean))];
 }
 
+/** Merge freshly generated regalo URLs with non-regalo manual lines (D-05). */
+export function mergeGeneratedRegaloUrls(generated: string[], existingText: string): string[] {
+  const manualLines = existingText
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && parseRegaloCategoryUrl(line) === null);
+
+  return dedupeUrls([...generated, ...manualLines]);
+}
+
 export function generateRegaloUrls(
-  cities: readonly SubitoRegaloCity[],
+  cities: readonly SubitoCitySlug[],
   slugs: readonly string[],
-  region: SubitoRegaloRegion = 'veneto',
 ): string[] {
   const urls: string[] = [];
   for (const city of cities) {
+    const entry = getCityBySubitoSlug(city);
+    if (!entry) continue;
     for (const slug of slugs) {
-      urls.push(buildRegaloCategoryUrl(region, slug, city));
+      urls.push(buildRegaloCategoryUrl(entry.region, slug, city));
     }
   }
   return urls;

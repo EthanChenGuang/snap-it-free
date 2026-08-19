@@ -1,3 +1,16 @@
+# Local tooling / agent config (not part of app source)
+.planning/
+.cursor/
+.claude/
+
+# Build / local dev artifacts
+.next/
+tsconfig.tsbuildinfo
+.dev-tunnel.pids
+.tmp-e2e-session.json
+.playwright-mcp/
+supabase/.temp/
+
 node_modules/
 build/
 dist/

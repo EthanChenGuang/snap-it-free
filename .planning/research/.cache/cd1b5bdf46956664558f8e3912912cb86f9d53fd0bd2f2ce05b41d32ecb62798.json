@@ -1,1 +1,0 @@
-{"content":"Crawlee HttpCrawler supports ProxyConfiguration, useSessionPool, persistCookiesPerSession for cookie/token persistence across warm-up and API requests. got-scraping provides TLS fingerprint via Crawlee transitive dependency.","source":"docs","provider":"context7","confidence":"MEDIUM","fetched_at":"2026-08-15T09:25:14.962Z","ttl":86400000,"kind":"docs"}

@@ -3,24 +3,35 @@
 import Image from 'next/image';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { SubitoRegaloSlug } from '@/lib/admin/subito-regalo-catalog';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { toast } from '@/components/ui/toaster';
 import { createClient } from '@/lib/supabase/client';
 import { getSupabaseEnv } from '@/lib/supabase/env';
 import { ZONE_CENTERS } from '@/lib/geo/zone-centers';
 import {
+  clearCachedDraftPhotos,
+  getCachedDraftPhotos,
+  setCachedDraftPhotos,
+} from '@/lib/post-draft/photo-cache';
+import {
   clearPostDraft,
-  dataUrlToPhotoFile,
+  dataUrlsToPhotoFiles,
   mergePostDraft,
-  photoFileToDataUrl,
+  photoFilesToDataUrls,
   readPostDraft,
   type PostDraftCondition,
 } from '@/lib/post-draft/storage';
 import { useMessages } from '@/lib/i18n/useMessages';
-import { POST_CATEGORIES, type PostCategory } from '@/lib/listings/canonical-categories';
+import {
+  getSubitoCategoryLabel,
+  SUBITO_CATEGORY_SLUGS,
+} from '@/lib/listings/subito-categories';
 import { isWithinUgcVeniceBounds } from '@/lib/ugc/schemas';
+import { cn } from '@/lib/utils';
 
 type ItemCondition = PostDraftCondition;
+type MediaView = 'carousel' | 'grid';
 
 type PhotoItem = {
   id: string;
@@ -28,15 +39,9 @@ type PhotoItem = {
   preview: string;
 };
 
-const CONDITIONS: ItemCondition[] = ['new', 'good', 'fair'];
+const CONDITIONS: ItemCondition[] = ['brand_new', 'like_new', 'good', 'fair', 'poor'];
 const MAX_PHOTOS = 10;
-
-function postCategoryLabel(
-  category: PostCategory,
-  messages: ReturnType<typeof useMessages>['messages'],
-): string {
-  return messages.post.categories[category];
-}
+const DEFAULT_CATEGORY: SubitoRegaloSlug = 'arredamento-casalinghi';
 
 function conditionLabel(
   condition: ItemCondition,
@@ -45,14 +50,25 @@ function conditionLabel(
   return messages.post.conditions[condition];
 }
 
+function postCategoryLabel(
+  slug: SubitoRegaloSlug,
+  language: ReturnType<typeof useMessages>['language'],
+  messages: ReturnType<typeof useMessages>['messages'],
+): string {
+  if (slug === 'usato') return messages.post.categoryOther;
+  return getSubitoCategoryLabel(slug, language, { messages }) ?? slug;
+}
+
 function buildDescription(
   userText: string,
-  category: PostCategory,
+  categorySlug: SubitoRegaloSlug,
   condition: ItemCondition,
   messages: ReturnType<typeof useMessages>['messages'],
+  language: ReturnType<typeof useMessages>['language'],
 ): string | undefined {
+  const categoryLabel = postCategoryLabel(categorySlug, language, messages);
   const meta = [
-    `${messages.post.categoryMeta}: ${postCategoryLabel(category, messages)}`,
+    `${messages.post.categoryMeta}: ${categoryLabel}`,
     `${messages.post.conditionMeta}: ${conditionLabel(condition, messages)}`,
   ].join('\n');
 
@@ -69,28 +85,141 @@ function createPhotoItem(file: File): PhotoItem {
   };
 }
 
+function XMarkIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M6 6L18 18M18 6L6 18"
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function PhotoPlusIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="3" y="6" width="14" height="13" rx="3" stroke="currentColor" strokeWidth={1.5} />
+      <circle cx="7.5" cy="10.5" r="1.25" fill="currentColor" />
+      <path
+        d="M5.5 16l3-3a1.4 1.4 0 0 1 2 0L14 16.5"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M18.5 3v6.5M15.25 6.25h6.5" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function PhotoTile({
+  photo,
+  index,
+  total,
+  variant,
+  photoLabel,
+  removeLabel,
+  onRemove,
+}: {
+  photo: PhotoItem;
+  index: number;
+  total: number;
+  variant: MediaView;
+  photoLabel: string;
+  removeLabel: string;
+  onRemove: (id: string) => void;
+}) {
+  return (
+    <div
+      className={cn(
+        'relative flex items-center justify-center overflow-hidden rounded-2xl bg-surface-container shadow-sm transition-all duration-200',
+        variant === 'carousel'
+          ? 'h-64 w-64 shrink-0 snap-center'
+          : 'aspect-square w-full',
+      )}
+    >
+      <Image
+        src={photo.preview}
+        alt={`${photoLabel} ${index + 1}`}
+        fill
+        className="object-contain p-1"
+        unoptimized
+      />
+      <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-black/40 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
+        {index + 1}/{total}
+      </span>
+      <button
+        type="button"
+        aria-label={removeLabel}
+        onClick={() => onRemove(photo.id)}
+        className="absolute right-2 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-black/40 text-white shadow-sm backdrop-blur-md transition-all hover:bg-black/60 active:scale-90"
+      >
+        <XMarkIcon className="h-3 w-3" />
+      </button>
+    </div>
+  );
+}
+
+function AddPhotoTile({
+  inputId,
+  variant,
+  empty,
+  uploadHint,
+  addMoreLabel,
+}: {
+  inputId: string;
+  variant: MediaView;
+  empty: boolean;
+  uploadHint: string;
+  addMoreLabel: string;
+}) {
+  return (
+    <label
+      htmlFor={inputId}
+      className={cn(
+        'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low/60 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container/80 active:scale-[0.98]',
+        variant === 'carousel'
+          ? 'h-64 w-64 shrink-0 snap-center'
+          : 'aspect-square w-full',
+      )}
+    >
+      <PhotoPlusIcon className="h-6 w-6 opacity-70" />
+      <span className="px-2 text-center text-xs font-medium leading-tight">
+        {empty ? uploadHint : addMoreLabel}
+      </span>
+    </label>
+  );
+}
+
 export function PostForm() {
-  const { messages } = useMessages();
+  const { messages, language } = useMessages();
   const addPhotosInputId = useId();
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   const router = useRouter();
-  const [draftReady, setDraftReady] = useState(false);
+  const [draftHydrated, setDraftHydrated] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<PostCategory>('furniture');
+  const [categorySlug, setCategorySlug] = useState<SubitoRegaloSlug | null>(DEFAULT_CATEGORY);
   const [condition, setCondition] = useState<ItemCondition>('good');
   const [lat, setLat] = useState(ZONE_CENTERS.centro_storico.lat);
   const [lng, setLng] = useState(ZONE_CENTERS.centro_storico.lng);
   const [locationConfirmed, setLocationConfirmed] = useState(false);
   const [cityLabel, setCityLabel] = useState('');
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const [mediaView, setMediaView] = useState<MediaView>('carousel');
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const primaryPhotoFile = photos[0]?.file ?? null;
+  const photosRef = useRef<PhotoItem[]>([]);
+  photosRef.current = photos;
+  const photoWriteToken = useRef(0);
 
   useEffect(() => {
     if (!getSupabaseEnv()) {
@@ -98,18 +227,24 @@ export function PostForm() {
       return;
     }
 
+    let cancelled = false;
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
-      setIsLoggedIn(Boolean(user));
+      if (!cancelled) setIsLoggedIn(Boolean(user));
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
     const draft = readPostDraft();
+
     if (draft) {
       if (draft.title != null) setTitle(draft.title);
       if (draft.description != null) setDescription(draft.description);
-      if (draft.category) setCategory(draft.category);
+      if (draft.categorySlug) setCategorySlug(draft.categorySlug);
       if (draft.condition) setCondition(draft.condition);
       if (draft.lat != null && draft.lng != null) {
         setLat(draft.lat);
@@ -117,22 +252,41 @@ export function PostForm() {
       }
       setLocationConfirmed(draft.locationConfirmed);
       setCityLabel(draft.label ?? '');
-
-      if (draft.photoDataUrl) {
-        void dataUrlToPhotoFile(draft.photoDataUrl).then((file) => {
-          if (file) setPhotos([createPhotoItem(file)]);
-        });
-      }
     }
 
-    setDraftReady(true);
+    // Returning from the location picker keeps the module cache, so the original
+    // Files restore synchronously with no re-encode and no async gap.
+    const cachedFiles = getCachedDraftPhotos();
+    if (cachedFiles.length > 0) {
+      setPhotos(cachedFiles.map(createPhotoItem));
+      setDraftHydrated(true);
+      return;
+    }
+
+    const urls = draft?.photoDataUrls ?? [];
+    if (urls.length === 0) {
+      setDraftHydrated(true);
+      return;
+    }
+
+    let cancelled = false;
+    void dataUrlsToPhotoFiles(urls).then((files) => {
+      if (cancelled) return;
+      setCachedDraftPhotos(files);
+      setPhotos(files.map(createPhotoItem));
+      setDraftHydrated(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
     return () => {
-      photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
+      photosRef.current.forEach((photo) => URL.revokeObjectURL(photo.preview));
     };
-  }, [photos]);
+  }, []);
 
   useEffect(() => {
     const el = descriptionRef.current;
@@ -141,88 +295,55 @@ export function PostForm() {
     el.style.height = `${el.scrollHeight}px`;
   }, [description]);
 
-  const persistFormDraft = useCallback(
-    async (overrides?: {
-      title?: string;
-      description?: string;
-      category?: PostCategory;
-      condition?: ItemCondition;
-      photoFile?: File | null;
-      lat?: number;
-      lng?: number;
-      cityLabel?: string;
-      locationConfirmed?: boolean;
-    }) => {
-      if (!draftReady) return;
-
-      const nextTitle = overrides?.title ?? title;
-      const nextDescription = overrides?.description ?? description;
-      const nextCategory = overrides?.category ?? category;
-      const nextCondition = overrides?.condition ?? condition;
-      const nextLat = overrides?.lat ?? lat;
-      const nextLng = overrides?.lng ?? lng;
-      const nextCityLabel = overrides?.cityLabel ?? cityLabel;
-      const nextLocationConfirmed = overrides?.locationConfirmed ?? locationConfirmed;
-      const nextPhotoFile =
-        overrides?.photoFile !== undefined ? overrides.photoFile : primaryPhotoFile;
-
-      let photoDataUrl: string | undefined;
-      if (nextPhotoFile) {
-        const encoded = await photoFileToDataUrl(nextPhotoFile);
-        if (encoded) photoDataUrl = encoded;
-      }
-
-      mergePostDraft({
-        ...(nextTitle.trim() ? { title: nextTitle } : {}),
-        ...(nextDescription.trim() ? { description: nextDescription } : {}),
-        category: nextCategory,
-        condition: nextCondition,
-        lat: nextLat,
-        lng: nextLng,
-        label: nextCityLabel || undefined,
-        locationConfirmed: nextLocationConfirmed,
-        ...(photoDataUrl ? { photoDataUrl } : {}),
-      });
-    },
-    [
-      title,
-      description,
-      category,
+  // Text fields persist without touching photoDataUrls; mergePostDraft preserves the
+  // stored photos so a keystroke can never wipe them.
+  useEffect(() => {
+    if (!draftHydrated) return;
+    mergePostDraft({
+      ...(title.trim() ? { title } : {}),
+      ...(description.trim() ? { description } : {}),
+      ...(categorySlug ? { categorySlug } : {}),
       condition,
       lat,
       lng,
-      cityLabel,
+      label: cityLabel || undefined,
       locationConfirmed,
-      primaryPhotoFile,
-      draftReady,
-    ],
-  );
-
-  useEffect(() => {
-    void persistFormDraft();
+    });
   }, [
+    draftHydrated,
     title,
     description,
-    category,
+    categorySlug,
     condition,
     lat,
     lng,
     cityLabel,
     locationConfirmed,
-    primaryPhotoFile,
-    persistFormDraft,
   ]);
+
+  const commitPhotos = useCallback((next: PhotoItem[]) => {
+    setPhotos(next);
+
+    const files = next.map((photo) => photo.file);
+    setCachedDraftPhotos(files);
+
+    const token = ++photoWriteToken.current;
+    void (async () => {
+      const photoDataUrls = files.length > 0 ? await photoFilesToDataUrls(files) : [];
+      if (token !== photoWriteToken.current) return;
+      mergePostDraft({ photoDataUrls });
+    })();
+  }, []);
 
   const addPhotoFiles = (files: FileList | File[]) => {
     const incoming = Array.from(files).filter((file) => file.type.startsWith('image/'));
     if (incoming.length === 0) return;
 
-    setPhotos((current) => {
-      const remaining = MAX_PHOTOS - current.length;
-      if (remaining <= 0) return current;
-      const nextItems = incoming.slice(0, remaining).map(createPhotoItem);
-      return [...current, ...nextItems];
-    });
+    const current = photosRef.current;
+    const remaining = MAX_PHOTOS - current.length;
+    if (remaining <= 0) return;
+
+    commitPhotos([...current, ...incoming.slice(0, remaining).map(createPhotoItem)]);
   };
 
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -231,15 +352,12 @@ export function PostForm() {
   };
 
   const handleRemovePhoto = (id: string) => {
-    setPhotos((current) => {
-      const removed = current.find((photo) => photo.id === id);
-      if (removed) URL.revokeObjectURL(removed.preview);
-      return current.filter((photo) => photo.id !== id);
-    });
+    const removed = photosRef.current.find((photo) => photo.id === id);
+    if (removed) URL.revokeObjectURL(removed.preview);
+    commitPhotos(photosRef.current.filter((photo) => photo.id !== id));
   };
 
   const handleOpenLocationPicker = () => {
-    void persistFormDraft();
     router.push('/select-location?context=post');
   };
 
@@ -253,6 +371,11 @@ export function PostForm() {
     }
 
     if (!primaryPhotoFile || !title.trim()) {
+      setError(messages.post.missingFields);
+      return;
+    }
+
+    if (!categorySlug) {
       setError(messages.post.missingFields);
       return;
     }
@@ -296,8 +419,8 @@ export function PostForm() {
           photoUrl,
           lat,
           lng,
-          postCategory: category,
-          description: buildDescription(description, category, condition, messages),
+          postCategory: categorySlug,
+          description: buildDescription(description, categorySlug, condition, messages, language),
         }),
       });
 
@@ -322,6 +445,7 @@ export function PostForm() {
 
       const { id } = (await createRes.json()) as { id: string };
       clearPostDraft();
+      clearCachedDraftPhotos();
       toast(messages.post.successToast);
       router.push(`/listing/${id}`);
     } catch {
@@ -331,57 +455,91 @@ export function PostForm() {
     }
   };
 
-  const chipBase =
-    'rounded-xl py-2.5 text-xs font-medium text-center border transition-all duration-150';
-  const chipSelected = 'scale-[1.02] border-primary bg-primary text-on-primary shadow-sm';
-  const chipUnselected =
+  const categoryChipSelected =
+    'border-primary bg-primary text-on-primary shadow-sm scale-[1.02]';
+  const categoryChipUnselected =
+    'border-outline-variant/60 bg-surface-container-low text-on-surface-variant hover:bg-surface-container';
+
+  const conditionChipSelected = 'border-primary bg-primary text-on-primary shadow-sm';
+  const conditionChipUnselected =
     'border-transparent bg-surface-container/80 text-on-surface-variant hover:bg-surface-container-high/60';
+
+  const sectionHeaderClass =
+    'text-label-sm font-semibold uppercase tracking-wide text-outline';
+
+  const canAddMore = photos.length < MAX_PHOTOS;
 
   return (
     <>
       <form id="post-item-form" onSubmit={handleSubmit} className="flex flex-col gap-6 pb-36">
         <section className="space-y-2">
-          <label className="block text-label-md text-on-surface-variant">
-            {messages.post.photoLabel}
-          </label>
-
-          <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto py-2">
-            {photos.map((photo, index) => (
-              <div
-                key={photo.id}
-                className="relative flex h-72 w-72 shrink-0 snap-center items-center justify-center overflow-hidden rounded-2xl bg-surface-container shadow-sm"
+          <div className="flex items-center justify-between gap-2">
+            <span className={sectionHeaderClass}>{messages.post.photoLabel}</span>
+            <div
+              className="flex rounded-lg bg-surface-container p-0.5"
+              role="group"
+              aria-label={messages.post.photoLabel}
+            >
+              <button
+                type="button"
+                aria-label={messages.post.mediaViewCarousel}
+                aria-pressed={mediaView === 'carousel'}
+                onClick={() => setMediaView('carousel')}
+                className={cn(
+                  'flex h-8 w-8 items-center justify-center rounded-md transition-all',
+                  mediaView === 'carousel'
+                    ? 'bg-surface-container-lowest text-on-surface shadow-sm'
+                    : 'text-on-surface-variant hover:text-on-surface',
+                )}
               >
-                <Image
-                  src={photo.preview}
-                  alt={`${messages.post.photoLabel} ${index + 1}`}
-                  fill
-                  className="object-contain p-1"
-                  unoptimized
-                />
-                <span className="absolute right-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
-                  {index + 1}/{photos.length}
-                </span>
-                <button
-                  type="button"
-                  aria-label={messages.post.removePhoto}
-                  onClick={() => handleRemovePhoto(photo.id)}
-                  className="absolute right-2 top-9 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-white transition-transform duration-150 hover:bg-black active:scale-95"
-                >
-                  <span className="material-symbols-outlined text-base leading-none">close</span>
-                </button>
-              </div>
+                <span className="material-symbols-outlined text-[20px]">view_carousel</span>
+              </button>
+              <button
+                type="button"
+                aria-label={messages.post.mediaViewGrid}
+                aria-pressed={mediaView === 'grid'}
+                onClick={() => setMediaView('grid')}
+                className={cn(
+                  'flex h-8 w-8 items-center justify-center rounded-md transition-all',
+                  mediaView === 'grid'
+                    ? 'bg-surface-container-lowest text-on-surface shadow-sm'
+                    : 'text-on-surface-variant hover:text-on-surface',
+                )}
+              >
+                <span className="material-symbols-outlined text-[20px]">grid_view</span>
+              </button>
+            </div>
+          </div>
+
+          <div
+            className={cn(
+              'py-2 transition-all duration-200',
+              mediaView === 'carousel'
+                ? 'no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto'
+                : 'grid grid-cols-3 gap-2.5',
+            )}
+          >
+            {photos.map((photo, index) => (
+              <PhotoTile
+                key={photo.id}
+                photo={photo}
+                index={index}
+                total={photos.length}
+                variant={mediaView}
+                photoLabel={messages.post.photoLabel}
+                removeLabel={messages.post.removePhoto}
+                onRemove={handleRemovePhoto}
+              />
             ))}
 
-            {photos.length < MAX_PHOTOS && (
-              <label
-                htmlFor={addPhotosInputId}
-                className="flex h-72 w-72 shrink-0 snap-center cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-outline-variant bg-surface-container/80 text-on-surface-variant transition-all duration-150 hover:bg-surface-container-high/60 active:scale-[0.98]"
-              >
-                <span className="material-symbols-outlined text-3xl">add_photo_alternate</span>
-                <span className="px-4 text-center text-xs font-medium">
-                  {photos.length === 0 ? messages.post.uploadHint : messages.post.addMorePhotos}
-                </span>
-              </label>
+            {canAddMore && (
+              <AddPhotoTile
+                inputId={addPhotosInputId}
+                variant={mediaView}
+                empty={photos.length === 0}
+                uploadHint={messages.post.uploadHint}
+                addMoreLabel={messages.post.addMorePhotos}
+              />
             )}
           </div>
 
@@ -399,7 +557,7 @@ export function PostForm() {
           )}
         </section>
 
-        <section className="rounded-2xl border border-outline-variant/50 bg-surface-container/70 p-4 transition-all focus-within:border-primary focus-within:bg-surface-container-lowest focus-within:ring-1 focus-within:ring-primary">
+        <section className="rounded-2xl border border-outline-variant/50 bg-surface-container-low/60 p-4 transition-all focus-within:border-primary focus-within:bg-surface-container-lowest focus-within:ring-1 focus-within:ring-primary/10">
           <input
             type="text"
             value={title}
@@ -420,34 +578,57 @@ export function PostForm() {
 
         <section className="space-y-4">
           <div className="space-y-2">
-            <span className="block text-label-md text-on-surface-variant">
-              {messages.post.categoryLabel}
-            </span>
-            <div className="mt-2 grid grid-cols-3 gap-2">
-              {POST_CATEGORIES.map((value) => (
+            <div className="flex items-center justify-between gap-2">
+              <span className={cn('block', sectionHeaderClass)}>
+                {messages.post.categoryLabel}
+              </span>
+              {categorySlug && (
                 <button
-                  key={value}
                   type="button"
-                  onClick={() => setCategory(value)}
-                  className={`${chipBase} ${category === value ? chipSelected : chipUnselected}`}
+                  onClick={() => setCategorySlug(null)}
+                  className="text-label-sm text-on-surface-variant underline-offset-2 hover:underline"
                 >
-                  {postCategoryLabel(value, messages)}
+                  {messages.feed.clearSelection}
                 </button>
-              ))}
+              )}
+            </div>
+            <div className="mt-2 grid grid-cols-3 gap-2.5">
+              {SUBITO_CATEGORY_SLUGS.map((slug) => {
+                const isSelected = categorySlug === slug;
+                const label = postCategoryLabel(slug, language, messages);
+                return (
+                  <button
+                    key={slug}
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => setCategorySlug(slug)}
+                    className={cn(
+                      'flex min-h-11 items-center justify-center break-words rounded-xl border px-3 py-2.5 text-center text-xs font-medium leading-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline',
+                      isSelected ? categoryChipSelected : categoryChipUnselected,
+                    )}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           <div className="space-y-2">
-            <span className="block text-label-md text-on-surface-variant">
+            <span className={cn('block', sectionHeaderClass)}>
               {messages.post.conditionLabel}
             </span>
-            <div className="mt-2 grid grid-cols-3 gap-2">
+            <div className="mt-2 grid w-full grid-cols-5 gap-1.5">
               {CONDITIONS.map((value) => (
                 <button
                   key={value}
                   type="button"
+                  aria-pressed={condition === value}
                   onClick={() => setCondition(value)}
-                  className={`${chipBase} ${condition === value ? chipSelected : chipUnselected}`}
+                  className={cn(
+                    'rounded-full border px-1 py-2 text-center text-xs font-medium leading-tight transition-all',
+                    condition === value ? conditionChipSelected : conditionChipUnselected,
+                  )}
                 >
                   {conditionLabel(value, messages)}
                 </button>

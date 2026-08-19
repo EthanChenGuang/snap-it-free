@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { selectSourceBySlug } from '@/lib/admin/source-select';
 import type {
   AdminAlert,
   FooterStats,
@@ -23,6 +24,7 @@ import {
   collectTranslationCostSummary,
   getListingUsageTotals,
 } from '@/lib/admin/translation-usage-log';
+import { TRANSLATION_QUEUE_PAGE_SIZE } from '@/lib/admin/translation-queue-pagination';
 
 type ScrapeRunRow = {
   id: string;
@@ -142,18 +144,12 @@ export async function getSourceBySlug(slug: string): Promise<SourceDetail | null
   try {
     const supabase = await createClient();
 
-    const [{ data: source, error: sourceError }, { data: globalConfig }] = await Promise.all([
-      supabase
-        .from('scraper_sources')
-        .select(
-          'slug, display_name, implementation_status, enabled, interval_minutes, anti_block_preset, target_urls, session_enc',
-        )
-        .eq('slug', slug)
-        .maybeSingle(),
+    const [{ row: source, sessionEncAvailable }, { data: globalConfig }] = await Promise.all([
+      selectSourceBySlug(supabase, slug),
       supabase.from('scraper_global_config').select('proxy_enc').eq('id', 1).maybeSingle(),
     ]);
 
-    if (sourceError || !source) {
+    if (!source) {
       return null;
     }
 
@@ -185,7 +181,7 @@ export async function getSourceBySlug(slug: string): Promise<SourceDetail | null
       intervalMinutes: source.interval_minutes as number,
       antiBlockPreset: source.anti_block_preset as string,
       targetUrls: (source.target_urls as string[] | null) ?? [],
-      sessionConfigured: source.session_enc != null,
+      sessionConfigured: sessionEncAvailable && source.session_enc != null,
       proxyConfigured: globalConfig?.proxy_enc != null,
       lastRun: lastRunRow ? mapLastRun(lastRunRow) : null,
       lastFullSuccess: lastFullSuccessRow ? mapLastFullSuccess(lastFullSuccessRow) : null,
@@ -472,8 +468,15 @@ function resolveListingJoin(
   return listing;
 }
 
-export async function getTranslationQueue(): Promise<TranslationQueueItem[]> {
+export async function getTranslationQueue(options?: {
+  page?: number;
+  pageSize?: number;
+}): Promise<TranslationQueueItem[]> {
   try {
+    const pageSize = options?.pageSize ?? TRANSLATION_QUEUE_PAGE_SIZE;
+    const page = Math.max(1, options?.page ?? 1);
+    const offset = (page - 1) * pageSize;
+
     const supabase = await createClient();
     const [{ data, error }, { data: configRow }] = await Promise.all([
       supabase
@@ -483,7 +486,7 @@ export async function getTranslationQueue(): Promise<TranslationQueueItem[]> {
         )
         .in('status', ['pending', 'failed'])
         .order('updated_at', { ascending: false })
-        .limit(500),
+        .range(offset, offset + pageSize - 1),
       supabase
         .from('scraper_global_config')
         .select('translation_provider')

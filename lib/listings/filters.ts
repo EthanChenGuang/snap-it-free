@@ -1,7 +1,14 @@
+import type { ConsumerCityKey } from '@/lib/geo/italian-cities';
+import { CONSUMER_CITY_KEYS, getCityByConsumerKey, getCityBySubitoSlug } from '@/lib/geo/italian-cities';
 import { haversineKm } from '@/lib/geo/haversine';
 import type { ListingRow, VeniceZone, ZoneChip } from './types';
 
-export type ConsumerCity = 'all' | 'venice' | 'padova';
+export type ConsumerCity = 'all' | ConsumerCityKey;
+
+export const CONSUMER_CITY_FILTER_OPTIONS: readonly ConsumerCity[] = [
+  'all',
+  ...CONSUMER_CITY_KEYS,
+];
 
 export function filterByZone(listings: ListingRow[], zoneChip: ZoneChip): ListingRow[] {
   if (zoneChip === 'All') {
@@ -32,7 +39,7 @@ export function excludeReportedIds(listings: ListingRow[], reportedIds: string[]
 }
 
 /** Map DB zone/city fields to consumer city filter (D-02, D-34). */
-export function listingConsumerCity(listing: ListingRow): 'venice' | 'padova' | null {
+export function listingConsumerCity(listing: ListingRow): ConsumerCityKey | null {
   if (
     listing.zone === 'centro_storico' ||
     listing.zone === 'mestre_marghera' ||
@@ -40,7 +47,13 @@ export function listingConsumerCity(listing: ListingRow): 'venice' | 'padova' | 
   ) {
     return 'venice';
   }
-  if (listing.city?.toLowerCase() === 'padova') return 'padova';
+
+  const dbCity = listing.city?.toLowerCase();
+  if (dbCity) {
+    const entry = getCityBySubitoSlug(dbCity) ?? getCityByConsumerKey(dbCity);
+    if (entry) return entry.consumerKey;
+  }
+
   return null;
 }
 

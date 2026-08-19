@@ -3,8 +3,10 @@
 import { useEffect, useRef } from 'react';
 import Map, { Marker, type MapRef } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
-
-const OPENFREEMAP_LIBERTY = 'https://tiles.openfreemap.org/styles/liberty';
+import {
+  OPENFREEMAP_LIBERTY_STYLE_URL,
+  patchOpenFreeMapStyle,
+} from '@/lib/map/openfreemap-style';
 
 const VENICE_VIEW = {
   longitude: 12.33,
@@ -47,9 +49,10 @@ export function StreetDumpPinMap({
           longitude: lng,
           latitude: lat,
         }}
-        mapStyle={OPENFREEMAP_LIBERTY}
+        mapStyle={OPENFREEMAP_LIBERTY_STYLE_URL}
         style={{ width: '100%', height: '240px' }}
         attributionControl={{ compact: true }}
+        onLoad={(event) => patchOpenFreeMapStyle(event.target)}
       >
         <Marker
           longitude={lng}
