@@ -49,6 +49,12 @@ export type GlobalAdminStatus = {
 
 export type CrawlMode = 'incremental' | 'full';
 
+export type ProxyCostTier =
+  | 'direct_free'
+  | 'webshare_budget'
+  | 'residential_recommended'
+  | 'insufficient_data';
+
 export type GlobalSettingsConfig = {
   globalPause: boolean;
   autoTranslate: boolean;
@@ -66,6 +72,10 @@ export type GlobalSettingsConfig = {
   lastBlockReason: string | null;
   degradedRunCount: number;
   showDegradedBanner: boolean;
+  blockedRatio7d: number | null;
+  proxyCostTier: ProxyCostTier;
+  proxyCostTierLabel: string;
+  proxyCostTierHint: string;
 };
 
 export type FooterStats = {

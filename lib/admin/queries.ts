@@ -16,6 +16,7 @@ import type {
   TranslationCostSummary,
   TranslationQueueItem,
 } from '@/lib/admin/types';
+import { computeProxyCostTier } from '@/lib/admin/proxy-cost-tier';
 import { parseUrlBreakdown } from '@/lib/admin/format';
 import { localizeFailureReason } from '@/lib/admin/run-status';
 import { estimateListingCost } from '@/lib/admin/translation-cost';
@@ -267,10 +268,58 @@ export async function getGlobalAdminStatus(): Promise<GlobalAdminStatus | null> 
   }
 }
 
+type SubitoBlockedRatioRow = {
+  blocked_url_count: number | null;
+  target_urls_snapshot: string[] | null;
+};
+
+function targetUrlCountFromRun(row: SubitoBlockedRatioRow): number {
+  if (Array.isArray(row.target_urls_snapshot) && row.target_urls_snapshot.length > 0) {
+    return row.target_urls_snapshot.length;
+  }
+  return 0;
+}
+
+export async function getSubitoBlockedRatio7d(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<number | null> {
+  const since = new Date();
+  since.setUTCDate(since.getUTCDate() - 7);
+
+  const { data, error } = await supabase
+    .from('scrape_runs')
+    .select('blocked_url_count, target_urls_snapshot')
+    .eq('source', 'subito')
+    .gte('started_at', since.toISOString());
+
+  if (error || !data) {
+    return null;
+  }
+
+  const runs = data as SubitoBlockedRatioRow[];
+  if (runs.length < 3) {
+    return null;
+  }
+
+  let sumBlocked = 0;
+  let sumTarget = 0;
+
+  for (const row of runs) {
+    sumBlocked += row.blocked_url_count ?? 0;
+    sumTarget += targetUrlCountFromRun(row);
+  }
+
+  if (sumTarget <= 0) {
+    return null;
+  }
+
+  return sumBlocked / sumTarget;
+}
+
 export async function getGlobalSettingsConfig(): Promise<GlobalSettingsConfig | null> {
   try {
     const supabase = await createClient();
-    const [{ data, error }, latestSubitoRunDegraded] = await Promise.all([
+    const [{ data, error }, latestSubitoRunDegraded, blockedRatio7d] = await Promise.all([
       supabase
         .from('scraper_global_config')
         .select(
@@ -279,6 +328,7 @@ export async function getGlobalSettingsConfig(): Promise<GlobalSettingsConfig | 
         .eq('id', 1)
         .maybeSingle(),
       getLatestSubitoRunDegraded(supabase),
+      getSubitoBlockedRatio7d(supabase),
     ]);
 
     if (error || !data) {
@@ -287,6 +337,7 @@ export async function getGlobalSettingsConfig(): Promise<GlobalSettingsConfig | 
 
     const proxyConfigured = data.proxy_enc != null;
     const degradedRunCount = (data.degraded_run_count as number) ?? 0;
+    const tierMeta = computeProxyCostTier(blockedRatio7d);
 
     return {
       globalPause: Boolean(data.global_pause),
@@ -309,6 +360,10 @@ export async function getGlobalSettingsConfig(): Promise<GlobalSettingsConfig | 
         degradedRunCount,
         latestSubitoRunDegraded,
       }),
+      blockedRatio7d,
+      proxyCostTier: tierMeta.tier,
+      proxyCostTierLabel: tierMeta.labelZh,
+      proxyCostTierHint: tierMeta.hint,
     };
   } catch {
     return null;
