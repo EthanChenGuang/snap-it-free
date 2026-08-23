@@ -27,6 +27,14 @@ describe('UpdateSourceSchema', () => {
     const result = UpdateSourceSchema.safeParse({ interval_minutes: 1440 });
     expect(result.success).toBe(true);
   });
+
+  it('accepts per-source proxy URL toggle', () => {
+    const result = UpdateSourceSchema.safeParse({ use_proxy_url: true });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.use_proxy_url).toBe(true);
+    }
+  });
 });
 
 describe('UpdateGlobalConfigSchema', () => {

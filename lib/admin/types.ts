@@ -21,6 +21,7 @@ export type SourceWithLastRun = {
   enabled: boolean;
   intervalMinutes: number;
   antiBlockPreset: string;
+  useProxyUrl: boolean;
   lastRun: SourceLastRun | null;
   lastFullSuccess: SourceLastFullSuccess | null;
 };

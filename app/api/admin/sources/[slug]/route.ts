@@ -20,6 +20,7 @@ type SourceRow = {
   interval_minutes: number;
   anti_block_preset: string;
   target_urls: string[] | null;
+  use_proxy_url?: boolean | null;
   session_enc: unknown;
 };
 
@@ -32,6 +33,7 @@ function serializeSource(row: SourceRow) {
     intervalMinutes: row.interval_minutes,
     antiBlockPreset: row.anti_block_preset,
     targetUrls: row.target_urls ?? [],
+    useProxyUrl: row.use_proxy_url ?? (row.slug === 'vinted'),
     sessionConfigured: row.session_enc != null,
   };
 }

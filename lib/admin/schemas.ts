@@ -11,6 +11,7 @@ export const UpdateSourceSchema = z.object({
   interval_minutes: z.number().int().min(30).max(1440).optional(),
   anti_block_preset: antiBlockPresetSchema.optional(),
   target_urls: z.array(z.string().url()).min(1).optional(),
+  use_proxy_url: z.boolean().optional(),
   /** Operator Facebook cookie JSON — encrypted to session_enc on PATCH (D-18-10/11). */
   session_json: z.string().max(65536).optional(),
 });

@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export const SOURCE_BASE_FIELDS =
-  'slug, display_name, implementation_status, enabled, interval_minutes, anti_block_preset, target_urls';
+  'slug, display_name, implementation_status, enabled, interval_minutes, anti_block_preset, target_urls, use_proxy_url';
 
 export const SOURCE_FIELDS_WITH_SESSION = `${SOURCE_BASE_FIELDS}, session_enc`;
 
@@ -13,6 +13,7 @@ export type ScraperSourceRow = {
   interval_minutes: number;
   anti_block_preset: string;
   target_urls: string[] | null;
+  use_proxy_url?: boolean | null;
   session_enc?: unknown;
 };
 

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SUBITO_CATEGORY_URLS } from './subito/categories.js';
 import { loadSourceConfig, mergeTargetUrls } from './config-loader.js';
@@ -49,6 +49,16 @@ function mockSupabase(responses: {
 }
 
 describe('loadSourceConfig', () => {
+  const originalProxyUrl = process.env.PROXY_URL;
+
+  afterEach(() => {
+    if (originalProxyUrl === undefined) {
+      delete process.env.PROXY_URL;
+    } else {
+      process.env.PROXY_URL = originalProxyUrl;
+    }
+  });
+
   it('falls back to SUBITO_CATEGORY_URLS when DB target_urls are empty', async () => {
     const supabase = mockSupabase({
       source: {
@@ -124,5 +134,60 @@ describe('loadSourceConfig', () => {
 
     const config = await loadSourceConfig(supabase, 'subito');
     expect(config!.preset).toBe('standard');
+  });
+
+  it('keeps Subito direct by default even when PROXY_URL is configured', async () => {
+    process.env.PROXY_URL = 'http://env-proxy.example:8080';
+    const supabase = mockSupabase({
+      source: {
+        slug: 'subito',
+        target_urls: ['https://www.subito.it/db-only/'],
+        anti_block_preset: 'standard',
+        enabled: true,
+        implementation_status: 'live',
+      },
+      global: { global_pause: false, proxy_enc: null },
+    });
+
+    const config = await loadSourceConfig(supabase, 'subito');
+    expect(config!.proxyUrl).toBeUndefined();
+    expect(config!.proxyConfigured).toBe(false);
+  });
+
+  it('uses PROXY_URL for Vinted by default', async () => {
+    process.env.PROXY_URL = 'http://env-proxy.example:8080';
+    const supabase = mockSupabase({
+      source: {
+        slug: 'vinted',
+        target_urls: ['https://www.vinted.it/catalog?search_text=gratis'],
+        anti_block_preset: 'standard',
+        enabled: true,
+        implementation_status: 'live',
+      },
+      global: { global_pause: false, proxy_enc: null },
+    });
+
+    const config = await loadSourceConfig(supabase, 'vinted');
+    expect(config!.proxyUrl).toBe('http://env-proxy.example:8080');
+    expect(config!.proxyConfigured).toBe(true);
+  });
+
+  it('disables PROXY_URL when source use_proxy_url is false', async () => {
+    process.env.PROXY_URL = 'http://env-proxy.example:8080';
+    const supabase = mockSupabase({
+      source: {
+        slug: 'vinted',
+        target_urls: ['https://www.vinted.it/catalog?search_text=gratis'],
+        anti_block_preset: 'standard',
+        enabled: true,
+        implementation_status: 'live',
+        use_proxy_url: false,
+      },
+      global: { global_pause: false, proxy_enc: null },
+    });
+
+    const config = await loadSourceConfig(supabase, 'vinted');
+    expect(config!.proxyUrl).toBeUndefined();
+    expect(config!.proxyConfigured).toBe(false);
   });
 });

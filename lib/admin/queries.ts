@@ -81,6 +81,10 @@ function mapLastRun(row: ScrapeRunRow) {
   };
 }
 
+function defaultUseProxyUrl(slug: string): boolean {
+  return slug === 'vinted';
+}
+
 export async function getSourcesWithLastRun(): Promise<SourceWithLastRun[]> {
   try {
     const supabase = await createClient();
@@ -88,7 +92,7 @@ export async function getSourcesWithLastRun(): Promise<SourceWithLastRun[]> {
     const { data: sources, error: sourcesError } = await supabase
       .from('scraper_sources')
       .select(
-        'slug, display_name, implementation_status, enabled, interval_minutes, anti_block_preset',
+        'slug, display_name, implementation_status, enabled, interval_minutes, anti_block_preset, use_proxy_url',
       )
       .order('slug');
 
@@ -131,6 +135,9 @@ export async function getSourcesWithLastRun(): Promise<SourceWithLastRun[]> {
       enabled: Boolean(source.enabled),
       intervalMinutes: source.interval_minutes as number,
       antiBlockPreset: source.anti_block_preset as string,
+      useProxyUrl:
+        (source.use_proxy_url as boolean | null | undefined) ??
+        defaultUseProxyUrl(source.slug as string),
       lastRun: latestBySource.has(source.slug)
         ? mapLastRun(latestBySource.get(source.slug)!)
         : null,
@@ -182,6 +189,7 @@ export async function getSourceBySlug(slug: string): Promise<SourceDetail | null
       intervalMinutes: source.interval_minutes as number,
       antiBlockPreset: source.anti_block_preset as string,
       targetUrls: (source.target_urls as string[] | null) ?? [],
+      useProxyUrl: source.use_proxy_url ?? defaultUseProxyUrl(source.slug),
       sessionConfigured: sessionEncAvailable && source.session_enc != null,
       proxyConfigured: globalConfig?.proxy_enc != null,
       lastRun: lastRunRow ? mapLastRun(lastRunRow) : null,

@@ -13,6 +13,7 @@ export type SourceConfig = {
   globalPause: boolean;
   proxyUrl: string | undefined;
   proxyConfigured: boolean;
+  useProxyUrl: boolean;
   enabled: boolean;
   implementationStatus: 'live' | 'coming_soon';
   intervalMinutes: number;
@@ -62,6 +63,10 @@ function fallbackUrlsForSlug(slug: string): readonly string[] {
   return [];
 }
 
+function defaultUseProxyUrl(slug: string): boolean {
+  return slug === 'vinted';
+}
+
 /** Load DB-backed source config merged with global settings (D-18). */
 export async function loadSourceConfig(
   supabase: SupabaseClient,
@@ -94,7 +99,11 @@ export async function loadSourceConfig(
     );
   }
 
-  const proxyUrl = resolveProxyUrl(global?.proxy_enc as EncryptedProxyPayload | null);
+  const useProxyUrl =
+    (source.use_proxy_url as boolean | null | undefined) ?? defaultUseProxyUrl(slug);
+  const proxyUrl = useProxyUrl
+    ? resolveProxyUrl(global?.proxy_enc as EncryptedProxyPayload | null)
+    : undefined;
 
   return {
     urls,
@@ -102,6 +111,7 @@ export async function loadSourceConfig(
     globalPause: global?.global_pause ?? false,
     proxyUrl,
     proxyConfigured: Boolean(proxyUrl),
+    useProxyUrl,
     enabled: Boolean(source.enabled),
     implementationStatus: source.implementation_status as 'live' | 'coming_soon',
     intervalMinutes: (source.interval_minutes as number) ?? 90,

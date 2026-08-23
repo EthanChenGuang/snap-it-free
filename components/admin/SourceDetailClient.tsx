@@ -80,6 +80,7 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
   const [antiBlock, setAntiBlock] = useState<AntiBlockPreset>(
     initialSource.antiBlockPreset as AntiBlockPreset,
   );
+  const [useProxyUrl, setUseProxyUrl] = useState(initialSource.useProxyUrl);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -96,6 +97,7 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
   const isVinted = initialSource.slug === 'vinted';
   const isFacebook = initialSource.slug === 'facebook';
   const hasUrlMatrix = isSubito || isVinted || isFacebook;
+  const supportsProxyToggle = isSubito || isVinted;
 
   const currentUrlCount = useMemo(
     () =>
@@ -154,6 +156,10 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
       anti_block_preset: antiBlock,
       target_urls: urls,
     };
+
+    if (supportsProxyToggle) {
+      payload.use_proxy_url = useProxyUrl;
+    }
 
     if (isFacebook && sessionJsonText.trim()) {
       payload.session_json = sessionJsonText.trim();
@@ -420,6 +426,47 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
                 label={sourcesMessages.sourceStatusLabel}
               />
             </div>
+
+            {supportsProxyToggle ? (
+              <>
+                <div className="source-detail-divider" />
+                <div className="source-detail-toggle-row">
+                  <div>
+                    <h3 className="source-detail-card-title">{sourcesMessages.sourceProxyLabel}</h3>
+                    <p className="source-detail-card-subtitle">{sourcesMessages.sourceProxyHelp}</p>
+                  </div>
+                  <IosToggle
+                    checked={useProxyUrl}
+                    onChange={setUseProxyUrl}
+                    label={sourcesMessages.sourceProxyLabel}
+                  />
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-high px-2.5 py-0.5 text-[12px]">
+                    <span
+                      className={`h-2 w-2 rounded-full ${initialSource.proxyConfigured ? 'bg-primary' : 'bg-outline-variant'}`}
+                      aria-hidden
+                    />
+                    {initialSource.proxyConfigured
+                      ? sourcesMessages.sourceProxyConfigured
+                      : sourcesMessages.sourceProxyNotConfigured}
+                  </span>
+                </div>
+                {useProxyUrl && !initialSource.proxyConfigured ? (
+                  <p className="source-detail-inline-banner source-detail-inline-banner-warning mt-3">
+                    <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                      warning
+                    </span>
+                    <span>
+                      {sourcesMessages.sourceProxyMissingHelp}{' '}
+                      <Link href="/admin/settings" className="underline underline-offset-2">
+                        {sourcesMessages.sourceProxySettingsLink}
+                      </Link>
+                    </span>
+                  </p>
+                ) : null}
+              </>
+            ) : null}
 
             {isFacebook ? (
               <>
