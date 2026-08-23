@@ -1,5 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
-import { selectSourceBySlug } from '@/lib/admin/source-select';
+import {
+  defaultUseProxyUrl,
+  selectSourceBySlug,
+  selectSourcesForList,
+} from '@/lib/admin/source-select';
 import type {
   AdminAlert,
   FooterStats,
@@ -81,22 +85,13 @@ function mapLastRun(row: ScrapeRunRow) {
   };
 }
 
-function defaultUseProxyUrl(slug: string): boolean {
-  return slug === 'vinted';
-}
-
 export async function getSourcesWithLastRun(): Promise<SourceWithLastRun[]> {
   try {
     const supabase = await createClient();
 
-    const { data: sources, error: sourcesError } = await supabase
-      .from('scraper_sources')
-      .select(
-        'slug, display_name, implementation_status, enabled, interval_minutes, anti_block_preset, use_proxy_url',
-      )
-      .order('slug');
+    const { rows: sources } = await selectSourcesForList(supabase);
 
-    if (sourcesError) {
+    if (!sources) {
       return [];
     }
 
@@ -128,20 +123,18 @@ export async function getSourcesWithLastRun(): Promise<SourceWithLastRun[]> {
       }
     }
 
-    return (sources ?? []).map((source) => ({
-      slug: source.slug as string,
-      displayName: source.display_name as string,
+    return sources.map((source) => ({
+      slug: source.slug,
+      displayName: source.display_name,
       implementationStatus: source.implementation_status as 'live' | 'coming_soon',
       enabled: Boolean(source.enabled),
-      intervalMinutes: source.interval_minutes as number,
-      antiBlockPreset: source.anti_block_preset as string,
-      useProxyUrl:
-        (source.use_proxy_url as boolean | null | undefined) ??
-        defaultUseProxyUrl(source.slug as string),
+      intervalMinutes: source.interval_minutes,
+      antiBlockPreset: source.anti_block_preset,
+      useProxyUrl: source.use_proxy_url ?? defaultUseProxyUrl(source.slug),
       lastRun: latestBySource.has(source.slug)
         ? mapLastRun(latestBySource.get(source.slug)!)
         : null,
-      lastFullSuccess: latestFullSuccessBySource.get(source.slug as string) ?? null,
+      lastFullSuccess: latestFullSuccessBySource.get(source.slug) ?? null,
     }));
   } catch {
     return [];

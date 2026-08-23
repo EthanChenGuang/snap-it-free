@@ -7,7 +7,12 @@ import {
   hasFacebookAuthCookie,
   parseFacebookSessionJson,
 } from '@/lib/admin/facebook-session';
-import { isMissingSessionEncColumn, selectSourceBySlug } from '@/lib/admin/source-select';
+import {
+  defaultUseProxyUrl,
+  isMissingSessionEncColumn,
+  isMissingUseProxyUrlColumn,
+  selectSourceBySlug,
+} from '@/lib/admin/source-select';
 import { validateTargetUrls } from '@/lib/admin/url-validate';
 
 type RouteContext = { params: Promise<{ slug: string }> };
@@ -33,7 +38,7 @@ function serializeSource(row: SourceRow) {
     intervalMinutes: row.interval_minutes,
     antiBlockPreset: row.anti_block_preset,
     targetUrls: row.target_urls ?? [],
-    useProxyUrl: row.use_proxy_url ?? (row.slug === 'vinted'),
+    useProxyUrl: row.use_proxy_url ?? defaultUseProxyUrl(row.slug),
     sessionConfigured: row.session_enc != null,
   };
 }
@@ -141,6 +146,12 @@ export async function PATCH(request: Request, context: RouteContext) {
     if (updatePayload.session_enc != null && isMissingSessionEncColumn(updateError)) {
       return NextResponse.json(
         { error: 'session_enc column missing — apply migration 030_facebook_session_enc.sql' },
+        { status: 500 },
+      );
+    }
+    if (updatePayload.use_proxy_url !== undefined && isMissingUseProxyUrlColumn(updateError)) {
+      return NextResponse.json(
+        { error: 'use_proxy_url column missing — apply migration 032_source_proxy_toggle.sql' },
         { status: 500 },
       );
     }
