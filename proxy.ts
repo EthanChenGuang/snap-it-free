@@ -6,10 +6,11 @@ export async function proxy(request: NextRequest) {
   const { response, user, supabase } = await updateSession(request);
 
   if (!user?.email) {
+    const requestedPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/post';
     loginUrl.search = '';
-    loginUrl.searchParams.set('next', '/admin');
+    loginUrl.searchParams.set('next', requestedPath);
     return NextResponse.redirect(loginUrl);
   }
 
