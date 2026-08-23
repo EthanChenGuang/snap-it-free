@@ -63,30 +63,41 @@ Before production cadence:
 - Production without proxy remains possible (soft gate) — operator discipline required.
 - Provider selection and cost are out-of-repo concerns.
 
-## Cost ladder (Phase 16 draft)
+## Cost ladder (Phase 16)
 
-**Status:** Draft — finalized in Phase 16 Plan 05 (PROXY-C05) after 7-day production measurement.
+**Status:** Accepted addendum (Phase 16 Plan 05 — PROXY-C05)  
+**Measurement:** 7-day production spike — `16-DECISION-GATE.md` (STAY_DIRECT at 2.5% blocked_ratio_7d, operator approved 2026-08-12)
 
 Phase 16 research (PROXY-C01) finds **no free residential IP pool**. OSS proxy managers (Anakin, Trawl, Proxyhub) only rotate **paid upstream IPs**. The operator cost ladder:
 
-| Tier | Provider / mode | Cost | When to use |
-|------|-----------------|------|-------------|
-| 1 | **Direct (no proxy)** | Free | Default when 7-day `blocked_ratio_7d` **< 0.5** (50% gate) |
-| 2 | **Webshare free tier** | Free (1 GB/mo) | Prod validation after gate fails; smoke tests |
-| 3 | **Webshare paid** | ~$1.40/GB | Lowest-cost residential when direct blocked |
-| 4 | **IPRoyal** | ~$1.75/GB | Budget alternative; non-expiring traffic packs |
-| 5 | **Decodo** (current) | ~$2.00/GB | Keep only if cheaper tiers fail unblock targets |
+| Tier | Admin label | Provider / mode | Cost | When to use |
+|------|-------------|-----------------|------|-------------|
+| 1 | **直连免费** (direct_free) | Direct (no proxy) | Free | 7-day `blocked_ratio_7d` **< 0.5** (50% gate) |
+| 2 | **Webshare 经济档** (webshare_budget) | Webshare free → paid | Free 1 GB/mo → ~$1.40/GB | 0.5 ≤ ratio **< 0.7** — budget residential |
+| 3 | **住宅代理推荐** (residential_recommended) | Webshare / IPRoyal / Decodo | $1.40–2.00/GB | ratio **≥ 0.7** — sustained blocks |
+
+Admin Settings proxy card surfaces the computed tier from `getSubitoBlockedRatio7d()` (rolling 7-day window, ≥3 runs required).
 
 ### Residential requirement demotion
 
 - **Before (Phase 15):** Italian residential proxy **required** for sustained production full 34-URL matrix (D-15-20).
-- **After (Phase 16 draft):** Residential proxy **recommended when** 7-day `blocked_ratio_7d ≥ 0.5`, where:
+- **After (Phase 16):** Residential proxy **optional by default**; **recommended when** 7-day `blocked_ratio_7d ≥ 0.5`:
 
   `blocked_ratio_7d = sum(blocked_url_count) / sum(target_url_count)` across Subito `scrape_runs` in the window.
 
   `target_url_count` per run = `COALESCE(array_length(target_urls_snapshot, 1), 0)`.
 
 - Direct/degraded crawl remains valid at tier 1; PROXY-C04 adds single direct retry on quota exhaustion.
+- **Current production posture (2026-08-12):** STAY_DIRECT — tier 1 active; proxy unset acceptable.
+
+### Admin cost tier thresholds (PROXY-C05)
+
+| blocked_ratio_7d | Tier | Action |
+|------------------|------|--------|
+| null (< 3 runs) | insufficient_data | Monitor; no spend change |
+| < 0.5 | direct_free | Keep proxy unset |
+| 0.5 – 0.7 | webshare_budget | Trial Webshare free tier |
+| ≥ 0.7 | residential_recommended | Configure Italian residential proxy |
 
 ### Traffic estimate (incremental)
 

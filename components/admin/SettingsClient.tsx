@@ -12,6 +12,7 @@ import {
   SCRAPE_MIN_GEO_RESOLUTION_RATE,
   SCRAPE_MIN_SELECTOR_RATE,
 } from '@/lib/admin/validation-thresholds';
+import { formatBlockedRatioPercent } from '@/lib/admin/proxy-cost-tier';
 
 type SettingsClientProps = {
   initialConfig: GlobalSettingsConfig;
@@ -62,6 +63,10 @@ export function SettingsClient({
   const [fullCrawlError, setFullCrawlError] = useState<string | null>(null);
   const lastBlockReason = initialConfig.lastBlockReason;
   const degradedRunCount = initialConfig.degradedRunCount;
+  const blockedRatio7d = initialConfig.blockedRatio7d;
+  const proxyCostTierLabel = initialConfig.proxyCostTierLabel;
+  const proxyCostTierHint = initialConfig.proxyCostTierHint;
+  const blockedRatioDisplay = formatBlockedRatioPercent(blockedRatio7d);
 
   const capExceeded = translationsToday >= dailyCap;
 
@@ -362,6 +367,24 @@ export function SettingsClient({
               />
               {proxyConfigured ? settingsMessages.proxyConfigured : settingsMessages.proxyNotConfigured}
             </span>
+          </div>
+
+          <div className="space-y-2 border-b border-outline-variant pb-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-secondary">
+                {settingsMessages.proxyCostTierLabel}
+              </p>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-high px-2.5 py-0.5 text-[12px]">
+                {proxyCostTierLabel}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[14px]">
+              <span className="text-secondary">{settingsMessages.proxyCostTierRatioLabel}</span>
+              <span className="font-mono text-on-surface">
+                {blockedRatioDisplay ?? settingsMessages.proxyCostTierRatioUnavailable}
+              </span>
+            </div>
+            <p className="text-[12px] text-secondary">{proxyCostTierHint}</p>
           </div>
 
           <div>
