@@ -8,6 +8,7 @@ import {
   sourceIcons,
   sourcesMessages,
 } from '@/components/admin/admin-messages';
+import { adminRunHref, adminSourceHref } from '@/lib/admin/dashboard-links';
 import { formatUtcTimestamp } from '@/lib/admin/format';
 import {
   isPreCrawlSkip,
@@ -112,13 +113,31 @@ function RunFailureHint({ reason, hintKey }: { reason: string; hintKey: string }
 
 function CompactLastRunLine({ source }: { source: SourceWithLastRun }) {
   const visual = resolveRunStatusVisual(source.lastRun);
+  const runHref = source.lastRun?.id ? adminRunHref(source.lastRun.id) : null;
+
+  const statusNode = <RunStatusBadge visual={visual} />;
+  const timeNode = (
+    <span className="shrink-0 font-mono text-[12px] tabular-nums text-[#86868b]">
+      {formatRecentRunTimestamp(source.lastRun)}
+    </span>
+  );
 
   return (
     <div className="flex items-center justify-between gap-2">
-      <RunStatusBadge visual={visual} />
-      <span className="shrink-0 font-mono text-[12px] tabular-nums text-[#86868b]">
-        {formatRecentRunTimestamp(source.lastRun)}
-      </span>
+      {runHref ? (
+        <Link href={runHref} className="relative z-[2] min-w-0">
+          {statusNode}
+        </Link>
+      ) : (
+        statusNode
+      )}
+      {runHref ? (
+        <Link href={runHref} className="relative z-[2] shrink-0">
+          {timeNode}
+        </Link>
+      ) : (
+        timeNode
+      )}
     </div>
   );
 }
@@ -256,14 +275,19 @@ export function SourceCard({
   return (
     <article
       className={cn(
-        'sources-grid-card flex flex-col',
+        'sources-grid-card relative flex flex-col',
         isCompact && 'sources-grid-card-compact',
         isComingSoon && 'sources-grid-card-muted',
         isRunNowActivePhase(runPhase) && 'run-now-card-active',
         runPhase === 'running' && 'run-now-wrapper-running',
       )}
     >
-      <header className="flex items-start justify-between gap-3">
+      <Link
+        href={adminSourceHref(source.slug)}
+        className="sources-grid-card-nav"
+        aria-label={`打开 ${source.displayName} 配置`}
+      />
+      <header className="relative z-[1] flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span
@@ -298,12 +322,12 @@ export function SourceCard({
 
       {isCompact ? (
         isLive ? (
-          <div className="mt-3">
+          <div className="relative z-[1] mt-3">
             <CompactLastRunLine source={source} />
           </div>
         ) : null
       ) : (
-        <div className="mt-4 space-y-2.5">
+        <div className="relative z-[1] mt-4 space-y-2.5">
           <div className="flex items-center justify-between gap-2 text-[13px] text-[#636366]">
             <span className="shrink-0">{sourcesMessages.intervalPrefix}</span>
             <span className="truncate font-mono tabular-nums text-[#1d1d1f]">
@@ -329,7 +353,12 @@ export function SourceCard({
       )}
 
       {isLive ? (
-        <footer className={cn('mt-auto border-t border-black/[0.06]', isCompact ? 'pt-3' : 'pt-4')}>
+        <footer
+          className={cn(
+            'relative z-[2] mt-auto border-t border-black/[0.06]',
+            isCompact ? 'pt-3' : 'pt-4',
+          )}
+        >
           {!isCompact ? <SourceRunStatsPanel source={source} /> : null}
           <div className={cn('flex items-center justify-end gap-2', !isCompact && 'mt-3')}>
             <RunNowButton
@@ -342,8 +371,8 @@ export function SourceCard({
               onPhaseChange={setRunPhase}
             />
             <Link
-              href={`/admin/sources/${source.slug}`}
-              className="sources-icon-btn"
+              href={adminSourceHref(source.slug)}
+              className="sources-icon-btn relative z-[2]"
               aria-label={`${sourcesMessages.edit} ${source.displayName}`}
             >
               <span className="material-symbols-outlined text-[18px]" aria-hidden>
@@ -353,10 +382,10 @@ export function SourceCard({
           </div>
         </footer>
       ) : (
-        <footer className="mt-auto border-t border-black/[0.06] pt-4">
+        <footer className="relative z-[2] mt-auto border-t border-black/[0.06] pt-4">
           <Link
-            href={`/admin/sources/${source.slug}`}
-            className="sources-icon-btn ml-auto"
+            href={adminSourceHref(source.slug)}
+            className="sources-icon-btn relative z-[2] ml-auto"
             aria-label={`${sourcesMessages.edit} ${source.displayName}`}
           >
             <span className="material-symbols-outlined text-[18px]" aria-hidden>

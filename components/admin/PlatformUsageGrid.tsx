@@ -3,6 +3,11 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { DashboardSectionHeader } from '@/components/admin/DashboardSectionHeader';
+import {
+  adminBillingHref,
+  adminRoutes,
+  BILLING_SECTION_IDS,
+} from '@/lib/admin/dashboard-links';
 import type { ThresholdAlert } from '@/lib/admin/threshold-alerts';
 import type { PlatformUsageSnapshot } from '@/lib/admin/platform-usage';
 import {
@@ -90,16 +95,18 @@ function PlatformCard({
   subtitle,
   icon,
   iconTint,
+  href,
   children,
 }: {
   title: string;
   subtitle: string;
   icon: string;
   iconTint: string;
+  href: string;
   children: React.ReactNode;
 }) {
   return (
-    <article className="dashboard-platform-card">
+    <Link href={href} className="dashboard-platform-card dashboard-platform-card-link">
       <div className="dashboard-platform-card-head">
         <div className="min-w-0">
           <h3 className="dashboard-platform-card-title">{title}</h3>
@@ -114,7 +121,7 @@ function PlatformCard({
         </span>
       </div>
       <div className="dashboard-platform-card-body">{children}</div>
-    </article>
+    </Link>
   );
 }
 
@@ -143,7 +150,7 @@ export function PlatformUsageGrid({ snapshot, loading, error, refresh }: Platfor
         subtitle="Supabase · 计算托管 · LLM · 代理 · 通知健康度"
         action={
           <div className="flex flex-wrap gap-2">
-            <Link href="/admin/billing" className="dashboard-metric-action">
+            <Link href={adminRoutes.billing} className="dashboard-metric-action">
               详细账单
             </Link>
             <button type="button" onClick={refresh} disabled={loading} className="dashboard-metric-action">
@@ -179,6 +186,7 @@ export function PlatformUsageGrid({ snapshot, loading, error, refresh }: Platfor
                 subtitle="数据库 · Storage · Egress"
                 icon="database"
                 iconTint="rgba(62, 207, 142, 0.12)"
+                href={adminBillingHref(BILLING_SECTION_IDS.supabase)}
               >
                 <div className="space-y-2.5">
                   <div>
@@ -221,6 +229,7 @@ export function PlatformUsageGrid({ snapshot, loading, error, refresh }: Platfor
                 subtitle="Cron · Edge · Bandwidth"
                 icon="cloud"
                 iconTint="rgba(0, 0, 0, 0.06)"
+                href={adminBillingHref(BILLING_SECTION_IDS.vercel)}
               >
                 <p className="font-mono text-[12px] tabular-nums text-[#636366]">
                   Egress{' '}
@@ -244,6 +253,7 @@ export function PlatformUsageGrid({ snapshot, loading, error, refresh }: Platfor
                 subtitle="Worker · Instance Hours"
                 icon="flight_takeoff"
                 iconTint="rgba(136, 89, 225, 0.1)"
+                href={adminBillingHref(BILLING_SECTION_IDS.flyio)}
               >
                 <p className="font-mono text-2xl font-bold tabular-nums text-[#1d1d1f]">
                   {formatHours(snapshot.flyio.instanceHours)}
@@ -261,6 +271,7 @@ export function PlatformUsageGrid({ snapshot, loading, error, refresh }: Platfor
                 subtitle="Gemini / OpenRouter"
                 icon="psychology"
                 iconTint="rgba(88, 86, 214, 0.1)"
+                href={adminBillingHref(BILLING_SECTION_IDS.llm)}
               >
                 <p className="font-mono text-2xl font-bold tabular-nums text-[#1d1d1f]">
                   {formatPlatformUsd(snapshot.translation.monthTotalUsd)}
@@ -278,6 +289,7 @@ export function PlatformUsageGrid({ snapshot, loading, error, refresh }: Platfor
                 subtitle="Proxies · 请求与流量"
                 icon="swap_horiz"
                 iconTint="rgba(255, 149, 0, 0.1)"
+                href={adminBillingHref(BILLING_SECTION_IDS.proxy)}
               >
                 <p className="font-mono text-2xl font-bold tabular-nums text-[#1d1d1f]">
                   {snapshot.proxy.requestCount.toLocaleString()}
@@ -299,6 +311,7 @@ export function PlatformUsageGrid({ snapshot, loading, error, refresh }: Platfor
                 subtitle="Telegram · Resend · Supabase"
                 icon="notifications"
                 iconTint="rgba(52, 199, 89, 0.1)"
+                href={adminRoutes.settings}
               >
                 <div className="flex flex-wrap gap-1.5">
                   <HealthPill

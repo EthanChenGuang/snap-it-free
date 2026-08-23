@@ -381,6 +381,16 @@ export const translationMessages = {
     n === 1 ? '1 条翻译失败，请查看错误信息' : `${n} 条翻译失败，请查看错误信息`,
   translatePartialBatch: (successCount: number, failureCount: number) =>
     `成功 ${successCount} 条，失败 ${failureCount} 条`,
+  autoTranslateAllLabel: '自动全部翻译',
+  autoTranslateAllInterval: '间隔（分钟）',
+  translationQueueRunNow: '立即翻译',
+  autoTranslateAllCheckNow: '立即检查',
+  autoTranslateAllSettingsHelp: '开启后按间隔自动检查待翻译队列并启动全部翻译（仅当前浏览器标签页有效）。',
+  autoTranslateAllRunning: '全部翻译进行中，已跳过定时检查',
+  autoTranslateAllSkipped: '翻译进行中，等待下次检查',
+  autoTranslateAllDisabledHint: '开启后按间隔自动检查并启动全部翻译',
+  autoTranslateAllScheduleHint: (minutes: number, lastCheck: string) =>
+    `已启用 · 每 ${minutes} 分钟检查 · 上次 ${lastCheck}`,
 } as const;
 
 export const settingsMessages = {

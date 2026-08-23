@@ -6,17 +6,15 @@ import {
 } from '@/components/admin/DashboardClient';
 import {
   getGlobalAdminStatus,
-  getPendingTranslationCount,
   getRecentAlerts,
   getSourcesWithLastRun,
 } from '@/lib/admin/queries';
 
 async function DashboardContent() {
-  const [sources, alerts, globalStatus, pendingTranslationCount] = await Promise.all([
+  const [sources, alerts, globalStatus] = await Promise.all([
     getSourcesWithLastRun(),
     getRecentAlerts(),
     getGlobalAdminStatus(),
-    getPendingTranslationCount(),
   ]);
 
   if (globalStatus === null) {
@@ -28,7 +26,6 @@ async function DashboardContent() {
       initialSources={sources}
       initialGlobalStatus={globalStatus}
       initialAlerts={alerts}
-      pendingTranslationCount={pendingTranslationCount}
     />
   );
 }

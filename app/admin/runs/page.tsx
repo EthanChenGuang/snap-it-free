@@ -1,11 +1,12 @@
 import { Suspense } from 'react';
 import { RunsListClient } from '@/components/admin/RunsListClient';
+import { parseRunsListFilter } from '@/lib/admin/dashboard-links';
 import { reconcileOrphanScrapeRuns } from '@/lib/admin/orphan-runs';
 import { getScrapeRuns } from '@/lib/admin/queries';
 import { createServiceClient } from '@/lib/supabase/service';
 
 type PageProps = {
-  searchParams: Promise<{ id?: string; days?: string }>;
+  searchParams: Promise<{ id?: string; days?: string; filter?: string }>;
 };
 
 function parseSinceDays(value: string | undefined): number {
@@ -19,6 +20,7 @@ function parseSinceDays(value: string | undefined): number {
 async function RunsPageContent({ searchParams }: PageProps) {
   const params = await searchParams;
   const sinceDays = parseSinceDays(params.days);
+  const initialQuickFilter = parseRunsListFilter(params.filter);
 
   try {
     await reconcileOrphanScrapeRuns(createServiceClient());
@@ -33,6 +35,7 @@ async function RunsPageContent({ searchParams }: PageProps) {
       initialRuns={runs}
       initialSelectedId={params.id ?? null}
       initialSinceDays={sinceDays}
+      initialQuickFilter={initialQuickFilter}
     />
   );
 }

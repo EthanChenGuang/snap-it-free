@@ -6,12 +6,11 @@ import { SourceCard } from '@/components/admin/SourceCard';
 import { CoreHealthSection } from '@/components/admin/CoreHealthSection';
 import { DashboardSectionHeader } from '@/components/admin/DashboardSectionHeader';
 import { useMaintenance } from '@/components/admin/MaintenanceCard';
-import {
-  PlatformUsageGrid,
-  usePlatformUsage,
-} from '@/components/admin/PlatformUsageGrid';
+import { InfrastructureSummaryBar } from '@/components/admin/InfrastructureSummaryBar';
+import { usePlatformUsage } from '@/components/admin/PlatformUsageGrid';
 import { DegradedBanner } from '@/components/admin/DegradedBanner';
 import { ThresholdAlertBanner } from '@/components/admin/ThresholdAlertBanner';
+import { adminRoutes } from '@/lib/admin/dashboard-links';
 import { adminShellMessages } from '@/components/admin/admin-messages';
 import type { AdminAlert, GlobalAdminStatus, SourceWithLastRun } from '@/lib/admin/types';
 
@@ -19,14 +18,12 @@ type DashboardClientProps = {
   initialSources: SourceWithLastRun[];
   initialGlobalStatus: GlobalAdminStatus;
   initialAlerts: AdminAlert[];
-  pendingTranslationCount: number;
 };
 
 export function DashboardClient({
   initialSources,
   initialGlobalStatus,
   initialAlerts,
-  pendingTranslationCount,
 }: DashboardClientProps) {
   const router = useRouter();
   const [globalPause, setGlobalPause] = useState(initialGlobalStatus.globalPause);
@@ -115,18 +112,18 @@ export function DashboardClient({
         globalPause={globalPause}
         pauseSaving={pauseSaving}
         lastSyncAt={lastSyncAt}
-        pendingTranslationCount={pendingTranslationCount}
         alerts={initialAlerts}
         maintenance={maintenance}
         onGlobalToggle={handleGlobalPauseToggle}
       />
 
-      <PlatformUsageGrid {...platformUsage} />
+      <InfrastructureSummaryBar {...platformUsage} />
 
-      <section className="border-t border-black/[0.05] pt-8" aria-label="数据源">
+      <section className="dashboard-sources-section" aria-label="数据源">
         <DashboardSectionHeader
           title="数据源"
           subtitle="监控各平台抓取 Worker 运行状态"
+          titleHref={adminRoutes.sources}
         />
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {orderedSources.map((source) => (
@@ -149,24 +146,15 @@ export function DashboardSkeleton() {
   return (
     <div className="dashboard-console">
       <div className="mb-6 h-14 animate-pulse rounded-xl bg-black/[0.04]" />
-      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="grid grid-cols-2 gap-3 lg:col-span-5">
+      <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
+        <div className="flex flex-col gap-3 lg:col-span-5">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div
-              key={index}
-              className={`h-24 animate-pulse rounded-xl bg-black/[0.04] ${index === 2 ? 'col-span-2' : ''}`}
-            />
+            <div key={index} className="dashboard-compact-tile h-[88px] animate-pulse bg-black/[0.04]" />
           ))}
         </div>
-        <div className="h-48 animate-pulse rounded-xl bg-black/[0.04] lg:col-span-7" />
+        <div className="h-[300px] animate-pulse rounded-xl bg-black/[0.04] lg:col-span-7" />
       </div>
-      <div className="mb-8 rounded-2xl border border-black/[0.05] bg-black/[0.02] p-5">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="h-40 animate-pulse rounded-xl bg-black/[0.04]" />
-          ))}
-        </div>
-      </div>
+      <div className="mb-8 h-[52px] animate-pulse rounded-xl bg-black/[0.04]" />
       <div className="border-t border-black/[0.05] pt-8">
         <div className="mb-4 h-8 w-48 animate-pulse rounded bg-black/[0.04]" />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

@@ -215,8 +215,8 @@ export function TranslationQueueClient({
     pendingCount,
     setPendingCount,
     isPolling,
-    startPolling,
-    stopPolling,
+    isBulkTranslating,
+    retryAllPending,
     fetchPendingCount,
   } = useTranslationQueuePollingContext();
   const [items, setItems] = useState(initialItems);
@@ -224,7 +224,6 @@ export function TranslationQueueClient({
   const [costLoading, setCostLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [isRetryAllPending, setIsRetryAllPending] = useState(false);
   const [isBatchRetrying, setIsBatchRetrying] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
@@ -254,10 +253,10 @@ export function TranslationQueueClient({
   useEffect(() => {
     setItems(initialItems);
     setSelectedIds([]);
-    if (!isPolling && !isRetryAllPending) {
+    if (!isPolling && !isBulkTranslating) {
       setPendingCount(totalPending);
     }
-  }, [initialItems, totalPending, page, isPolling, isRetryAllPending, setPendingCount]);
+  }, [initialItems, totalPending, page, isPolling, isBulkTranslating, setPendingCount]);
 
   const showNotification = useCallback((message: string) => {
     if (notificationTimeout.current) {
@@ -267,19 +266,30 @@ export function TranslationQueueClient({
     notificationTimeout.current = setTimeout(() => setNotification(null), 5000);
   }, []);
 
-  const finishRetryAllPending = useCallback(
-    (showCompleteToast: boolean) => {
-      stopPolling();
-      setIsRetryAllPending(false);
-      if (showCompleteToast) {
-        showNotification(translationMessages.retryAllPendingComplete);
+  const handleRetryAllPending = async () => {
+    setErrorMessage(null);
+
+    try {
+      const result = await retryAllPending();
+
+      if (result === 'skipped') {
+        return;
       }
+
+      if (result === 'completed') {
+        showNotification(translationMessages.retryAllPendingComplete);
+      } else if (result === 'partial') {
+        showNotification(translationMessages.retryAllPendingComplete);
+      } else if (result === 'error') {
+        setErrorMessage(translationMessages.retryAll);
+      }
+
       void router.refresh();
       void refreshCostSummary();
-    },
-    [refreshCostSummary, router, showNotification, stopPolling],
-  );
-
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : translationMessages.retryAll);
+    }
+  };
 
   const showProcessedSuccess = (processed: ProcessedTranslation[]) => {
     if (processed.length === 0) {
@@ -391,56 +401,6 @@ export function TranslationQueueClient({
     }
   };
 
-  const handleRetryAllPending = async () => {
-    setErrorMessage(null);
-    setIsRetryAllPending(true);
-
-    let completedViaPolling = false;
-
-    startPolling({
-      onZero: () => {
-        completedViaPolling = true;
-        finishRetryAllPending(true);
-      },
-      onError: () => {
-        if (!completedViaPolling) {
-          finishRetryAllPending(false);
-          setErrorMessage(translationMessages.retryAll);
-        }
-      },
-    });
-
-    try {
-      const result = await postRetry({ all_pending: true });
-      refreshFromResponse(result.processed);
-      applyFailures(result.failures);
-
-      const latestCount = await fetchPendingCount();
-      if (latestCount !== null) {
-        setPendingCount(latestCount);
-      }
-
-      if (completedViaPolling) {
-        return;
-      }
-
-      stopPolling();
-      setIsRetryAllPending(false);
-
-      if (latestCount === 0) {
-        showNotification(translationMessages.retryAllPendingComplete);
-      } else {
-        showBatchResult(result.processed, result.failures);
-      }
-
-      void router.refresh();
-      void refreshCostSummary();
-    } catch (error) {
-      finishRetryAllPending(false);
-      setErrorMessage(error instanceof Error ? error.message : translationMessages.retryAll);
-    }
-  };
-
   const handleBatchRetry = async () => {
     if (selectedIds.length === 0) {
       return;
@@ -482,19 +442,19 @@ export function TranslationQueueClient({
         <button
           type="button"
           onClick={handleRetryAllPending}
-          disabled={isEmpty || isRetryAllPending}
+          disabled={isEmpty || isBulkTranslating}
           className="translation-queue-primary-btn"
         >
           <span
             className={cn(
               'material-symbols-outlined text-[18px]',
-              isRetryAllPending && 'animate-spin',
+              isBulkTranslating && 'animate-spin',
             )}
             aria-hidden
           >
-            {isRetryAllPending ? 'progress_activity' : 'refresh'}
+            {isBulkTranslating ? 'progress_activity' : 'refresh'}
           </span>
-          {isRetryAllPending
+          {isBulkTranslating
             ? translationMessages.retryAllPendingProcessing
             : translationMessages.retryAllPending}
         </button>

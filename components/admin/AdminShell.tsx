@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatedCount } from '@/components/admin/AnimatedCount';
 import { adminNav, adminNavItems, adminShellMessages } from '@/components/admin/admin-messages';
+import { adminRoutes, adminRunsHref } from '@/lib/admin/dashboard-links';
 import {
   TranslationQueuePollingProvider,
   useTranslationQueuePollingContext,
@@ -83,8 +84,10 @@ function AdminShellInner({
     <div className="min-h-screen bg-background text-on-background">
       <aside className="fixed left-0 top-0 z-20 hidden h-screen w-64 flex-col border-r border-outline-variant bg-surface md:flex">
         <div className="px-gutter py-space-lg">
-          <h1 className="text-h3 font-semibold text-primary">{adminShellMessages.brandTitle}</h1>
-          <p className="mt-1 text-label-sm text-secondary">{adminShellMessages.brandSubtitle}</p>
+          <Link href={adminRoutes.dashboard} className="block rounded-md transition-colors hover:opacity-80">
+            <h1 className="text-h3 font-semibold text-primary">{adminShellMessages.brandTitle}</h1>
+            <p className="mt-1 text-label-sm text-secondary">{adminShellMessages.brandSubtitle}</p>
+          </Link>
         </div>
 
         <nav className="flex flex-1 flex-col gap-1" aria-label="Admin navigation">
@@ -139,34 +142,37 @@ function AdminShellInner({
           <div className="flex items-center gap-4">
             {pendingTranslationsCount > 0 && (
               <Link
-                href="/admin/translation"
+                href={adminRoutes.translation}
                 prefetch={false}
                 className="hidden rounded-full border border-outline-variant bg-surface-container px-3 py-1 text-label-sm font-semibold text-primary hover:bg-surface-container-high sm:inline-flex"
               >
                 {adminNav.translation}: <AnimatedCount value={pendingTranslationsCount} />
               </Link>
             )}
-            <span className="hidden rounded-full bg-surface-container-high px-3 py-1 font-mono text-label-sm text-secondary sm:inline">
+            <Link
+              href={adminRoutes.settings}
+              className="hidden rounded-full bg-surface-container-high px-3 py-1 font-mono text-label-sm text-secondary transition-colors hover:bg-surface-container sm:inline"
+            >
               {operatorEmail}
-            </span>
-            <button
-              type="button"
+            </Link>
+            <Link
+              href={adminRunsHref({ filter: 'failed' })}
               className="rounded-full p-2 text-secondary transition-colors hover:bg-surface-container"
-              aria-label="Notifications"
+              aria-label="查看最近告警"
             >
               <span className="material-symbols-outlined text-[20px]" aria-hidden>
                 notifications
               </span>
-            </button>
-            <button
-              type="button"
+            </Link>
+            <Link
+              href={adminRoutes.settings}
               className="rounded-full p-2 text-secondary transition-colors hover:bg-surface-container"
-              aria-label="Help"
+              aria-label="系统设置"
             >
               <span className="material-symbols-outlined text-[20px]" aria-hidden>
                 help_outline
               </span>
-            </button>
+            </Link>
           </div>
         </header>
 
@@ -174,26 +180,29 @@ function AdminShellInner({
 
         <footer className="mt-auto border-t border-outline-variant bg-surface p-gutter">
           <div className="mx-auto flex max-w-container-max flex-wrap gap-x-space-xl gap-y-space-sm text-label-sm text-secondary">
-            <div>
+            <Link href={adminRoutes.runs} className="transition-colors hover:text-primary">
               24h 新增：
               <span className="font-medium text-primary">
                 {footerStats ? footerStats.inserted24h.toLocaleString('zh-CN') : '—'}
               </span>
-            </div>
-            <div>
+            </Link>
+            <Link
+              href={adminRunsHref({ filter: 'failed' })}
+              className="transition-colors hover:text-primary"
+            >
               7d 失败运行：
               <span className="font-medium text-error">
                 {footerStats ? footerStats.failedRuns7d.toLocaleString('zh-CN') : '—'}
               </span>
-            </div>
-            <div>
+            </Link>
+            <Link href={adminRoutes.runs} className="transition-colors hover:text-primary">
               平均选择器命中率：
               <span className="font-medium text-primary">
                 {footerStats?.avgSelectorRate != null
                   ? `${(footerStats.avgSelectorRate * 100).toFixed(1)}%`
                   : '—'}
               </span>
-            </div>
+            </Link>
           </div>
         </footer>
       </div>

@@ -14,14 +14,15 @@ import {
 import { formatQuotaBytes } from '@/lib/admin/quota-usage';
 import { formatUtcTimestamp } from '@/lib/admin/format';
 import { formatTokenCount, formatUsd } from '@/lib/admin/translation-cost';
+import { BILLING_SECTION_IDS } from '@/lib/admin/dashboard-links';
 import { cn } from '@/lib/utils';
 
 const ANCHORS = [
-  { id: 'billing-supabase', label: 'Supabase' },
-  { id: 'billing-vercel', label: 'Vercel' },
-  { id: 'billing-flyio', label: 'Fly.io' },
-  { id: 'billing-llm', label: 'LLM 翻译' },
-  { id: 'billing-proxy', label: '代理与消息' },
+  { id: BILLING_SECTION_IDS.supabase, label: 'Supabase' },
+  { id: BILLING_SECTION_IDS.vercel, label: 'Vercel' },
+  { id: BILLING_SECTION_IDS.flyio, label: 'Fly.io' },
+  { id: BILLING_SECTION_IDS.llm, label: 'LLM 翻译' },
+  { id: BILLING_SECTION_IDS.proxy, label: '代理与消息' },
 ] as const;
 
 type BillingClientProps = {
@@ -210,7 +211,7 @@ export function BillingClient({ initialSnapshot, initialError }: BillingClientPr
       {snapshot ? (
         <div className="billing-panels space-y-6">
           <BillingPanel
-            id="billing-supabase"
+            id={BILLING_SECTION_IDS.supabase}
             title="Supabase"
             subtitle="PostgreSQL · Storage · Auth · API"
             icon="database"
@@ -286,7 +287,7 @@ export function BillingClient({ initialSnapshot, initialError }: BillingClientPr
           </BillingPanel>
 
           <BillingPanel
-            id="billing-vercel"
+            id={BILLING_SECTION_IDS.vercel}
             title="Vercel"
             subtitle="Cron · Edge Network · Builds"
             icon="cloud"
@@ -333,7 +334,7 @@ export function BillingClient({ initialSnapshot, initialError }: BillingClientPr
           </BillingPanel>
 
           <BillingPanel
-            id="billing-flyio"
+            id={BILLING_SECTION_IDS.flyio}
             title="Fly.io"
             subtitle="Scraper Worker · Cron Jobs"
             icon="flight_takeoff"
@@ -390,7 +391,7 @@ export function BillingClient({ initialSnapshot, initialError }: BillingClientPr
           </BillingPanel>
 
           <BillingPanel
-            id="billing-llm"
+            id={BILLING_SECTION_IDS.llm}
             title="LLM 翻译"
             subtitle={snapshot.translation.primaryModelLabel}
             icon="psychology"
@@ -433,7 +434,7 @@ export function BillingClient({ initialSnapshot, initialError }: BillingClientPr
           </BillingPanel>
 
           <BillingPanel
-            id="billing-proxy"
+            id={BILLING_SECTION_IDS.proxy}
             title="代理与消息"
             subtitle="Proxies · Telegram · Resend"
             icon="swap_horiz"

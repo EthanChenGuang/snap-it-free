@@ -1,6 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import type { ThresholdAlert } from '@/lib/admin/threshold-alerts';
+import { adminRoutes } from '@/lib/admin/dashboard-links';
 import { cn } from '@/lib/utils';
 
 type ThresholdAlertBannerProps = {
@@ -25,7 +27,7 @@ export function ThresholdAlertBanner({ alerts, onDismiss, dismissed }: Threshold
       role="alert"
       data-testid="threshold-alert-banner"
     >
-      <div className="flex min-w-0 items-start gap-3">
+      <Link href={adminRoutes.billing} className="flex min-w-0 flex-1 items-start gap-3 transition-opacity hover:opacity-90">
         <span className="text-xl leading-none" aria-hidden>
           ⚠️
         </span>
@@ -41,7 +43,7 @@ export function ThresholdAlertBanner({ alerts, onDismiss, dismissed }: Threshold
             </ul>
           ) : null}
         </div>
-      </div>
+      </Link>
       {onDismiss ? (
         <button
           type="button"

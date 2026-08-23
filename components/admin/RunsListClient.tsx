@@ -10,6 +10,7 @@ import {
   SOURCE_SLUGS,
   sourceDisplayNames,
 } from '@/components/admin/admin-messages';
+import { parseRunsListFilter, type RunsListFilter } from '@/lib/admin/dashboard-links';
 import {
   formatDuration,
   formatRomeTooltip,
@@ -24,9 +25,10 @@ type RunsListClientProps = {
   initialRuns: ScrapeRunListItem[];
   initialSelectedId?: string | null;
   initialSinceDays?: number;
+  initialQuickFilter?: RunsListFilter | null;
 };
 
-type QuickFilter = 'all' | 'failed' | 'partial';
+type QuickFilter = 'all' | RunsListFilter;
 
 function durationLabel(run: ScrapeRunListItem): string {
   if (run.wallTimeSeconds != null && Number.isFinite(run.wallTimeSeconds)) {
@@ -110,11 +112,12 @@ export function RunsListClient({
   initialRuns,
   initialSelectedId,
   initialSinceDays = 7,
+  initialQuickFilter = null,
 }: RunsListClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [quickFilter, setQuickFilter] = useState<QuickFilter>('all');
+  const [quickFilter, setQuickFilter] = useState<QuickFilter>(initialQuickFilter ?? 'all');
   const [selectedSource, setSelectedSource] = useState('');
   const [selectedMode, setSelectedMode] = useState('');
   const [selectedTrigger, setSelectedTrigger] = useState('');
@@ -123,6 +126,10 @@ export function RunsListClient({
   useEffect(() => {
     setSinceDays(String(initialSinceDays));
   }, [initialSinceDays]);
+
+  useEffect(() => {
+    setQuickFilter(initialQuickFilter ?? 'all');
+  }, [initialQuickFilter]);
   const [selectedId, setSelectedId] = useState<string | null>(
     initialSelectedId ?? searchParams.get('id') ?? initialRuns[0]?.id ?? null,
   );
