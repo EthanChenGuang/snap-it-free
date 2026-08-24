@@ -301,12 +301,12 @@ export function PlatformUsageGrid({ snapshot, loading, error, refresh }: Platfor
                 <p className="text-[12px] text-[#86868b]">
                   流量{' '}
                   <span className="font-mono tabular-nums text-[#636366]">
-                    {formatTraffic(snapshot.proxy.estimatedTrafficBytes)}
+                    {formatTraffic(snapshot.proxy.trafficBytes)}
                   </span>
                   {' · '}
                   费用{' '}
                   <span className="font-mono tabular-nums text-[#636366]">
-                    {formatPlatformUsd(snapshot.proxy.estimatedCostUsd)}
+                    {formatPlatformUsd(snapshot.proxy.costUsd)}
                   </span>
                 </p>
                 <p className="font-mono text-[11px] tabular-nums text-[#636366]">

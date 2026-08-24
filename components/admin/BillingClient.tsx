@@ -10,6 +10,7 @@ import {
   formatPlatformUsd,
   formatTraffic,
   type PlatformUsageSnapshot,
+  type ProxyMetricSource,
 } from '@/lib/admin/platform-usage';
 import { formatQuotaBytes } from '@/lib/admin/quota-usage';
 import { formatUtcTimestamp } from '@/lib/admin/format';
@@ -34,7 +35,7 @@ type BillingClientProps = {
   serviceMeta: BillingServiceMeta;
 };
 
-function MetricRow({ label, value }: { label: string; value: React.ReactNode }) {
+function MetricRow({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (
     <div className="billing-metric-row">
       <span className="billing-metric-label">{label}</span>
@@ -82,6 +83,58 @@ function formatRemainingTrafficGb(value: number | null): string {
     return `${Math.round(value)} GB`;
   }
   return `${value.toFixed(2)} GB`;
+}
+
+function metricSourceLabel(source: ProxyMetricSource | null): string {
+  if (source === 'provider_api') {
+    return '实时';
+  }
+  if (source === 'env') {
+    return '配置';
+  }
+  return '估算';
+}
+
+function MetricSourceBadge({ source }: { source: ProxyMetricSource | null }) {
+  if (!source) {
+    return null;
+  }
+
+  const label = metricSourceLabel(source);
+  const isLive = source === 'provider_api';
+
+  return (
+    <span
+      className={cn(
+        'ml-1.5 inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium',
+        isLive ? 'bg-[#34c759]/10 text-[#248a3d]' : 'bg-black/[0.04] text-[#86868b]',
+      )}
+    >
+      {label}
+    </span>
+  );
+}
+
+function MetricRowWithSource({
+  label,
+  source,
+  value,
+}: {
+  label: string;
+  source: ProxyMetricSource | null;
+  value: React.ReactNode;
+}) {
+  return (
+    <MetricRow
+      label={
+        <span className="inline-flex items-center">
+          {label}
+          <MetricSourceBadge source={source} />
+        </span>
+      }
+      value={value}
+    />
+  );
 }
 function PlanTierBadge({ tier }: { tier: ServicePlanTier }) {
   return (
@@ -575,24 +628,27 @@ export function BillingClient({ initialSnapshot, initialError, serviceMeta }: Bi
                             </span>
                           }
                         />
-                        <MetricRow
-                          label="本月流量（估算）"
+                        <MetricRowWithSource
+                          label="本月流量"
+                          source={snapshot.proxy.trafficSource}
                           value={
                             <span className="font-mono tabular-nums">
-                              {formatTraffic(snapshot.proxy.estimatedTrafficBytes)}
+                              {formatTraffic(snapshot.proxy.trafficBytes)}
                             </span>
                           }
                         />
-                        <MetricRow
-                          label="本月费用（估算）"
+                        <MetricRowWithSource
+                          label="本月费用"
+                          source={snapshot.proxy.costSource}
                           value={
                             <span className="font-mono tabular-nums">
-                              {formatPlatformUsd(snapshot.proxy.estimatedCostUsd)}
+                              {formatPlatformUsd(snapshot.proxy.costUsd)}
                             </span>
                           }
                         />
-                        <MetricRow
+                        <MetricRowWithSource
                           label="剩余流量"
+                          source={snapshot.proxy.remainingTrafficSource}
                           value={
                             <span className="font-mono tabular-nums">
                               {formatRemainingTrafficGb(snapshot.proxy.remainingTrafficGb)}
@@ -621,6 +677,15 @@ export function BillingClient({ initialSnapshot, initialError, serviceMeta }: Bi
                       </div>
                       {snapshot.proxy.remainingTrafficNote ? (
                         <p className="text-[11px] text-[#86868b]">{snapshot.proxy.remainingTrafficNote}</p>
+                      ) : snapshot.proxy.remainingTrafficSource == null ? (
+                        <p className="text-[11px] text-[#86868b]">
+                          配置 DATAIMPULSE_API_LOGIN / DATAIMPULSE_API_PASSWORD 后可同步 DataImpulse 实时余额与剩余流量。
+                        </p>
+                      ) : null}
+                      {snapshot.proxy.providerSyncedAt ? (
+                        <p className="font-mono text-[10px] tabular-nums text-[#aeaeb2]">
+                          Provider 同步 {formatUtcTimestamp(snapshot.proxy.providerSyncedAt)}
+                        </p>
                       ) : null}
                       {snapshot.proxy.balanceError ? (
                         <p className="font-mono text-[11px] text-[#ff9500]">{snapshot.proxy.balanceError}</p>

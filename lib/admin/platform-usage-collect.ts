@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { fetchDataImpulseBalanceInfo } from './dataimpulse-balance';
+import { fetchDataImpulseUsageInfo } from './dataimpulse-balance';
 import { resolveSubitoProxyUrl } from './proxy-url';
 import {
   buildProxyProviderStatuses,
@@ -29,6 +29,7 @@ import {
   type FlyUsageCard,
   type NotificationHealthCard,
   type PlatformUsageSnapshot,
+  type ProxyMetricSource,
   type ProxyUsageCard,
   type SupabaseUsageCard,
   type TranslationProviderDetail,
@@ -263,45 +264,89 @@ async function buildProxyCard(
   const activeProviderId = resolveActiveProxyProviderId(proxyUrl);
   const providers = buildProxyProviderStatuses(activeProviderId);
   const activeProvider = activeProviderId ? getProxyProviderCatalogEntry(activeProviderId) : null;
+
+  const estimatedTrafficBytes = metrics.estimatedTrafficBytes;
   const estimatedCostUsd = activeProvider
-    ? estimateProxyCostUsd(metrics.estimatedTrafficBytes, activeProvider.pricePerGbUsd)
+    ? estimateProxyCostUsd(estimatedTrafficBytes, activeProvider.pricePerGbUsd)
     : 0;
 
+  let trafficBytes = estimatedTrafficBytes;
+  let trafficSource: ProxyMetricSource = 'estimated';
+  let costUsd = estimatedCostUsd;
+  let costSource: ProxyMetricSource = 'estimated';
   let balanceUsd: number | null = null;
   let balanceSource: ProxyUsageCard['balanceSource'] = null;
   let balanceError: string | null = null;
-  let remainingGbFromApi: number | null = null;
+  let remainingTrafficGb: number | null = null;
+  let remainingTrafficSource: ProxyMetricSource | null = null;
+  let remainingTrafficNote: string | null = null;
+  let providerSyncedAt: string | null = null;
 
   if (activeProviderId === 'dataimpulse') {
-    const balanceInfo = await fetchDataImpulseBalanceInfo();
-    balanceUsd = balanceInfo.balanceUsd;
-    balanceSource = balanceInfo.source;
-    balanceError = balanceInfo.error;
-    remainingGbFromApi = balanceInfo.remainingGb;
-  }
+    const usage = await fetchDataImpulseUsageInfo({ proxyUrl });
 
-  const { remainingGb, note } = resolveRemainingTrafficGb({
-    remainingGbFromApi,
-    remainingGbFromEnv: null,
-    planGb: parseOptionalGbEnv('DATAIMPULSE_PLAN_GB'),
-    usedBytes: metrics.estimatedTrafficBytes,
-  });
+    balanceUsd = usage.balanceUsd;
+    balanceSource = usage.source;
+    balanceError = usage.error;
+    providerSyncedAt = usage.source ? new Date().toISOString() : null;
+
+    if (usage.monthTrafficGb != null) {
+      trafficBytes = Math.round(usage.monthTrafficGb * 1024 * 1024 * 1024);
+      trafficSource = usage.source === 'env' ? 'env' : 'provider_api';
+    }
+
+    if (usage.monthCostUsd != null) {
+      costUsd = usage.monthCostUsd;
+      costSource = usage.source === 'env' ? 'env' : 'provider_api';
+    } else if (trafficSource === 'provider_api' && usage.monthTrafficGb != null && activeProvider) {
+      costUsd = estimateProxyCostUsd(trafficBytes, activeProvider.pricePerGbUsd);
+      costSource = 'provider_api';
+    }
+
+    if (usage.remainingGb != null) {
+      remainingTrafficGb = usage.remainingGb;
+      remainingTrafficSource = usage.source === 'env' ? 'env' : 'provider_api';
+      remainingTrafficNote =
+        usage.source === 'api'
+          ? '来自 DataImpulse API（刷新页面时同步）'
+          : usage.source === 'env'
+            ? '来自环境变量'
+            : null;
+    } else {
+      const derived = resolveRemainingTrafficGb({
+        remainingGbFromApi: null,
+        remainingGbFromEnv: null,
+        planGb: parseOptionalGbEnv('DATAIMPULSE_PLAN_GB'),
+        usedBytes: trafficBytes,
+      });
+      remainingTrafficGb = derived.remainingGb;
+      remainingTrafficNote = derived.note;
+      remainingTrafficSource = derived.remainingGb != null ? 'estimated' : null;
+    }
+  }
 
   return {
     ...metrics,
+    estimatedTrafficBytes: trafficBytes,
     configured: Boolean(proxyUrl?.trim()),
     activeProviderId,
     activeProviderLabel: activeProvider?.label ?? null,
     maskedProxyHost: proxyUrl ? maskProxyHost(proxyUrl) : null,
     providers,
-    estimatedCostUsd,
+    estimatedCostUsd: costUsd,
+    trafficBytes,
+    trafficSource,
+    costUsd,
+    costSource,
     balanceUsd,
-    remainingTrafficGb: remainingGb,
-    remainingTrafficNote: note,
+    remainingTrafficGb,
+    remainingTrafficSource,
+    remainingTrafficNote,
     balanceSource,
     balanceError,
     activeDashboardUrl: activeProvider?.dashboardUrl ?? null,
     activeDashboardLabel: activeProvider?.dashboardLabel ?? null,
+    providerSyncedAt,
   };
 }
 

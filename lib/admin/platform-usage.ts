@@ -76,6 +76,8 @@ export type TranslationUsageCard = {
   providerDetails: TranslationProviderDetail[];
 };
 
+export type ProxyMetricSource = 'estimated' | 'provider_api' | 'env';
+
 export type ProxyUsageCard = {
   requestCount: number;
   estimatedTrafficBytes: number;
@@ -88,13 +90,19 @@ export type ProxyUsageCard = {
   maskedProxyHost: string | null;
   providers: ProxyProviderStatus[];
   estimatedCostUsd: number;
+  trafficBytes: number;
+  trafficSource: ProxyMetricSource;
+  costUsd: number;
+  costSource: ProxyMetricSource;
   balanceUsd: number | null;
   remainingTrafficGb: number | null;
+  remainingTrafficSource: ProxyMetricSource | null;
   remainingTrafficNote: string | null;
   balanceSource: 'api' | 'env' | null;
   balanceError: string | null;
   activeDashboardUrl: string | null;
   activeDashboardLabel: string | null;
+  providerSyncedAt: string | null;
 };
 
 export type NotificationHealthCard = {
