@@ -1,4 +1,4 @@
-import type { PlatformUsageSnapshot } from './platform-usage';
+import type { FlyUsageCard, PlatformUsageSnapshot } from './platform-usage';
 
 export type ServicePlanTier = 'free' | 'paid';
 
@@ -50,6 +50,33 @@ export function resolveFlyAppName(): string {
 export function inferVercelPlanTier(planLabel: string): ServicePlanTier {
   const normalized = planLabel.trim().toLowerCase();
   return FREE_VERCEL_PLAN_KEYWORDS.some((keyword) => normalized.includes(keyword)) ? 'free' : 'paid';
+}
+
+/** Optional override: FLY_PLAN_TIER=free|paid */
+function resolveFlyPlanTierFromEnv(): ServicePlanTier | null {
+  const raw = process.env.FLY_PLAN_TIER?.trim().toLowerCase();
+  if (raw === 'free' || raw === 'paid') {
+    return raw;
+  }
+  return null;
+}
+
+/**
+ * Fly.io badge reflects whether this project currently shows billable usage.
+ * Legacy Hobby plans include free shared-cpu VMs; cron workers often stay at $0/mo.
+ * Our estimated cost is derived from scrape wall time (not 24/7 machine uptime).
+ */
+export function inferFlyPlanTier(flyio: Pick<FlyUsageCard, 'estimatedCostUsd'> | undefined): ServicePlanTier {
+  const fromEnv = resolveFlyPlanTierFromEnv();
+  if (fromEnv) {
+    return fromEnv;
+  }
+
+  if (!flyio || flyio.estimatedCostUsd <= 0) {
+    return 'free';
+  }
+
+  return 'paid';
 }
 
 function buildSupabaseDashboard(): ServiceDashboardLink | null {
@@ -123,7 +150,7 @@ export function buildBillingServiceMeta(snapshot: PlatformUsageSnapshot | null):
       dashboard: buildVercelDashboard(),
     },
     flyio: {
-      planTier: 'paid',
+      planTier: inferFlyPlanTier(snapshot?.flyio),
       dashboard: buildFlyDashboard(),
     },
     llm: {

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   buildBillingServiceMeta,
   extractSupabaseProjectRef,
+  inferFlyPlanTier,
   inferVercelPlanTier,
   planTierLabel,
   resolveFlyAppName,
@@ -51,6 +52,29 @@ describe('extractSupabaseProjectRef', () => {
   });
 });
 
+describe('inferFlyPlanTier', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('treats zero estimated cost as free', () => {
+    expect(inferFlyPlanTier({ estimatedCostUsd: 0 })).toBe('free');
+  });
+
+  it('treats positive estimated cost as paid', () => {
+    expect(inferFlyPlanTier({ estimatedCostUsd: 1.5 })).toBe('paid');
+  });
+
+  it('defaults to free when usage is missing', () => {
+    expect(inferFlyPlanTier(undefined)).toBe('free');
+  });
+
+  it('respects FLY_PLAN_TIER env override', () => {
+    vi.stubEnv('FLY_PLAN_TIER', 'paid');
+    expect(inferFlyPlanTier({ estimatedCostUsd: 0 })).toBe('paid');
+  });
+});
+
 describe('buildBillingServiceMeta', () => {
   afterEach(() => {
     vi.unstubAllEnvs();
@@ -63,6 +87,7 @@ describe('buildBillingServiceMeta', () => {
     const meta = buildBillingServiceMeta(null);
 
     expect(meta.supabase.planTier).toBe('free');
+    expect(meta.flyio.planTier).toBe('free');
     expect(meta.supabase.dashboard?.href).toBe('https://supabase.com/dashboard/project/test-ref');
     expect(meta.flyio.dashboard.href).toBe('https://fly.io/apps/my-scraper');
     expect(meta.llm.openrouter.href).toBe('https://openrouter.ai/activity');
