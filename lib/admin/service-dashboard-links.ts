@@ -19,6 +19,9 @@ export type BillingServiceMeta = {
   proxy: {
     links: ServiceDashboardLink[];
   };
+  messages: {
+    links: ServiceDashboardLink[];
+  };
 };
 
 const FREE_VERCEL_PLAN_KEYWORDS = ['hobby', 'free'];
@@ -117,17 +120,20 @@ function buildFlyDashboard(): ServiceDashboardLink {
 }
 
 function inferProxyDashboardLinks(): ServiceDashboardLink[] {
-  const links: ServiceDashboardLink[] = [
-    { label: 'Telegram BotFather', href: 'https://t.me/BotFather' },
-    { label: 'Resend Dashboard', href: 'https://resend.com/overview' },
-  ];
+  const links: ServiceDashboardLink[] = [];
 
   const proxyUrl = process.env.PROXY_URL?.trim();
   if (proxyUrl) {
     try {
       const hostname = new URL(proxyUrl).hostname.toLowerCase();
+      if (hostname.includes('dataimpulse')) {
+        links.push({ label: 'DataImpulse Dashboard', href: 'https://app.dataimpulse.com/dashboard' });
+      }
       if (hostname.includes('webshare')) {
-        links.unshift({ label: 'Webshare Dashboard', href: 'https://dashboard.webshare.io/' });
+        links.push({ label: 'Webshare Dashboard', href: 'https://dashboard.webshare.io/' });
+      }
+      if (hostname.includes('decodo') || hostname.includes('smartproxy')) {
+        links.push({ label: 'Decodo Dashboard', href: 'https://app.decodo.com/' });
       }
     } catch {
       /* ignore malformed PROXY_URL */
@@ -135,6 +141,13 @@ function inferProxyDashboardLinks(): ServiceDashboardLink[] {
   }
 
   return links;
+}
+
+function buildMessagesDashboardLinks(): ServiceDashboardLink[] {
+  return [
+    { label: 'Telegram BotFather', href: 'https://t.me/BotFather' },
+    { label: 'Resend Dashboard', href: 'https://resend.com/overview' },
+  ];
 }
 
 export function buildBillingServiceMeta(snapshot: PlatformUsageSnapshot | null): BillingServiceMeta {
@@ -166,6 +179,9 @@ export function buildBillingServiceMeta(snapshot: PlatformUsageSnapshot | null):
     },
     proxy: {
       links: inferProxyDashboardLinks(),
+    },
+    messages: {
+      links: buildMessagesDashboardLinks(),
     },
   };
 }

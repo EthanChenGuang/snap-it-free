@@ -286,7 +286,11 @@ export function PlatformUsageGrid({ snapshot, loading, error, refresh }: Platfor
 
               <PlatformCard
                 title="抓取代理"
-                subtitle="Proxies · 请求与流量"
+                subtitle={
+                  snapshot.proxy.activeProviderLabel
+                    ? `${snapshot.proxy.activeProviderLabel} · 请求与流量`
+                    : 'Proxies · 请求与流量'
+                }
                 icon="swap_horiz"
                 iconTint="rgba(255, 149, 0, 0.1)"
                 href={adminBillingHref(BILLING_SECTION_IDS.proxy)}
@@ -299,6 +303,11 @@ export function PlatformUsageGrid({ snapshot, loading, error, refresh }: Platfor
                   <span className="font-mono tabular-nums text-[#636366]">
                     {formatTraffic(snapshot.proxy.estimatedTrafficBytes)}
                   </span>
+                  {' · '}
+                  费用{' '}
+                  <span className="font-mono tabular-nums text-[#636366]">
+                    {formatPlatformUsd(snapshot.proxy.estimatedCostUsd)}
+                  </span>
                 </p>
                 <p className="font-mono text-[11px] tabular-nums text-[#636366]">
                   Block {snapshot.proxy.blockRatePercent}% · 7d {snapshot.proxy.blockedRunCount}/
@@ -307,11 +316,11 @@ export function PlatformUsageGrid({ snapshot, loading, error, refresh }: Platfor
               </PlatformCard>
 
               <PlatformCard
-                title="通知健康度"
+                title="消息通知"
                 subtitle="Telegram · Resend · Supabase"
                 icon="notifications"
                 iconTint="rgba(52, 199, 89, 0.1)"
-                href={adminRoutes.settings}
+                href={adminBillingHref(BILLING_SECTION_IDS.messages)}
               >
                 <div className="flex flex-wrap gap-1.5">
                   <HealthPill

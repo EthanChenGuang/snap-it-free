@@ -10,6 +10,7 @@ import {
   evaluateThresholds,
   type ThresholdAlert,
 } from './threshold-alerts';
+import { buildProxyProviderStatuses } from './proxy-providers';
 import type { PlatformUsageSnapshot } from './platform-usage';
 
 function baseSnapshot(overrides: Partial<PlatformUsageSnapshot> = {}): PlatformUsageSnapshot {
@@ -65,6 +66,19 @@ function baseSnapshot(overrides: Partial<PlatformUsageSnapshot> = {}): PlatformU
       blockRatePercent: 5,
       blockedRunCount: 1,
       totalRunCount: 20,
+      configured: true,
+      activeProviderId: 'dataimpulse',
+      activeProviderLabel: 'DataImpulse',
+      maskedProxyHost: 'gw.dataimpulse.com:823',
+      providers: buildProxyProviderStatuses('dataimpulse'),
+      estimatedCostUsd: 1.14,
+      balanceUsd: null,
+      remainingTrafficGb: null,
+      remainingTrafficNote: null,
+      balanceSource: null,
+      balanceError: null,
+      activeDashboardUrl: 'https://app.dataimpulse.com/dashboard',
+      activeDashboardLabel: 'DataImpulse Dashboard',
     },
     notifications: {
       telegramConfigured: true,

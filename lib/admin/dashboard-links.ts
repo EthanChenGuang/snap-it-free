@@ -4,6 +4,7 @@ export const BILLING_SECTION_IDS = {
   flyio: 'billing-flyio',
   llm: 'billing-llm',
   proxy: 'billing-proxy',
+  messages: 'billing-messages',
 } as const;
 
 export type BillingSectionId = (typeof BILLING_SECTION_IDS)[keyof typeof BILLING_SECTION_IDS];

@@ -24,7 +24,8 @@ const ANCHORS = [
   { id: BILLING_SECTION_IDS.vercel, label: 'Vercel' },
   { id: BILLING_SECTION_IDS.flyio, label: 'Fly.io' },
   { id: BILLING_SECTION_IDS.llm, label: 'LLM 翻译' },
-  { id: BILLING_SECTION_IDS.proxy, label: '代理与消息' },
+  { id: BILLING_SECTION_IDS.proxy, label: '代理' },
+  { id: BILLING_SECTION_IDS.messages, label: '消息' },
 ] as const;
 
 type BillingClientProps = {
@@ -60,6 +61,28 @@ function ProgressBar({ percent, label }: { percent: number; label: string }) {
   );
 }
 
+function ProviderStatusBadge({ active, inactiveReason }: { active: boolean; inactiveReason: string | null }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium',
+        active ? 'bg-[#34c759]/10 text-[#248a3d]' : 'bg-black/[0.04] text-[#86868b]',
+      )}
+    >
+      {active ? '激活' : inactiveReason ?? '未启用'}
+    </span>
+  );
+}
+
+function formatRemainingTrafficGb(value: number | null): string {
+  if (value == null) {
+    return '—';
+  }
+  if (value >= 100) {
+    return `${Math.round(value)} GB`;
+  }
+  return `${value.toFixed(2)} GB`;
+}
 function PlanTierBadge({ tier }: { tier: ServicePlanTier }) {
   return (
     <span
@@ -508,39 +531,123 @@ export function BillingClient({ initialSnapshot, initialError, serviceMeta }: Bi
 
           <BillingPanel
             id={BILLING_SECTION_IDS.proxy}
-            title="代理与消息"
-            subtitle="Proxies · Telegram · Resend"
+            title="抓取代理"
+            subtitle={snapshot.proxy.configured ? snapshot.proxy.maskedProxyHost ?? 'Proxy 已配置' : 'Proxy 未配置'}
             icon="swap_horiz"
             iconTint="rgba(255, 149, 0, 0.1)"
+            planTier={snapshot.proxy.activeProviderId ? 'paid' : undefined}
           >
-            <div className="grid gap-4 md:grid-cols-2">
-              <MetricRow
-                label="代理请求数"
-                value={
-                  <span className="font-mono tabular-nums">
-                    {snapshot.proxy.requestCount.toLocaleString()}
-                  </span>
-                }
-              />
-              <MetricRow
-                label="代理流量"
-                value={
-                  <span className="font-mono tabular-nums">
-                    {formatTraffic(snapshot.proxy.estimatedTrafficBytes)}
-                  </span>
-                }
-              />
-              <MetricRow
-                label="Block Rate (7d)"
-                value={
-                  <span className="font-mono tabular-nums">
-                    {snapshot.proxy.blockRatePercent}% · {snapshot.proxy.blockedRunCount}/
-                    {snapshot.proxy.totalRunCount}
-                  </span>
-                }
-              />
-            </div>
-            <div className="mt-4 space-y-3 border-t border-black/[0.05] pt-4">
+            <ul className="space-y-3">
+              {snapshot.proxy.providers.map((provider) => (
+                <li
+                  key={provider.id}
+                  className={cn(
+                    'rounded-lg border p-3',
+                    provider.active
+                      ? 'border-black/[0.08] bg-[#fafafa]'
+                      : 'border-black/[0.05] bg-white',
+                  )}
+                >
+                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[13px] font-semibold text-[#1d1d1f]">{provider.label}</span>
+                        <ProviderStatusBadge
+                          active={provider.active}
+                          inactiveReason={provider.inactiveReason}
+                        />
+                      </div>
+                      <p className="mt-0.5 text-[12px] text-[#86868b]">{provider.subtitle}</p>
+                    </div>
+                    <span className="font-mono text-[11px] tabular-nums text-[#86868b]">
+                      ${provider.pricePerGbUsd.toFixed(2)}/GB
+                    </span>
+                  </div>
+
+                  {provider.active ? (
+                    <div className="space-y-3 border-t border-black/[0.05] pt-3">
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <MetricRow
+                          label="本月请求数"
+                          value={
+                            <span className="font-mono tabular-nums">
+                              {snapshot.proxy.requestCount.toLocaleString()}
+                            </span>
+                          }
+                        />
+                        <MetricRow
+                          label="本月流量（估算）"
+                          value={
+                            <span className="font-mono tabular-nums">
+                              {formatTraffic(snapshot.proxy.estimatedTrafficBytes)}
+                            </span>
+                          }
+                        />
+                        <MetricRow
+                          label="本月费用（估算）"
+                          value={
+                            <span className="font-mono tabular-nums">
+                              {formatPlatformUsd(snapshot.proxy.estimatedCostUsd)}
+                            </span>
+                          }
+                        />
+                        <MetricRow
+                          label="剩余流量"
+                          value={
+                            <span className="font-mono tabular-nums">
+                              {formatRemainingTrafficGb(snapshot.proxy.remainingTrafficGb)}
+                            </span>
+                          }
+                        />
+                        {snapshot.proxy.balanceUsd != null ? (
+                          <MetricRow
+                            label="账户余额"
+                            value={
+                              <span className="font-mono tabular-nums">
+                                {formatUsd(snapshot.proxy.balanceUsd)}
+                              </span>
+                            }
+                          />
+                        ) : null}
+                        <MetricRow
+                          label="Block Rate (7d)"
+                          value={
+                            <span className="font-mono tabular-nums">
+                              {snapshot.proxy.blockRatePercent}% · {snapshot.proxy.blockedRunCount}/
+                              {snapshot.proxy.totalRunCount}
+                            </span>
+                          }
+                        />
+                      </div>
+                      {snapshot.proxy.remainingTrafficNote ? (
+                        <p className="text-[11px] text-[#86868b]">{snapshot.proxy.remainingTrafficNote}</p>
+                      ) : null}
+                      {snapshot.proxy.balanceError ? (
+                        <p className="font-mono text-[11px] text-[#ff9500]">{snapshot.proxy.balanceError}</p>
+                      ) : null}
+                      {snapshot.proxy.activeDashboardUrl && snapshot.proxy.activeDashboardLabel ? (
+                        <ServiceDashboardLink
+                          link={{
+                            href: snapshot.proxy.activeDashboardUrl,
+                            label: snapshot.proxy.activeDashboardLabel,
+                          }}
+                        />
+                      ) : null}
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </BillingPanel>
+
+          <BillingPanel
+            id={BILLING_SECTION_IDS.messages}
+            title="消息通知"
+            subtitle="Telegram · Resend · Supabase 配额"
+            icon="notifications"
+            iconTint="rgba(52, 199, 89, 0.1)"
+          >
+            <div className="space-y-3">
               <p className="text-[13px] font-medium text-[#1d1d1f]">通知配额健康度</p>
               <div className="flex flex-wrap gap-2">
                 <HealthPill
@@ -568,7 +675,7 @@ export function BillingClient({ initialSnapshot, initialError, serviceMeta }: Bi
               </p>
             </div>
             <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-black/[0.05] pt-3">
-              {serviceMeta.proxy.links.map((link) => (
+              {serviceMeta.messages.links.map((link) => (
                 <ServiceDashboardLink key={link.href} link={link} />
               ))}
             </div>
@@ -585,7 +692,7 @@ export function BillingSkeleton() {
       <div className="mb-6 h-14 animate-pulse rounded-xl bg-black/[0.04]" />
       <div className="mb-6 h-36 animate-pulse rounded-xl bg-black/[0.04]" />
       <div className="mb-6 h-12 animate-pulse rounded-xl bg-black/[0.04]" />
-      {Array.from({ length: 5 }).map((_, index) => (
+      {Array.from({ length: 6 }).map((_, index) => (
         <div key={index} className="mb-6 h-56 animate-pulse rounded-xl bg-black/[0.04]" />
       ))}
     </div>

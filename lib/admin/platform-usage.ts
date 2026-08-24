@@ -1,4 +1,17 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { fetchDataImpulseBalanceInfo } from './dataimpulse-balance';
+import { resolveSubitoProxyUrl } from './proxy-url';
+import {
+  buildProxyProviderStatuses,
+  estimateProxyCostUsd,
+  getProxyProviderCatalogEntry,
+  maskProxyHost,
+  parseOptionalGbEnv,
+  resolveActiveProxyProviderId,
+  resolveRemainingTrafficGb,
+  type ProxyProviderId,
+  type ProxyProviderStatus,
+} from './proxy-providers';
 import {
   SUPABASE_FREE_LIMITS,
   classifyQuotaUsage,
@@ -90,6 +103,19 @@ export type ProxyUsageCard = {
   blockRatePercent: number;
   blockedRunCount: number;
   totalRunCount: number;
+  configured: boolean;
+  activeProviderId: ProxyProviderId | null;
+  activeProviderLabel: string | null;
+  maskedProxyHost: string | null;
+  providers: ProxyProviderStatus[];
+  estimatedCostUsd: number;
+  balanceUsd: number | null;
+  remainingTrafficGb: number | null;
+  remainingTrafficNote: string | null;
+  balanceSource: 'api' | 'env' | null;
+  balanceError: string | null;
+  activeDashboardUrl: string | null;
+  activeDashboardLabel: string | null;
 };
 
 export type NotificationHealthCard = {
@@ -308,7 +334,7 @@ async function buildTranslationCard(
   };
 }
 
-function buildProxyCard(monthRows: ScrapeRunAggRow[], weekRows: ScrapeRunAggRow[]): ProxyUsageCard {
+function buildProxyUsageMetrics(monthRows: ScrapeRunAggRow[], weekRows: ScrapeRunAggRow[]) {
   const requestCount = monthRows.reduce((sum, row) => sum + (row.http_requests ?? 0), 0);
   const estimatedTrafficBytes = requestCount * PROXY_BYTES_PER_REQUEST;
   const blockedRunCount = weekRows.filter(isBlockedRun).length;
@@ -322,6 +348,57 @@ function buildProxyCard(monthRows: ScrapeRunAggRow[], weekRows: ScrapeRunAggRow[
     blockRatePercent,
     blockedRunCount,
     totalRunCount,
+  };
+}
+
+async function buildProxyCard(
+  monthRows: ScrapeRunAggRow[],
+  weekRows: ScrapeRunAggRow[],
+  proxyUrl: string | null,
+): Promise<ProxyUsageCard> {
+  const metrics = buildProxyUsageMetrics(monthRows, weekRows);
+  const activeProviderId = resolveActiveProxyProviderId(proxyUrl);
+  const providers = buildProxyProviderStatuses(activeProviderId);
+  const activeProvider = activeProviderId ? getProxyProviderCatalogEntry(activeProviderId) : null;
+  const estimatedCostUsd = activeProvider
+    ? estimateProxyCostUsd(metrics.estimatedTrafficBytes, activeProvider.pricePerGbUsd)
+    : 0;
+
+  let balanceUsd: number | null = null;
+  let balanceSource: ProxyUsageCard['balanceSource'] = null;
+  let balanceError: string | null = null;
+  let remainingGbFromApi: number | null = null;
+
+  if (activeProviderId === 'dataimpulse') {
+    const balanceInfo = await fetchDataImpulseBalanceInfo();
+    balanceUsd = balanceInfo.balanceUsd;
+    balanceSource = balanceInfo.source;
+    balanceError = balanceInfo.error;
+    remainingGbFromApi = balanceInfo.remainingGb;
+  }
+
+  const { remainingGb, note } = resolveRemainingTrafficGb({
+    remainingGbFromApi,
+    remainingGbFromEnv: null,
+    planGb: parseOptionalGbEnv('DATAIMPULSE_PLAN_GB'),
+    usedBytes: metrics.estimatedTrafficBytes,
+  });
+
+  return {
+    ...metrics,
+    configured: Boolean(proxyUrl?.trim()),
+    activeProviderId,
+    activeProviderLabel: activeProvider?.label ?? null,
+    maskedProxyHost: proxyUrl ? maskProxyHost(proxyUrl) : null,
+    providers,
+    estimatedCostUsd,
+    balanceUsd,
+    remainingTrafficGb: remainingGb,
+    remainingTrafficNote: note,
+    balanceSource,
+    balanceError,
+    activeDashboardUrl: activeProvider?.dashboardUrl ?? null,
+    activeDashboardLabel: activeProvider?.dashboardLabel ?? null,
   };
 }
 
@@ -422,6 +499,8 @@ export async function collectPlatformUsageSnapshot(
   const flyioCard = buildFlyCard(monthRows);
   const supabaseCard = buildSupabaseCard(quotaSnapshot, apiRequestsMonth, mauEstimate);
   const translationCard = await buildTranslationCard(supabase, primaryProvider, monthStart);
+  const proxyUrl = await resolveSubitoProxyUrl(supabase);
+  const proxyCard = await buildProxyCard(monthRows, weekRows, proxyUrl);
 
   return {
     capturedAt: new Date().toISOString(),
@@ -430,7 +509,7 @@ export async function collectPlatformUsageSnapshot(
     flyio: flyioCard,
     compute: buildComputeCard(vercelCard, flyioCard),
     translation: translationCard,
-    proxy: buildProxyCard(monthRows, weekRows),
+    proxy: proxyCard,
     notifications: buildNotificationCard({
       telegramChatId: (configRow?.telegram_chat_id as string | null) ?? null,
       alertEmail: (configRow?.alert_email as string | null) ?? null,

@@ -91,7 +91,7 @@ describe('buildBillingServiceMeta', () => {
     expect(meta.supabase.dashboard?.href).toBe('https://supabase.com/dashboard/project/test-ref');
     expect(meta.flyio.dashboard.href).toBe('https://fly.io/apps/my-scraper');
     expect(meta.llm.openrouter.href).toBe('https://openrouter.ai/activity');
-    expect(meta.proxy.links.some((link) => link.label.includes('Resend'))).toBe(true);
+    expect(meta.messages.links.some((link) => link.label.includes('Resend'))).toBe(true);
   });
 });
 
