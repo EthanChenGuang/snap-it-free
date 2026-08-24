@@ -15,6 +15,8 @@ import { formatQuotaBytes } from '@/lib/admin/quota-usage';
 import { formatUtcTimestamp } from '@/lib/admin/format';
 import { formatTokenCount, formatUsd } from '@/lib/admin/translation-cost';
 import { BILLING_SECTION_IDS } from '@/lib/admin/dashboard-links';
+import type { BillingServiceMeta, ServiceDashboardLink, ServicePlanTier } from '@/lib/admin/service-dashboard-links';
+import { planTierLabel } from '@/lib/admin/service-dashboard-links';
 import { cn } from '@/lib/utils';
 
 const ANCHORS = [
@@ -28,6 +30,7 @@ const ANCHORS = [
 type BillingClientProps = {
   initialSnapshot: PlatformUsageSnapshot | null;
   initialError: string | null;
+  serviceMeta: BillingServiceMeta;
 };
 
 function MetricRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -57,12 +60,43 @@ function ProgressBar({ percent, label }: { percent: number; label: string }) {
   );
 }
 
+function PlanTierBadge({ tier }: { tier: ServicePlanTier }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium',
+        tier === 'free' ? 'bg-[#34c759]/10 text-[#248a3d]' : 'bg-black/[0.06] text-[#636366]',
+      )}
+    >
+      {planTierLabel(tier)}
+    </span>
+  );
+}
+
+function ServiceDashboardLink({ link }: { link: ServiceDashboardLink }) {
+  return (
+    <a
+      href={link.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="dashboard-metric-link inline-flex items-center gap-1 text-[12px]"
+    >
+      {link.label}
+      <span className="material-symbols-outlined text-[14px]" aria-hidden>
+        open_in_new
+      </span>
+    </a>
+  );
+}
+
 function BillingPanel({
   id,
   title,
   subtitle,
   icon,
   iconTint,
+  planTier,
+  dashboardLink,
   children,
 }: {
   id: string;
@@ -70,20 +104,32 @@ function BillingPanel({
   subtitle: string;
   icon: string;
   iconTint: string;
+  planTier?: ServicePlanTier;
+  dashboardLink?: ServiceDashboardLink | null;
   children: React.ReactNode;
 }) {
   return (
     <section id={id} className="billing-panel scroll-mt-24">
       <header className="billing-panel-head">
         <div>
-          <h2 className="billing-panel-title">{title}</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="billing-panel-title">{title}</h2>
+            {planTier ? <PlanTierBadge tier={planTier} /> : null}
+          </div>
           <p className="billing-panel-subtitle">{subtitle}</p>
         </div>
         <span className="billing-panel-icon-wrap" style={{ background: iconTint }} aria-hidden>
           <span className="material-symbols-outlined text-[22px] text-[#1d1d1f]">{icon}</span>
         </span>
       </header>
-      <div className="billing-panel-body">{children}</div>
+      <div className="billing-panel-body">
+        {children}
+        {dashboardLink ? (
+          <div className="mt-4 border-t border-black/[0.05] pt-3">
+            <ServiceDashboardLink link={dashboardLink} />
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }
@@ -102,7 +148,7 @@ function HealthPill({ ok, label }: { ok: boolean; label: string }) {
   );
 }
 
-export function BillingClient({ initialSnapshot, initialError }: BillingClientProps) {
+export function BillingClient({ initialSnapshot, initialError, serviceMeta }: BillingClientProps) {
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(initialError);
@@ -216,6 +262,8 @@ export function BillingClient({ initialSnapshot, initialError }: BillingClientPr
             subtitle="PostgreSQL · Storage · Auth · API"
             icon="database"
             iconTint="rgba(62, 207, 142, 0.12)"
+            planTier={serviceMeta.supabase.planTier}
+            dashboardLink={serviceMeta.supabase.dashboard}
           >
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
@@ -292,6 +340,8 @@ export function BillingClient({ initialSnapshot, initialError }: BillingClientPr
             subtitle="Cron · Edge Network · Builds"
             icon="cloud"
             iconTint="rgba(0, 0, 0, 0.06)"
+            planTier={serviceMeta.vercel.planTier}
+            dashboardLink={serviceMeta.vercel.dashboard}
           >
             <div className="grid gap-4 md:grid-cols-2">
               <MetricRow
@@ -339,6 +389,8 @@ export function BillingClient({ initialSnapshot, initialError }: BillingClientPr
             subtitle="Scraper Worker · Cron Jobs"
             icon="flight_takeoff"
             iconTint="rgba(136, 89, 225, 0.1)"
+            planTier={serviceMeta.flyio.planTier}
+            dashboardLink={serviceMeta.flyio.dashboard}
           >
             <div className="grid gap-4 md:grid-cols-2">
               <MetricRow
@@ -396,6 +448,7 @@ export function BillingClient({ initialSnapshot, initialError }: BillingClientPr
             subtitle={snapshot.translation.primaryModelLabel}
             icon="psychology"
             iconTint="rgba(88, 86, 214, 0.1)"
+            planTier={serviceMeta.llm.planTier}
           >
             <div className="mb-4 flex flex-wrap items-baseline gap-4">
               <p className="font-mono text-2xl font-bold tabular-nums text-[#1d1d1f]">
@@ -407,7 +460,15 @@ export function BillingClient({ initialSnapshot, initialError }: BillingClientPr
             </div>
             {snapshot.translation.providerDetails.length > 0 ? (
               <ul className="space-y-3">
-                {snapshot.translation.providerDetails.map((provider) => (
+                {snapshot.translation.providerDetails.map((provider) => {
+                  const providerDashboard =
+                    provider.provider === 'openrouter'
+                      ? serviceMeta.llm.openrouter
+                      : provider.provider === 'gemini'
+                        ? serviceMeta.llm.gemini
+                        : null;
+
+                  return (
                   <li
                     key={provider.provider}
                     className="rounded-lg border border-black/[0.05] bg-[#fafafa] p-3"
@@ -425,11 +486,23 @@ export function BillingClient({ initialSnapshot, initialError }: BillingClientPr
                       <span>Output {formatTokenCount(provider.outputTokens)}</span>
                       <span>{provider.callCount.toLocaleString()} calls</span>
                     </div>
+                    {providerDashboard ? (
+                      <div className="mt-2">
+                        <ServiceDashboardLink link={providerDashboard} />
+                      </div>
+                    ) : null}
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             ) : (
-              <p className="text-[13px] text-[#86868b]">暂无本月翻译用量记录。</p>
+              <div className="space-y-3">
+                <p className="text-[13px] text-[#86868b]">暂无本月翻译用量记录。</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                  <ServiceDashboardLink link={serviceMeta.llm.openrouter} />
+                  <ServiceDashboardLink link={serviceMeta.llm.gemini} />
+                </div>
+              </div>
             )}
           </BillingPanel>
 
@@ -493,6 +566,11 @@ export function BillingClient({ initialSnapshot, initialError }: BillingClientPr
                   ? `Mail: ${snapshot.notifications.resendTarget}`
                   : 'Mail: —'}
               </p>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-black/[0.05] pt-3">
+              {serviceMeta.proxy.links.map((link) => (
+                <ServiceDashboardLink key={link.href} link={link} />
+              ))}
             </div>
           </BillingPanel>
         </div>
