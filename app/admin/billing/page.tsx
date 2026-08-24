@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { BillingClient, BillingSkeleton } from '@/components/admin/BillingClient';
-import { collectPlatformUsageSnapshot } from '@/lib/admin/platform-usage';
+import { collectPlatformUsageSnapshot } from '@/lib/admin/platform-usage-collect';
 import { buildBillingServiceMeta } from '@/lib/admin/service-dashboard-links';
 
 async function BillingContent() {

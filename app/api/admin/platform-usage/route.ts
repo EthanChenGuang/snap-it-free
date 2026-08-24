@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { collectPlatformUsageSnapshot } from '@/lib/admin/platform-usage';
+import { collectPlatformUsageSnapshot } from '@/lib/admin/platform-usage-collect';
 import { evaluateThresholds } from '@/lib/admin/threshold-alerts';
 import { requireOperatorSession } from '@/lib/admin/operator-route';
 import { createServiceClient } from '@/lib/supabase/service';

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { collectPlatformUsageSnapshot } from './platform-usage-collect';
 import {
-  collectPlatformUsageSnapshot,
   formatHours,
   formatPlatformTokens,
   formatPlatformUsd,
@@ -173,7 +173,7 @@ function buildTelegramMarkdown(alerts: ThresholdAlert[], snapshot: PlatformUsage
     `• 翻译 LLM: ${formatPlatformTokens(snapshot.translation.totalTokens)} · ${formatPlatformUsd(snapshot.translation.monthTotalUsd)}`,
     `• 代理: ${snapshot.proxy.requestCount.toLocaleString()} req · ${formatTraffic(snapshot.proxy.estimatedTrafficBytes)}`,
     '',
-    '— 手慢无 Admin Console',
+    '— 零元 Admin Console',
   ];
   return lines.join('\n');
 }
@@ -192,7 +192,7 @@ function buildEmailHtml(alerts: ThresholdAlert[], snapshot: PlatformUsageSnapsho
 <li>翻译 LLM: ${formatPlatformTokens(snapshot.translation.totalTokens)} · ${formatPlatformUsd(snapshot.translation.monthTotalUsd)}</li>
 <li>代理: ${snapshot.proxy.requestCount.toLocaleString()} req · ${formatTraffic(snapshot.proxy.estimatedTrafficBytes)}</li>
 </ul>
-<p style="color:#86868b;font-size:12px;">— 手慢无 Admin Console</p>
+<p style="color:#86868b;font-size:12px;">— 零元 Admin Console</p>
 </body></html>`;
 }
 
