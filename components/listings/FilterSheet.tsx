@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import {
   Drawer,
   DrawerContent,
@@ -18,6 +19,11 @@ import {
 import { cn } from '@/lib/utils';
 
 const CITY_OPTIONS = CONSUMER_CITY_FILTER_OPTIONS;
+
+/** Collapsed snap leaves ~upper half of feed visible; expanded fits all city/category chips. */
+const FILTER_SHEET_SNAP_COLLAPSED = 0.5;
+const FILTER_SHEET_SNAP_EXPANDED = 0.85;
+const FILTER_SHEET_SNAP_POINTS = [FILTER_SHEET_SNAP_COLLAPSED, FILTER_SHEET_SNAP_EXPANDED] as const;
 
 function ConsumerCityChipSelector({
   value,
@@ -67,11 +73,47 @@ export function FilterSheet() {
     resetFilters,
   } = useFeedFilter();
 
-  const handleOpenChange = (open: boolean) => setSheetOpen(open);
+  const [activeSnapPoint, setActiveSnapPoint] = useState<number | string | null>(
+    FILTER_SHEET_SNAP_COLLAPSED,
+  );
+
+  useEffect(() => {
+    if (sheetOpen) {
+      setActiveSnapPoint(FILTER_SHEET_SNAP_COLLAPSED);
+    }
+  }, [sheetOpen]);
+
+  const isSheetExpanded = activeSnapPoint === FILTER_SHEET_SNAP_EXPANDED;
+
+  const handleOpenChange = (open: boolean) => {
+    setSheetOpen(open);
+    if (!open) {
+      setActiveSnapPoint(FILTER_SHEET_SNAP_COLLAPSED);
+    }
+  };
+
+  const toggleSheet = () => {
+    setActiveSnapPoint(isSheetExpanded ? FILTER_SHEET_SNAP_COLLAPSED : FILTER_SHEET_SNAP_EXPANDED);
+  };
 
   return (
-    <Drawer open={sheetOpen} onOpenChange={handleOpenChange}>
-      <DrawerContent className="max-h-[85vh]">
+    <Drawer
+      open={sheetOpen}
+      onOpenChange={handleOpenChange}
+      modal={false}
+      snapPoints={[...FILTER_SHEET_SNAP_POINTS]}
+      activeSnapPoint={activeSnapPoint}
+      setActiveSnapPoint={setActiveSnapPoint}
+    >
+      <DrawerContent
+        nonModal
+        className="max-h-[85vh]"
+        handleAriaLabel={
+          isSheetExpanded ? messages.sheet.collapseSheet : messages.sheet.expandSheet
+        }
+        onHandleClick={toggleSheet}
+        handleHintActive={!isSheetExpanded}
+      >
         <DrawerHeader className="border-b border-outline-variant px-gutter pb-space-md pt-space-sm">
           <DrawerTitle className="text-xl">{messages.feed.filtersTitle}</DrawerTitle>
         </DrawerHeader>

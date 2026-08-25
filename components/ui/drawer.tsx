@@ -38,7 +38,7 @@ const DrawerContent = React.forwardRef<
     onHandleClick?: () => void;
     handleHintActive?: boolean;
   }
->(({ className, children, nonModal, ...props }, ref) => {
+>(({ className, children, nonModal, handleAriaLabel, onHandleClick, handleHintActive, ...props }, ref) => {
   useUnlockBodyPointerEvents(Boolean(nonModal));
 
   return (
@@ -53,10 +53,15 @@ const DrawerContent = React.forwardRef<
         )}
         {...props}
       >
-        <div
+        <button
+          type="button"
+          aria-label={handleAriaLabel}
+          onClick={onHandleClick}
           className={cn(
             'mx-auto my-space-sm h-1.5 w-12 shrink-0 rounded-full bg-outline',
             nonModal && 'pointer-events-auto',
+            onHandleClick && 'cursor-pointer',
+            handleHintActive && 'animate-pulse',
           )}
         />
         <div className={cn('flex min-h-0 flex-1 flex-col', nonModal && 'pointer-events-auto')}>
