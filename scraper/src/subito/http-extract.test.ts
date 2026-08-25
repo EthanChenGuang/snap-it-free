@@ -86,6 +86,37 @@ describe('parseCategoryNextData', () => {
     expect(listings[0]?.price).toBe('0 €');
     expect(jsonFieldCompleteness).toBe(1);
   });
+
+  it('falls back to city bbox center for non-Venice regalo URLs when geo has no centroid', () => {
+    const milanoUrl =
+      'https://www.subito.it/annunci-lombardia/regalo/informatica/milano/milano/';
+    const payload = JSON.stringify({
+      props: {
+        pageProps: {
+          initialState: {
+            items: {
+              originalList: [
+                {
+                  subject: 'monitor gratis',
+                  date: '2026-08-11 12:00:00',
+                  features: { '/price': { values: [{ value: '0 €' }] } },
+                  images: [{ cdnBaseUrl: 'https://images.sbito.it/x.jpg' }],
+                  urls: {
+                    default: 'https://www.subito.it/informatica/monitor-milano-999.htm',
+                  },
+                  geo: { city: { value: 'Milano', shortName: 'MI' } },
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+    const html = `<html><script id="__NEXT_DATA__">${payload}</script></html>`;
+    const { listings } = parseCategoryNextData(html, milanoUrl);
+    expect(listings[0]?.lat).toBeCloseTo(45.45);
+    expect(listings[0]?.lng).toBeCloseTo(9.15);
+  });
 });
 
 describe('http-extract module surface', () => {

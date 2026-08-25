@@ -3,7 +3,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import {
   buildEmailSubject,
   buildTelegramMessage,
+  buildWhatsAppMessage,
+  isWhatsAppConfigured,
   notifyOperator,
+  resolveChannel,
   type AlertPayload,
 } from './notify.js';
 
@@ -20,6 +23,7 @@ const basePayload: AlertPayload = {
 
 const resendSend = vi.fn();
 const telegramSend = vi.fn();
+const fetchMock = vi.fn();
 
 function mockSupabase(routing: { telegram_chat_id?: string | null; alert_email?: string | null } = {}) {
   return {
@@ -51,15 +55,36 @@ vi.mock('node-telegram-bot-api', () => ({
 describe('notifyOperator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    delete process.env.CALLMEBOT_PHONE;
+    delete process.env.CALLMEBOT_APIKEY;
     delete process.env.TELEGRAM_BOT_TOKEN;
     delete process.env.TELEGRAM_CHAT_ID;
     delete process.env.RESEND_API_KEY;
     delete process.env.ALERT_FROM;
     delete process.env.ALERT_TO;
+    vi.stubGlobal('fetch', fetchMock);
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it('WhatsApp path sends CallMeBot request when CALLMEBOT_* set', async () => {
+    process.env.CALLMEBOT_PHONE = '+393331234567';
+    process.env.CALLMEBOT_APIKEY = 'abc123';
+    process.env.TELEGRAM_BOT_TOKEN = 'bot-token';
+    process.env.TELEGRAM_CHAT_ID = 'chat-id';
+    fetchMock.mockResolvedValue({ ok: true, text: async () => 'Message queued' });
+
+    await notifyOperator(mockSupabase(), basePayload);
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const called = fetchMock.mock.calls[0][0];
+    const url = typeof called === 'string' ? called : called instanceof URL ? called.href : String(called);
+    expect(url).toContain('api.callmebot.com/whatsapp.php');
+    expect(url).toContain('phone=%2B393331234567');
+    expect(url).toContain('apikey=abc123');
+    expect(telegramSend).not.toHaveBeenCalled();
   });
 
   it('Resend path sends subject containing run_id when RESEND_API_KEY set', async () => {
@@ -105,6 +130,30 @@ describe('notifyOperator', () => {
       expect.stringContaining('ALERT_DELIVERY_FAILED channel=resend run_id=run-abc-123'),
     );
     stderrSpy.mockRestore();
+  });
+});
+
+describe('buildWhatsAppMessage', () => {
+  it('includes run_id and block context', () => {
+    const message = buildWhatsAppMessage(basePayload);
+    expect(message).toContain('Subito scraper blocked');
+    expect(message).toContain('run run-abc-123');
+    expect(message).toContain('Reason: LOW_COUNT');
+  });
+});
+
+describe('resolveChannel', () => {
+  it('prefers WhatsApp over Telegram and email', () => {
+    process.env.CALLMEBOT_PHONE = '+393331234567';
+    process.env.CALLMEBOT_APIKEY = 'abc123';
+    process.env.TELEGRAM_BOT_TOKEN = 'bot-token';
+    process.env.TELEGRAM_CHAT_ID = 'chat-id';
+    process.env.RESEND_API_KEY = 're_test';
+    process.env.ALERT_FROM = 'alerts@example.com';
+    process.env.ALERT_TO = 'ops@example.com';
+
+    expect(resolveChannel()).toBe('whatsapp');
+    expect(isWhatsAppConfigured()).toBe(true);
   });
 });
 

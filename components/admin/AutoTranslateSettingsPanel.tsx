@@ -5,7 +5,7 @@ import {
   type AutoTranslateTickResult,
 } from '@/lib/admin/auto-translate-settings';
 import { translationMessages } from '@/components/admin/admin-messages';
-import { useAutoTranslateAll } from '@/hooks/useAutoTranslateAll';
+import { useAutoTranslateContext } from '@/components/admin/AutoTranslateProvider';
 import { cn } from '@/lib/utils';
 
 function formatLastCheck(date: Date | null): string {
@@ -43,7 +43,7 @@ export function AutoTranslateSettingsPanel() {
     lastCheckAt,
     lastTickResult,
     runScheduledCheck,
-  } = useAutoTranslateAll();
+  } = useAutoTranslateContext();
 
   const status = statusMessage(
     settings.enabled,
@@ -54,11 +54,13 @@ export function AutoTranslateSettingsPanel() {
   );
 
   return (
-    <div className="space-y-3 border-t border-outline-variant pt-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <section className="translation-queue-auto-poll" aria-labelledby="translation-queue-auto-poll-title">
+      <div className="translation-queue-auto-poll-head">
         <div>
-          <p className="font-semibold">{translationMessages.autoTranslateAllLabel}</p>
-          <p className="mt-1 text-[14px] text-secondary">{translationMessages.autoTranslateAllSettingsHelp}</p>
+          <h2 id="translation-queue-auto-poll-title" className="translation-queue-auto-poll-title">
+            {translationMessages.autoTranslateAllLabel}
+          </h2>
+          <p className="translation-queue-auto-poll-help">{translationMessages.autoTranslateAllSettingsHelp}</p>
         </div>
         <button
           type="button"
@@ -79,14 +81,14 @@ export function AutoTranslateSettingsPanel() {
         </button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-2 text-[14px] text-secondary">
+      <div className="translation-queue-auto-poll-controls">
+        <label className="translation-queue-auto-poll-interval">
           <span>{translationMessages.autoTranslateAllInterval}</span>
           <select
             value={settings.intervalMinutes}
-            disabled={isBulkTranslating}
+            disabled={!settings.enabled || isBulkTranslating}
             onChange={(event) => setIntervalMinutes(Number(event.target.value))}
-            className="rounded border border-outline-variant bg-surface-container-low px-2 py-1.5 font-mono text-[13px] text-on-surface focus:border-primary focus:outline-none"
+            className="translation-queue-auto-poll-interval-select"
           >
             {AUTO_TRANSLATE_INTERVAL_OPTIONS.map((minutes) => (
               <option key={minutes} value={minutes}>
@@ -100,16 +102,16 @@ export function AutoTranslateSettingsPanel() {
             type="button"
             onClick={() => void runScheduledCheck()}
             disabled={isBulkTranslating}
-            className="rounded border border-outline-variant px-3 py-1.5 text-[13px] font-medium text-primary hover:bg-surface-container-high"
+            className="translation-queue-ghost-btn"
           >
             {translationMessages.autoTranslateAllCheckNow}
           </button>
         ) : null}
       </div>
 
-      <p className="font-mono text-[12px] text-secondary" aria-live="polite">
+      <p className="translation-queue-auto-poll-status" aria-live="polite">
         {status}
       </p>
-    </div>
+    </section>
   );
 }

@@ -3,14 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { DetailActionCard } from '@/components/detail/DetailActionCard';
-import { DetailArticle } from '@/components/detail/DetailArticle';
-import { DetailFooter } from '@/components/detail/DetailFooter';
-import { DetailLocationBlock } from '@/components/detail/DetailLocationBlock';
-import { DetailSourceIdentity } from '@/components/detail/DetailSourceIdentity';
-import { DetailTopBar } from '@/components/detail/DetailTopBar';
-import { HeroMetadata } from '@/components/detail/HeroMetadata';
-import { SimilarListings } from '@/components/detail/SimilarListings';
+import { ListingDetailContent } from '@/components/detail/ListingDetailContent';
 import { DmDrawer } from '@/components/messages/DmDrawer';
 import { HiddenReviewBanner } from '@/components/ugc/HiddenReviewBanner';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
@@ -165,34 +158,17 @@ export function UgcListingShell({
   ) : undefined;
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto bg-surface">
-      <DetailTopBar listing={listing} />
-
-      <main className="mx-auto w-full max-w-container-max px-gutter py-space-xl pb-32">
-        <div className="grid grid-cols-1 gap-space-xl lg:grid-cols-12">
-          <div className="flex flex-col gap-space-lg lg:col-span-8">
-            {showHiddenBanner && <HiddenReviewBanner />}
-            <HeroMetadata listing={listing} />
-            <DetailArticle listing={listing} isUgc />
-          </div>
-
-          <aside className="flex flex-col gap-space-lg lg:col-span-4">
-            <DetailActionCard
-              isAvailable={isAvailable}
-              isUgc
-              onClaim={openContact}
-              onMessage={openContact}
-              messageDisabled={isReserved}
-              claimDisabled={isReserved}
-              lifecycleActions={lifecycleActions}
-            />
-            <DetailSourceIdentity listing={listing} />
-            <DetailLocationBlock listing={listing} />
-            <SimilarListings listings={similarListings} />
-          </aside>
-        </div>
-        <DetailFooter />
-      </main>
+    <>
+      <ListingDetailContent
+        listing={listing}
+        similarListings={similarListings}
+        isUgc
+        isAvailable={isAvailable}
+        onPrimaryAction={openContact}
+        primaryDisabled={isReserved}
+        lifecycleActions={lifecycleActions}
+        banner={showHiddenBanner ? <HiddenReviewBanner /> : undefined}
+      />
 
       <AuthPromptModal
         open={authOpen}
@@ -239,6 +215,6 @@ export function UgcListingShell({
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

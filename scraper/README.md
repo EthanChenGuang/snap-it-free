@@ -1,4 +1,4 @@
-# 手慢无 (ShouManWu) Scraper Worker
+# 零元 (ZeroDollar / ZeroEuro) Scraper Worker
 
 Dedicated Node.js worker that ingests free/regalo listings from Subito.it (Veneto) into Supabase Postgres/PostGIS.
 
@@ -9,9 +9,18 @@ Copy `.env.example` to `.env` and set:
 - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` — Supabase service role (worker only)
 - `PROXY_URL` — residential rotating proxy endpoint (recommended for production)
 - `CRON_ENABLED=true` — 90-minute in-process schedule with overlap guard
-- Alerting: `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` (preferred), or `RESEND_API_KEY` + `ALERT_FROM` + `ALERT_TO`
+- Alerting (priority order): `CALLMEBOT_PHONE` + `CALLMEBOT_APIKEY` (WhatsApp, recommended), or `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`, or `RESEND_API_KEY` + `ALERT_FROM` + `ALERT_TO`
 
 Apply migrations from `../supabase/migrations/` before first run.
+
+### WhatsApp alerts (CallMeBot)
+
+1. Add **+34 684 72 39 62** to your WhatsApp contacts (name: CallMeBot).
+2. Send **`I allow callmebot to send me messages`** to that contact.
+3. Copy the **apikey** from CallMeBot's reply into `CALLMEBOT_APIKEY`; set `CALLMEBOT_PHONE` to your number in international format (e.g. `+393331234567`).
+4. Test locally: `npm run test:whatsapp`
+
+Block / validation failures trigger WhatsApp immediately (see `notifyOperator` in `src/alert/notify.ts`).
 
 ## Local development
 
@@ -47,6 +56,8 @@ fly secrets set \
   SUPABASE_SERVICE_ROLE_KEY=... \
   SCRAPER_SECRETS_KEY=... \
   PROXY_URL=... \
+  CALLMEBOT_PHONE=... \
+  CALLMEBOT_APIKEY=... \
   TELEGRAM_BOT_TOKEN=... \
   TELEGRAM_CHAT_ID=...
 fly deploy

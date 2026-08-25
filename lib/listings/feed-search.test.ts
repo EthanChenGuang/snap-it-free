@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { matchesFeedSearch, type ConsumerCityLabels } from './feed-search';
+import {
+  listingConsumerLocationLabel,
+  matchesFeedSearch,
+  type ConsumerCityLabels,
+} from './feed-search';
 import type { ListingRow } from './types';
 
 const baseListing: ListingRow = {
@@ -106,5 +110,45 @@ describe('matchesFeedSearch', () => {
 
   it('returns false when query matches nothing', () => {
     expect(matchesFeedSearch(baseListing, 'xyznonexistent', 'it', cityLabels)).toBe(false);
+  });
+});
+
+describe('listingConsumerLocationLabel', () => {
+  it('maps Venice sub-zones to the city label', () => {
+    expect(
+      listingConsumerLocationLabel(
+        { ...baseListing, zone: 'centro_storico' },
+        cityLabels,
+        'Approximate zone',
+      ),
+    ).toBe('Venice');
+
+    expect(
+      listingConsumerLocationLabel(
+        { ...baseListing, zone: 'mestre_marghera' },
+        cityLabels,
+        'Approximate zone',
+      ),
+    ).toBe('Venice');
+  });
+
+  it('uses consumer city for non-Venice listings', () => {
+    expect(
+      listingConsumerLocationLabel(
+        { ...baseListing, zone: null, city: 'padova' },
+        cityLabels,
+        'Approximate zone',
+      ),
+    ).toBe('Padova');
+  });
+
+  it('falls back to approximate zone label when city is unknown', () => {
+    expect(
+      listingConsumerLocationLabel(
+        { ...baseListing, zone: null, city: null },
+        cityLabels,
+        'Approximate zone',
+      ),
+    ).toBe('Approximate zone');
   });
 });

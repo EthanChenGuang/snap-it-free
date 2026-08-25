@@ -4,7 +4,7 @@ import { subitoCategoriesIt } from './subito-category-labels';
 
 export const messages = {
   app: {
-    title: '手慢无',
+    title: 'ZeroEuro',
     description: 'Regali gratuiti a Venezia sulla mappa',
   },
   nav: {
@@ -362,10 +362,18 @@ export const messages = {
     verifiedFree: 'Verified Free',
     openOnSubito: 'Apri su Subito',
     claimOnSubito: 'Reclama su Subito',
+    snagIt: 'Reclama',
+    openOnVinted: 'Apri su Vinted',
+    openOnFacebook: 'Apri su Facebook',
     claimThisItem: 'Reclama oggetto',
     messageOwner: 'Scrivi al proprietario',
     statusAvailableNow: 'Disponibile ora',
     costFree: '€0,00',
+    costFreeLabel: 'Gratis.',
+    fcfsNote: 'Chi arriva primo, lo prende!',
+    pickupInCity: 'Ritiro a {city}.',
+    arrangeOnSource: 'Contatta il venditore su {source} per organizzare il ritiro.',
+    pickupHintUgc: 'Scrivi al proprietario per organizzare il ritiro.',
     sourceIdentityTitle: 'Source Identity',
     sourceIdentityCommunity: 'Membro verificato della community',
     sourceIdentitySubito: 'Annuncio Subito verificato',
@@ -381,8 +389,7 @@ export const messages = {
     pickupTitle: 'Ritiro',
     pickupBody:
       'Disponibile per il ritiro nel fine settimana (sabato o domenica, 10:00–16:00). Porta un aiuto per oggetti pesanti; il proprietario potrebbe non poter aiutare con le scale.',
-    descriptionFallbackScraped:
-      'Oggetto gratis in buone condizioni. Contatta il proprietario per organizzare il ritiro il prima possibile — chi arriva primo, lo prende.',
+    descriptionFallbackScraped: 'Oggetto gratis — vedi l’annuncio originale per i dettagli.',
     descriptionFallbackUgc:
       'Annuncio pubblicato dalla community locale. Scrivi al proprietario per confermare disponibilità e organizzare il ritiro.',
     locationTitle: 'Location',

@@ -208,7 +208,7 @@ async function main() {
 
   // Test 6 — Settings chrome (logged out checks)
   await anonPage.goto(`${BASE}/settings`, { waitUntil: 'domcontentloaded' });
-  const titleBar = anonPage.getByText('手慢无');
+  const titleBar = anonPage.getByText('零元');
   const titleVisible = await titleBar.isVisible().catch(() => false);
   const manageLink = anonPage.getByRole('link', { name: /My listings|我的发布|I miei annunci/i });
   const manageHref = await manageLink.getAttribute('href').catch(() => null);

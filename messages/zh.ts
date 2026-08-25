@@ -3,7 +3,7 @@ import { subitoCategoriesZh } from './subito-category-labels';
 
 export const messages: Messages = {
   app: {
-    title: '手慢无',
+    title: '零元',
     description: '威尼斯免费物品地图',
   },
   nav: {
@@ -347,10 +347,18 @@ export const messages: Messages = {
     verifiedFree: '已验证免费',
     openOnSubito: '在 Subito 打开',
     claimOnSubito: '在 Subito 领取',
+    snagIt: '抢先领取',
+    openOnVinted: '在 Vinted 打开',
+    openOnFacebook: '在 Facebook 打开',
     claimThisItem: '领取物品',
     messageOwner: '联系发布者',
     statusAvailableNow: '现在可取',
     costFree: '€0,00',
+    costFreeLabel: '免费。',
+    fcfsNote: '先到先得！',
+    pickupInCity: '在{city}自取。',
+    arrangeOnSource: '请在 {source} 联系卖家安排取件。',
+    pickupHintUgc: '私信发布者安排取件。',
     sourceIdentityTitle: '来源身份',
     sourceIdentityCommunity: '已验证的社区成员',
     sourceIdentitySubito: '已验证的 Subito 物品',
@@ -366,8 +374,7 @@ export const messages: Messages = {
     pickupTitle: '取件',
     pickupBody:
       '周末可取（周六或周日 10:00–16:00）。大件请自备帮手；发布者可能无法协助搬运。',
-    descriptionFallbackScraped:
-      '成色良好的免费物品。尽快联系发布者安排取件——先到先得。',
+    descriptionFallbackScraped: '免费物品——详情请查看原始 listing。',
     descriptionFallbackUgc:
       '由本地社区发布。请私信确认是否仍可取并安排交接。',
     locationTitle: '位置',

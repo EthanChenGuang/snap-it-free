@@ -5,6 +5,7 @@ import { loadZonePolygons, tagZone } from './zone-tag.js';
 import { crawlHashForListing } from '../subito/crawl-hash.js';
 import type { RawListing } from '../subito/extract.js';
 import { extractCategoryFromSubitoUrl } from '../subito/normalize.js';
+import { cityBboxCenter } from '../geo/italian-cities.js';
 import { parseRegaloCategoryUrl } from '../subito/url-context.js';
 import { normalizeSubitoPhotoUrl } from '../../../lib/listings/subito-photo-url.js';
 import { computeScrapedListingExpiresAt as computeExpiresAt } from '../../../lib/listings/scraped-listing-ttl.js';
@@ -22,12 +23,19 @@ export function normalizeRawListing(raw: RawListing): NormalizeResult {
   const postedAt = new Date(raw.posted_at);
   const expiresAt = computeExpiresAt(postedAt);
 
-  const zone =
-    raw.lat != null && raw.lng != null ? tagZone(raw.lat, raw.lng, zonePolygons) : null;
-
   const urlContext = raw.source_category_url
     ? parseRegaloCategoryUrl(raw.source_category_url)
     : null;
+
+  let lat = raw.lat;
+  let lng = raw.lng;
+  if (lat == null && lng == null && urlContext?.city) {
+    const center = cityBboxCenter(urlContext.city);
+    lat = center.lat;
+    lng = center.lng;
+  }
+
+  const zone = lat != null && lng != null ? tagZone(lat, lng, zonePolygons) : null;
 
   const candidate = {
     source: 'subito' as const,
@@ -35,8 +43,8 @@ export function normalizeRawListing(raw: RawListing): NormalizeResult {
     title: raw.title,
     photo_url: normalizeSubitoPhotoUrl(raw.photo_url),
     external_url: raw.external_url,
-    lat: raw.lat,
-    lng: raw.lng,
+    lat,
+    lng,
     zone,
     city: urlContext?.city ?? null,
     region: urlContext?.region ?? null,

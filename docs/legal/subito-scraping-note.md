@@ -2,7 +2,7 @@
 
 **Document ID:** D-22  
 **Last verified:** 2026-07-26  
-**Project:** 手慢无 (ShouManWu) — Venice Free Finds MVP
+**Project:** 零元 (ZeroDollar / ZeroEuro) — Venice Free Finds MVP
 
 ## Purpose
 

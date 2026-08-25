@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
+import { listingConsumerLocationLabel } from '@/lib/listings/feed-search';
 import { useMessages } from '@/lib/i18n/useMessages';
 import type { ListingRow } from '@/lib/listings/types';
 
@@ -10,7 +12,8 @@ type SimilarListingsProps = {
 };
 
 export function SimilarListings({ listings }: SimilarListingsProps) {
-  const { messages, zoneLabel, formatRelativeTime } = useMessages();
+  const { messages, formatRelativeTime } = useMessages();
+  const cityLabels = consumerCityLabelsFromMessages(messages);
 
   if (listings.length === 0) return null;
 
@@ -21,7 +24,11 @@ export function SimilarListings({ listings }: SimilarListingsProps) {
       </h3>
       <div className="flex flex-col gap-space-sm">
         {listings.map((item) => {
-          const zoneText = item.zone ? zoneLabel(item.zone) : messages.listing.approximateZone;
+          const locationText = listingConsumerLocationLabel(
+            item,
+            cityLabels,
+            messages.listing.approximateZone,
+          );
           return (
             <Link
               key={item.id}
@@ -49,7 +56,7 @@ export function SimilarListings({ listings }: SimilarListingsProps) {
                   {item.title}
                 </p>
                 <p className="text-label-sm text-secondary">
-                  {zoneText} • {formatRelativeTime(item.posted_at)}
+                  {locationText} • {formatRelativeTime(item.posted_at)}
                 </p>
               </div>
             </Link>

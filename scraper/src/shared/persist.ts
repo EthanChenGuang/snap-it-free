@@ -89,6 +89,7 @@ export async function persistListing(
     source: listing.source,
     external_id: listing.external_id,
     title: listing.title,
+    description: descriptionFromListing(listing),
     photo_url: listing.photo_url,
     external_url: listing.external_url,
     lat: listing.lat,

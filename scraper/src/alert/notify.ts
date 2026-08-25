@@ -14,9 +14,11 @@ export type AlertPayload = {
 
 const TELEGRAM_MAX_LENGTH = 4096;
 const TELEGRAM_DETAIL_TRUNCATE = 500;
+const WHATSAPP_MAX_LENGTH = 1000;
+const WHATSAPP_DETAIL_TRUNCATE = 300;
 
 function buildEmailSubject(runId: string): string {
-  return `[ALERT] 手慢无 scraper soft-block — run ${runId} failed validation`;
+  return `[ALERT] 零元 scraper soft-block — run ${runId} failed validation`;
 }
 
 function buildEmailBody(payload: AlertPayload): string {
@@ -35,8 +37,41 @@ function buildEmailBody(payload: AlertPayload): string {
     '3. If Subito DOM changed, update extract/ selectors (D-05)',
     '4. If blocked, see legal/ops note and fallback plan (D-22)',
     '',
-    '— 手慢无 (ShouManWu) ingestion worker',
+    '— 零元 (ZeroDollar / ZeroEuro) ingestion worker',
   ].join('\n');
+}
+
+function buildWhatsAppMessage(payload: AlertPayload): string {
+  let failureDetail = payload.failureDetail;
+  const base = [
+    `⚠️ Subito scraper blocked — run ${payload.runId}`,
+    `Parsed ${payload.parsedCount} listings (need ≥${payload.minCount}). Selectors ${payload.selectorPct}%.`,
+    `Reason: ${payload.failureCode}`,
+    failureDetail ? `Detail: ${failureDetail}` : null,
+    '→ Check logs & scrape_runs',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  if (base.length <= WHATSAPP_MAX_LENGTH) {
+    return base;
+  }
+
+  failureDetail =
+    failureDetail.length > WHATSAPP_DETAIL_TRUNCATE
+      ? `${failureDetail.slice(0, WHATSAPP_DETAIL_TRUNCATE)}…(truncated)`
+      : failureDetail;
+
+  return [
+    `⚠️ Subito scraper blocked — run ${payload.runId}`,
+    `Parsed ${payload.parsedCount} listings (need ≥${payload.minCount}). Selectors ${payload.selectorPct}%.`,
+    `Reason: ${payload.failureCode}`,
+    failureDetail ? `Detail: ${failureDetail}` : null,
+    '→ Check logs & scrape_runs',
+  ]
+    .filter(Boolean)
+    .join('\n')
+    .slice(0, WHATSAPP_MAX_LENGTH);
 }
 
 function buildTelegramMessage(payload: AlertPayload): string {
@@ -93,7 +128,14 @@ async function loadAlertRouting(supabase: SupabaseClient): Promise<AlertRouting>
   };
 }
 
-function resolveChannel(routing?: AlertRouting): 'telegram' | 'resend' | null {
+function isWhatsAppConfigured(): boolean {
+  return Boolean(process.env.CALLMEBOT_PHONE && process.env.CALLMEBOT_APIKEY);
+}
+
+function resolveChannel(routing?: AlertRouting): 'whatsapp' | 'telegram' | 'resend' | null {
+  if (isWhatsAppConfigured()) {
+    return 'whatsapp';
+  }
   const chatId = routing?.telegramChatId ?? process.env.TELEGRAM_CHAT_ID;
   if (process.env.TELEGRAM_BOT_TOKEN && chatId) {
     return 'telegram';
@@ -125,6 +167,25 @@ async function sendTelegramMessage(payload: AlertPayload, chatId: string): Promi
   await bot.sendMessage(chatId, buildTelegramMessage(payload));
 }
 
+async function sendWhatsAppMessage(payload: AlertPayload): Promise<void> {
+  const phone = process.env.CALLMEBOT_PHONE!;
+  const apikey = process.env.CALLMEBOT_APIKEY!;
+  const message = buildWhatsAppMessage(payload);
+  const url = new URL('https://api.callmebot.com/whatsapp.php');
+  url.searchParams.set('phone', phone);
+  url.searchParams.set('text', message);
+  url.searchParams.set('apikey', apikey);
+
+  const res = await fetch(url);
+  const body = await res.text();
+  if (!res.ok) {
+    throw new Error(`CallMeBot HTTP ${res.status}: ${body.slice(0, 200)}`);
+  }
+  if (/error|fail/i.test(body) && !/success|sent|queued/i.test(body)) {
+    throw new Error(`CallMeBot rejected: ${body.slice(0, 200)}`);
+  }
+}
+
 export async function notifyOperator(
   supabase: SupabaseClient,
   payload: AlertPayload,
@@ -153,7 +214,9 @@ export async function notifyOperator(
   }
 
   try {
-    if (channel === 'telegram') {
+    if (channel === 'whatsapp') {
+      await sendWhatsAppMessage(payload);
+    } else if (channel === 'telegram') {
       const chatId = routing.telegramChatId ?? process.env.TELEGRAM_CHAT_ID!;
       await sendTelegramMessage(payload, chatId);
     } else {
@@ -169,7 +232,9 @@ export async function notifyOperator(
 export {
   buildEmailSubject,
   buildEmailBody,
+  buildWhatsAppMessage,
   buildTelegramMessage,
+  isWhatsAppConfigured,
   loadAlertRouting,
   resolveChannel,
 };

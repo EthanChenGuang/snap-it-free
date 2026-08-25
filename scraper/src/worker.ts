@@ -466,20 +466,16 @@ export async function runSourceScrape(
         console.error('Failed to record degraded run:', err);
       });
 
-      await notifyOperator(
-        supabase,
-        {
-          runId: run.id,
-          startedAt: run.startedAt,
-          parsedCount: rawListings.length,
-          minCount,
-          medianCount,
-          selectorPct: Math.round(jsonFieldCompleteness * 100),
-          failureCode: 'HIGH_BLOCK_RATE',
-          failureDetail: blockReason,
-        },
-        { emailOnly: true },
-      ).catch((notifyErr) => {
+      await notifyOperator(supabase, {
+        runId: run.id,
+        startedAt: run.startedAt,
+        parsedCount: rawListings.length,
+        minCount,
+        medianCount,
+        selectorPct: Math.round(jsonFieldCompleteness * 100),
+        failureCode: 'HIGH_BLOCK_RATE',
+        failureDetail: blockReason,
+      }).catch((notifyErr) => {
         console.error('Failed to send blocked-ratio alert:', notifyErr);
       });
     }

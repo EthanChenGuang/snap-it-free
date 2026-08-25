@@ -15,6 +15,7 @@ import {
 } from '@/lib/filter-prefs/storage';
 import { readBrowseCenter } from '@/lib/browse-center/storage';
 import { resolveCityLabel, VENICE_CENTER } from '@/lib/geo/resolve-city-label';
+import { usePlaceLabel } from '@/lib/geo/use-place-label';
 import { readPostDraft, writePostDraft } from '@/lib/post-draft/storage';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { isWithinUgcVeniceBounds } from '@/lib/ugc/schemas';
@@ -54,7 +55,7 @@ export function SelectLocationClient() {
   const searchParams = useSearchParams();
   const context: 'browse' | 'post' =
     searchParams.get('context') === 'post' ? 'post' : 'browse';
-  const { messages } = useMessages();
+  const { language, messages } = useMessages();
   const mapRef = useRef<MapRef>(null);
   const gpsRequested = useRef(false);
   const isMountedRef = useRef(true);
@@ -191,12 +192,21 @@ export function SelectLocationClient() {
     );
   }, [context, radiusKm, triggerPinDrop]);
 
+  const fallbackCityLabel = resolveCityLabel(markerPosition.lat, markerPosition.lng, {
+    venice: messages.feed.cityVenice,
+    padova: messages.feed.cityPadova,
+  });
+  const { label: placeLabel } = usePlaceLabel(
+    markerPosition.lat,
+    markerPosition.lng,
+    language,
+    fallbackCityLabel,
+    ready,
+  );
+
   const handleConfirm = () => {
     setConfirmError(null);
-    const label = resolveCityLabel(markerPosition.lat, markerPosition.lng, {
-      venice: messages.feed.cityVenice,
-      padova: messages.feed.cityPadova,
-    });
+    const label = placeLabel;
     if (context === 'post') {
       if (!isWithinUgcVeniceBounds(markerPosition.lat, markerPosition.lng)) {
         setConfirmError(messages.post.pinOutsideVenice);
@@ -292,12 +302,7 @@ export function SelectLocationClient() {
                 location_on
               </span>
               <span className="text-body-md text-on-surface-variant">
-                {ready
-                  ? resolveCityLabel(markerPosition.lat, markerPosition.lng, {
-                      venice: messages.feed.cityVenice,
-                      padova: messages.feed.cityPadova,
-                    })
-                  : null}
+                {ready ? placeLabel : null}
               </span>
             </div>
             {confirmError ? (

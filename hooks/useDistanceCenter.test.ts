@@ -103,7 +103,35 @@ describe('composeFeedListings pipeline', () => {
     expect(listings).toHaveLength(2);
   });
 
-  it('sorts by distance when center is active', () => {
+  it('sorts by posted_at desc when center is active and times differ', () => {
+    const olderNear: ListingRow = {
+      ...baseListing,
+      id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      lat: 45.441,
+      lng: 12.331,
+      posted_at: '2026-07-20T10:00:00.000Z',
+    };
+    const newerFar: ListingRow = {
+      ...baseListing,
+      id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+      lat: 45.5,
+      lng: 12.5,
+      posted_at: '2026-07-28T10:00:00.000Z',
+    };
+    const applied = { ...DEFAULT_FILTER_PREFS, radiusEnabled: false };
+    const { listings } = composeFeedListings({
+      listings: [olderNear, newerFar],
+      applied,
+      center,
+      searchQuery: '',
+      language: 'en',
+      cityLabels,
+    });
+    expect(listings[0]?.id).toBe(newerFar.id);
+    expect(listings[1]?.id).toBe(olderNear.id);
+  });
+
+  it('tie-breaks by distance when posted_at matches and center is active', () => {
     const near: ListingRow = {
       ...baseListing,
       id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',

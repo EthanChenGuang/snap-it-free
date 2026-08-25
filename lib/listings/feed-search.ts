@@ -22,6 +22,17 @@ export function listingConsumerCityLabel(
   return '';
 }
 
+/** Consumer-facing location line — city name only, not Venice sub-zones. */
+export function listingConsumerLocationLabel(
+  listing: ListingRow,
+  cityLabels: ConsumerCityLabels,
+  approximateZoneLabel: string,
+): string {
+  const cityLabel = listingConsumerCityLabel(listing, cityLabels);
+  if (cityLabel) return cityLabel;
+  return approximateZoneLabel;
+}
+
 /**
  * Client-side feed search matcher (D-06): title + description + city label.
  */

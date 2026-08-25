@@ -78,7 +78,7 @@ export function FavoriteButton({
             favorited
               ? 'text-accent-orange'
               : tone === 'overlay'
-                ? 'text-white'
+                ? 'text-primary'
                 : 'text-on-surface-variant',
           )}
           style={{

@@ -10,6 +10,7 @@
     "scrape:once": "node --import tsx src/worker.ts -- --source subito --once",
     "configure:webshare": "node scripts/configure-webshare-proxy.mjs",
     "configure:proxy": "node --import tsx scripts/configure-proxy.mjs",
+    "test:whatsapp": "node --import tsx scripts/test-whatsapp-alert.mjs",
     "deploy:fly": "bash scripts/deploy-fly.sh",
     "logs:fly": "fly logs"
   },

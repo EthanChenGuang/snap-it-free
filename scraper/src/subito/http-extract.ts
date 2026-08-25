@@ -1,10 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { cityBboxCenter } from '../geo/italian-cities.js';
 import {
   lookupMunicipalityCentroid,
   type RawListing,
 } from './extract.js';
+import { parseRegaloCategoryUrl } from './url-context.js';
 import { normalizeSubitoPhotoUrl } from '../../../lib/listings/subito-photo-url.js';
 
 const LISTING_ARRAY_PATH = ['props', 'pageProps', 'initialState', 'items', 'originalList'] as const;
@@ -123,13 +125,24 @@ function mapAdItem(item: SubitoAdItem, sourceCategoryUrl: string): CategoryJsonL
   const municipalityText = municipalityFromGeo(item.geo);
   const centroid = lookupMunicipalityCentroid(municipalityText);
 
+  let lat = centroid?.lat ?? null;
+  let lng = centroid?.lng ?? null;
+  if (lat == null && lng == null && sourceCategoryUrl) {
+    const urlContext = parseRegaloCategoryUrl(sourceCategoryUrl);
+    if (urlContext?.city) {
+      const center = cityBboxCenter(urlContext.city);
+      lat = center.lat;
+      lng = center.lng;
+    }
+  }
+
   return {
     external_id,
     title: title.slice(0, 500),
     photo_url,
     external_url,
-    lat: centroid?.lat ?? null,
-    lng: centroid?.lng ?? null,
+    lat,
+    lng,
     posted_at,
     price,
     image_urls,

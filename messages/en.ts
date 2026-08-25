@@ -3,7 +3,7 @@ import { subitoCategoriesEn } from './subito-category-labels';
 
 export const messages: Messages = {
   app: {
-    title: '手慢无',
+    title: 'ZeroDollar',
     description: 'Venice free finds on a map',
   },
   nav: {
@@ -354,10 +354,18 @@ export const messages: Messages = {
     verifiedFree: 'Verified Free',
     openOnSubito: 'Open on Subito',
     claimOnSubito: 'Claim on Subito',
+    snagIt: 'Snag It',
+    openOnVinted: 'Open on Vinted',
+    openOnFacebook: 'Open on Facebook',
     claimThisItem: 'Claim item',
     messageOwner: 'Message the owner',
     statusAvailableNow: 'Available now',
     costFree: '€0.00',
+    costFreeLabel: 'Free.',
+    fcfsNote: 'First come, first served!',
+    pickupInCity: 'Pickup in {city}.',
+    arrangeOnSource: 'Contact the seller on {source} to arrange pickup.',
+    pickupHintUgc: 'Message the owner to arrange pickup.',
     sourceIdentityTitle: 'Source Identity',
     sourceIdentityCommunity: 'Verified community member',
     sourceIdentitySubito: 'Verified Subito listing',
@@ -373,8 +381,7 @@ export const messages: Messages = {
     pickupTitle: 'Pickup',
     pickupBody:
       'Available for weekend pickup (Saturday or Sunday, 10:00–16:00). Bring help for heavy items; the owner may not be able to assist with stairs.',
-    descriptionFallbackScraped:
-      'Free item in good condition. Contact the owner to arrange pickup as soon as possible — first come, first served.',
+    descriptionFallbackScraped: 'Free item — see the original listing for full details.',
     descriptionFallbackUgc:
       'Listing posted by the local community. Message the owner to confirm availability and arrange pickup.',
     locationTitle: 'Location',

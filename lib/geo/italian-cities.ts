@@ -143,6 +143,19 @@ export function inCityBbox(lat: number, lng: number, city: SubitoCitySlug): bool
   return lat >= latMin && lat <= latMax && lng >= lngMin && lng <= lngMax;
 }
 
+/** Bbox center for listings_public D-28 fallback when Subito omits coords. */
+export function cityBboxCenter(city: SubitoCitySlug): { lat: number; lng: number } {
+  const entry = getCityBySubitoSlug(city);
+  if (!entry) {
+    throw new Error(`Unknown city slug: ${city}`);
+  }
+  const { latMin, latMax, lngMin, lngMax } = entry.bbox;
+  return {
+    lat: (latMin + latMax) / 2,
+    lng: (lngMin + lngMax) / 2,
+  };
+}
+
 /** Generic Subito regalo path — region/city validated against catalog. */
 export const REGALO_CATEGORY_PATH_REGEX =
   /^\/annunci-([^/]+)\/regalo\/([^/]+)\/([^/]+)\/\3\/?$/i;

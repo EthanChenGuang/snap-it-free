@@ -120,7 +120,7 @@ describe('normalizeRawListing', () => {
     expect(result.zone).toBe('centro_storico');
   });
 
-  it('sets zone null when coordinates are missing', () => {
+  it('sets zone null when coordinates are missing and no city context', () => {
     const result = normalizeRawListing({
       ...baseRaw,
       lat: null,
@@ -128,6 +128,25 @@ describe('normalizeRawListing', () => {
     });
 
     if ('reject' in result) throw new Error('expected canonical listing');
+    expect(result.zone).toBeNull();
+    expect(result.lat).toBeNull();
+    expect(result.lng).toBeNull();
+  });
+
+  it('falls back to city bbox center when coords missing and source URL has city', () => {
+    const result = normalizeRawListing({
+      ...baseRaw,
+      lat: null,
+      lng: null,
+      source_category_url:
+        'https://www.subito.it/annunci-lombardia/regalo/informatica/milano/milano/',
+      external_url: 'https://www.subito.it/informatica/monitor-milano-123.htm',
+    });
+
+    if ('reject' in result) throw new Error('expected canonical listing');
+    expect(result.city).toBe('milano');
+    expect(result.lat).toBeCloseTo(45.45);
+    expect(result.lng).toBeCloseTo(9.15);
     expect(result.zone).toBeNull();
   });
 

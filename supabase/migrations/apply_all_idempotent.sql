@@ -1,4 +1,4 @@
--- Idempotent apply-all for ShouManWu (safe to re-run)
+-- Idempotent apply-all for 零元 / ZeroDollar / ZeroEuro (safe to re-run)
 -- Run in Supabase Dashboard → SQL Editor
 
 -- 001 PostGIS

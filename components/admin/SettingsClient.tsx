@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { DegradedBanner } from '@/components/admin/DegradedBanner';
-import { AutoTranslateSettingsPanel } from '@/components/admin/AutoTranslateSettingsPanel';
 import { adminShellMessages, settingsMessages, sourcesMessages } from '@/components/admin/admin-messages';
 import type { GlobalSettingsConfig } from '@/lib/admin/types';
 import {
@@ -495,8 +494,6 @@ export function SettingsClient({
             />
           </label>
         </div>
-
-        <AutoTranslateSettingsPanel />
 
         <div className="grid grid-cols-1 gap-4 border-b border-outline-variant pb-4 md:grid-cols-2">
           <div>

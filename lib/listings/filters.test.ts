@@ -9,6 +9,7 @@ import {
   matchesConsumerCity,
   sortByDistance,
   sortByPostedAtDesc,
+  sortByPostedAtDescThenDistance,
 } from './filters';
 import type { ListingRow } from './types';
 
@@ -255,5 +256,70 @@ describe('sortByPostedAtDesc', () => {
       posted_at: '2026-07-29T10:00:00.000Z',
     };
     expect(sortByPostedAtDesc([older, newer]).map((l) => l.id)).toEqual([newer.id, older.id]);
+  });
+});
+
+describe('sortByPostedAtDescThenDistance', () => {
+  const center = { lat: 45.4371, lng: 12.3326 };
+
+  it('orders by posted_at descending first', () => {
+    const olderNear: ListingRow = {
+      ...baseListing,
+      id: '22222222-2222-2222-2222-222222222222',
+      lat: 45.45,
+      lng: 12.33,
+      posted_at: '2026-07-28T10:00:00.000Z',
+    };
+    const newerFar: ListingRow = {
+      ...baseListing,
+      id: '33333333-3333-3333-3333-333333333333',
+      lat: 45.55,
+      lng: 12.33,
+      posted_at: '2026-07-29T10:00:00.000Z',
+    };
+    expect(sortByPostedAtDescThenDistance([olderNear, newerFar], center).map((l) => l.id)).toEqual([
+      newerFar.id,
+      olderNear.id,
+    ]);
+  });
+
+  it('tie-breaks by distance when posted_at matches', () => {
+    const near: ListingRow = {
+      ...baseListing,
+      id: '22222222-2222-2222-2222-222222222222',
+      lat: 45.45,
+      lng: 12.33,
+    };
+    const far: ListingRow = {
+      ...baseListing,
+      id: '33333333-3333-3333-3333-333333333333',
+      lat: 45.55,
+      lng: 12.33,
+    };
+    expect(sortByPostedAtDescThenDistance([far, near], center).map((l) => l.id)).toEqual([
+      near.id,
+      far.id,
+    ]);
+  });
+
+  it('ignores distance when center is null', () => {
+    const first: ListingRow = {
+      ...baseListing,
+      id: '22222222-2222-2222-2222-222222222222',
+      lat: 45.55,
+      lng: 12.33,
+      posted_at: '2026-07-28T10:00:00.000Z',
+    };
+    const second: ListingRow = {
+      ...baseListing,
+      id: '33333333-3333-3333-3333-333333333333',
+      lat: 45.45,
+      lng: 12.33,
+      posted_at: '2026-07-28T10:00:00.000Z',
+    };
+    expect(sortByPostedAtDescThenDistance([first, second], null).map((l) => l.id)).toEqual([
+      first.id,
+      second.id,
+    ]);
   });
 });

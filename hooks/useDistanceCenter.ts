@@ -4,13 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useBrowseCenter } from '@/lib/browse-center/context';
 import type { BrowseCenter } from '@/lib/browse-center/storage';
 import type { FilterPrefs } from '@/lib/filter-prefs/storage';
-import { haversineKm } from '@/lib/geo/haversine';
 import { matchesFeedSearch, type ConsumerCityLabels } from '@/lib/listings/feed-search';
 import {
   filterByRadiusKm,
   matchesConsumerCity,
-  sortByDistance,
-  sortByPostedAtDesc,
+  sortByPostedAtDescThenDistance,
 } from '@/lib/listings/filters';
 import { matchesAnySubitoCategories } from '@/lib/listings/subito-categories';
 import type { ListingRow } from '@/lib/listings/types';
@@ -63,7 +61,6 @@ export function composeFeedListings({
   cityLabels,
 }: ComposeFeedListingsInput): {
   listings: ListingRow[];
-  distanceMap: Map<string, number>;
 } {
   let rows = listings.filter((listing) =>
     matchesFeedSearch(listing, searchQuery, language, cityLabels),
@@ -81,20 +78,9 @@ export function composeFeedListings({
     rows = rows.filter((listing) => matchesAnySubitoCategories(listing, applied.categories));
   }
 
-  const distanceMap = new Map<string, number>();
-  if (center) {
-    for (const listing of rows) {
-      if (listing.lat != null && listing.lng != null) {
-        const km = haversineKm(center, { lat: listing.lat, lng: listing.lng });
-        distanceMap.set(listing.id, km * 1000);
-      }
-    }
-    rows = sortByDistance(rows, center);
-  } else {
-    rows = sortByPostedAtDesc(rows);
-  }
+  rows = sortByPostedAtDescThenDistance(rows, center);
 
-  return { listings: rows, distanceMap };
+  return { listings: rows };
 }
 
 /** One-shot GPS center resolution for haversine filtering (D-05–10). */

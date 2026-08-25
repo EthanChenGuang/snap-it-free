@@ -1,5 +1,5 @@
 {
-  "name": "手慢无",
+  "name": "零元",
   "description": "Sustainable living through community sharing. Minimalist free item drops, map explorer, claim management, and alerts.",
   "requestFramePermissions": ["geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

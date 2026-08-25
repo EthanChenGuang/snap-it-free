@@ -6,7 +6,9 @@ import { forwardRef } from 'react';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { ReservedBadge } from '@/components/listings/ReservedBadge';
 import { resolveListingCategory, resolveListingTitle } from '@/lib/i18n/listing-fields';
+import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { listingConsumerLocationLabel } from '@/lib/listings/feed-search';
 import type { ListingRow } from '@/lib/listings/types';
 import { cn } from '@/lib/utils';
 
@@ -15,33 +17,16 @@ type ListingCardProps = {
   isSelected?: boolean;
 };
 
-function sourceBadgeLabel(
-  source: ListingRow['source'],
-  messages: ReturnType<typeof useMessages>['messages'],
-): string {
-  if (source === 'ugc') return messages.listing.sourceCommunity;
-  return messages.listing.sourceSubito;
-}
-
-function listingLocationLabel(
-  listing: ListingRow,
-  zoneLabel: ReturnType<typeof useMessages>['zoneLabel'],
-): string {
-  if (listing.zone) {
-    return zoneLabel(listing.zone).toUpperCase();
-  }
-  if (listing.city) {
-    return listing.city.toUpperCase();
-  }
-  return '';
-}
-
 export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
   function ListingCard({ listing, isSelected }, ref) {
-    const { language, messages, zoneLabel, formatRelativeTime } = useMessages();
+    const { language, messages, formatRelativeTime } = useMessages();
     const displayTitle = resolveListingTitle(listing, language);
     const categoryLabel = resolveListingCategory(listing, language);
-    const locationText = listingLocationLabel(listing, zoneLabel);
+    const locationText = listingConsumerLocationLabel(
+      listing,
+      consumerCityLabelsFromMessages(messages),
+      messages.listing.approximateZone,
+    ).toUpperCase();
     const postedLabel = formatRelativeTime(listing.posted_at);
     const isVeniceZoned = listing.zone != null;
 
@@ -72,9 +57,11 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
             </div>
           )}
           <div className="absolute left-space-sm top-space-sm flex flex-wrap gap-space-xs">
-            <span className="rounded-sm border border-outline-variant bg-surface px-space-sm py-space-xs text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-              {sourceBadgeLabel(listing.source, messages)}
-            </span>
+            {listing.source === 'ugc' && (
+              <span className="rounded-sm border border-outline-variant bg-surface px-space-sm py-space-xs text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                {messages.listing.sourceCommunity}
+              </span>
+            )}
             {listing.status === 'claimed' && <ReservedBadge />}
           </div>
           <div className="absolute right-space-sm top-space-sm">

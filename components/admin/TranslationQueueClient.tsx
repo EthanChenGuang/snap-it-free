@@ -8,6 +8,7 @@ import {
   sourceDisplayNames,
   translationMessages,
 } from '@/components/admin/admin-messages';
+import { AutoTranslateSettingsPanel } from '@/components/admin/AutoTranslateSettingsPanel';
 import { TranslationCostKpiGrid } from '@/components/admin/TranslationCostKpiGrid';
 import { TranslationListingCostPill } from '@/components/admin/TranslationListingCostPill';
 import { useTranslationQueuePollingContext } from '@/components/admin/TranslationQueuePollingProvider';
@@ -459,6 +460,8 @@ export function TranslationQueueClient({
             : translationMessages.retryAllPending}
         </button>
       </header>
+
+      <AutoTranslateSettingsPanel />
 
       <TranslationCostKpiGrid summary={costSummary} loading={costLoading} />
 

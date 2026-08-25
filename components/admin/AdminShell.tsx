@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { AnimatedCount } from '@/components/admin/AnimatedCount';
 import { adminNav, adminNavItems, adminShellMessages } from '@/components/admin/admin-messages';
 import { adminRoutes, adminRunsHref } from '@/lib/admin/dashboard-links';
+import { AutoTranslateProvider } from '@/components/admin/AutoTranslateProvider';
 import {
   TranslationQueuePollingProvider,
   useTranslationQueuePollingContext,
@@ -60,13 +61,15 @@ export function AdminShell({
 }: AdminShellProps) {
   return (
     <TranslationQueuePollingProvider initialCount={pendingTranslationsCount}>
-      <AdminShellInner
-        operatorEmail={operatorEmail}
-        rejectsCount={rejectsCount}
-        footerStats={footerStats}
-      >
-        {children}
-      </AdminShellInner>
+      <AutoTranslateProvider>
+        <AdminShellInner
+          operatorEmail={operatorEmail}
+          rejectsCount={rejectsCount}
+          footerStats={footerStats}
+        >
+          {children}
+        </AdminShellInner>
+      </AutoTranslateProvider>
     </TranslationQueuePollingProvider>
   );
 }

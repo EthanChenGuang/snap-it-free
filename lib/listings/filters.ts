@@ -98,3 +98,23 @@ export function sortByPostedAtDesc(listings: ListingRow[]): ListingRow[] {
     (a, b) => new Date(b.posted_at).getTime() - new Date(a.posted_at).getTime(),
   );
 }
+
+/** Newest first; when posted_at ties, nearest to center wins (listings without coords last). */
+export function sortByPostedAtDescThenDistance(
+  listings: ListingRow[],
+  center: { lat: number; lng: number } | null,
+): ListingRow[] {
+  return [...listings].sort((a, b) => {
+    const timeDiff = new Date(b.posted_at).getTime() - new Date(a.posted_at).getTime();
+    if (timeDiff !== 0) return timeDiff;
+    if (!center) return 0;
+
+    const aKm = hasValidCoords(a)
+      ? haversineKm(center, { lat: a.lat!, lng: a.lng! })
+      : Infinity;
+    const bKm = hasValidCoords(b)
+      ? haversineKm(center, { lat: b.lat!, lng: b.lng! })
+      : Infinity;
+    return aKm - bKm;
+  });
+}

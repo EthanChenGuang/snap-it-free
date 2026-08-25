@@ -1,4 +1,4 @@
-# 手慢无 (ShouManWu) — Venice Free Finds
+# 零元 (ZeroDollar / ZeroEuro) — Venice Free Finds
 
 Map-first browsing app for free listings scraped from Subito.it in Venice.
 

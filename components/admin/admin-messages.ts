@@ -391,7 +391,8 @@ export const translationMessages = {
   autoTranslateAllInterval: '间隔（分钟）',
   translationQueueRunNow: '立即翻译',
   autoTranslateAllCheckNow: '立即检查',
-  autoTranslateAllSettingsHelp: '开启后按间隔自动检查待翻译队列并启动全部翻译（仅当前浏览器标签页有效）。',
+  autoTranslateAllSettingsHelp:
+    '开启后按间隔自动检查待翻译队列并启动全部翻译；若已有翻译任务进行中则等待下次轮询（后台管理标签页保持打开时生效）。',
   autoTranslateAllRunning: '全部翻译进行中，已跳过定时检查',
   autoTranslateAllSkipped: '翻译进行中，等待下次检查',
   autoTranslateAllDisabledHint: '开启后按间隔自动检查并启动全部翻译',

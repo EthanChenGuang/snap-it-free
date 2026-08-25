@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   ITALIAN_CITIES,
   buildRegaloCategoryUrl,
+  cityBboxCenter,
   inCityBbox,
   parseRegaloCategoryPath,
 } from './italian-cities';
@@ -47,5 +48,10 @@ describe('italian-cities catalog', () => {
   it('validates city bboxes', () => {
     expect(inCityBbox(45.46, 9.19, 'milano')).toBe(true);
     expect(inCityBbox(45.46, 9.19, 'venezia')).toBe(false);
+  });
+
+  it('returns bbox center for catalog cities', () => {
+    expect(cityBboxCenter('milano')).toEqual({ lat: 45.45, lng: 9.15 });
+    expect(cityBboxCenter('padova')).toEqual({ lat: 45.4, lng: 11.85 });
   });
 });

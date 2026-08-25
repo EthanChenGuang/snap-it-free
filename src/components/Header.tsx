@@ -47,10 +47,10 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-2 cursor-pointer select-none group"
           >
             <div className="w-6 h-6 bg-[#df6b05] rounded flex items-center justify-center text-white text-xs font-bold shadow-xs transition-transform group-hover:scale-105">
-              手
+              零
             </div>
             <h1 className="text-base font-bold text-[#37352f] tracking-tight">
-              手慢无
+              零元
             </h1>
           </div>
         </div>
@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={() => {
                   if (navigator.share) {
-                    navigator.share({ title: '手慢无 Item', url: window.location.href }).catch(() => {});
+                    navigator.share({ title: '零元 Item', url: window.location.href }).catch(() => {});
                   } else {
                     navigator.clipboard.writeText(window.location.href);
                     alert('Link copied to clipboard!');

@@ -48,12 +48,12 @@ type CategoryProcessResult = {
   notFreeRejected: number;
 };
 
-function sessionPoolOptions(maxPoolSize: number) {
+export function sessionPoolOptions(maxPoolSize: number) {
   return {
     maxPoolSize,
-    // Handle 429 in requestHandler (retire session + Playwright fallback) instead of
-    // Crawlee throwing before the handler runs.
-    blockedStatusCodes: [401, 403],
+    // Override Crawlee's default blocked statuses; otherwise it throws before requestHandler runs.
+    // 401/403/429 are handled in requestHandler (retire session + Playwright fallback).
+    blockedStatusCodes: [],
     persistenceOptions: { enable: false },
   };
 }
@@ -221,10 +221,23 @@ function isBlockedHttpResponse(statusCode: number | undefined, body: string): bo
   return false;
 }
 
-async function openRunRequestQueue(runId?: string): Promise<RequestQueue> {
+export function buildRunRequestQueueName(
+  runId?: string,
+  queueKind: 'main' | 'retry' = 'main',
+): string {
+  const sanitized = runId?.replace(/[^a-zA-Z0-9-]/g, '') || `${Date.now()}`;
   const suffix =
-    runId?.replace(/[^a-zA-Z0-9-]/g, '').slice(0, 36) ?? `${Date.now()}`;
-  return RequestQueue.open(`vinted-run-${suffix}`);
+    queueKind === 'main'
+      ? sanitized.slice(0, 36)
+      : `${sanitized.slice(0, 30)}-${queueKind}`;
+  return `vinted-run-${suffix}`;
+}
+
+async function openRunRequestQueue(
+  runId?: string,
+  queueKind: 'main' | 'retry' = 'main',
+): Promise<RequestQueue> {
+  return RequestQueue.open(buildRunRequestQueueName(runId, queueKind));
 }
 
 async function dropRunRequestQueue(queue: RequestQueue): Promise<void> {
@@ -394,9 +407,7 @@ export async function runVintedCrawler(
     await httpCrawler.run([...categoryUrls]);
 
     if (blockRetryUrls.size > 0) {
-      const retryQueue = await openRunRequestQueue(
-        options.runId ? `${options.runId}-retry` : undefined,
-      );
+      const retryQueue = await openRunRequestQueue(options.runId, 'retry');
       try {
         const blockRetryCrawler = new PlaywrightCrawler({
           requestQueue: retryQueue,
