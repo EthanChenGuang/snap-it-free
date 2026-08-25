@@ -6,10 +6,10 @@ const PUBLIC_LISTINGS = 'listings_public';
 const BASE_LISTINGS = 'listings';
 
 const ACTIVE_LISTING_COLUMNS =
-  'id, source, title, title_en, title_zh, description, description_en, description_zh, photo_url, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status';
+  'id, source, title, title_en, title_zh, description, description_en, description_zh, photo_url, photo_urls, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status';
 
 const OWNER_LISTING_COLUMNS =
-  'id, source, title, photo_url, external_url, lat, lng, zone, posted_at, expires_at, status, owner_user_id, hidden_reason, description';
+  'id, source, title, photo_url, photo_urls, external_url, lat, lng, zone, posted_at, expires_at, status, owner_user_id, hidden_reason, description';
 
 export async function getActiveListings(): Promise<ListingRow[]> {
   if (!getSupabaseEnv()) {
@@ -123,15 +123,70 @@ export async function getOwnerListings(): Promise<OwnerListingRow[]> {
   return (data ?? []) as OwnerListingRow[];
 }
 
+export async function getSimilarListings(
+  current: Pick<ListingRow, 'id' | 'zone'>,
+  limit = 3,
+): Promise<ListingRow[]> {
+  if (!getSupabaseEnv()) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const baseQuery = () =>
+    supabase
+      .from(PUBLIC_LISTINGS)
+      .select(ACTIVE_LISTING_COLUMNS)
+      .neq('id', current.id)
+      .order('posted_at', { ascending: false })
+      .limit(limit);
+
+  if (current.zone) {
+    const { data: zoneMatches, error: zoneError } = await baseQuery().eq('zone', current.zone);
+    if (zoneError) {
+      return [];
+    }
+
+    const zoneListings = (zoneMatches ?? []) as ListingRow[];
+    if (zoneListings.length >= limit) {
+      return zoneListings.slice(0, limit);
+    }
+
+    const remaining = limit - zoneListings.length;
+    const excludeIds = [current.id, ...zoneListings.map((item) => item.id)];
+    const { data: fallbackMatches, error: fallbackError } = await supabase
+      .from(PUBLIC_LISTINGS)
+      .select(ACTIVE_LISTING_COLUMNS)
+      .not('id', 'in', `(${excludeIds.join(',')})`)
+      .order('posted_at', { ascending: false })
+      .limit(remaining);
+
+    if (fallbackError) {
+      return zoneListings;
+    }
+
+    return [...zoneListings, ...((fallbackMatches ?? []) as ListingRow[])];
+  }
+
+  const { data, error } = await baseQuery();
+  if (error) {
+    return [];
+  }
+
+  return (data ?? []) as ListingRow[];
+}
+
 export async function getListingForDetail(
   id: string,
 ): Promise<{ listing: ListingRow | OwnerListingRow; isOwnerView: boolean } | null> {
-  const ownerListing = await getOwnerListingById(id);
+  const [ownerListing, publicListing] = await Promise.all([
+    getOwnerListingById(id),
+    getListingById(id),
+  ]);
+
   if (ownerListing) {
     return { listing: ownerListing, isOwnerView: true };
   }
 
-  const publicListing = await getListingById(id);
   if (publicListing) {
     return { listing: publicListing, isOwnerView: false };
   }

@@ -9,16 +9,28 @@ Copy `.env.example` to `.env` and set:
 - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` — Supabase service role (worker only)
 - `PROXY_URL` — residential rotating proxy endpoint (recommended for production)
 - `CRON_ENABLED=true` — 90-minute in-process schedule with overlap guard
-- Alerting (priority order): `CALLMEBOT_PHONE` + `CALLMEBOT_APIKEY` (WhatsApp, recommended), or `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`, or `RESEND_API_KEY` + `ALERT_FROM` + `ALERT_TO`
+- Alerting fallback chain (tries in order until one succeeds): Telegram → WhatsApp → PushPlus (WeChat) → Resend email. Configure any subset; unconfigured channels are skipped.
 
 Apply migrations from `../supabase/migrations/` before first run.
+
+### WeChat alerts (PushPlus)
+
+1. Register at https://www.pushplus.plus and complete **实名认证** (required).
+2. Follow the **PushPlus 微信服务号** from the dashboard.
+3. Copy your **用户 token** into `PUSHPLUS_TOKEN` in `.env`.
+4. Set `PUSHPLUS_CHANNEL=app` (default) and **install PushPlus App** for lock-screen notifications.
+   - `wechat` channel only delivers to PushPlus **服务号** inbox (not personal chat).
+   - WeChat does not allow third-party direct personal chat APIs.
+5. Test: `npm run test:wechat` or compare channels: `npm run test:wechat:all`
+
+Optional **WxPusher**: set `WXPUSHER_SPT` (scan QR at https://wxpusher.zjiecode.com/docs/spt.html) — overrides PushPlus when set.
 
 ### WhatsApp alerts (CallMeBot)
 
 1. Add **+34 684 72 39 62** to your WhatsApp contacts (name: CallMeBot).
 2. Send **`I allow callmebot to send me messages`** to that contact.
 3. Copy the **apikey** from CallMeBot's reply into `CALLMEBOT_APIKEY`; set `CALLMEBOT_PHONE` to your number in international format (e.g. `+393331234567`).
-4. Test locally: `npm run test:whatsapp`
+4. Test locally: `npm run test:wechat`, `npm run test:telegram`, or `npm run test:whatsapp`
 
 Block / validation failures trigger WhatsApp immediately (see `notifyOperator` in `src/alert/notify.ts`).
 
@@ -56,6 +68,7 @@ fly secrets set \
   SUPABASE_SERVICE_ROLE_KEY=... \
   SCRAPER_SECRETS_KEY=... \
   PROXY_URL=... \
+  PUSHPLUS_TOKEN=... \
   CALLMEBOT_PHONE=... \
   CALLMEBOT_APIKEY=... \
   TELEGRAM_BOT_TOKEN=... \

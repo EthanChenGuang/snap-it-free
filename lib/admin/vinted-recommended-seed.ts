@@ -16,7 +16,7 @@ import {
 } from './subito-regalo-catalog';
 import type { SubitoCitySlug } from '@/lib/geo/italian-cities';
 
-/** Same 9 cities as Subito regalo matrix (260815-fjs italian-cities). */
+/** Same 13 cities as Subito regalo matrix (260815-fjs italian-cities). */
 export const VINTED_SEED_CITY_SLUGS = SUBITO_CITY_SLUGS;
 
 export type VintedSeedCitySlug = SubitoCitySlug;
@@ -67,7 +67,7 @@ function generateVintedSeedUrls(): string[] {
   return urls;
 }
 
-/** Recommended admin seed URLs — 17 categories × 9 cities (153 URLs). */
+/** Recommended admin seed URLs — 17 categories × 13 cities (221 URLs). */
 export const RECOMMENDED_VINTED_SEED_URLS: readonly string[] = generateVintedSeedUrls();
 
 export const RECOMMENDED_VINTED_SEED_COUNT = RECOMMENDED_VINTED_SEED_URLS.length;

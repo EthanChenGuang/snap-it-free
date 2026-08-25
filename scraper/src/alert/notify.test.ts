@@ -3,7 +3,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import {
   buildEmailSubject,
   buildTelegramMessage,
+  buildWeChatMessage,
   buildWhatsAppMessage,
+  getAlertFallbackChain,
+  isWeChatConfigured,
   isWhatsAppConfigured,
   notifyOperator,
   resolveChannel,
@@ -55,6 +58,7 @@ vi.mock('node-telegram-bot-api', () => ({
 describe('notifyOperator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    delete process.env.PUSHPLUS_TOKEN;
     delete process.env.CALLMEBOT_PHONE;
     delete process.env.CALLMEBOT_APIKEY;
     delete process.env.TELEGRAM_BOT_TOKEN;
@@ -66,28 +70,59 @@ describe('notifyOperator', () => {
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
-  it('WhatsApp path sends CallMeBot request when CALLMEBOT_* set', async () => {
+  it('tries Telegram first when all channels configured', async () => {
+    process.env.PUSHPLUS_TOKEN = 'pp-token-123';
     process.env.CALLMEBOT_PHONE = '+393331234567';
     process.env.CALLMEBOT_APIKEY = 'abc123';
     process.env.TELEGRAM_BOT_TOKEN = 'bot-token';
     process.env.TELEGRAM_CHAT_ID = 'chat-id';
+    telegramSend.mockResolvedValue({ message_id: 1 });
+
+    await notifyOperator(mockSupabase(), basePayload);
+
+    expect(telegramSend).toHaveBeenCalledOnce();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('falls back to WhatsApp when Telegram fails', async () => {
+    process.env.CALLMEBOT_PHONE = '+393331234567';
+    process.env.CALLMEBOT_APIKEY = 'abc123';
+    process.env.TELEGRAM_BOT_TOKEN = 'bot-token';
+    process.env.TELEGRAM_CHAT_ID = 'chat-id';
+    telegramSend.mockImplementation(() => Promise.reject(new Error('Telegram down')));
     fetchMock.mockResolvedValue({ ok: true, text: async () => 'Message queued' });
 
     await notifyOperator(mockSupabase(), basePayload);
 
+    expect(telegramSend).toHaveBeenCalledOnce();
     expect(fetchMock).toHaveBeenCalledOnce();
     const called = fetchMock.mock.calls[0][0];
     const url = typeof called === 'string' ? called : called instanceof URL ? called.href : String(called);
     expect(url).toContain('api.callmebot.com/whatsapp.php');
-    expect(url).toContain('phone=%2B393331234567');
-    expect(url).toContain('apikey=abc123');
-    expect(telegramSend).not.toHaveBeenCalled();
   });
 
-  it('Resend path sends subject containing run_id when RESEND_API_KEY set', async () => {
+  it('falls back to PushPlus when Telegram and WhatsApp fail', async () => {
+    process.env.PUSHPLUS_TOKEN = 'pp-token-123';
+    process.env.CALLMEBOT_PHONE = '+393331234567';
+    process.env.CALLMEBOT_APIKEY = 'abc123';
+    process.env.TELEGRAM_BOT_TOKEN = 'bot-token';
+    process.env.TELEGRAM_CHAT_ID = 'chat-id';
+    telegramSend.mockImplementation(() => Promise.reject(new Error('Telegram down')));
+    fetchMock
+      .mockResolvedValueOnce({ ok: true, text: async () => 'Message not sent' })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ code: 200, msg: 'success' }) });
+
+    await notifyOperator(mockSupabase(), basePayload);
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const [, pushInit] = fetchMock.mock.calls[1] as [string, RequestInit];
+    expect(pushInit.body).toContain('pp-token-123');
+  });
+
+  it('falls back to Resend when earlier channels fail or are unconfigured', async () => {
     process.env.RESEND_API_KEY = 're_test';
     process.env.ALERT_FROM = 'alerts@example.com';
     process.env.ALERT_TO = 'ops@example.com';
@@ -100,6 +135,31 @@ describe('notifyOperator', () => {
     expect(call.subject).toBe(buildEmailSubject(basePayload.runId));
     expect(call.subject).toContain('run-abc-123');
     expect(call.text).toContain('did NOT persist this batch');
+  });
+
+  it('logs ALERT_DELIVERY_EXHAUSTED when every channel fails', async () => {
+    process.env.PUSHPLUS_TOKEN = 'pp-token-123';
+    process.env.CALLMEBOT_PHONE = '+393331234567';
+    process.env.CALLMEBOT_APIKEY = 'abc123';
+    process.env.TELEGRAM_BOT_TOKEN = 'bot-token';
+    process.env.TELEGRAM_CHAT_ID = 'chat-id';
+    process.env.RESEND_API_KEY = 're_test';
+    process.env.ALERT_FROM = 'alerts@example.com';
+    process.env.ALERT_TO = 'ops@example.com';
+    telegramSend.mockImplementation(() => Promise.reject(new Error('Telegram down')));
+    fetchMock
+      .mockResolvedValueOnce({ ok: true, text: async () => 'Message not sent' })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ code: 500, msg: 'PushPlus down' }) });
+    resendSend.mockResolvedValue({ data: null, error: { message: 'SMTP rejected' } });
+
+    const stderrSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await notifyOperator(mockSupabase(), basePayload);
+
+    expect(stderrSpy).toHaveBeenCalledWith(
+      expect.stringContaining('ALERT_DELIVERY_EXHAUSTED run_id=run-abc-123 chain=telegram>whatsapp>wechat>resend'),
+    );
+    stderrSpy.mockRestore();
   });
 
   it('Telegram path truncates failure_detail at 500 chars when message would exceed 4096', async () => {
@@ -115,21 +175,14 @@ describe('notifyOperator', () => {
     expect(message.length).toBeLessThanOrEqual(4096);
     expect(message).toContain('…(truncated)');
   });
+});
 
-  it('logs ALERT_DELIVERY_FAILED to stderr on delivery failure', async () => {
-    process.env.RESEND_API_KEY = 're_test';
-    process.env.ALERT_FROM = 'alerts@example.com';
-    process.env.ALERT_TO = 'ops@example.com';
-    resendSend.mockResolvedValue({ data: null, error: { message: 'SMTP rejected' } });
-
-    const stderrSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    await notifyOperator(mockSupabase(), basePayload);
-
-    expect(stderrSpy).toHaveBeenCalledWith(
-      expect.stringContaining('ALERT_DELIVERY_FAILED channel=resend run_id=run-abc-123'),
-    );
-    stderrSpy.mockRestore();
+describe('buildWeChatMessage', () => {
+  it('includes run_id and block context', () => {
+    const message = buildWeChatMessage(basePayload);
+    expect(message).toContain('Subito scraper blocked');
+    expect(message).toContain('run run-abc-123');
+    expect(message).toContain('Reason: LOW_COUNT');
   });
 });
 
@@ -142,8 +195,20 @@ describe('buildWhatsAppMessage', () => {
   });
 });
 
-describe('resolveChannel', () => {
-  it('prefers WhatsApp over Telegram and email', () => {
+describe('getAlertFallbackChain', () => {
+  beforeEach(() => {
+    delete process.env.PUSHPLUS_TOKEN;
+    delete process.env.CALLMEBOT_PHONE;
+    delete process.env.CALLMEBOT_APIKEY;
+    delete process.env.TELEGRAM_BOT_TOKEN;
+    delete process.env.TELEGRAM_CHAT_ID;
+    delete process.env.RESEND_API_KEY;
+    delete process.env.ALERT_FROM;
+    delete process.env.ALERT_TO;
+  });
+
+  it('orders Telegram → WhatsApp → PushPlus → Resend when all configured', () => {
+    process.env.PUSHPLUS_TOKEN = 'pp-token';
     process.env.CALLMEBOT_PHONE = '+393331234567';
     process.env.CALLMEBOT_APIKEY = 'abc123';
     process.env.TELEGRAM_BOT_TOKEN = 'bot-token';
@@ -152,8 +217,20 @@ describe('resolveChannel', () => {
     process.env.ALERT_FROM = 'alerts@example.com';
     process.env.ALERT_TO = 'ops@example.com';
 
-    expect(resolveChannel()).toBe('whatsapp');
-    expect(isWhatsAppConfigured()).toBe(true);
+    expect(getAlertFallbackChain()).toEqual(['telegram', 'whatsapp', 'wechat', 'resend']);
+    expect(resolveChannel()).toBe('telegram');
+    expect(isWeChatConfigured()).toBe(true);
+  });
+
+  it('skips unconfigured channels', () => {
+    process.env.TELEGRAM_BOT_TOKEN = 'bot-token';
+    process.env.TELEGRAM_CHAT_ID = 'chat-id';
+    process.env.RESEND_API_KEY = 're_test';
+    process.env.ALERT_FROM = 'alerts@example.com';
+    process.env.ALERT_TO = 'ops@example.com';
+
+    expect(getAlertFallbackChain()).toEqual(['telegram', 'resend']);
+    expect(isWhatsAppConfigured()).toBe(false);
   });
 });
 

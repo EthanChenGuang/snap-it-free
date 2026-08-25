@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const ACTIVE_COLUMNS =
-  'id, source, title, title_en, title_zh, description, description_en, description_zh, photo_url, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status';
+  'id, source, title, title_en, title_zh, description, description_en, description_zh, photo_url, photo_urls, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status';
 
 const mockSelect = vi.fn();
 const mockEq = vi.fn();
@@ -123,6 +123,38 @@ describe('getActiveListings', () => {
     expect(result[0]?.external_url).toBe(
       'https://www.facebook.com/marketplace/item/9876543210123456/',
     );
+    expect(mockNot).not.toHaveBeenCalled();
+  });
+});
+
+describe('getSimilarListings', () => {
+  const mockLimit = vi.fn();
+  const mockNeq = vi.fn();
+  const mockIn = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockLimit.mockReturnValue({ data: [], error: null });
+    mockNeq.mockReturnValue({ eq: mockEq, order: mockOrder, limit: mockLimit });
+    mockIn.mockReturnValue({ order: mockOrder, limit: mockLimit });
+    mockOrder.mockReturnValue({ limit: mockLimit, eq: mockEq });
+    mockEq.mockReturnValue({ order: mockOrder, limit: mockLimit, not: mockNot });
+    mockNot.mockReturnValue({ order: mockOrder, limit: mockLimit });
+    mockSelect.mockReturnValue({ eq: mockEq, neq: mockNeq, not: mockNot, order: mockOrder, limit: mockLimit });
+    mockFrom.mockReturnValue({ select: mockSelect });
+  });
+
+  it('limits similar listings query instead of loading the full feed', async () => {
+    const { getSimilarListings } = await import('./queries');
+
+    await getSimilarListings({
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      zone: null,
+    });
+
+    expect(mockFrom).toHaveBeenCalledWith('listings_public');
+    expect(mockNeq).toHaveBeenCalledWith('id', '550e8400-e29b-41d4-a716-446655440000');
+    expect(mockLimit).toHaveBeenCalledWith(3);
     expect(mockNot).not.toHaveBeenCalled();
   });
 });

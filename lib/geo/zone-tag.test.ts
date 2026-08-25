@@ -20,6 +20,10 @@ describe('tagZone', () => {
     expect(tagZone(45.5, 12.0, zones)).toBeNull();
   });
 
+  it('returns null for Mirano — inside Venice bbox but outside service zones', () => {
+    expect(tagZone(45.4934, 12.1084, zones)).toBeNull();
+  });
+
   it('returns null when coordinates are outside Venice bounds', () => {
     expect(tagZone(46.0, 13.0, zones)).toBeNull();
   });

@@ -142,6 +142,7 @@ async function main() {
     photoUrl: uploadJson.photoUrl ?? 'https://example.com/x.jpg',
     lat: 45.434,
     lng: 12.338,
+    postCategory: 'arredamento-casalinghi',
   };
 
   const createRes = await apiFetch('/api/ugc/listings', cookieHeader, {

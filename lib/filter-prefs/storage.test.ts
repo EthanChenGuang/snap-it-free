@@ -87,6 +87,11 @@ describe('writeFilterPrefs', () => {
     expect(readFilterPrefs().categories).toEqual(['informatica', 'furniture']);
   });
 
+  it('round-trips other city filter', () => {
+    writeFilterPrefs({ ...DEFAULT_FILTER_PREFS, city: 'other' });
+    expect(readFilterPrefs().city).toBe('other');
+  });
+
   it('dispatches change event on write', () => {
     const handler = vi.fn();
     window.addEventListener('shoumanwu-filter-prefs-change', handler);

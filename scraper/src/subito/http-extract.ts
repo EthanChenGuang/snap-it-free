@@ -33,6 +33,7 @@ export type ParseCategoryResult = {
 
 type SubitoAdItem = {
   subject?: string;
+  body?: string;
   date?: string;
   features?: Record<string, { values?: Array<{ key?: string; value?: string }> }>;
   images?: Array<{ cdnBaseUrl?: string }>;
@@ -113,6 +114,7 @@ function mapAdItem(item: SubitoAdItem, sourceCategoryUrl: string): CategoryJsonL
     .map(normalizeSubitoPhotoUrl);
   const photo_url = image_urls[0] ?? '';
   const posted_at = item.date ? parseSubitoPostedAt(item.date) : '';
+  const description = item.body?.trim() || undefined;
   let price = extractPrice(item.features);
   if (!price && /\/regalo\//i.test(sourceCategoryUrl)) {
     price = '0 €';
@@ -147,6 +149,7 @@ function mapAdItem(item: SubitoAdItem, sourceCategoryUrl: string): CategoryJsonL
     price,
     image_urls,
     source_category_url: sourceCategoryUrl || undefined,
+    ...(description ? { description } : {}),
   };
 }
 

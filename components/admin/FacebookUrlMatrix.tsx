@@ -150,7 +150,7 @@ export function FacebookUrlMatrix({
         <div>
           <h2 className="source-detail-card-title">Facebook URL 矩阵</h2>
           <p className="source-detail-card-subtitle">
-            按城市与搜索词生成 Marketplace 搜索 URL。与 Subito 矩阵使用相同的 9 城（Venezia 路径 slug 为{' '}
+            按城市与搜索词生成 Marketplace 搜索 URL。与 Subito 矩阵使用相同的 13 城（Venezia 路径 slug 为{' '}
             <code className="text-xs">venice</code>）。
           </p>
         </div>

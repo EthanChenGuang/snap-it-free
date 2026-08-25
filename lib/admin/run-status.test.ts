@@ -90,7 +90,7 @@ describe('run-status', () => {
         status: 'partial',
         finishedAt: null,
         startedAt: thirtyMinutesAgo,
-        targetUrlCount: 153,
+        targetUrlCount: 221,
       }),
     ).toBe('运行中');
   });

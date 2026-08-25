@@ -1,13 +1,31 @@
 import type { ConsumerCityKey } from '@/lib/geo/italian-cities';
-import { CONSUMER_CITY_KEYS, getCityByConsumerKey, getCityBySubitoSlug } from '@/lib/geo/italian-cities';
+import { getCityByConsumerKey, getCityBySubitoSlug, inCityBbox } from '@/lib/geo/italian-cities';
 import { haversineKm } from '@/lib/geo/haversine';
 import type { ListingRow, VeniceZone, ZoneChip } from './types';
 
-export type ConsumerCity = 'all' | ConsumerCityKey;
+export type ConsumerCity = 'all' | 'other' | ConsumerCityKey;
+
+/** Filter chip order by Chinese-resident population in Italy; unranked cities before `other`. */
+export const CONSUMER_CITY_FILTER_ORDER: readonly ConsumerCityKey[] = [
+  'milano',
+  'roma',
+  'prato',
+  'torino',
+  'firenze',
+  'bologna',
+  'napoli',
+  'brescia',
+  'venice',
+  'genova',
+  'padova',
+  'perugia',
+  'verona',
+];
 
 export const CONSUMER_CITY_FILTER_OPTIONS: readonly ConsumerCity[] = [
   'all',
-  ...CONSUMER_CITY_KEYS,
+  ...CONSUMER_CITY_FILTER_ORDER,
+  'other',
 ];
 
 export function filterByZone(listings: ListingRow[], zoneChip: ZoneChip): ListingRow[] {
@@ -51,7 +69,16 @@ export function listingConsumerCity(listing: ListingRow): ConsumerCityKey | null
   const dbCity = listing.city?.toLowerCase();
   if (dbCity) {
     const entry = getCityBySubitoSlug(dbCity) ?? getCityByConsumerKey(dbCity);
-    if (entry) return entry.consumerKey;
+    if (entry) {
+      if (
+        listing.lat != null &&
+        listing.lng != null &&
+        !inCityBbox(listing.lat, listing.lng, entry.subitoSlug)
+      ) {
+        return null;
+      }
+      return entry.consumerKey;
+    }
   }
 
   return null;
@@ -59,6 +86,7 @@ export function listingConsumerCity(listing: ListingRow): ConsumerCityKey | null
 
 export function matchesConsumerCity(listing: ListingRow, city: ConsumerCity): boolean {
   if (city === 'all') return true;
+  if (city === 'other') return listingConsumerCity(listing) === null;
   return listingConsumerCity(listing) === city;
 }
 

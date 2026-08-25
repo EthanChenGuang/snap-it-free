@@ -52,6 +52,9 @@ secret_args=(
 if [[ -n "${PROXY_URL:-}" ]]; then
   secret_args+=("PROXY_URL=$PROXY_URL")
 fi
+if [[ -n "${PUSHPLUS_TOKEN:-}" ]]; then
+  secret_args+=("PUSHPLUS_TOKEN=$PUSHPLUS_TOKEN")
+fi
 if [[ -n "${CALLMEBOT_PHONE:-}" ]]; then
   secret_args+=("CALLMEBOT_PHONE=$CALLMEBOT_PHONE")
 fi

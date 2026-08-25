@@ -28,6 +28,63 @@ describe('parseCategoryNextData', () => {
     expect(first.source_category_url).toBe(SOURCE_URL);
     expect(first.lat).not.toBeNull();
     expect(first.lng).not.toBeNull();
+    expect(first.description).toBe('[redacted description]');
+  });
+
+  it('maps category JSON body to description', () => {
+    const payload = JSON.stringify({
+      props: {
+        pageProps: {
+          initialState: {
+            items: {
+              originalList: [
+                {
+                  subject: 'lampada da tavolo',
+                  body: '  Lampada funzionante, ritiro in zona Mestre.  ',
+                  date: '2026-08-11 12:00:00',
+                  features: { '/price': { values: [{ value: '0 €' }] } },
+                  images: [{ cdnBaseUrl: 'https://images.sbito.it/x.jpg' }],
+                  urls: {
+                    default: 'https://www.subito.it/arredamento-casalinghi/lampada-456.htm',
+                  },
+                  geo: { city: { value: 'Venezia', shortName: 'VE' } },
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+    const html = `<html><script id="__NEXT_DATA__">${payload}</script></html>`;
+    const { listings } = parseCategoryNextData(html, SOURCE_URL);
+    expect(listings[0]?.description).toBe('Lampada funzionante, ritiro in zona Mestre.');
+  });
+
+  it('omits description when body is missing or blank', () => {
+    const payload = JSON.stringify({
+      props: {
+        pageProps: {
+          initialState: {
+            items: {
+              originalList: [
+                {
+                  subject: 'sedia',
+                  body: '   ',
+                  date: '2026-08-11 12:00:00',
+                  features: { '/price': { values: [{ value: '0 €' }] } },
+                  images: [{ cdnBaseUrl: 'https://images.sbito.it/x.jpg' }],
+                  urls: { default: 'https://www.subito.it/arredamento-casalinghi/sedia-789.htm' },
+                  geo: { city: { value: 'Venezia', shortName: 'VE' } },
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+    const html = `<html><script id="__NEXT_DATA__">${payload}</script></html>`;
+    const { listings } = parseCategoryNextData(html, SOURCE_URL);
+    expect(listings[0]?.description).toBeUndefined();
   });
 
   it('preserves fixture JSON array order', () => {

@@ -5,7 +5,7 @@ import type { ListingRow } from './types';
 const PUBLIC_LISTINGS = 'listings_public';
 
 const ACTIVE_LISTING_COLUMNS =
-  'id, source, title, title_en, title_zh, description, description_en, description_zh, photo_url, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status';
+  'id, source, title, title_en, title_zh, description, description_en, description_zh, photo_url, photo_urls, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status';
 
 function activeListingQuery(supabase: ReturnType<typeof createClient>) {
   return supabase

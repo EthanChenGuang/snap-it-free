@@ -149,7 +149,7 @@ export function VintedUrlMatrix({
           <h2 className="source-detail-card-title">Vinted URL 矩阵</h2>
           <p className="source-detail-card-subtitle">
             按城市与 Subito 分类生成 Vinted catalog URL；城市范围通过{' '}
-            <code className="text-xs">?city=</code> 元数据标记（D-17-06）。与 Subito 矩阵使用相同的 9 城。
+            <code className="text-xs">?city=</code> 元数据标记（D-17-06）。与 Subito 矩阵使用相同的 13 城。
           </p>
         </div>
       </header>

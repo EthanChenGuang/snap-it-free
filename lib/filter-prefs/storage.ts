@@ -7,7 +7,7 @@ export type FilterPrefs = {
   mode: FilterMode;
   radiusKm: number;
   radiusEnabled: boolean;
-  city: 'all' | ConsumerCityKey;
+  city: 'all' | 'other' | ConsumerCityKey;
   categories: string[];
 };
 
@@ -22,7 +22,7 @@ export const DEFAULT_FILTER_PREFS: FilterPrefs = {
   categories: [],
 };
 
-const VALID_CITIES = new Set<FilterPrefs['city']>(['all', ...CONSUMER_CITY_KEYS]);
+const VALID_CITIES = new Set<FilterPrefs['city']>(['all', 'other', ...CONSUMER_CITY_KEYS]);
 const VALID_MODES = new Set<FilterMode>(['city', 'map']);
 const RADIUS_PRESETS = [5, 10, 50, 100] as const;
 export const SELECT_LOCATION_RADIUS_OPTIONS = RADIUS_PRESETS;
@@ -49,6 +49,7 @@ function parseMode(value: unknown, parsed: Record<string, unknown>): FilterMode 
 
 function parseCity(value: unknown): FilterPrefs['city'] {
   if (value === 'all') return 'all';
+  if (value === 'other') return 'other';
   if (typeof value === 'string' && isConsumerCityKey(value)) {
     return value;
   }

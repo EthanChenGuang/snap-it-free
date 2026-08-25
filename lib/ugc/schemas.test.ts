@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { SUBITO_CATEGORY_SLUGS } from '@/lib/listings/subito-categories';
-import { CreateListingSchema, isWithinUgcVeniceBounds } from './schemas';
+import {
+  CreateListingSchema,
+  isWithinUgcPickupBounds,
+  isWithinUgcVeniceBounds,
+} from './schemas';
 
 describe('CreateListingSchema', () => {
   const valid = {
@@ -51,23 +55,24 @@ describe('CreateListingSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects lat outside Venice bounds', () => {
-    const result = CreateListingSchema.safeParse({ ...valid, lat: 44.9 });
+  it('rejects lat outside supported pickup envelope', () => {
+    const result = CreateListingSchema.safeParse({ ...valid, lat: 38.0 });
     expect(result.success).toBe(false);
   });
 
-  it('rejects lng outside Venice bounds', () => {
-    const result = CreateListingSchema.safeParse({ ...valid, lng: 12.0 });
-    expect(result.success).toBe(false);
+  it('accepts Padova pickup coordinates in the national envelope', () => {
+    expect(isWithinUgcPickupBounds(45.4064, 11.8768)).toBe(true);
+    expect(
+      CreateListingSchema.safeParse({
+        ...valid,
+        lat: 45.4064,
+        lng: 11.8768,
+      }).success,
+    ).toBe(true);
   });
 
-  it('rejects Padova pickup coordinates (UGC is Venice-only)', () => {
-    expect(isWithinUgcVeniceBounds(45.4064, 11.8768)).toBe(false);
-    const result = CreateListingSchema.safeParse({
-      ...valid,
-      lat: 45.4064,
-      lng: 11.8768,
-    });
-    expect(result.success).toBe(false);
+  it('isWithinUgcVeniceBounds remains a deprecated alias', () => {
+    expect(isWithinUgcVeniceBounds(45.434, 12.338)).toBe(true);
+    expect(isWithinUgcVeniceBounds(45.4064, 11.8768)).toBe(true);
   });
 });

@@ -55,7 +55,7 @@ export function SimilarListings({ listings }: SimilarListingsProps) {
                 <p className="truncate text-label-md text-primary group-hover:underline">
                   {item.title}
                 </p>
-                <p className="text-label-sm text-secondary">
+                <p className="text-label-sm text-secondary" suppressHydrationWarning>
                   {locationText} • {formatRelativeTime(item.posted_at)}
                 </p>
               </div>

@@ -13,10 +13,16 @@ import { useMessages } from '@/lib/i18n/useMessages';
 
 type DetailHeroControlsProps = {
   listing: ListingRow;
+  showFavorite?: boolean;
+  showOverflow?: boolean;
 };
 
 /** Floating back / favorite / share / more controls on the hero image. */
-export function DetailHeroControls({ listing }: DetailHeroControlsProps) {
+export function DetailHeroControls({
+  listing,
+  showFavorite = true,
+  showOverflow = true,
+}: DetailHeroControlsProps) {
   const { messages } = useMessages();
   const router = useRouter();
   const [reportOpen, setReportOpen] = useState(false);
@@ -53,12 +59,14 @@ export function DetailHeroControls({ listing }: DetailHeroControlsProps) {
         </button>
 
         <div className="pointer-events-auto flex items-center gap-space-sm">
-          <FavoriteButton
-            listingId={listing.id}
-            size="sm"
-            tone="overlay"
-            className="h-10 w-10 rounded-full bg-surface-container-lowest/90 p-2 backdrop-blur-sm transition hover:bg-surface-container-lowest"
-          />
+          {showFavorite ? (
+            <FavoriteButton
+              listingId={listing.id}
+              size="sm"
+              tone="overlay"
+              className="h-10 w-10 rounded-full bg-surface-container-lowest/90 p-2 backdrop-blur-sm transition hover:bg-surface-container-lowest"
+            />
+          ) : null}
           <Button
             type="button"
             variant="ghost"
@@ -69,9 +77,11 @@ export function DetailHeroControls({ listing }: DetailHeroControlsProps) {
           >
             <span className="material-symbols-outlined text-primary">share</span>
           </Button>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-lowest/90 backdrop-blur-sm">
-            <DetailOverflowMenu onReport={() => setReportOpen(true)} />
-          </div>
+          {showOverflow ? (
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-lowest/90 backdrop-blur-sm">
+              <DetailOverflowMenu onReport={() => setReportOpen(true)} />
+            </div>
+          ) : null}
         </div>
       </div>
 

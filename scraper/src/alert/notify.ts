@@ -16,6 +16,8 @@ const TELEGRAM_MAX_LENGTH = 4096;
 const TELEGRAM_DETAIL_TRUNCATE = 500;
 const WHATSAPP_MAX_LENGTH = 1000;
 const WHATSAPP_DETAIL_TRUNCATE = 300;
+const WECHAT_MAX_LENGTH = 2000;
+const WECHAT_DETAIL_TRUNCATE = 400;
 
 function buildEmailSubject(runId: string): string {
   return `[ALERT] 零元 scraper soft-block — run ${runId} failed validation`;
@@ -39,6 +41,39 @@ function buildEmailBody(payload: AlertPayload): string {
     '',
     '— 零元 (ZeroDollar / ZeroEuro) ingestion worker',
   ].join('\n');
+}
+
+function buildWeChatMessage(payload: AlertPayload): string {
+  let failureDetail = payload.failureDetail;
+  const base = [
+    `⚠️ Subito scraper blocked — run ${payload.runId}`,
+    `Parsed ${payload.parsedCount} listings (need ≥${payload.minCount}). Selectors ${payload.selectorPct}%.`,
+    `Reason: ${payload.failureCode}`,
+    failureDetail ? `Detail: ${failureDetail}` : null,
+    '→ Check logs & scrape_runs',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  if (base.length <= WECHAT_MAX_LENGTH) {
+    return base;
+  }
+
+  failureDetail =
+    failureDetail.length > WECHAT_DETAIL_TRUNCATE
+      ? `${failureDetail.slice(0, WECHAT_DETAIL_TRUNCATE)}…(truncated)`
+      : failureDetail;
+
+  return [
+    `⚠️ Subito scraper blocked — run ${payload.runId}`,
+    `Parsed ${payload.parsedCount} listings (need ≥${payload.minCount}). Selectors ${payload.selectorPct}%.`,
+    `Reason: ${payload.failureCode}`,
+    failureDetail ? `Detail: ${failureDetail}` : null,
+    '→ Check logs & scrape_runs',
+  ]
+    .filter(Boolean)
+    .join('\n')
+    .slice(0, WECHAT_MAX_LENGTH);
 }
 
 function buildWhatsAppMessage(payload: AlertPayload): string {
@@ -128,23 +163,74 @@ async function loadAlertRouting(supabase: SupabaseClient): Promise<AlertRouting>
   };
 }
 
+function resolvePushPlusChannel(): string {
+  const channel = process.env.PUSHPLUS_CHANNEL?.trim();
+  if (channel) return channel;
+  // `app` pushes to PushPlus mobile app (lock-screen notification); `wechat` goes to 服务号 inbox only.
+  return 'app';
+}
+
+function isWxPusherConfigured(): boolean {
+  return Boolean(process.env.WXPUSHER_SPT?.trim());
+}
+
+function isWeChatConfigured(): boolean {
+  return isWxPusherConfigured() || Boolean(process.env.PUSHPLUS_TOKEN?.trim());
+}
+
 function isWhatsAppConfigured(): boolean {
   return Boolean(process.env.CALLMEBOT_PHONE && process.env.CALLMEBOT_APIKEY);
 }
 
-function resolveChannel(routing?: AlertRouting): 'whatsapp' | 'telegram' | 'resend' | null {
-  if (isWhatsAppConfigured()) {
-    return 'whatsapp';
-  }
+type AlertChannel = 'telegram' | 'whatsapp' | 'wechat' | 'resend';
+
+function isTelegramConfigured(routing?: AlertRouting): boolean {
   const chatId = routing?.telegramChatId ?? process.env.TELEGRAM_CHAT_ID;
-  if (process.env.TELEGRAM_BOT_TOKEN && chatId) {
-    return 'telegram';
-  }
+  return Boolean(process.env.TELEGRAM_BOT_TOKEN && chatId);
+}
+
+function isResendConfigured(routing?: AlertRouting): boolean {
   const alertTo = routing?.alertEmail ?? process.env.ALERT_TO;
-  if (process.env.RESEND_API_KEY && process.env.ALERT_FROM && alertTo) {
-    return 'resend';
+  return Boolean(process.env.RESEND_API_KEY && process.env.ALERT_FROM && alertTo);
+}
+
+/** Ordered fallback chain: Telegram → WhatsApp → PushPlus → Resend. Skips unconfigured channels. */
+function getAlertFallbackChain(routing?: AlertRouting): AlertChannel[] {
+  const chain: AlertChannel[] = [];
+  if (isTelegramConfigured(routing)) chain.push('telegram');
+  if (isWhatsAppConfigured()) chain.push('whatsapp');
+  if (isWeChatConfigured()) chain.push('wechat');
+  if (isResendConfigured(routing)) chain.push('resend');
+  return chain;
+}
+
+function resolveChannel(routing?: AlertRouting): AlertChannel | null {
+  return getAlertFallbackChain(routing)[0] ?? null;
+}
+
+async function deliverAlert(
+  channel: AlertChannel,
+  payload: AlertPayload,
+  routing: AlertRouting,
+): Promise<void> {
+  switch (channel) {
+    case 'telegram':
+      await sendTelegramMessage(payload, routing.telegramChatId ?? process.env.TELEGRAM_CHAT_ID!);
+      return;
+    case 'whatsapp':
+      await sendWhatsAppMessage(payload);
+      return;
+    case 'wechat':
+      await sendWeChatMessage(payload);
+      return;
+    case 'resend':
+      await sendResendEmail(payload, routing.alertEmail ?? process.env.ALERT_TO!);
+      return;
+    default: {
+      const _exhaustive: never = channel;
+      throw new Error(`Unknown alert channel: ${_exhaustive}`);
+    }
   }
-  return null;
 }
 
 async function sendResendEmail(payload: AlertPayload, alertTo: string): Promise<void> {
@@ -167,6 +253,57 @@ async function sendTelegramMessage(payload: AlertPayload, chatId: string): Promi
   await bot.sendMessage(chatId, buildTelegramMessage(payload));
 }
 
+async function sendWxPusherMessage(payload: AlertPayload): Promise<void> {
+  const spt = process.env.WXPUSHER_SPT!.trim();
+  const content = buildWeChatMessage(payload);
+
+  const res = await fetch('https://wxpusher.zjiecode.com/api/send/message/simple-push', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      spt,
+      content,
+      summary: `[零元] Subito blocked — ${payload.failureCode}`,
+      contentType: 1,
+    }),
+  });
+
+  const data = (await res.json()) as { code?: number; msg?: string; success?: boolean };
+  const ok = data.success === true || data.code === 1000;
+  if (!res.ok || !ok) {
+    throw new Error(`WxPusher ${data.code ?? res.status}: ${data.msg ?? 'unknown error'}`);
+  }
+}
+
+async function sendWeChatMessage(payload: AlertPayload): Promise<void> {
+  if (isWxPusherConfigured()) {
+    await sendWxPusherMessage(payload);
+    return;
+  }
+
+  const token = process.env.PUSHPLUS_TOKEN!.trim();
+  const title = `[零元] Subito blocked — ${payload.failureCode}`;
+  const content = buildWeChatMessage(payload);
+  const channel = resolvePushPlusChannel();
+
+  const res = await fetch('https://www.pushplus.plus/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      token,
+      title,
+      content,
+      template: 'txt',
+      channel,
+    }),
+  });
+
+  const data = (await res.json()) as { code?: number; msg?: string };
+  if (!res.ok || data.code !== 200) {
+    throw new Error(`PushPlus ${data.code ?? res.status}: ${data.msg ?? 'unknown error'}`);
+  }
+}
+
 async function sendWhatsAppMessage(payload: AlertPayload): Promise<void> {
   const phone = process.env.CALLMEBOT_PHONE!;
   const apikey = process.env.CALLMEBOT_APIKEY!;
@@ -181,7 +318,10 @@ async function sendWhatsAppMessage(payload: AlertPayload): Promise<void> {
   if (!res.ok) {
     throw new Error(`CallMeBot HTTP ${res.status}: ${body.slice(0, 200)}`);
   }
-  if (/error|fail/i.test(body) && !/success|sent|queued/i.test(body)) {
+  if (/message not sent/i.test(body)) {
+    throw new Error(`CallMeBot rejected: ${body.slice(0, 200)}`);
+  }
+  if (/error|fail/i.test(body) && !/success|queued/i.test(body)) {
     throw new Error(`CallMeBot rejected: ${body.slice(0, 200)}`);
   }
 }
@@ -192,49 +332,61 @@ export async function notifyOperator(
   options: { emailOnly?: boolean } = {},
 ): Promise<void> {
   const routing = await loadAlertRouting(supabase);
-  let channel = resolveChannel(routing);
 
   if (options.emailOnly) {
-    const alertTo = routing.alertEmail ?? process.env.ALERT_TO;
-    if (process.env.RESEND_API_KEY && process.env.ALERT_FROM && alertTo) {
-      channel = 'resend';
-    } else {
+    if (!isResendConfigured(routing)) {
       console.error(
         `ALERT_DELIVERY_FAILED channel=email-only run_id=${payload.runId} error=No email alerting credentials configured`,
       );
       return;
     }
+    try {
+      await deliverAlert('resend', payload, routing);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`ALERT_DELIVERY_FAILED channel=resend run_id=${payload.runId} error=${message}`);
+    }
+    return;
   }
 
-  if (!channel) {
+  const chain = getAlertFallbackChain(routing);
+  if (chain.length === 0) {
     console.error(
       `ALERT_DELIVERY_FAILED channel=none run_id=${payload.runId} error=No alerting credentials configured`,
     );
     return;
   }
 
-  try {
-    if (channel === 'whatsapp') {
-      await sendWhatsAppMessage(payload);
-    } else if (channel === 'telegram') {
-      const chatId = routing.telegramChatId ?? process.env.TELEGRAM_CHAT_ID!;
-      await sendTelegramMessage(payload, chatId);
-    } else {
-      const alertTo = routing.alertEmail ?? process.env.ALERT_TO!;
-      await sendResendEmail(payload, alertTo);
+  const failures: string[] = [];
+  for (const channel of chain) {
+    try {
+      await deliverAlert(channel, payload, routing);
+      return;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`ALERT_DELIVERY_FAILED channel=${channel} run_id=${payload.runId} error=${message}`);
+      failures.push(`${channel}: ${message}`);
     }
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error(`ALERT_DELIVERY_FAILED channel=${channel} run_id=${payload.runId} error=${message}`);
   }
+
+  console.error(
+    `ALERT_DELIVERY_EXHAUSTED run_id=${payload.runId} chain=${chain.join('>')} errors=${failures.join(' | ')}`,
+  );
 }
 
 export {
   buildEmailSubject,
   buildEmailBody,
+  buildWeChatMessage,
   buildWhatsAppMessage,
   buildTelegramMessage,
+  isWeChatConfigured,
+  isWxPusherConfigured,
   isWhatsAppConfigured,
+  isTelegramConfigured,
+  isResendConfigured,
+  getAlertFallbackChain,
   loadAlertRouting,
   resolveChannel,
+  resolvePushPlusChannel,
 };

@@ -17,7 +17,7 @@ describe('orphan-runs', () => {
 
   it('scales timeout with category URL count', () => {
     expect(estimateOrphanTimeoutMs(34)).toBe(34 * ORPHAN_RUN_SECONDS_PER_URL * 1000);
-    expect(estimateOrphanTimeoutMs(153)).toBe(153 * ORPHAN_RUN_SECONDS_PER_URL * 1000);
+    expect(estimateOrphanTimeoutMs(221)).toBe(221 * ORPHAN_RUN_SECONDS_PER_URL * 1000);
     expect(estimateOrphanTimeoutMs(0)).toBe(DEFAULT_ORPHAN_RUN_TIMEOUT_MINUTES * 60_000);
   });
 
@@ -32,7 +32,7 @@ describe('orphan-runs', () => {
 
   it('detects stale running runs using scaled timeout', () => {
     const now = new Date('2026-08-15T10:00:00Z');
-    const urlCount = 153;
+    const urlCount = 221;
     const timeoutMs = estimateOrphanTimeoutMs(urlCount);
 
     expect(

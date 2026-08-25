@@ -54,6 +54,10 @@ const cityLabels = {
   perugia: 'Perugia',
   torino: 'Turin',
   prato: 'Prato',
+  bologna: 'Bologna',
+  brescia: 'Brescia',
+  genova: 'Genoa',
+  verona: 'Verona',
 };
 
 describe('composeFeedListings pipeline', () => {

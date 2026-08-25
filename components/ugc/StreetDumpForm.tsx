@@ -10,6 +10,8 @@ import { toast } from '@/components/ui/toaster';
 import { createClient } from '@/lib/supabase/client';
 import { getSupabaseEnv } from '@/lib/supabase/env';
 import { ZONE_CENTERS } from '@/lib/geo/zone-centers';
+import { isWithinUgcPickupBounds } from '@/lib/ugc/schemas';
+import { preparePhotoForUpload } from '@/lib/ugc/prepare-upload';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { getMessages } from '@/messages';
 
@@ -125,10 +127,23 @@ export function StreetDumpForm({
       return;
     }
 
+    if (!isWithinUgcPickupBounds(lat, lng)) {
+      setError(messages.post.pinOutsideSupportedArea);
+      return;
+    }
+
     setSubmitting(true);
     try {
+      let uploadFile: File;
+      try {
+        uploadFile = await preparePhotoForUpload(photoFile);
+      } catch {
+        setError(messages.post.uploadError);
+        return;
+      }
+
       const uploadForm = new FormData();
-      uploadForm.append('photo', photoFile);
+      uploadForm.append('photo', uploadFile);
 
       const uploadRes = await fetch('/api/ugc/upload', {
         method: 'POST',
@@ -141,7 +156,8 @@ export function StreetDumpForm({
       }
 
       if (!uploadRes.ok) {
-        throw new Error(messages.post.uploadError);
+        setError(messages.post.uploadError);
+        return;
       }
 
       const { photoUrl } = (await uploadRes.json()) as { photoUrl: string };
@@ -154,6 +170,7 @@ export function StreetDumpForm({
           photoUrl,
           lat,
           lng,
+          postCategory: 'usato',
           description: description.trim() || undefined,
         }),
       });
@@ -163,8 +180,8 @@ export function StreetDumpForm({
         return;
       }
 
-      if (createRes.status === 422) {
-        setError(messages.post.pinOutsideVenice);
+      if (createRes.status === 400) {
+        setError(messages.post.pinOutsideSupportedArea);
         return;
       }
 
@@ -174,7 +191,8 @@ export function StreetDumpForm({
       }
 
       if (!createRes.ok) {
-        throw new Error(messages.post.createError);
+        setError(messages.post.createError);
+        return;
       }
 
       const { id } = (await createRes.json()) as { id: string };

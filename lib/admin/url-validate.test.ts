@@ -18,6 +18,14 @@ describe('validateTargetUrl', () => {
     expect(result).toEqual({ ok: true });
   });
 
+  it('accepts Bologna regalo URL after italian-cities expansion', () => {
+    const result = validateTargetUrl(
+      'https://www.subito.it/annunci-emilia-romagna/regalo/informatica/bologna/bologna/',
+      'subito',
+    );
+    expect(result).toEqual({ ok: true });
+  });
+
   it('accepts Milano regalo URL after italian-cities expansion (260815-fjs)', () => {
     const result = validateTargetUrl(
       'https://www.subito.it/annunci-lombardia/regalo/informatica/milano/milano/',

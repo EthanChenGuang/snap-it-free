@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { SUBITO_CITY_SLUGS } from '@/lib/geo/italian-cities';
 import { RECOMMENDED_SUBITO_SEED_URLS } from './subito-recommended-seed';
 import {
   REGALO_CATEGORY_URL_REGEX,
@@ -113,7 +114,7 @@ describe('mergeGeneratedRegaloUrls', () => {
 
 describe('RECOMMENDED_SUBITO_SEED_URLS', () => {
   it('includes 17 categories for each supported city', () => {
-    expect(RECOMMENDED_SUBITO_SEED_URLS).toHaveLength(17 * 9);
+    expect(RECOMMENDED_SUBITO_SEED_URLS).toHaveLength(17 * SUBITO_CITY_SLUGS.length);
   });
 
   it('contains multi-region URLs when spike PASS', () => {

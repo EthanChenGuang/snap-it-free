@@ -3,6 +3,7 @@ import {
   resolveListingDescription,
   resolveListingTitle,
 } from '@/lib/i18n/listing-fields';
+import { getCityBySubitoSlug } from '@/lib/geo/italian-cities';
 import { listingConsumerCity } from '@/lib/listings/filters';
 import type { AppLanguage } from '@/lib/settings/preferences';
 import type { ListingRow } from './types';
@@ -17,6 +18,8 @@ export function listingConsumerCityLabel(
   const city = listingConsumerCity(listing);
   if (city && cityLabels[city]) return cityLabels[city];
   if (listing.city) {
+    const entry = getCityBySubitoSlug(listing.city);
+    if (entry && cityLabels[entry.consumerKey]) return cityLabels[entry.consumerKey];
     return listing.city.charAt(0).toUpperCase() + listing.city.slice(1);
   }
   return '';

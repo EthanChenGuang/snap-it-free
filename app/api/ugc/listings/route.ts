@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
-import { loadZonePolygons, tagZone } from '@/lib/geo/zone-tag';
+import { pickupFieldsForInsert, resolvePickupLocation } from '@/lib/geo/pickup-location';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
 import { createListingSchemaForUser } from '@/lib/ugc/schemas';
@@ -32,13 +32,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { title, photoUrl, lat, lng, description, postCategory } = parsed.data;
-  const zones = loadZonePolygons();
-  const zone = tagZone(lat, lng, zones);
-
-  if (!zone) {
-    return NextResponse.json({ error: messages.post.pinOutsideVenice }, { status: 422 });
-  }
+  const { title, photoUrl, photoUrls, lat, lng, description, postCategory } = parsed.data;
+  const pickup = resolvePickupLocation(lat, lng);
+  const { city: citySlug, region } = pickupFieldsForInsert(pickup);
+  const gallery =
+    photoUrls && photoUrls.length > 0 ? photoUrls : [photoUrl];
 
   const supabase = await createClient();
 
@@ -61,12 +59,15 @@ export async function POST(request: Request) {
     source: 'ugc',
     external_id: id,
     title,
-    photo_url: photoUrl,
+    photo_url: gallery[0]!,
+    photo_urls: gallery,
     external_url: `/listing/${id}`,
     lat,
     lng,
     geom: `SRID=4326;POINT(${lng} ${lat})`,
-    zone,
+    zone: null,
+    city: citySlug,
+    region,
     status: 'active',
     posted_at: now.toISOString(),
     expires_at: expiresAt.toISOString(),

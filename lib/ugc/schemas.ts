@@ -1,43 +1,61 @@
 import { z } from 'zod';
 import type { SubitoRegaloSlug } from '@/lib/admin/subito-regalo-catalog';
 import { SUBITO_CATEGORY_SLUGS } from '@/lib/listings/subito-categories';
+import {
+  UGC_PICKUP_LAT_MAX,
+  UGC_PICKUP_LAT_MIN,
+  UGC_PICKUP_LNG_MAX,
+  UGC_PICKUP_LNG_MIN,
+  isWithinUgcPickupBounds,
+} from '@/lib/geo/pickup-location';
 
 const postCategoryEnum = z.enum(
   SUBITO_CATEGORY_SLUGS as [SubitoRegaloSlug, ...SubitoRegaloSlug[]],
 );
 
-/** UGC posts and DB RLS are Venice-only — matches migration 012 bounds. */
-export const UGC_VENICE_LAT_MIN = 45.0;
-export const UGC_VENICE_LAT_MAX = 45.7;
-export const UGC_VENICE_LNG_MIN = 12.1;
-export const UGC_VENICE_LNG_MAX = 12.6;
+export {
+  isWithinUgcPickupBounds,
+  UGC_PICKUP_LAT_MIN,
+  UGC_PICKUP_LAT_MAX,
+  UGC_PICKUP_LNG_MIN,
+  UGC_PICKUP_LNG_MAX,
+};
 
+/** @deprecated Use isWithinUgcPickupBounds — kept for legacy imports during migration. */
+export const UGC_VENICE_LAT_MIN = UGC_PICKUP_LAT_MIN;
+/** @deprecated Use UGC_PICKUP_LAT_MAX */
+export const UGC_VENICE_LAT_MAX = UGC_PICKUP_LAT_MAX;
+/** @deprecated Use UGC_PICKUP_LNG_MIN */
+export const UGC_VENICE_LNG_MIN = UGC_PICKUP_LNG_MIN;
+/** @deprecated Use UGC_PICKUP_LNG_MAX */
+export const UGC_VENICE_LNG_MAX = UGC_PICKUP_LNG_MAX;
+
+/** @deprecated Use isWithinUgcPickupBounds */
 export function isWithinUgcVeniceBounds(lat: number, lng: number): boolean {
-  return (
-    lat >= UGC_VENICE_LAT_MIN &&
-    lat <= UGC_VENICE_LAT_MAX &&
-    lng >= UGC_VENICE_LNG_MIN &&
-    lng <= UGC_VENICE_LNG_MAX
-  );
+  return isWithinUgcPickupBounds(lat, lng);
 }
 
 export const CreateListingSchema = z.object({
   title: z.string().trim().min(1).max(500),
   photoUrl: z.string().url(),
-  lat: z.number().min(UGC_VENICE_LAT_MIN).max(UGC_VENICE_LAT_MAX),
-  lng: z.number().min(UGC_VENICE_LNG_MIN).max(UGC_VENICE_LNG_MAX),
+  photoUrls: z.array(z.string().url()).min(1).max(10).optional(),
+  lat: z.number().min(UGC_PICKUP_LAT_MIN).max(UGC_PICKUP_LAT_MAX),
+  lng: z.number().min(UGC_PICKUP_LNG_MIN).max(UGC_PICKUP_LNG_MAX),
   description: z.string().max(2000).optional(),
   postCategory: postCategoryEnum,
 });
 
 export function createListingSchemaForUser(userId: string) {
+  const userPhotoUrl = z
+    .string()
+    .url()
+    .refine((url) => url.includes(`/ugc-photos/${userId}/`), {
+      message: 'Photo must be uploaded via /api/ugc/upload',
+    });
+
   return CreateListingSchema.extend({
-    photoUrl: z
-      .string()
-      .url()
-      .refine((url) => url.includes(`/ugc-photos/${userId}/`), {
-        message: 'Photo must be uploaded via /api/ugc/upload',
-      }),
+    photoUrl: userPhotoUrl,
+    photoUrls: z.array(userPhotoUrl).min(1).max(10).optional(),
   });
 }
 

@@ -27,7 +27,8 @@ import {
   getSubitoCategoryLabel,
   SUBITO_CATEGORY_SLUGS,
 } from '@/lib/listings/subito-categories';
-import { isWithinUgcVeniceBounds } from '@/lib/ugc/schemas';
+import { preparePhotoForUpload } from '@/lib/ugc/prepare-upload';
+import { isWithinUgcPickupBounds } from '@/lib/ugc/schemas';
 import { cn } from '@/lib/utils';
 
 type ItemCondition = PostDraftCondition;
@@ -385,38 +386,52 @@ export function PostForm() {
       return;
     }
 
-    if (!isWithinUgcVeniceBounds(lat, lng)) {
-      setError(messages.post.pinOutsideVenice);
+    if (!isWithinUgcPickupBounds(lat, lng)) {
+      setError(messages.post.pinOutsideSupportedArea);
       return;
     }
 
     setSubmitting(true);
     try {
-      const uploadForm = new FormData();
-      uploadForm.append('photo', primaryPhotoFile);
+      const photoUrls: string[] = [];
+      for (const photo of photos) {
+        let uploadFile: File;
+        try {
+          uploadFile = await preparePhotoForUpload(photo.file);
+        } catch {
+          setError(messages.post.uploadError);
+          return;
+        }
 
-      const uploadRes = await fetch('/api/ugc/upload', {
-        method: 'POST',
-        body: uploadForm,
-      });
+        const uploadForm = new FormData();
+        uploadForm.append('photo', uploadFile);
 
-      if (uploadRes.status === 401) {
-        setAuthOpen(true);
-        return;
+        const uploadRes = await fetch('/api/ugc/upload', {
+          method: 'POST',
+          body: uploadForm,
+        });
+
+        if (uploadRes.status === 401) {
+          setAuthOpen(true);
+          return;
+        }
+
+        if (!uploadRes.ok) {
+          setError(messages.post.uploadError);
+          return;
+        }
+
+        const { photoUrl } = (await uploadRes.json()) as { photoUrl: string };
+        photoUrls.push(photoUrl);
       }
-
-      if (!uploadRes.ok) {
-        throw new Error(messages.post.uploadError);
-      }
-
-      const { photoUrl } = (await uploadRes.json()) as { photoUrl: string };
 
       const createRes = await fetch('/api/ugc/listings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: title.trim(),
-          photoUrl,
+          photoUrl: photoUrls[0],
+          photoUrls,
           lat,
           lng,
           postCategory: categorySlug,
@@ -430,7 +445,7 @@ export function PostForm() {
       }
 
       if (createRes.status === 422 || createRes.status === 400) {
-        setError(messages.post.pinOutsideVenice);
+        setError(messages.post.pinOutsideSupportedArea);
         return;
       }
 
@@ -440,14 +455,14 @@ export function PostForm() {
       }
 
       if (!createRes.ok) {
-        throw new Error(messages.post.createError);
+        setError(messages.post.createError);
+        return;
       }
 
       const { id } = (await createRes.json()) as { id: string };
       clearPostDraft();
       clearCachedDraftPhotos();
-      toast(messages.post.successToast);
-      router.push(`/listing/${id}`);
+      router.replace(`/listing/${id}/posted`);
     } catch {
       setError(messages.post.createError);
     } finally {

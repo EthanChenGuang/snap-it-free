@@ -8,7 +8,11 @@ export type SubitoCitySlug =
   | 'napoli'
   | 'perugia'
   | 'torino'
-  | 'prato';
+  | 'prato'
+  | 'bologna'
+  | 'brescia'
+  | 'genova'
+  | 'verona';
 
 export type SubitoRegionSlug =
   | 'veneto'
@@ -17,7 +21,9 @@ export type SubitoRegionSlug =
   | 'lazio'
   | 'campania'
   | 'umbria'
-  | 'piemonte';
+  | 'piemonte'
+  | 'emilia-romagna'
+  | 'liguria';
 
 export type CityBbox = {
   latMin: number;
@@ -87,6 +93,30 @@ export const ITALIAN_CITIES: readonly ItalianCityDefinition[] = [
     region: 'toscana',
     labelIt: 'Prato',
     bbox: { latMin: 43.82, latMax: 43.95, lngMin: 11.02, lngMax: 11.18 },
+  },
+  {
+    subitoSlug: 'bologna',
+    region: 'emilia-romagna',
+    labelIt: 'Bologna',
+    bbox: { latMin: 44.37, latMax: 44.61, lngMin: 11.19, lngMax: 11.49 },
+  },
+  {
+    subitoSlug: 'brescia',
+    region: 'lombardia',
+    labelIt: 'Brescia',
+    bbox: { latMin: 45.42, latMax: 45.66, lngMin: 10.07, lngMax: 10.37 },
+  },
+  {
+    subitoSlug: 'genova',
+    region: 'liguria',
+    labelIt: 'Genova',
+    bbox: { latMin: 44.29, latMax: 44.53, lngMin: 8.78, lngMax: 9.08 },
+  },
+  {
+    subitoSlug: 'verona',
+    region: 'veneto',
+    labelIt: 'Verona',
+    bbox: { latMin: 45.32, latMax: 45.56, lngMin: 10.84, lngMax: 11.14 },
   },
 ] as const;
 

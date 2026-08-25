@@ -26,7 +26,7 @@ export function getOrphanRunTimeoutMs(
   return timeoutMinutes * 60_000;
 }
 
-/** Scale orphan timeout with configured category URL count (9 cities × 17 cats ≈ 153 URLs). */
+/** Scale orphan timeout with configured category URL count (13 cities × 17 cats ≈ 221 URLs). */
 export function estimateOrphanTimeoutMs(
   urlCount: number,
   floorMinutes: number = getOrphanRunTimeoutMinutes(),

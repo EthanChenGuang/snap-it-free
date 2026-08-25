@@ -14,16 +14,21 @@ export function consumerCityLabelsFromMessages(messages: Messages): ConsumerCity
     perugia: feed.cityPerugia,
     torino: feed.cityTorino,
     prato: feed.cityPrato,
+    bologna: feed.cityBologna,
+    brescia: feed.cityBrescia,
+    genova: feed.cityGenova,
+    verona: feed.cityVerona,
   };
 }
 
 /** Filter chip labels keyed by filter prefs city value (includes `all`). */
 export function consumerCityFilterLabelsFromMessages(
   messages: Messages,
-): Record<'all' | keyof ConsumerCityLabels, string> {
+): Record<'all' | 'other' | keyof ConsumerCityLabels, string> {
   const cityLabels = consumerCityLabelsFromMessages(messages);
   return {
     all: messages.feed.cityAll,
+    other: messages.feed.cityOther,
     ...cityLabels,
   };
 }

@@ -8,8 +8,8 @@ import {
 } from './italian-cities';
 
 describe('italian-cities catalog', () => {
-  it('includes nine supported cities', () => {
-    expect(ITALIAN_CITIES).toHaveLength(9);
+  it('includes thirteen supported cities', () => {
+    expect(ITALIAN_CITIES).toHaveLength(13);
     expect(ITALIAN_CITIES.map((city) => city.subitoSlug)).toEqual([
       'venezia',
       'padova',
@@ -20,6 +20,10 @@ describe('italian-cities catalog', () => {
       'perugia',
       'torino',
       'prato',
+      'bologna',
+      'brescia',
+      'genova',
+      'verona',
     ]);
   });
 
@@ -29,6 +33,9 @@ describe('italian-cities catalog', () => {
     );
     expect(buildRegaloCategoryUrl('lazio', 'informatica', 'roma')).toBe(
       'https://www.subito.it/annunci-lazio/regalo/informatica/roma/roma/',
+    );
+    expect(buildRegaloCategoryUrl('emilia-romagna', 'informatica', 'bologna')).toBe(
+      'https://www.subito.it/annunci-emilia-romagna/regalo/informatica/bologna/bologna/',
     );
   });
 

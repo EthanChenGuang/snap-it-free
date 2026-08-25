@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ListingDetailContent } from '@/components/detail/ListingDetailContent';
+import { DetailHeroControls } from '@/components/detail/DetailHeroControls';
+import { UgcListingDetailContent } from '@/components/detail/UgcListingDetailContent';
 import { DmDrawer } from '@/components/messages/DmDrawer';
 import { HiddenReviewBanner } from '@/components/ugc/HiddenReviewBanner';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
@@ -52,10 +53,11 @@ export function UgcListingShell({
   const isAvailable = listing.status === 'active';
   const isHiddenPending =
     listing.status === 'hidden' && listing.hidden_reason === 'pending_review';
+  const authReady = isLoggedIn !== null;
   const isOwner =
     isOwnerView &&
     Boolean(listing.owner_user_id) &&
-    listing.owner_user_id === sessionUserId;
+    (!authReady || listing.owner_user_id === sessionUserId);
   const showHiddenBanner = isOwner && isHiddenPending;
   const showOwnerLifecycle = isOwner && !isHiddenPending && listing.status !== 'expired';
   const authRedirect = `/listing/${listing.id}?openDm=1`;
@@ -127,13 +129,13 @@ export function UgcListingShell({
     }
   };
 
-  const lifecycleActions = showOwnerLifecycle ? (
+  const ownerFooter = showOwnerLifecycle ? (
     <div className="flex flex-col gap-space-sm">
       {!isReserved && (
         <Button
           type="button"
           variant="secondary"
-          className="w-full"
+          className="w-full rounded-lg"
           disabled={lifecyclePending}
           onClick={() => patchStatus('reserved')}
         >
@@ -142,7 +144,7 @@ export function UgcListingShell({
       )}
       <Button
         type="button"
-        className="w-full"
+        className="w-full rounded-lg"
         disabled={lifecyclePending}
         onClick={() => setDeliverConfirmOpen(true)}
       >
@@ -150,7 +152,7 @@ export function UgcListingShell({
       </Button>
       <Link
         href="/post/manage"
-        className="text-center text-label-sm text-on-surface-variant underline-offset-2 hover:underline"
+        className="py-space-xs text-center text-label-sm text-on-surface-variant underline-offset-2 hover:underline"
       >
         {messages.post.manageLink}
       </Link>
@@ -159,15 +161,22 @@ export function UgcListingShell({
 
   return (
     <>
-      <ListingDetailContent
+      <UgcListingDetailContent
         listing={listing}
         similarListings={similarListings}
-        isUgc
         isAvailable={isAvailable}
-        onPrimaryAction={openContact}
-        primaryDisabled={isReserved}
-        lifecycleActions={lifecycleActions}
+        isOwner={isOwner}
+        onContact={openContact}
+        contactDisabled={isReserved}
+        ownerFooter={ownerFooter}
         banner={showHiddenBanner ? <HiddenReviewBanner /> : undefined}
+        heroControls={
+          <DetailHeroControls
+            listing={listing}
+            showFavorite={!isOwner}
+            showOverflow={!isOwner}
+          />
+        }
       />
 
       <AuthPromptModal

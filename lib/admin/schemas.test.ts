@@ -97,8 +97,8 @@ describe('UpdateGlobalConfigSchema', () => {
 });
 
 describe('ValidateTargetUrlsSchema', () => {
-  it('accepts full regalo matrix size (153 URLs)', () => {
-    const urls = Array.from({ length: 153 }, (_, index) => `https://example.com/${index}`);
+  it('accepts full regalo matrix size (221 URLs)', () => {
+    const urls = Array.from({ length: 221 }, (_, index) => `https://example.com/${index}`);
     const result = ValidateTargetUrlsSchema.safeParse({ urls });
     expect(result.success).toBe(true);
   });

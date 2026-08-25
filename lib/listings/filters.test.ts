@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CONSUMER_CITY_FILTER_OPTIONS,
   excludeReportedIds,
   filterByRadiusKm,
   filterByZone,
@@ -11,6 +12,7 @@ import {
   sortByPostedAtDesc,
   sortByPostedAtDescThenDistance,
 } from './filters';
+import { CONSUMER_CITY_KEYS } from '@/lib/geo/italian-cities';
 import type { ListingRow } from './types';
 
 const baseListing: ListingRow = {
@@ -26,6 +28,31 @@ const baseListing: ListingRow = {
   expires_at: '2026-07-30T10:00:00.000Z',
   status: 'active',
 };
+
+describe('CONSUMER_CITY_FILTER_OPTIONS', () => {
+  it('orders cities by Chinese-resident population with other last', () => {
+    expect(CONSUMER_CITY_FILTER_OPTIONS[0]).toBe('all');
+    expect(CONSUMER_CITY_FILTER_OPTIONS.at(-1)).toBe('other');
+    expect(CONSUMER_CITY_FILTER_OPTIONS.slice(1, -1)).toEqual([
+      'milano',
+      'roma',
+      'prato',
+      'torino',
+      'firenze',
+      'bologna',
+      'napoli',
+      'brescia',
+      'venice',
+      'genova',
+      'padova',
+      'perugia',
+      'verona',
+    ]);
+    expect(new Set(CONSUMER_CITY_FILTER_OPTIONS.slice(1, -1))).toEqual(
+      new Set(CONSUMER_CITY_KEYS),
+    );
+  });
+});
 
 describe('filterByZone', () => {
   it('returns zoned listings and zone-null rows with coords when zone is All (D-22)', () => {
@@ -155,6 +182,18 @@ describe('listingConsumerCity', () => {
       }),
     ).toBeNull();
   });
+
+  it('returns null when city slug is nearest reference but coords sit outside its bbox (→ other)', () => {
+    expect(
+      listingConsumerCity({
+        ...baseListing,
+        zone: null,
+        city: 'bologna',
+        lat: 44.7,
+        lng: 10.5,
+      }),
+    ).toBeNull();
+  });
 });
 
 describe('matchesConsumerCity', () => {
@@ -180,6 +219,43 @@ describe('matchesConsumerCity', () => {
   it('excludes venice zone rows when padova selected', () => {
     expect(matchesConsumerCity(baseListing, 'padova')).toBe(false);
     expect(matchesConsumerCity(padovaListing, 'padova')).toBe(true);
+  });
+
+  it('matches nearest-reference listings when other selected', () => {
+    const nearestReferenceListing: ListingRow = {
+      ...baseListing,
+      id: '66666666-6666-6666-6666-666666666666',
+      zone: null,
+      city: 'bologna',
+      lat: 44.7,
+      lng: 10.5,
+    };
+    expect(matchesConsumerCity(nearestReferenceListing, 'other')).toBe(true);
+    expect(matchesConsumerCity(nearestReferenceListing, 'bologna')).toBe(false);
+  });
+
+  it('matches non-catalog listings when other selected', () => {
+    const unknownCityListing: ListingRow = {
+      ...baseListing,
+      id: '44444444-4444-4444-4444-444444444444',
+      zone: null,
+      city: 'reggio-emilia',
+      lat: 44.7,
+      lng: 10.63,
+    };
+    const noCityListing: ListingRow = {
+      ...baseListing,
+      id: '55555555-5555-5555-5555-555555555555',
+      zone: null,
+      city: null,
+      lat: 44.7,
+      lng: 10.63,
+    };
+
+    expect(matchesConsumerCity(baseListing, 'other')).toBe(false);
+    expect(matchesConsumerCity(padovaListing, 'other')).toBe(false);
+    expect(matchesConsumerCity(unknownCityListing, 'other')).toBe(true);
+    expect(matchesConsumerCity(noCityListing, 'other')).toBe(true);
   });
 });
 

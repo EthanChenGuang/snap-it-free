@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import { Inter } from 'next/font/google';
+import { InlineScript } from '@/components/InlineScript';
 import { getMessages } from '@/messages';
 import { BrowseCenterProvider } from '@/lib/browse-center/context';
 import { AppThemeProvider } from '@/components/providers/AppThemeProvider';
@@ -36,23 +36,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
           rel="stylesheet"
         />
+        {isDev ? (
+          <InlineScript id="dev-unregister-sw" html={DEV_UNREGISTER_SW_SCRIPT} />
+        ) : null}
+        <InlineScript id="appearance-init" html={APPEARANCE_INIT_SCRIPT} />
       </head>
       <body
         className="overflow-hidden bg-background text-on-background"
         suppressHydrationWarning
       >
-        {isDev ? (
-          <Script
-            id="dev-unregister-sw"
-            strategy="beforeInteractive"
-            dangerouslySetInnerHTML={{ __html: DEV_UNREGISTER_SW_SCRIPT }}
-          />
-        ) : null}
-        <Script
-          id="appearance-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: APPEARANCE_INIT_SCRIPT }}
-        />
         <AppThemeProvider>
           <BrowseCenterProvider>
             <DocumentLang />

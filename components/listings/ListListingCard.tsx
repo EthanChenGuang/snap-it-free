@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
 import { resolveListingTitle } from '@/lib/i18n/listing-fields';
@@ -22,7 +22,6 @@ type ListListingCardProps = {
 export function ListListingCard({ listing, priority = false }: ListListingCardProps) {
   const { language, messages, formatRelativeTime } = useMessages();
   const displayTitle = resolveListingTitle(listing, language);
-  const router = useRouter();
   const isClaimed = listing.status === 'claimed';
   const postedLabel = formatRelativeTime(listing.posted_at);
   const metadata = buildCardMetadata({
@@ -32,17 +31,10 @@ export function ListListingCard({ listing, priority = false }: ListListingCardPr
   });
 
   return (
-    <article
-      className="group flex cursor-pointer flex-col transition-transform duration-150 ease-out active:scale-[0.98]"
-      onClick={() => router.push(`/listing/${listing.id}`)}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          router.push(`/listing/${listing.id}`);
-        }
-      }}
-      role="link"
-      tabIndex={0}
+    <Link
+      href={`/listing/${listing.id}`}
+      prefetch
+      className="group flex flex-col transition-transform duration-150 ease-out active:scale-[0.98]"
     >
       <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-surface-container-high">
         <ListingPhoto
@@ -81,6 +73,6 @@ export function ListListingCard({ listing, priority = false }: ListListingCardPr
           </p>
         )}
       </div>
-    </article>
+    </Link>
   );
 }

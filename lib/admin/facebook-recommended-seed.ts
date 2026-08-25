@@ -1,7 +1,7 @@
 /**
  * Facebook admin seed URL matrix (D-18-21/22/23).
  *
- * 9 cities × 3 search queries — discovery-only URLs (no per-category matrix).
+ * 13 cities × 3 search queries — discovery-only URLs (no per-category matrix).
  * Marketplace path slugs use consumer keys (`venice` for Venezia; others match Subito).
  */
 import { CONSUMER_CITY_KEYS, type ConsumerCityKey } from '@/lib/geo/italian-cities';
@@ -29,7 +29,7 @@ function generateFacebookSeedUrls(): string[] {
   return urls;
 }
 
-/** Recommended admin seed URLs — 9 cities × gratis/regalo/free (27 URLs). */
+/** Recommended admin seed URLs — 13 cities × gratis/regalo/free (39 URLs). */
 export const RECOMMENDED_FACEBOOK_SEED_URLS: readonly string[] = generateFacebookSeedUrls();
 
 export const RECOMMENDED_FACEBOOK_SEED_COUNT = RECOMMENDED_FACEBOOK_SEED_URLS.length;

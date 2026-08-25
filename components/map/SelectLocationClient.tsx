@@ -14,11 +14,11 @@ import {
   SELECT_LOCATION_RADIUS_OPTIONS,
 } from '@/lib/filter-prefs/storage';
 import { readBrowseCenter } from '@/lib/browse-center/storage';
-import { resolveCityLabel, VENICE_CENTER } from '@/lib/geo/resolve-city-label';
+import { geocodeFallbackLabel, VENICE_CENTER } from '@/lib/geo/pickup-label';
 import { usePlaceLabel } from '@/lib/geo/use-place-label';
 import { readPostDraft, writePostDraft } from '@/lib/post-draft/storage';
 import { useMessages } from '@/lib/i18n/useMessages';
-import { isWithinUgcVeniceBounds } from '@/lib/ugc/schemas';
+import { isWithinUgcPickupBounds } from '@/lib/ugc/schemas';
 
 const DEFAULT_ZOOM = 14;
 const GEO_OPTIONS: PositionOptions = { enableHighAccuracy: true, timeout: 10000 };
@@ -192,26 +192,28 @@ export function SelectLocationClient() {
     );
   }, [context, radiusKm, triggerPinDrop]);
 
-  const fallbackCityLabel = resolveCityLabel(markerPosition.lat, markerPosition.lng, {
-    venice: messages.feed.cityVenice,
-    padova: messages.feed.cityPadova,
-  });
+  const geocodeFallback = geocodeFallbackLabel(
+    markerPosition.lat,
+    markerPosition.lng,
+    messages,
+  );
   const { label: placeLabel } = usePlaceLabel(
     markerPosition.lat,
     markerPosition.lng,
     language,
-    fallbackCityLabel,
+    geocodeFallback,
     ready,
   );
+  const locationPreviewLabel = placeLabel;
 
   const handleConfirm = () => {
     setConfirmError(null);
-    const label = placeLabel;
     if (context === 'post') {
-      if (!isWithinUgcVeniceBounds(markerPosition.lat, markerPosition.lng)) {
-        setConfirmError(messages.post.pinOutsideVenice);
+      if (!isWithinUgcPickupBounds(markerPosition.lat, markerPosition.lng)) {
+        setConfirmError(messages.post.pinOutsideSupportedArea);
         return;
       }
+      const label = placeLabel;
       writePostDraft({
         lat: markerPosition.lat,
         lng: markerPosition.lng,
@@ -220,6 +222,7 @@ export function SelectLocationClient() {
       router.push('/post');
       return;
     }
+    const label = placeLabel;
     applyMapFilterPrefs(
       {
         lat: markerPosition.lat,
@@ -302,7 +305,7 @@ export function SelectLocationClient() {
                 location_on
               </span>
               <span className="text-body-md text-on-surface-variant">
-                {ready ? placeLabel : null}
+                {ready ? locationPreviewLabel : null}
               </span>
             </div>
             {confirmError ? (

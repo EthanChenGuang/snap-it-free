@@ -13,6 +13,8 @@ export type ListingRow = {
   description_en?: string | null;
   description_zh?: string | null;
   photo_url: string;
+  /** UGC gallery — first entry mirrors photo_url when set. */
+  photo_urls?: string[] | null;
   external_url: string;
   lat: number | null;
   lng: number | null;

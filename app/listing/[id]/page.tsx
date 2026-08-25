@@ -2,23 +2,13 @@ import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import { ScrapedListingShell } from '@/components/detail/ScrapedListingShell';
 import { UgcListingShell } from '@/components/detail/UgcListingShell';
-import { getActiveListings, getListingForDetail } from '@/lib/listings/queries';
-import type { ListingRow } from '@/lib/listings/types';
+import { getListingForDetail, getSimilarListings } from '@/lib/listings/queries';
 
 const listingIdSchema = z.string().uuid();
 
 type ListingPageProps = {
   params: Promise<{ id: string }>;
 };
-
-function pickSimilarListings(all: ListingRow[], current: ListingRow, limit = 3): ListingRow[] {
-  const others = all.filter((item) => item.id !== current.id && item.status === 'active');
-  const sameZone = current.zone
-    ? others.filter((item) => item.zone === current.zone)
-    : others;
-  const pool = sameZone.length >= limit ? sameZone : others;
-  return pool.slice(0, limit);
-}
 
 export default async function ListingPage({ params }: ListingPageProps) {
   const { id } = await params;
@@ -27,17 +17,16 @@ export default async function ListingPage({ params }: ListingPageProps) {
     notFound();
   }
 
-  const [result, allListings] = await Promise.all([
-    getListingForDetail(parsed.data),
-    getActiveListings(),
-  ]);
-
+  const result = await getListingForDetail(parsed.data);
   if (!result) {
     notFound();
   }
 
   const { listing, isOwnerView } = result;
-  const similarListings = pickSimilarListings(allListings, listing);
+  const similarListings =
+    listing.status === 'active'
+      ? await getSimilarListings(listing)
+      : [];
 
   if (listing.source === 'ugc') {
     return (
