@@ -45,9 +45,9 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
     [messages],
   );
 
-  const { filteredListings, distanceMap } = useMemo(() => {
+  const filteredListings = useMemo(() => {
     const visible = excludeReportedIds(listings, reportedIds);
-    const { listings: filtered, distanceMap: distances } = composeFeedListings({
+    const { listings: filtered } = composeFeedListings({
       listings: visible,
       applied,
       center,
@@ -55,7 +55,7 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
       language,
       cityLabels,
     });
-    return { filteredListings: filtered, distanceMap: distances };
+    return filtered;
   }, [listings, reportedIds, searchQuery, applied, center, language, cityLabels]);
 
   const hasSearchQuery = searchQuery.trim().length > 0;
@@ -91,11 +91,11 @@ export function FeedHomeClient({ initialListings }: FeedHomeClientProps) {
           </div>
         ) : (
           <section className="grid grid-cols-2 gap-3">
-            {filteredListings.map((listing) => (
+            {filteredListings.map((listing, index) => (
               <ListListingCard
                 key={listing.id}
                 listing={listing}
-                distanceMeters={distanceMap.get(listing.id) ?? null}
+                priority={index < 6}
               />
             ))}
           </section>

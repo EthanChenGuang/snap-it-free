@@ -3,34 +3,29 @@
 import { useRouter } from 'next/navigation';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
-import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
 import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { buildCardMetadata } from '@/lib/listings/card-metadata';
-import { listingConsumerCityLabel } from '@/lib/listings/feed-search';
 import type { ListingRow } from '@/lib/listings/types';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
 type ListListingCardProps = {
   listing: ListingRow;
-  /** Distance in meters from active center; null when coords or center unavailable. */
-  distanceMeters?: number | null;
+  /** Eager-load photo for above-the-fold cards. */
+  priority?: boolean;
 };
 
 /**
  * Minimalist feed card — image, FREE badge, favorite, compact metadata.
  * iOS photo-first layout with top gradient legibility overlay and press feedback.
  */
-export function ListListingCard({ listing, distanceMeters }: ListListingCardProps) {
+export function ListListingCard({ listing, priority = false }: ListListingCardProps) {
   const { language, messages, formatRelativeTime } = useMessages();
   const displayTitle = resolveListingTitle(listing, language);
   const router = useRouter();
   const isClaimed = listing.status === 'claimed';
-  const cityLabel = listingConsumerCityLabel(listing, consumerCityLabelsFromMessages(messages));
   const postedLabel = formatRelativeTime(listing.posted_at);
   const metadata = buildCardMetadata({
-    distanceMeters,
-    cityLabel,
     postedLabel,
     isClaimed,
     reservedLabel: messages.listing.reserved,
@@ -53,11 +48,13 @@ export function ListListingCard({ listing, distanceMeters }: ListListingCardProp
         <ListingPhoto
           src={listing.photo_url}
           alt={displayTitle}
+          priority={priority}
+          variant="thumbnail"
           className={cn(
             'object-cover transition-transform duration-500 group-hover:scale-105',
             isClaimed && 'opacity-60',
           )}
-          sizes="(max-width: 768px) 50vw, 400px"
+          sizes="(max-width: 768px) 50vw, 240px"
         />
         <div
           className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 rounded-t-2xl bg-gradient-to-b from-black/30 to-transparent"
@@ -67,16 +64,6 @@ export function ListListingCard({ listing, distanceMeters }: ListListingCardProp
           <span className="rounded-full bg-emerald-500/80 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
             {messages.listing.free}
           </span>
-          {listing.source === 'vinted' && (
-            <span className="rounded-md border border-outline-variant bg-[#f1f1f0] px-2 py-0.5 text-xs font-medium text-on-surface">
-              {messages.listing.sourceVinted}
-            </span>
-          )}
-          {listing.source === 'facebook' && (
-            <span className="rounded-md border border-outline-variant bg-[#f1f1f0] px-2 py-0.5 text-xs font-medium text-on-surface">
-              {messages.listing.sourceFacebook}
-            </span>
-          )}
         </div>
         <FavoriteButton
           listingId={listing.id}

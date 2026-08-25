@@ -6,7 +6,6 @@ import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
 import { RubberbandScroll } from '@/components/ui/RubberbandScroll';
 import { ListListingCard } from '@/components/listings/ListListingCard';
-import { useDistanceCenter } from '@/hooks/useDistanceCenter';
 import {
   FAVORITES_CHANGE_EVENT,
   pruneMissingFavoriteIds,
@@ -14,7 +13,6 @@ import {
 } from '@/lib/favorites/storage';
 import { fetchListingsByIdsClient } from '@/lib/listings/client-queries';
 import type { ListingRow } from '@/lib/listings/types';
-import { haversineKm } from '@/lib/geo/haversine';
 import { createClient } from '@/lib/supabase/client';
 import { useMessages } from '@/lib/i18n/useMessages';
 
@@ -31,7 +29,6 @@ async function fetchFavoriteIds(isAuthed: boolean): Promise<string[]> {
 
 export function FavoritesPageClient() {
   const { messages } = useMessages();
-  const { center } = useDistanceCenter(false);
 
   const [listings, setListings] = useState<ListingRow[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -166,19 +163,13 @@ export function FavoritesPageClient() {
         <RubberbandScroll className="no-scrollbar flex-1 px-gutter pb-space-xl pt-space-md">
           {syncBanner}
           <section className="grid grid-cols-2 gap-3">
-            {listings.map((listing) => {
-              const distanceMeters =
-                listing.lat != null && listing.lng != null && center
-                  ? haversineKm(center, { lat: listing.lat, lng: listing.lng }) * 1000
-                  : null;
-              return (
-                <ListListingCard
-                  key={listing.id}
-                  listing={listing}
-                  distanceMeters={distanceMeters}
-                />
-              );
-            })}
+            {listings.map((listing, index) => (
+              <ListListingCard
+                key={listing.id}
+                listing={listing}
+                priority={index < 6}
+              />
+            ))}
           </section>
         </RubberbandScroll>
       </main>

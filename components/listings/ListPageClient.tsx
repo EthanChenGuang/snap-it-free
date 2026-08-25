@@ -80,8 +80,8 @@ export function ListPageClient({ initialListings }: ListPageClientProps) {
           </div>
         ) : (
           <section className="grid grid-cols-1 gap-space-lg md:grid-cols-2 lg:grid-cols-3">
-            {filteredListings.map((listing) => (
-              <ListListingCard key={listing.id} listing={listing} />
+            {filteredListings.map((listing, index) => (
+              <ListListingCard key={listing.id} listing={listing} priority={index < 6} />
             ))}
           </section>
         )}
