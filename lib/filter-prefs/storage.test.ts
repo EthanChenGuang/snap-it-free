@@ -52,12 +52,15 @@ describe('writeFilterPrefs', () => {
     expect(readFilterPrefs()).toEqual(prefs);
   });
 
-  it('clamps radiusKm to 1–100 range', () => {
+  it('clamps radiusKm to 1–200 range', () => {
     writeFilterPrefs({ ...DEFAULT_FILTER_PREFS, radiusKm: 0 });
     expect(readFilterPrefs().radiusKm).toBe(1);
 
     writeFilterPrefs({ ...DEFAULT_FILTER_PREFS, radiusKm: 150 });
-    expect(readFilterPrefs().radiusKm).toBe(100);
+    expect(readFilterPrefs().radiusKm).toBe(150);
+
+    writeFilterPrefs({ ...DEFAULT_FILTER_PREFS, radiusKm: 250 });
+    expect(readFilterPrefs().radiusKm).toBe(200);
   });
 
   it('infers map mode from legacy radiusEnabled storage', () => {

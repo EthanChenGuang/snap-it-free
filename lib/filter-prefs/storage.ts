@@ -24,7 +24,7 @@ export const DEFAULT_FILTER_PREFS: FilterPrefs = {
 
 const VALID_CITIES = new Set<FilterPrefs['city']>(['all', 'other', ...CONSUMER_CITY_KEYS]);
 const VALID_MODES = new Set<FilterMode>(['city', 'map']);
-const RADIUS_PRESETS = [5, 10, 50, 100] as const;
+const RADIUS_PRESETS = [10, 50, 100, 200] as const;
 export const SELECT_LOCATION_RADIUS_OPTIONS = RADIUS_PRESETS;
 
 function clampRadiusKm(value: unknown): number {
@@ -35,7 +35,7 @@ function clampRadiusKm(value: unknown): number {
   if (RADIUS_PRESETS.includes(rounded as (typeof RADIUS_PRESETS)[number])) {
     return rounded;
   }
-  return Math.min(100, Math.max(1, rounded));
+  return Math.min(200, Math.max(1, rounded));
 }
 
 function parseMode(value: unknown, parsed: Record<string, unknown>): FilterMode {
