@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import {
   Drawer,
   DrawerContent,
@@ -67,11 +68,29 @@ export function FilterSheet() {
     resetFilters,
   } = useFeedFilter();
 
+  const [activeSnapPoint, setActiveSnapPoint] = useState<number | string | null>(0.85);
+
+  useEffect(() => {
+    if (sheetOpen) {
+      setActiveSnapPoint(0.85);
+    }
+  }, [sheetOpen]);
+
   const handleOpenChange = (open: boolean) => setSheetOpen(open);
+  const allCategoriesSelected = applied.categories.length === 0;
+  const allCategoryLabel = getSubitoCategoryLabel('all', language, { messages }) ?? 'All';
 
   return (
-    <Drawer open={sheetOpen} onOpenChange={handleOpenChange} modal={false} handleOnly>
-      <DrawerContent nonModal className="h-[85dvh] max-h-[85dvh]">
+    <Drawer
+      open={sheetOpen}
+      onOpenChange={handleOpenChange}
+      modal={false}
+      handleOnly
+      snapPoints={[0.85]}
+      activeSnapPoint={activeSnapPoint}
+      setActiveSnapPoint={setActiveSnapPoint}
+    >
+      <DrawerContent nonModal className="max-h-[85dvh]">
         <DrawerHeader className="shrink-0 border-b border-outline-variant px-gutter pb-space-md pt-space-sm">
           <DrawerTitle className="text-xl">{messages.feed.filtersTitle}</DrawerTitle>
         </DrawerHeader>
@@ -104,6 +123,19 @@ export function FilterSheet() {
                 )}
               </div>
               <div className="grid grid-cols-3 gap-2.5">
+                <button
+                  type="button"
+                  aria-pressed={allCategoriesSelected}
+                  onClick={() => clearCategories()}
+                  className={cn(
+                    'flex min-h-11 items-center justify-center break-words rounded-xl border px-3 py-2.5 text-center text-xs font-medium leading-tight transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline',
+                    allCategoriesSelected
+                      ? 'border-primary bg-primary text-on-primary shadow-sm'
+                      : 'border-outline-variant/60 bg-surface-container-low text-on-surface-variant hover:bg-surface-container',
+                  )}
+                >
+                  {allCategoryLabel}
+                </button>
                 {SUBITO_CATEGORY_SLUGS.map((slug) => {
                   const checked = applied.categories.includes(slug);
                   const label = getSubitoCategoryLabel(slug, language, { messages }) ?? slug;
