@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
+import { FreeBadge } from '@/components/listings/FreeBadge';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
 import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { buildCardMetadata } from '@/lib/listings/card-metadata';
@@ -44,7 +45,7 @@ export function ListListingCard({
     >
       <div
         className={cn(
-          'feed-card-media relative aspect-[3/4] overflow-hidden rounded-[22px] bg-surface-container-high',
+          'feed-card-media relative aspect-[4/5] overflow-hidden rounded-2xl bg-surface-container-high',
           isClaimed && 'opacity-90',
         )}
       >
@@ -72,14 +73,14 @@ export function ListListingCard({
         />
 
         <div className="absolute left-3.5 top-3.5 z-20">
-          <span className="feed-glass-badge">{messages.listing.free}</span>
+          <FreeBadge>{messages.listing.free}</FreeBadge>
         </div>
 
         <FavoriteButton
           listingId={listing.id}
           size="sm"
           tone="overlay"
-          className="feed-glass-icon-btn absolute right-3 top-3 z-20 h-9 w-9 p-0 hover:bg-transparent"
+          className="absolute right-3 top-3 z-20"
         />
       </div>
 

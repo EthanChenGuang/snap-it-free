@@ -60,12 +60,7 @@ export function DetailHeroControls({
 
         <div className="pointer-events-auto flex items-center gap-space-sm">
           {showFavorite ? (
-            <FavoriteButton
-              listingId={listing.id}
-              size="sm"
-              tone="overlay"
-              className="h-10 w-10 rounded-full bg-surface-container-lowest/90 p-2 backdrop-blur-sm transition hover:bg-surface-container-lowest"
-            />
+            <FavoriteButton listingId={listing.id} size="sm" tone="overlay" className="h-10 w-10" />
           ) : null}
           <Button
             type="button"

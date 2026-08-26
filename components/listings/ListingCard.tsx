@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { forwardRef } from 'react';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
+import { FreeBadge } from '@/components/listings/FreeBadge';
 import { ReservedBadge } from '@/components/listings/ReservedBadge';
 import { resolveListingCategory, resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
@@ -56,48 +57,44 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
               <span className="material-symbols-outlined">image</span>
             </div>
           )}
-          <div className="absolute left-space-sm top-space-sm flex flex-wrap gap-space-xs">
+          <div className="absolute left-space-sm top-space-sm z-10 flex flex-wrap gap-space-xs">
+            <FreeBadge>{messages.listing.free}</FreeBadge>
             {listing.source === 'ugc' && (
-              <span className="rounded-sm border border-outline-variant bg-surface px-space-sm py-space-xs text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+              <span className="rounded-sm border border-outline-variant bg-surface px-space-sm py-space-xs text-label-sm font-bold uppercase tracking-wider text-on-surface-variant">
                 {messages.listing.sourceCommunity}
               </span>
             )}
             {listing.status === 'claimed' && <ReservedBadge />}
           </div>
-          <div className="absolute right-space-sm top-space-sm">
-            <FavoriteButton listingId={listing.id} className="bg-surface/90" />
+          <div className="absolute right-space-sm top-space-sm z-10">
+            <FavoriteButton listingId={listing.id} size="sm" tone="overlay" />
           </div>
         </div>
 
-        <div className="flex items-start justify-between gap-space-sm">
-          <div className="min-w-0">
-            <div className="mb-1 flex flex-col gap-1">
-              {locationText && (
-                <p className="text-label-sm uppercase tracking-widest text-secondary">
-                  {locationText}
-                </p>
-              )}
-              {categoryLabel && (
-                <span
-                  className={cn(
-                    'w-max rounded-full px-2 py-1 text-label-sm',
-                    isVeniceZoned
-                      ? 'bg-[#f1f1f0] text-on-surface'
-                      : 'border border-transparent bg-surface-container-high text-on-surface',
-                  )}
-                >
-                  {categoryLabel}
-                </span>
-              )}
-            </div>
-            <h3 className="text-body-lg font-semibold leading-snug text-on-surface group-hover:underline">
-              {displayTitle}
-            </h3>
-            <p className="mt-space-xs text-label-sm text-on-surface-variant">{postedLabel}</p>
+        <div className="min-w-0">
+          <div className="mb-1 flex flex-col gap-1">
+            {locationText && (
+              <p className="text-label-sm uppercase tracking-widest text-secondary">
+                {locationText}
+              </p>
+            )}
+            {categoryLabel && (
+              <span
+                className={cn(
+                  'w-max rounded-full px-2 py-1 text-label-sm',
+                  isVeniceZoned
+                    ? 'bg-[#f1f1f0] text-on-surface'
+                    : 'border border-transparent bg-surface-container-high text-on-surface',
+                )}
+              >
+                {categoryLabel}
+              </span>
+            )}
           </div>
-          <span className="shrink-0 rounded border border-outline-variant bg-surface-container px-space-sm py-space-xs text-label-sm font-bold text-on-surface">
-            {messages.listing.free}
-          </span>
+          <h3 className="text-body-lg font-semibold leading-snug text-on-surface group-hover:underline">
+            {displayTitle}
+          </h3>
+          <p className="mt-space-xs text-label-sm text-on-surface-variant">{postedLabel}</p>
         </div>
       </Link>
     );

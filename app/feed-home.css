@@ -47,22 +47,6 @@
   backdrop-filter: blur(14px);
 }
 
-.feed-glass-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.35rem 0.7rem;
-  font-size: var(--text-label-sm);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-on-primary);
-  border-radius: 9999px;
-  background: color-mix(in srgb, var(--color-surface-container-lowest) 30%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-on-primary) 35%, transparent);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  backdrop-filter: blur(16px) saturate(180%);
-}
-
 .feed-card {
   animation: feed-card-enter 0.65s cubic-bezier(0.25, 0.1, 0.25, 1) both;
 }

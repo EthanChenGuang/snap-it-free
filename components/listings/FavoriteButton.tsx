@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { motion } from 'motion/react';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toaster';
 import { useFavorites } from '@/lib/favorites/useFavorites';
-import { getSupabaseEnv } from '@/lib/supabase/env';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { getSupabaseEnv } from '@/lib/supabase/env';
 import { cn } from '@/lib/utils';
+import { motion } from 'motion/react';
+import { usePathname } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 type FavoriteButtonProps = {
   listingId: string;
@@ -61,6 +61,8 @@ export function FavoriteButton({
 
   const redirectTo = pathname.startsWith('/favorites') ? '/favorites' : pathname;
 
+  const isOverlay = tone === 'overlay';
+
   return (
     <>
       <Button
@@ -70,15 +72,21 @@ export function FavoriteButton({
         onClick={handleClick}
         aria-label={messages.detail.favorite}
         aria-pressed={favorited}
-        className={cn('shrink-0', className)}
+        className={cn(
+          'shrink-0',
+          isOverlay &&
+            'h-9 w-9 rounded-full border border-white/25 bg-black/20 p-0 shadow-none backdrop-blur-md hover:bg-black/30 dark:border-white/15 dark:bg-white/20 dark:hover:bg-white/30',
+          className,
+        )}
       >
         <motion.span
           className={cn(
-            'material-symbols-outlined text-[22px]',
+            'material-symbols-outlined',
+            size === 'sm' ? 'text-body-lg' : 'text-h3',
             favorited
               ? 'text-accent-orange'
-              : tone === 'overlay'
-                ? 'text-primary'
+              : isOverlay
+                ? 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]'
                 : 'text-on-surface-variant',
           )}
           style={{
@@ -90,8 +98,8 @@ export function FavoriteButton({
           animate={shouldPop ? { scale: [1, 1.28, 1] } : { scale: 1 }}
           transition={
             shouldPop
-              ? { duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }
-              : { type: 'spring', stiffness: 500, damping: 20 }
+              ? { duration: 0.32, ease: [0.16, 1, 0.3, 1] }
+              : { type: 'spring', stiffness: 420, damping: 28 }
           }
         >
           favorite
