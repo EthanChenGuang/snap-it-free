@@ -114,4 +114,20 @@ describe('validateBatchHttp', () => {
     });
     expect(result).toEqual({ ok: true });
   });
+
+  it('reports block rate when every URL is blocked (not completeness)', () => {
+    const result = validateBatchHttp({
+      listings: [],
+      trailingMedians,
+      jsonFieldCompleteness: 0,
+      crawlMode: 'incremental',
+      listingsSkippedAtCrawl: 0,
+      blockedUrlCount: 4,
+      totalUrlCount: 4,
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe('4/4 category URLs blocked (no listings extracted)');
+    }
+  });
 });

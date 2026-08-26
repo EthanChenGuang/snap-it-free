@@ -41,6 +41,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
   if (
     listing.source === 'subito' ||
     listing.source === 'vinted' ||
+    listing.source === 'wallapop' ||
     listing.source === 'facebook'
   ) {
     return <ScrapedListingShell listing={listing} similarListings={similarListings} />;

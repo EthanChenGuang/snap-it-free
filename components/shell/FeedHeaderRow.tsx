@@ -11,7 +11,7 @@ import { getSubitoCategoryLabel } from '@/lib/listings/subito-categories';
 import { cn } from '@/lib/utils';
 
 const PILL_CLASS =
-  'inline-flex items-center gap-space-xs rounded-full border border-outline-variant bg-surface-container-lowest px-space-md py-space-xs text-label-sm text-on-surface transition-opacity active:opacity-80';
+  'feed-glass-pill inline-flex items-center gap-space-xs rounded-full px-space-md py-space-xs text-label-sm text-on-surface transition-all duration-300 active:scale-[0.97]';
 
 function truncateSearchQuery(query: string, maxLen = 24): string {
   const trimmed = query.trim();
@@ -31,7 +31,7 @@ function FilterPill({
   return (
     <button type="button" onClick={onDismiss} className={PILL_CLASS} aria-label={dismissLabel}>
       <span>{label}</span>
-      <span className="material-symbols-outlined text-[16px] text-on-surface-variant" aria-hidden>
+      <span className="material-symbols-outlined text-label-sm text-on-surface-variant" aria-hidden>
         close
       </span>
     </button>
@@ -51,7 +51,7 @@ function FeedActiveFilterPills() {
   }
 
   return (
-    <div className="flex flex-wrap gap-space-sm px-gutter pb-space-sm">
+    <div className="flex flex-wrap gap-space-sm px-5 pb-space-sm sm:px-6">
       {hasSearchPill && (
         <FilterPill
           label={truncateSearchQuery(searchQuery)}
@@ -86,16 +86,16 @@ export function FeedHeaderRow() {
   return (
     <header
       className={cn(
-        'sticky top-0 z-30 w-full shrink-0 border-b border-neutral-100/60 bg-white/80 backdrop-blur-md transition-all duration-200',
+        'feed-header-glass sticky top-0 z-30 w-full shrink-0 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]',
         headerHidden &&
-          'pointer-events-none max-h-0 overflow-hidden border-transparent py-0 opacity-0 -translate-y-full',
+          'pointer-events-none max-h-0 overflow-hidden py-0 opacity-0 -translate-y-full',
       )}
     >
-      <div className="mx-auto flex max-w-container-max items-center justify-between gap-space-sm px-gutter py-space-md">
+      <div className="mx-auto flex max-w-container-max items-center justify-between gap-space-sm px-5 py-space-md sm:px-6">
         <CompactLocaleChip />
         <div className="relative min-w-0 flex-1">
           <span
-            className="material-symbols-outlined pointer-events-none absolute left-space-md top-1/2 -translate-y-1/2 text-[22px] text-on-surface-variant"
+            className="material-symbols-outlined feed-header-icon pointer-events-none absolute left-space-md top-1/2 -translate-y-1/2 text-on-surface-variant"
             aria-hidden
             style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24" }}
           >
@@ -107,7 +107,7 @@ export function FeedHeaderRow() {
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder={messages.feed.searchPlaceholder}
             aria-label={messages.header.search}
-            className="min-h-11 w-full rounded-full bg-surface-container-lowest py-space-sm pl-10 pr-space-md text-body-md text-on-surface transition-all placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary"
+            className="feed-glass-search min-h-11 w-full rounded-full py-space-sm pl-10 pr-space-md text-body-md text-on-surface transition-all duration-300 placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-on-surface/20"
           />
         </div>
         <button
@@ -116,17 +116,17 @@ export function FeedHeaderRow() {
             event.currentTarget.blur();
             setSheetOpen(true);
           }}
-          className="relative flex h-10 w-10 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full bg-surface-container-lowest text-on-surface transition-opacity active:opacity-80"
+          className="feed-glass-icon-btn relative flex h-10 w-10 shrink-0 touch-manipulation cursor-pointer items-center justify-center text-on-surface"
           aria-label={messages.feed.openFilters}
         >
           {hasActiveFilters && (
             <span
-              className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary"
+              className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary"
               aria-hidden
             />
           )}
           <span
-            className="material-symbols-outlined text-[22px]"
+            className="material-symbols-outlined feed-header-icon"
             style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24" }}
           >
             discover_tune
@@ -134,17 +134,17 @@ export function FeedHeaderRow() {
         </button>
         <Link
           href="/select-location"
-          className="relative flex h-10 w-10 shrink-0 touch-manipulation items-center justify-center rounded-full bg-surface-container-lowest text-error transition-opacity active:opacity-80"
+          className="feed-glass-icon-btn relative flex h-10 w-10 shrink-0 touch-manipulation items-center justify-center text-on-surface"
           aria-label={messages.feed.openSelectLocation}
         >
           {showMapLocationIndicator && (
             <span
-              className="absolute right-1 top-1 h-2 w-2 rounded-full bg-error"
+              className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary"
               aria-hidden
             />
           )}
           <span
-            className="material-symbols-outlined text-[22px]"
+            className="material-symbols-outlined feed-header-icon"
             style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24" }}
           >
             pin_drop

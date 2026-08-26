@@ -18,13 +18,23 @@ import {
   updateNextRunAt,
 } from './config-loader.js';
 import { persistBatch } from './shared/persist.js';
-import { validateBatch, validateBatchHttp, VINTED_MIN_COUNT_RATIO_FULL, VINTED_MIN_COUNT_RATIO_INCREMENTAL, FACEBOOK_MIN_COUNT_RATIO_FULL, FACEBOOK_MIN_COUNT_RATIO_INCREMENTAL } from './shared/validate-run.js';
+import {
+  validateBatch,
+  validateBatchHttp,
+  VINTED_MIN_COUNT_RATIO_FULL,
+  VINTED_MIN_COUNT_RATIO_INCREMENTAL,
+  FACEBOOK_MIN_COUNT_RATIO_FULL,
+  FACEBOOK_MIN_COUNT_RATIO_INCREMENTAL,
+  WALLAPOP_MIN_COUNT_RATIO_FULL,
+  WALLAPOP_MIN_COUNT_RATIO_INCREMENTAL,
+} from './shared/validate-run.js';
 import { loadZonePolygons, tagZone } from './shared/zone-tag.js';
 import { reconcileOrphanScrapeRuns } from './orphan-runs.js';
 import { runSchedulerTick, TICK_INTERVAL_MS } from './scheduler.js';
 import { runSubitoCrawler, type CategoryUrlStats } from './subito/crawler.js';
 import { loadKnownListingSet } from './subito/known-set.js';
 import { runVintedCrawler } from './vinted/crawler.js';
+import { runWallapopCrawler } from './wallapop/crawler.js';
 import { runFacebookCrawler } from './facebook/crawler.js';
 import {
   loadFacebookSession,
@@ -37,7 +47,7 @@ import {
   isProductionSoftProxyContext,
   type CrawlMode,
 } from './worker-proxy-gate.js';
-import { runCrawlWithProxyFallback, runSubitoCrawlWithProxyFallback, runVintedCrawlWithProxyFallback, runFacebookCrawlWithProxyFallback, PROXY_QUOTA_FALLBACK_REASON } from './worker-proxy-fallback.js';
+import { runCrawlWithProxyFallback, runSubitoCrawlWithProxyFallback, runVintedCrawlWithProxyFallback, runWallapopCrawlWithProxyFallback, runFacebookCrawlWithProxyFallback, PROXY_QUOTA_FALLBACK_REASON } from './worker-proxy-fallback.js';
 import {
   acquireManualJobExecution,
   DuplicateJobRunError,
@@ -267,13 +277,10 @@ export async function runSourceScrape(
     throw new Error(`Unknown source: ${sourceSlug}`);
   }
 
-  const decision = resolveSourceRun(
-    {
-      implementation_status: config.implementationStatus,
-      enabled: config.enabled,
-    },
-    { manual: trigger === 'manual' },
-  );
+  const decision = resolveSourceRun({
+    implementation_status: config.implementationStatus,
+    enabled: config.enabled,
+  });
 
   if (decision.action === 'skipped') {
     const message =
@@ -319,10 +326,6 @@ export async function runSourceScrape(
     console.log(`Global pause active — running manual override for ${sourceSlug}`);
   }
 
-  if (!config.enabled && trigger === 'manual') {
-    console.log(`Source ${sourceSlug} disabled — running manual override`);
-  }
-
   const jobCrawlMode = jobId ? await loadJobCrawlMode(supabase, jobId) : null;
   const crawlMode = decideCrawlMode({
     lastFullRefreshAt: config.lastFullRefreshAt,
@@ -366,7 +369,10 @@ export async function runSourceScrape(
       : 50;
 
     const knownMap =
-      sourceSlug === 'subito' || sourceSlug === 'vinted' || sourceSlug === 'facebook'
+      sourceSlug === 'subito' ||
+      sourceSlug === 'vinted' ||
+      sourceSlug === 'wallapop' ||
+      sourceSlug === 'facebook'
         ? await loadKnownListingSet(supabase, sourceSlug)
         : new Map();
 
@@ -387,6 +393,7 @@ export async function runSourceScrape(
           isFullRefresh,
           mode: crawlMode,
           runId: run.id,
+          proxyUrls: config.proxyUrls,
         },
       );
       crawlResult = fallbackResult.crawlResult;
@@ -403,6 +410,27 @@ export async function runSourceScrape(
           isFullRefresh,
           mode: crawlMode,
           runId: run.id,
+          proxyUrls: config.proxyUrls,
+        },
+      );
+      crawlResult = fallbackResult.crawlResult;
+      fallbackDegraded = fallbackResult.fallbackDegraded;
+    } else if (sourceSlug === 'wallapop') {
+      if (!config.proxyUrl) {
+        throw new Error('Wallapop crawl requires residential proxy (D-25-02)');
+      }
+      const fallbackResult = await runWallapopCrawlWithProxyFallback(
+        runWallapopCrawler,
+        config.urls,
+        config.preset,
+        config.proxyUrl,
+        {
+          knownMap,
+          earlyStopK: config.earlyStopK,
+          isFullRefresh,
+          mode: crawlMode,
+          runId: run.id,
+          proxyUrls: config.proxyUrls,
         },
       );
       crawlResult = fallbackResult.crawlResult;
@@ -425,6 +453,7 @@ export async function runSourceScrape(
           isFullRefresh,
           mode: crawlMode,
           runId: run.id,
+          proxyUrls: config.proxyUrls,
         },
       );
       crawlResult = fallbackResult.crawlResult;
@@ -508,12 +537,19 @@ export async function runSourceScrape(
           jsonFieldCompleteness,
           crawlMode,
           listingsSkippedAtCrawl,
+          blockedUrlCount,
+          totalUrlCount: totalUrls,
           ...(sourceSlug === 'vinted'
             ? {
                 minCountRatioFull: VINTED_MIN_COUNT_RATIO_FULL,
                 minCountRatioIncremental: VINTED_MIN_COUNT_RATIO_INCREMENTAL,
               }
-            : sourceSlug === 'facebook'
+            : sourceSlug === 'wallapop'
+              ? {
+                  minCountRatioFull: WALLAPOP_MIN_COUNT_RATIO_FULL,
+                  minCountRatioIncremental: WALLAPOP_MIN_COUNT_RATIO_INCREMENTAL,
+                }
+              : sourceSlug === 'facebook'
               ? {
                   minCountRatioFull: FACEBOOK_MIN_COUNT_RATIO_FULL,
                   minCountRatioIncremental: FACEBOOK_MIN_COUNT_RATIO_INCREMENTAL,

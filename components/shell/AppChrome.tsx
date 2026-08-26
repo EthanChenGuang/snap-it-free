@@ -1,5 +1,6 @@
 'use client';
 
+import '@/app/feed-home.css';
 import { usePathname } from 'next/navigation';
 import { BottomNav } from '@/components/shell/BottomNav';
 import { FeedHeaderRow } from '@/components/shell/FeedHeaderRow';
@@ -18,9 +19,11 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
   const isSelectLocation = pathname === '/select-location';
   const showFeedHeader = pathname === '/';
   const showFavoritesTitle = pathname === '/favorites';
+  const showMessagesTitle = pathname === '/messages';
   const showSettingsTitle = pathname === '/settings';
-  const showSimpleTitle = showFavoritesTitle || showSettingsTitle;
-  const showBottomNav = !isListingDetail && !isSelectLocation;
+  const isMessageThread = /^\/messages\/[^/]+$/.test(pathname);
+  const showSimpleTitle = showFavoritesTitle || showMessagesTitle || showSettingsTitle;
+  const showBottomNav = !isListingDetail && !isSelectLocation && !isMessageThread;
 
   if (isAdmin) {
     return (
@@ -57,7 +60,11 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
       {showSimpleTitle && (
         <SimpleTitleBar
           title={
-            showFavoritesTitle ? messages.favorites.pageTitle : messages.app.title
+            showFavoritesTitle
+              ? messages.favorites.pageTitle
+              : showMessagesTitle
+                ? messages.inbox.pageTitle
+                : messages.app.title
           }
         />
       )}

@@ -50,6 +50,13 @@ export function dequeuePendingJobs(jobs: ScrapeJobRow[]): ScrapeJobRow[] {
   return jobs.filter((job) => job.status === 'pending');
 }
 
+export function filterPendingJobsForEnabledSources(
+  jobs: ScrapeJobRow[],
+  enabledSlugs: ReadonlySet<string>,
+): ScrapeJobRow[] {
+  return dequeuePendingJobs(jobs).filter((job) => enabledSlugs.has(job.source_slug));
+}
+
 /** Merge manual jobs (FIFO) with due cron sources; dedupe by source_slug (D-33). */
 export function mergeRunQueue(
   dueSources: ScraperSourceRow[],
@@ -111,7 +118,7 @@ export async function runSchedulerTick(
   const now = new Date();
 
   const [sourcesResult, jobsResult] = await Promise.all([
-    supabase.from('scraper_sources').select('slug, enabled, next_run_at').eq('enabled', true),
+    supabase.from('scraper_sources').select('slug, enabled, next_run_at'),
     supabase
       .from('scrape_jobs')
       .select('id, source_slug, status')
@@ -126,8 +133,11 @@ export async function runSchedulerTick(
     throw jobsResult.error;
   }
 
-  const dueSources = pickDueSources(sourcesResult.data ?? [], now, globalPause);
-  const pendingJobs = dequeuePendingJobs(jobsResult.data ?? []);
+  const allSources = sourcesResult.data ?? [];
+  const enabledSources = allSources.filter((source) => source.enabled);
+  const enabledSlugs = new Set(enabledSources.map((source) => source.slug));
+  const dueSources = pickDueSources(enabledSources, now, globalPause);
+  const pendingJobs = filterPendingJobsForEnabledSources(jobsResult.data ?? [], enabledSlugs);
   const queue = mergeRunQueue(dueSources, pendingJobs);
 
   if (queue.length === 0) {

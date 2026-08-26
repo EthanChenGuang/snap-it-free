@@ -17,7 +17,7 @@ export type RawListing = {
   lng: number | null;
   posted_at: string;
   /** Source of the listing. Defaults to 'subito' for legacy callers (Phase 15-era normalize). */
-  source?: 'subito' | 'vinted' | 'facebook';
+  source?: 'subito' | 'vinted' | 'facebook' | 'wallapop';
   description?: string;
   /** HTTP category JSON price field (crawl hash input). */
   price?: string;

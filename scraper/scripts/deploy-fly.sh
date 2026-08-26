@@ -52,6 +52,11 @@ secret_args=(
 if [[ -n "${PROXY_URL:-}" ]]; then
   secret_args+=("PROXY_URL=$PROXY_URL")
 fi
+for key in PROXY_URL_DATAIMPULSE PROXY_URL_WEBSHARE PROXY_URL_DECODO; do
+  if [[ -n "${!key:-}" ]]; then
+    secret_args+=("$key=${!key}")
+  fi
+done
 if [[ -n "${PUSHPLUS_TOKEN:-}" ]]; then
   secret_args+=("PUSHPLUS_TOKEN=$PUSHPLUS_TOKEN")
 fi

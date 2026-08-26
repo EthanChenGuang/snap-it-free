@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   dequeuePendingJobs,
+  filterPendingJobsForEnabledSources,
   mergeRunQueue,
   pickDueSources,
   staggerDelayMs,
@@ -47,6 +48,16 @@ describe('scheduler', () => {
     expect(staggerDelayMs(0)).toBe(0);
     expect(staggerDelayMs(1)).toBe(STAGGER_MINUTES * 60_000);
     expect(staggerDelayMs(2)).toBe(2 * STAGGER_MINUTES * 60_000);
+  });
+
+  it('filters pending jobs for disabled sources', () => {
+    const jobs = [
+      { id: '1', source_slug: 'subito', status: 'pending' },
+      { id: '2', source_slug: 'vinted', status: 'pending' },
+      { id: '3', source_slug: 'ebay', status: 'running' },
+    ];
+    const enabledSlugs = new Set(['subito']);
+    expect(filterPendingJobsForEnabledSources(jobs, enabledSlugs)).toEqual([jobs[0]]);
   });
 
   it('merges pending jobs and due sources deduping by source_slug (D-33)', () => {

@@ -364,6 +364,7 @@ export function SourceCard({
             <RunNowButton
               slug={source.slug}
               globalPause={globalPause}
+              sourceEnabled={source.enabled}
               defaultCrawlMode={source.slug === 'vinted' ? 'incremental' : undefined}
               variant="macos"
               showStatusLink

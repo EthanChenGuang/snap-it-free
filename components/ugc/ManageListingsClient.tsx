@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { OwnerMessagesButton } from '@/components/messages/OwnerMessagesButton';
 import { HiddenReviewBanner } from '@/components/ugc/HiddenReviewBanner';
 import { Button } from '@/components/ui/button';
 import {
@@ -120,26 +121,29 @@ export function ManageListingsClient({ listings, userId }: ManageListingsClientP
               </div>
 
               {!isHidden && !isExpired && listing.owner_user_id === userId && (
-                <div className="flex flex-col gap-space-sm sm:flex-row">
-                  {!isReserved && (
+                <div className="flex flex-col gap-space-sm">
+                  <div className="flex flex-col gap-space-sm sm:flex-row">
+                    {!isReserved && (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="flex-1"
+                        disabled={isPending}
+                        onClick={() => handleReserved(listing)}
+                      >
+                        {messages.manage.markReserved}
+                      </Button>
+                    )}
                     <Button
                       type="button"
-                      variant="secondary"
                       className="flex-1"
                       disabled={isPending}
-                      onClick={() => handleReserved(listing)}
+                      onClick={() => setDeliverTarget(listing)}
                     >
-                      {messages.manage.markReserved}
+                      {messages.manage.markDelivered}
                     </Button>
-                  )}
-                  <Button
-                    type="button"
-                    className="flex-1"
-                    disabled={isPending}
-                    onClick={() => setDeliverTarget(listing)}
-                  >
-                    {messages.manage.markDelivered}
-                  </Button>
+                  </div>
+                  <OwnerMessagesButton listingId={listing.id} />
                 </div>
               )}
             </li>

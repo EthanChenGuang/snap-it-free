@@ -22,7 +22,6 @@ type ListingDetailContentProps = {
   isAvailable: boolean;
   onPrimaryAction: () => void;
   primaryDisabled?: boolean;
-  /** Owner lifecycle controls replace the sticky CTA when set. */
   lifecycleActions?: React.ReactNode;
   banner?: React.ReactNode;
 };
@@ -51,8 +50,8 @@ export function ListingDetailContent({
 
   return (
     <div className="flex h-full flex-col overflow-y-auto bg-surface">
-      <div className="relative mx-auto w-full max-w-container-max">
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-container-low md:aspect-[16/10] md:rounded-b-lg">
+      <div className="relative mx-auto w-full max-w-container-max pb-28">
+        <div className="relative aspect-square w-full overflow-hidden bg-surface-container-low md:aspect-[4/3]">
           {listing.photo_url ? (
             <Image
               src={listing.photo_url}
@@ -71,57 +70,51 @@ export function ListingDetailContent({
           <DetailHeroControls listing={listing} />
         </div>
 
-        <div className="relative -mt-5 rounded-t-2xl border border-outline-variant bg-surface-container-lowest px-gutter pb-28 pt-space-lg md:-mt-6">
+        <div className="px-gutter pt-space-lg">
           {banner}
 
-          <div className="mx-auto max-w-lg text-center">
-            <h1 className="text-h2 font-bold leading-tight text-on-surface">{displayTitle}</h1>
-
+          <header className="border-b border-outline-variant pb-space-md">
+            <h1 className="text-h2 font-semibold leading-tight tracking-tight text-on-surface">
+              {displayTitle}
+            </h1>
             <p
-              className="mt-space-sm text-body-md text-secondary"
+              className="mt-space-xs text-label-sm text-on-surface-variant"
               suppressHydrationWarning
             >
               {metadataLine}
             </p>
-          </div>
+          </header>
 
-          <div className="mx-auto my-space-lg max-w-lg border-t border-outline-variant" />
-
-          <div className="mx-auto max-w-lg">
+          <section className="border-b border-outline-variant py-space-lg">
             <DetailArticle listing={listing} isUgc={isUgc} />
+          </section>
 
-            <p className="mt-space-md text-center text-h3 font-semibold text-primary">
-              {messages.detail.costFreeLabel}
-            </p>
-
+          <section className="border-b border-outline-variant py-space-md">
+            <p className="text-h3 font-semibold text-primary">{messages.detail.costFreeLabel}</p>
             {pickupHint && (
-              <p className="mt-space-sm text-center text-body-md text-on-surface-variant">
-                {pickupHint}
-              </p>
+              <p className="mt-space-xs text-body-md text-on-surface-variant">{pickupHint}</p>
             )}
-
             {isAvailable && !isUgc && (
-              <p className="mt-space-sm text-center text-label-md font-medium text-on-surface">
+              <p className="mt-space-sm text-label-md font-medium text-on-surface">
                 {messages.detail.fcfsNote}
               </p>
             )}
-
             {!isAvailable && (
-              <p className="mt-space-md text-center text-label-md font-medium text-secondary">
+              <p className="mt-space-sm text-label-md font-medium text-secondary">
                 {messages.listing.claimed}
               </p>
             )}
+          </section>
 
-            {lifecycleActions && (
-              <div className="mt-space-lg border-t border-outline-variant pt-space-lg">
-                {lifecycleActions}
-              </div>
-            )}
-          </div>
+          {lifecycleActions && (
+            <div className="border-b border-outline-variant py-space-lg">{lifecycleActions}</div>
+          )}
 
-          <div className="mx-auto mt-space-xl max-w-lg">
-            <SimilarListings listings={similarListings} />
-          </div>
+          {similarListings.length > 0 && (
+            <section className="border-t border-outline-variant pt-space-lg">
+              <SimilarListings listings={similarListings} />
+            </section>
+          )}
         </div>
       </div>
 
@@ -132,7 +125,7 @@ export function ListingDetailContent({
               <Button
                 type="button"
                 className={cn(
-                  'flex w-full items-center justify-center py-space-md text-label-md font-semibold',
+                  'flex w-full items-center justify-center rounded-lg py-space-md text-label-md font-semibold',
                 )}
                 disabled={primaryDisabled}
                 onClick={onPrimaryAction}
@@ -143,7 +136,7 @@ export function ListingDetailContent({
               <button
                 type="button"
                 disabled
-                className="flex w-full items-center justify-center border border-outline bg-surface-container py-space-md text-label-md font-medium text-secondary"
+                className="flex w-full items-center justify-center rounded-lg border border-outline bg-surface-container py-space-md text-label-md font-medium text-secondary"
               >
                 {messages.listing.claimed}
               </button>

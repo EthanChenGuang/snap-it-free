@@ -4,6 +4,8 @@ const FATAL_PROXY_PATTERNS = [
   /traffic limit/i,
   /quota (exceeded|reached|limit)/i,
   /bandwidth limit/i,
+  /payment required/i,
+  /402/i,
   /subscription (expired|inactive)/i,
   /account (suspended|disabled|expired)/i,
 ] as const;

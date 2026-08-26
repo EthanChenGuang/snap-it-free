@@ -10,13 +10,8 @@ import {
   SettingsToggle,
 } from '@/components/settings/SettingsUi';
 import { useAuthSession } from '@/lib/auth/useAuthSession';
-import {
-  canOfferPush,
-  canRequestPushPermission,
-  isIOS,
-  isIosPushDismissed,
-  isStandalonePwa,
-} from '@/lib/pwa/ios-detect';
+import { canRequestPushPermission } from '@/lib/pwa/ios-detect';
+import { usePushClientEnv } from '@/lib/pwa/usePushClientEnv';
 import {
   getPushSubscriptionActive,
   requestPushPermissionAndSubscribe,
@@ -63,9 +58,7 @@ export function NotificationsSection() {
   const [dndError, setDndError] = useState<string | null>(null);
 
   const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim();
-  const iosNonStandalone = isIOS() && !isStandalonePwa();
-  const iosDismissed = isIosPushDismissed();
-  const pushSupported = canOfferPush();
+  const { hydrated, pushSupported, iosNonStandalone, iosDismissed } = usePushClientEnv();
   const canSubscribe =
     isLoggedIn &&
     pushSupported &&
@@ -215,13 +208,22 @@ export function NotificationsSection() {
           <div className="min-w-0 flex-1">
             <p className="text-body-md font-medium text-on-surface">{messages.settings.push.title}</p>
             <p className="text-label-sm text-secondary">
-              {showInstallCta
-                ? messages.settings.push.iosDisabled
-                : (disabledReason ?? messages.settings.push.description)}
+              {!hydrated
+                ? messages.settings.push.description
+                : showInstallCta
+                  ? messages.settings.push.iosDisabled
+                  : (disabledReason ?? messages.settings.push.description)}
             </p>
             {error && <p className="mt-1 text-label-sm text-error">{error}</p>}
           </div>
-          {showInstallCta ? (
+          {!hydrated ? (
+            <SettingsToggle
+              checked={false}
+              disabled
+              onChange={() => {}}
+              ariaLabel={messages.settings.push.disabledLabel}
+            />
+          ) : showInstallCta ? (
             <Button type="button" size="sm" variant="secondary" onClick={openInstallGuide}>
               {messages.settings.push.installApp}
             </Button>

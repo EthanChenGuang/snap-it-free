@@ -67,13 +67,8 @@ export function BottomNav() {
 
   return (
     <>
-      <nav
-        className={cn(
-          'pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-gutter pb-[env(safe-area-inset-bottom,0px)] transition-all duration-200 ease-out',
-          navHidden && 'translate-y-[calc(100%+2rem)] opacity-0',
-        )}
-      >
-        <div className="pointer-events-auto flex items-center gap-space-lg rounded-full border border-white/20 bg-white/70 px-space-lg py-space-sm shadow-lg backdrop-blur-md">
+      <nav className={cn('feed-glass-nav-shell', navHidden && 'is-hidden')}>
+        <div className="feed-glass-bottom-nav">
           {navItems.map((item) => {
             const isActive = isNavActive(pathname, item.href);
 
@@ -84,14 +79,11 @@ export function BottomNav() {
                 onClick={(event) => handleNavClick(event, item)}
                 aria-label={item.label}
                 aria-current={isActive ? 'page' : undefined}
-                className={cn(
-                  'relative flex h-10 w-10 items-center justify-center transition-transform duration-200 active:scale-95',
-                  isActive ? 'text-error' : 'text-on-surface-variant',
-                )}
+                className={cn('feed-glass-nav-item', isActive && 'feed-glass-nav-item-active')}
               >
                 <span className="relative">
                   <span
-                    className="material-symbols-outlined text-[22px]"
+                    className="material-symbols-outlined feed-header-icon"
                     style={{
                       fontVariationSettings: isActive ? ICON_STYLE_ACTIVE : ICON_STYLE_OUTLINE,
                     }}

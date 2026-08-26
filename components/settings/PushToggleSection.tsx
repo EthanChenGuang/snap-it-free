@@ -3,13 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { usePwaOnboarding } from '@/components/providers/PwaOnboardingProvider';
 import { Button } from '@/components/ui/button';
-import {
-  canOfferPush,
-  canRequestPushPermission,
-  isIOS,
-  isIosPushDismissed,
-  isStandalonePwa,
-} from '@/lib/pwa/ios-detect';
+import { canRequestPushPermission } from '@/lib/pwa/ios-detect';
+import { usePushClientEnv } from '@/lib/pwa/usePushClientEnv';
 import {
   getPushSubscriptionActive,
   requestPushPermissionAndSubscribe,
@@ -59,9 +54,7 @@ export function PushToggleSection({ isLoggedIn }: PushToggleSectionProps) {
   const [error, setError] = useState<string | null>(null);
 
   const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim();
-  const iosNonStandalone = isIOS() && !isStandalonePwa();
-  const iosDismissed = isIosPushDismissed();
-  const pushSupported = canOfferPush();
+  const { hydrated, pushSupported, iosNonStandalone, iosDismissed } = usePushClientEnv();
   const canSubscribe =
     isLoggedIn &&
     pushSupported &&
@@ -154,13 +147,17 @@ export function PushToggleSection({ isLoggedIn }: PushToggleSectionProps) {
         <div className="min-w-0 flex-1">
           <p className="text-body-md font-medium text-on-surface">{messages.settings.push.title}</p>
           <p className="text-label-sm text-secondary">
-            {showInstallCta
-              ? messages.settings.push.iosDisabled
-              : (disabledReason ?? messages.settings.push.description)}
+            {!hydrated
+              ? messages.settings.push.description
+              : showInstallCta
+                ? messages.settings.push.iosDisabled
+                : (disabledReason ?? messages.settings.push.description)}
           </p>
           {error && <p className="mt-space-xs text-label-sm text-error">{error}</p>}
         </div>
-        {showInstallCta ? (
+        {!hydrated ? (
+          <PushToggle enabled={false} disabled onChange={() => {}} />
+        ) : showInstallCta ? (
           <Button type="button" size="sm" variant="secondary" onClick={openInstallGuide}>
             {messages.settings.push.installApp}
           </Button>
@@ -169,7 +166,7 @@ export function PushToggleSection({ isLoggedIn }: PushToggleSectionProps) {
         )}
       </div>
 
-      {iosNonStandalone && iosDismissed && (
+      {hydrated && iosNonStandalone && iosDismissed && (
         <p className="mt-space-sm text-label-sm text-secondary">
           {messages.settings.push.badgeFallbackNote}{' '}
           <button

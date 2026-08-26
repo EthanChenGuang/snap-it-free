@@ -43,6 +43,8 @@ export type RunSubitoCrawlerOptions = {
   earlyStopK?: number;
   isFullRefresh?: boolean;
   proxyUrlOverride?: string;
+  /** Ordered provider chain — worker failover uses this before direct fallback. */
+  proxyUrls?: string[];
   mode?: CrawlMode;
   /** Isolates Crawlee request queue per scrape run (avoids 0-request dedupe on long-lived workers). */
   runId?: string;

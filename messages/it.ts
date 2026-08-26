@@ -12,6 +12,7 @@ export const messages = {
     list: 'Elenco',
     home: 'Home',
     post: 'Pubblica',
+    messages: 'Messaggi',
     favorites: 'Preferiti',
     settings: 'Impostazioni',
   },
@@ -201,6 +202,7 @@ export const messages = {
     title: 'Impostazioni',
     subtitle: 'Gestisci preferenze e zone di monitoraggio.',
     generalSection: 'Generale',
+    myMessages: 'I miei messaggi',
     notificationsSection: 'Avvisi e notifiche',
     languageSection: 'Lingua',
     profileInformation: 'Informazioni profilo',
@@ -318,6 +320,12 @@ export const messages = {
       subscribeError: 'Impossibile attivare le notifiche push — riprova',
       matchBodySuffix: 'Nuovo oggetto gratis',
     },
+    messages: {
+      badgeLabel: (n: number) =>
+        n === 1 ? '1 nuovo messaggio' : `${n > 9 ? '9+' : n} nuovi messaggi`,
+    },
+    navBadgeLabel: (n: number) =>
+      n === 1 ? '1 nuovo aggiornamento' : `${n > 9 ? '9+' : n} nuovi aggiornamenti`,
     matches: {
       sectionTitle: 'Nuovi match',
       badgeFallbackNote:
@@ -378,6 +386,7 @@ export const messages = {
     claimOnSubito: 'Reclama su Subito',
     snagIt: 'Reclama',
     openOnVinted: 'Apri su Vinted',
+    openOnWallapop: 'Apri su Wallapop',
     openOnFacebook: 'Apri su Facebook',
     claimThisItem: 'Reclama oggetto',
     messageOwner: 'Scrivi al proprietario',
@@ -444,6 +453,22 @@ export const messages = {
     sendError: 'Impossibile inviare — riprova',
     bannerShort: 'Incontra in un luogo pubblico. Non pagare per oggetti gratuiti.',
   },
+  inbox: {
+    pageTitle: 'Messaggi',
+    emptyTitle: 'Nessun messaggio',
+    emptyDescription: 'Contatta un proprietario per iniziare una conversazione e organizzare il ritiro.',
+    browseFeed: 'Sfoglia annunci',
+    loadError: 'Impossibile caricare i messaggi. Riprova.',
+    retry: 'Riprova',
+    viewMessages: 'Vedi messaggi',
+    openInInbox: 'Apri nella posta in arrivo',
+    back: 'Indietro',
+    viewListing: 'Vedi annuncio',
+    roleBuyer: 'Annuncio che hai contattato',
+    roleSeller: 'Sul tuo annuncio',
+    signInTitle: 'Accedi per vedere i messaggi',
+    signInDescription: 'Accedi per vedere le conversazioni con i proprietari.',
+  },
   safety: {
     modalTitle: 'Incontra in sicurezza',
     bullet1: 'Scegli un luogo pubblico e ben illuminato.',
@@ -488,6 +513,7 @@ export const messages = {
   listing: {
     sourceSubito: 'Subito',
     sourceVinted: 'Vinted',
+    sourceWallapop: 'Wallapop',
     sourceFacebook: 'Facebook',
     sourceCommunity: 'Community',
     reserved: 'Riservato',

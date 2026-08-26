@@ -29,6 +29,7 @@ type SourceLabelInput = {
 export function listingSourceLabel({ source, messages }: SourceLabelInput): string | null {
   if (source === 'subito') return messages.listing.sourceSubito;
   if (source === 'vinted') return messages.listing.sourceVinted;
+  if (source === 'wallapop') return messages.listing.sourceWallapop;
   if (source === 'facebook') return messages.listing.sourceFacebook;
   return null;
 }
@@ -43,6 +44,7 @@ export function detailPrimaryCtaLabel({ source, isUgc, messages }: DetailCtaLabe
   if (isUgc) return messages.detail.messageOwner;
   if (source === 'subito') return messages.detail.snagIt;
   if (source === 'vinted') return messages.detail.openOnVinted;
+  if (source === 'wallapop') return messages.detail.openOnWallapop;
   if (source === 'facebook') return messages.detail.openOnFacebook;
   return messages.detail.snagIt;
 }

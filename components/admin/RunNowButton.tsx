@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 type RunNowButtonProps = {
   slug: string;
   globalPause?: boolean;
+  sourceEnabled?: boolean;
   /** When set, primary click runs this mode; chevron opens menu for other modes. */
   defaultCrawlMode?: CrawlMode;
   variant?: 'full' | 'compact' | 'macos';
@@ -127,6 +128,7 @@ function RunModeMenuItem({
 export function RunNowButton({
   slug,
   globalPause = false,
+  sourceEnabled = true,
   defaultCrawlMode,
   variant = 'compact',
   className,
@@ -143,7 +145,7 @@ export function RunNowButton({
   const isFull = variant === 'full';
   const isMacos = variant === 'macos';
   const iconSize = isFull || isMacos ? 'text-[16px]' : 'text-[16px]';
-  const menuDisabled = isActive || phase === 'done';
+  const menuDisabled = isActive || phase === 'done' || !sourceEnabled;
 
   function handleRun(crawlMode: CrawlMode) {
     void trigger(slug, crawlMode);

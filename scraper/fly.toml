@@ -8,6 +8,7 @@ primary_region = "ams"
 [env]
   CRON_ENABLED = "true"
   CRAWLEE_PERSIST_STORAGE = "false"
+  NODE_OPTIONS = "--max-old-space-size=256"
 
 [[vm]]
   size = "shared-cpu-1x"

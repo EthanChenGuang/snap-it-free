@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { getCityBySubitoSlug, inCityBbox } from '../geo/italian-cities.js';
 
-export const ListingSource = z.enum(['subito', 'facebook', 'ugc', 'vinted']);
+export const ListingSource = z.enum(['subito', 'facebook', 'ugc', 'vinted', 'wallapop']);
 export const VeniceZone = z.enum(['centro_storico', 'mestre_marghera', 'lido_murano']);
 
 export const CanonicalListingSchema = z

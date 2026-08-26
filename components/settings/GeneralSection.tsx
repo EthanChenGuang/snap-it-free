@@ -1,5 +1,6 @@
 'use client';
 
+import { MessagesSettingsRow } from '@/components/settings/MessagesSettingsRow';
 import {
   SettingsChevron,
   SettingsRowCard,
@@ -60,6 +61,8 @@ export function GeneralSection() {
         </div>
         <SettingsChevron />
       </SettingsRowCard>
+
+      <MessagesSettingsRow />
     </section>
   );
 }

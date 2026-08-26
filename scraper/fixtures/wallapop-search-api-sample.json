@@ -1,0 +1,65 @@
+{
+  "_meta": {
+    "source": "https://it.wallapop.com/app/search?keywords=gratis&latitude=45.4408&longitude=12.3155",
+    "endpoint": "/api/v3/general/search?max_sale_price=0",
+    "note": "Sanitized Wallapop search API fixture for Wave 0 / unit tests (D-25-02)"
+  },
+  "search_objects": [
+    {
+      "id": "9840000001",
+      "title": "Scaffale in legno — regalo",
+      "description": "Lo regalo, venite a prenderlo.",
+      "price": 0,
+      "currency": "EUR",
+      "web_slug": "9840000001-scaffale-legno-regalo",
+      "images": [
+        {
+          "urls": {
+            "medium": "https://cdn.wallapop.com/images/84/00/scaffale-medium.webp"
+          }
+        }
+      ],
+      "location": {
+        "latitude": 45.434,
+        "longitude": 12.338,
+        "city": "Venezia"
+      },
+      "creation_date": 1724500000
+    },
+    {
+      "id": "9840000002",
+      "title": "Libri vari",
+      "description": "Gratis",
+      "price": 0,
+      "currency": "EUR",
+      "web_slug": "9840000002-libri-vari",
+      "image": "https://cdn.wallapop.com/images/84/00/libri-medium.webp",
+      "location": {
+        "latitude": 45.441,
+        "longitude": 12.316,
+        "city": "Venezia"
+      },
+      "creation_date": 1724490000
+    },
+    {
+      "id": "9840000003",
+      "title": "Paid noise item",
+      "price": 5,
+      "currency": "EUR",
+      "web_slug": "9840000003-paid-noise",
+      "images": [
+        {
+          "urls": {
+            "medium": "https://cdn.wallapop.com/images/84/00/paid-medium.webp"
+          }
+        }
+      ],
+      "location": {
+        "latitude": 45.44,
+        "longitude": 12.31,
+        "city": "Venezia"
+      },
+      "creation_date": 1724480000
+    }
+  ]
+}

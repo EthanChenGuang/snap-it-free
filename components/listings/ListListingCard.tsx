@@ -13,13 +13,18 @@ type ListListingCardProps = {
   listing: ListingRow;
   /** Eager-load photo for above-the-fold cards. */
   priority?: boolean;
+  /** Stagger entrance animation on the home feed. */
+  index?: number;
 };
 
 /**
- * Minimalist feed card — image, FREE badge, favorite, compact metadata.
- * iOS photo-first layout with top gradient legibility overlay and press feedback.
+ * Premium feed card — editorial photo frame, glass overlays, refined type.
  */
-export function ListListingCard({ listing, priority = false }: ListListingCardProps) {
+export function ListListingCard({
+  listing,
+  priority = false,
+  index = 0,
+}: ListListingCardProps) {
   const { language, messages, formatRelativeTime } = useMessages();
   const displayTitle = resolveListingTitle(listing, language);
   const isClaimed = listing.status === 'claimed';
@@ -34,41 +39,59 @@ export function ListListingCard({ listing, priority = false }: ListListingCardPr
     <Link
       href={`/listing/${listing.id}`}
       prefetch
-      className="group flex flex-col transition-transform duration-150 ease-out active:scale-[0.98]"
+      className="feed-card group flex flex-col outline-none"
+      style={{ animationDelay: `${Math.min(index, 14) * 45}ms` }}
     >
-      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-surface-container-high">
+      <div
+        className={cn(
+          'feed-card-media relative aspect-[3/4] overflow-hidden rounded-[22px] bg-surface-container-high',
+          isClaimed && 'opacity-90',
+        )}
+      >
         <ListingPhoto
           src={listing.photo_url}
           alt={displayTitle}
           priority={priority}
-          variant="thumbnail"
+          variant="feed"
           className={cn(
-            'object-cover transition-transform duration-500 group-hover:scale-105',
-            isClaimed && 'opacity-60',
+            'feed-card-image object-cover',
+            isClaimed && 'saturate-[0.65]',
           )}
-          sizes="(max-width: 768px) 50vw, 240px"
+          sizes="(max-width: 768px) 50vw, 280px"
         />
+
+        <div className="feed-card-media-shine pointer-events-none absolute inset-0 z-[4]" aria-hidden />
+
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 rounded-t-2xl bg-gradient-to-b from-black/30 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 z-[6] h-20 bg-gradient-to-b from-black/20 via-black/5 to-transparent"
           aria-hidden
         />
-        <div className="absolute left-3 top-3 z-20 flex flex-wrap items-center gap-1.5">
-          <span className="rounded-full bg-emerald-500/80 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
-            {messages.listing.free}
-          </span>
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-24 bg-gradient-to-t from-black/30 via-black/10 to-transparent"
+          aria-hidden
+        />
+
+        <div className="absolute left-3.5 top-3.5 z-20">
+          <span className="feed-glass-badge">{messages.listing.free}</span>
         </div>
+
         <FavoriteButton
           listingId={listing.id}
           size="sm"
           tone="overlay"
-          className="absolute right-3 top-3 z-20 h-9 w-9 rounded-full bg-black/30 p-2 backdrop-blur-md transition hover:bg-black/40"
+          className="feed-glass-icon-btn absolute right-3 top-3 z-20 h-9 w-9 p-0 hover:bg-transparent"
         />
       </div>
 
-      <div className="min-w-0">
-        <h3 className="mt-2.5 line-clamp-1 text-sm font-medium text-neutral-900">{displayTitle}</h3>
+      <div className="feed-card-caption min-w-0 px-0.5 pt-3.5">
+        <h3 className="line-clamp-2 text-body-md font-semibold leading-snug tracking-[-0.02em] text-on-surface">
+          {displayTitle}
+        </h3>
         {metadata && (
-          <p className="mt-0.5 line-clamp-1 text-xs text-neutral-400" suppressHydrationWarning>
+          <p
+            className="mt-1.5 line-clamp-1 text-label-sm font-medium tracking-[-0.01em] text-on-surface-variant/75 tabular-nums"
+            suppressHydrationWarning
+          >
             {metadata}
           </p>
         )}

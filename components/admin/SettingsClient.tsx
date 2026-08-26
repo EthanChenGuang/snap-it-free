@@ -40,6 +40,7 @@ export function SettingsClient({
   const [pauseSaving, setPauseSaving] = useState(false);
   const [proxyUrl, setProxyUrl] = useState('');
   const [showProxy, setShowProxy] = useState(false);
+  const [proxyLoading, setProxyLoading] = useState(false);
   const [proxyConfigured, setProxyConfigured] = useState(initialConfig.proxyConfigured);
   const [telegramChatId, setTelegramChatId] = useState(initialConfig.telegramChatId ?? '');
   const [alertEmail, setAlertEmail] = useState(initialConfig.alertEmail ?? '');
@@ -68,6 +69,34 @@ export function SettingsClient({
   const blockedRatioDisplay = formatBlockedRatioPercent(blockedRatio7d);
 
   const capExceeded = translationsToday >= dailyCap;
+
+  const handleToggleShowProxy = useCallback(async () => {
+    const next = !showProxy;
+    if (next && proxyConfigured && !proxyUrl.trim()) {
+      setProxyLoading(true);
+      try {
+        const response = await fetch('/api/admin/config/proxy');
+        if (response.ok) {
+          const payload = (await response.json()) as { proxy_url: string };
+          setProxyUrl(payload.proxy_url);
+        } else {
+          setError(settingsMessages.saveError);
+          return;
+        }
+      } catch {
+        setError(settingsMessages.saveError);
+        return;
+      } finally {
+        setProxyLoading(false);
+      }
+    }
+
+    if (!next && proxyConfigured && !saving) {
+      setProxyUrl('');
+    }
+
+    setShowProxy(next);
+  }, [proxyConfigured, proxyUrl, saving, showProxy]);
 
   const handleGlobalPauseToggle = useCallback(async () => {
     setPauseSaving(true);
@@ -394,14 +423,20 @@ export function SettingsClient({
                 value={proxyUrl}
                 onChange={(event) => setProxyUrl(event.target.value)}
                 placeholder={
-                  proxyConfigured && !proxyUrl ? '••••••••••••••••••••' : settingsMessages.proxyPlaceholder
+                  proxyLoading
+                    ? settingsMessages.proxyLoading
+                    : proxyConfigured && !proxyUrl && !showProxy
+                      ? '••••••••••••••••••••'
+                      : settingsMessages.proxyPlaceholder
                 }
-                className="w-full bg-transparent px-3 py-2 font-mono text-[14px] focus:outline-none"
+                disabled={proxyLoading}
+                className="w-full bg-transparent px-3 py-2 font-mono text-[14px] focus:outline-none disabled:opacity-60"
               />
               <button
                 type="button"
-                onClick={() => setShowProxy((current) => !current)}
-                className="absolute right-2 top-2 text-secondary hover:text-on-surface"
+                disabled={proxyLoading || (!proxyConfigured && !proxyUrl.trim())}
+                onClick={() => void handleToggleShowProxy()}
+                className="absolute right-2 top-2 text-secondary hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label={showProxy ? 'Hide proxy URL' : 'Show proxy URL'}
               >
                 <span className="material-symbols-outlined text-[20px]" aria-hidden>

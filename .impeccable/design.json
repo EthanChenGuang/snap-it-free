@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-25T11:30:00.000Z",
+  "title": "Design System: Structured Minimalist",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Ink Black",
+        "canonical": "#000000",
+        "tonalRamp": ["#0a0a0a", "#1a1a1a", "#2b2b2b", "#3d3d3d", "#525252", "#6b6b6b", "#858585", "#a3a3a3", "#c4c4c4", "#e8e8e8"]
+      },
+      "on-surface": {
+        "role": "neutral",
+        "displayName": "Near Black Text",
+        "canonical": "#1a1c1c",
+        "tonalRamp": ["#0e0f0f", "#1a1c1c", "#252728", "#323435", "#444748", "#5a5d5e", "#747878", "#949899", "#b8bbbc", "#e2e2e1"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Paper Surface",
+        "canonical": "#f9f9f8",
+        "tonalRamp": ["#2f3130", "#444748", "#5a5d5e", "#747878", "#949899", "#b8bbbc", "#d4d4d3", "#e8e8e7", "#f4f4f3", "#f9f9f8"]
+      },
+      "outline-variant": {
+        "role": "neutral",
+        "displayName": "Structural Border",
+        "canonical": "#c4c7c7",
+        "tonalRamp": ["#444748", "#5a5d5e", "#747878", "#8e9192", "#a8abac", "#c4c7c7", "#d4d6d6", "#e2e2e1", "#eeeeed", "#f9f9f8"]
+      },
+      "accent-orange": {
+        "role": "tertiary",
+        "displayName": "Signal Orange",
+        "canonical": "#df6b05",
+        "tonalRamp": ["#3d1a00", "#5c2800", "#7a3600", "#994404", "#b85305", "#df6b05", "#f08830", "#f5a862", "#fac894", "#fde8cc"]
+      },
+      "error": {
+        "role": "semantic",
+        "displayName": "Alert Red",
+        "canonical": "#ba1a1a",
+        "tonalRamp": ["#410002", "#690005", "#93000a", "#ba1a1a", "#de3730", "#ff5449", "#ff897d", "#ffb4ab", "#ffdad6", "#ffedea"]
+      },
+      "chip-bg": {
+        "role": "neutral",
+        "displayName": "Chip Background",
+        "canonical": "#f1f1f0",
+        "tonalRamp": ["#2f3130", "#444748", "#5a5d5e", "#747878", "#949899", "#b8bbbc", "#d4d4d3", "#e2e2e1", "#eeeeed", "#f1f1f0"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display / H1", "purpose": "Page titles and hero headings; 32px on mobile." },
+      "headline": { "displayName": "Headline / H2", "purpose": "Section headers and drawer titles." },
+      "title": { "displayName": "Title / H3", "purpose": "Subsection labels in forms and settings." },
+      "body": { "displayName": "Body", "purpose": "Default UI copy at 15px/1.6." },
+      "body-lg": { "displayName": "Body Large", "purpose": "Listing detail prose and long descriptions." },
+      "label": { "displayName": "Label", "purpose": "Buttons, form labels, filter headers." },
+      "label-sm": { "displayName": "Label Small", "purpose": "Card metadata, chips, secondary captions." }
+    },
+    "shadows": [
+      { "name": "nav-capsule", "value": "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)", "purpose": "Floating bottom nav capsule only." },
+      { "name": "chip-active", "value": "0 1px 2px rgba(0,0,0,0.05)", "purpose": "Optional subtle depth on active filter chips in sheet." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Default state transitions on buttons and nav." },
+      { "name": "press-scale", "value": "transform 150ms ease-out", "purpose": "Listing card active:scale-[0.98] press feedback." },
+      { "name": "image-zoom", "value": "transform 500ms ease", "purpose": "Listing photo hover scale on feed cards." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "container-max", "value": "1200px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main call-to-action — black fill, white label.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Confirm</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; height: 36px; padding: 8px 16px; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 500; line-height: 1.4; color: #ffffff; background: #000000; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover { background: #1c1b1b; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 1px #747878; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Alternate action — white surface with structural border.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Cancel</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; height: 36px; padding: 8px 16px; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 500; color: #1a1c1c; background: #ffffff; border: 1px solid #c4c7c7; border-radius: 4px; cursor: pointer; transition: background 0.2s; } .ds-btn-secondary:hover { background: #eeeeed; } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 1px #747878; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Tertiary action — no border until hover.",
+      "html": "<button class=\"ds-btn-ghost\" type=\"button\">Clear</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; height: 36px; padding: 8px 16px; font-family: Inter, sans-serif; font-size: 14px; font-weight: 500; color: #444748; background: transparent; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s, color 0.2s; } .ds-btn-ghost:hover { background: #eeeeed; color: #1a1c1c; } .ds-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 1px #747878; }"
+    },
+    {
+      "name": "Category Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Inactive filter/category pill — white with border.",
+      "html": "<button class=\"ds-chip\" type=\"button\" aria-pressed=\"false\">Furniture</button>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 16px; font-family: Inter, sans-serif; font-size: 14px; font-weight: 500; color: #1a1c1c; background: #f9f9f8; border: 1px solid #c4c7c7; border-radius: 9999px; cursor: pointer; transition: background 0.2s; white-space: nowrap; } .ds-chip:hover { background: #eeeeed; } .ds-chip:focus-visible { outline: none; box-shadow: 0 0 0 2px #747878; }"
+    },
+    {
+      "name": "Category Chip Active",
+      "kind": "chip",
+      "refersTo": "chip-active",
+      "description": "Selected filter/category — black fill.",
+      "html": "<button class=\"ds-chip-active\" type=\"button\" aria-pressed=\"true\">Furniture</button>",
+      "css": ".ds-chip-active { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 16px; font-family: Inter, sans-serif; font-size: 14px; font-weight: 500; color: #ffffff; background: #000000; border: 1px solid #000000; border-radius: 9999px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); } .ds-chip-active:focus-visible { outline: none; box-shadow: 0 0 0 2px #747878; }"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": null,
+      "description": "Feed header search — pill input with leading icon space.",
+      "html": "<div class=\"ds-search-wrap\"><span class=\"ds-search-icon\" aria-hidden=\"true\">⌕</span><input class=\"ds-search-input\" type=\"search\" placeholder=\"Search free items…\" aria-label=\"Search\" /></div>",
+      "css": ".ds-search-wrap { position: relative; width: 100%; } .ds-search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 18px; color: #444748; pointer-events: none; } .ds-search-input { width: 100%; min-height: 44px; padding: 8px 16px 8px 40px; font-family: Inter, sans-serif; font-size: 15px; color: #1a1c1c; background: #ffffff; border: none; border-radius: 9999px; transition: box-shadow 0.2s; } .ds-search-input::placeholder { color: #444748; } .ds-search-input:focus { outline: none; box-shadow: 0 0 0 1px #000000; }"
+    },
+    {
+      "name": "Filter Pill",
+      "kind": "chip",
+      "refersTo": null,
+      "description": "Dismissible active filter below search bar.",
+      "html": "<button class=\"ds-filter-pill\" type=\"button\" aria-label=\"Remove filter\"><span>Furniture</span><span class=\"ds-filter-pill-close\" aria-hidden=\"true\">×</span></button>",
+      "css": ".ds-filter-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 16px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 500; color: #1a1c1c; background: #ffffff; border: 1px solid #c4c7c7; border-radius: 9999px; cursor: pointer; transition: opacity 0.15s; } .ds-filter-pill:active { opacity: 0.8; } .ds-filter-pill-close { font-size: 16px; color: #444748; line-height: 1; }"
+    },
+    {
+      "name": "Bottom Nav Capsule",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "Floating frosted nav — 4 Material Symbol icons; active in red.",
+      "html": "<nav class=\"ds-bottom-nav\" aria-label=\"Main\"><div class=\"ds-bottom-nav-capsule\"><button class=\"ds-nav-item ds-nav-item-active\" aria-current=\"page\" aria-label=\"Home\"><svg class=\"ds-nav-icon\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z\"/></svg></button><button class=\"ds-nav-item\" aria-label=\"Post\"><svg class=\"ds-nav-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M12 5v14M5 12h14\"/></svg></button><button class=\"ds-nav-item\" aria-label=\"Favorites\"><svg class=\"ds-nav-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z\"/></svg></button><button class=\"ds-nav-item\" aria-label=\"Settings\"><svg class=\"ds-nav-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zm7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-.98l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a7.03 7.03 0 0 0-1.7-.98l-.38-2.65A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.49.42l-.38 2.65a7.03 7.03 0 0 0-1.7.98l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.5.5 0 0 0 .12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65a.5.5 0 0 0-.12.64l2 3.46a.5.5 0 0 0 .61.22l2.49-1c.52.4 1.08.73 1.7.98l.38 2.65A.5.5 0 0 0 10 22h4a.5.5 0 0 0 .49-.42l.38-2.65c.62-.25 1.18-.58 1.7-.98l2.49 1a.5.5 0 0 0 .61-.22l2-3.46a.5.5 0 0 0-.12-.64l-2.11-1.65z\"/></svg></button></div></nav>",
+      "css": ".ds-bottom-nav { display: flex; justify-content: center; padding: 0 24px 16px; } .ds-bottom-nav-capsule { display: flex; align-items: center; gap: 16px; padding: 8px 16px; background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.2); border-radius: 9999px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); } .ds-nav-item { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; background: transparent; border: none; border-radius: 9999px; color: #444748; cursor: pointer; transition: transform 0.2s, color 0.2s; } .ds-nav-item-active { color: #ba1a1a; } .ds-nav-item:active { transform: scale(0.95); } .ds-nav-icon { width: 22px; height: 22px; }"
+    },
+    {
+      "name": "Listing Grid Card",
+      "kind": "card",
+      "refersTo": null,
+      "description": "Feed card — 4:5 photo, FREE badge, title, metadata.",
+      "html": "<a class=\"ds-listing-card\" href=\"#\"><div class=\"ds-listing-photo\"><span class=\"ds-free-badge\">FREE</span></div><h3 class=\"ds-listing-title\">Vintage wooden chair</h3><p class=\"ds-listing-meta\">1.2 km · 2h ago</p></a>",
+      "css": ".ds-listing-card { display: flex; flex-direction: column; text-decoration: none; color: inherit; transition: transform 150ms ease-out; } .ds-listing-card:active { transform: scale(0.98); } .ds-listing-photo { position: relative; aspect-ratio: 4/5; border-radius: 16px; overflow: hidden; background: #e8e8e7; } .ds-free-badge { position: absolute; top: 12px; left: 12px; padding: 4px 10px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #fff; background: rgba(16,185,129,0.8); border-radius: 9999px; backdrop-filter: blur(4px); } .ds-listing-title { margin: 10px 0 0; font-family: Inter, sans-serif; font-size: 14px; font-weight: 500; color: #1a1c1c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-listing-meta { margin: 2px 0 0; font-family: Inter, sans-serif; font-size: 12px; color: #444748; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Digital Document",
+    "overview": "零元 (Venice Free Finds) uses Google Stitch's Structured Minimalist world: a document-first, monochrome workspace where listings read like a carefully typeset catalog, not a promotional marketplace. Information density, scanability, and calm order outrank decoration. The system prioritizes thin structural borders, generous whitespace, and Inter-driven hierarchy so free items remain the hero.",
+    "keyCharacteristics": [
+      "Monochrome-first palette with black primary CTAs and #e5e5e5 structural borders",
+      "Inter typography as the sole type family; weight and size carry hierarchy",
+      "4px spacing grid; max content width 1200px; 24px gutters",
+      "Tonal layering over drop shadows; borders define zones",
+      "Material Symbols Outlined icons (weight 300–400, opsz 24)",
+      "Mobile-first PWA shell with frosted header/nav overlays on consumer feed surfaces",
+      "Radix/shadcn primitives allowed only when restyled to Stitch tokens"
+    ],
+    "rules": [
+      { "name": "The One Border Rule", "body": "All structural divisions use 1px #e5e5e5 (outline-variant). Do not mix border weights or ad-hoc gray hex values across surfaces.", "section": "colors" },
+      { "name": "The Monochrome Default Rule", "body": "Screens should read as black, white, and warm gray. Saturated fills appear only on photo overlays (FREE badge) or the two functional accents — never as decorative theme color.", "section": "colors" },
+      { "name": "The Weight-as-Signal Rule", "body": "Use 600–700 for headings only. Body stays 400; labels at 500. Never bold body paragraphs for emphasis — use label size or color instead.", "section": "typography" },
+      { "name": "The No Shadow Rule", "body": "Cards, buttons, and list rows do not carry drop shadows. If depth is needed, step surface tone or add a border.", "section": "elevation" },
+      { "name": "The Hover-Tint Rule", "body": "Hover and active states change background to surface-container or opacity — never translateY lift on buttons.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use @theme tokens from app/globals.css — never default shadcn theme colors.",
+      "Do apply .notion-border or border-outline-variant (#e5e5e5) for all structural edges.",
+      "Do use Inter scale from tokens: h1/h2/h3, body-md/body-lg, label-md/label-sm.",
+      "Do align to the 4px grid (space-xs through space-xl).",
+      "Do use black primary buttons for main actions; secondary for alternates.",
+      "Do use Material Symbols Outlined for consumer UI icons.",
+      "Do left-align text-heavy admin and settings content.",
+      "Do extend from Stitch screen prototypes in .planning/google-stitch-ui-design/*_notion_style/code.html when building new surfaces."
+    ],
+    "donts": [
+      "Don't use default shadcn rounded-xl/2xl cards, saturated accent palettes, or glassmorphism as a default container treatment.",
+      "Don't clone Snag's red theme or floating capsule nav verbatim — interaction yes, visual clone no.",
+      "Don't add drop shadows to cards, list rows, or primary buttons.",
+      "Don't introduce Lucide or emoji icons on consumer-facing surfaces that already use Material Symbols.",
+      "Don't hardcode hex values that drift from @theme tokens without DESIGN.md justification.",
+      "Don't invent a new visual language when a Stitch screen prototype exists — extend DESIGN.md instead."
+    ]
+  }
+}

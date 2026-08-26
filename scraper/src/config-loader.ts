@@ -3,6 +3,10 @@ import {
   decryptProxy,
   type EncryptedProxyPayload,
 } from '../../lib/admin/crypto.js';
+import {
+  resolveProxyChain,
+  type ProxyChainEntry,
+} from '../../lib/admin/proxy-chain.js';
 import type { AntiBlockPreset } from './admin/presets.js';
 import { getProxyUrl } from './config.js';
 import { SUBITO_CATEGORY_URLS } from './subito/categories.js';
@@ -12,6 +16,8 @@ export type SourceConfig = {
   preset: AntiBlockPreset;
   globalPause: boolean;
   proxyUrl: string | undefined;
+  proxyUrls: string[];
+  proxyChain: ProxyChainEntry[];
   proxyConfigured: boolean;
   useProxyUrl: boolean;
   enabled: boolean;
@@ -36,12 +42,13 @@ export function mergeTargetUrls(
 
 function resolveProxyUrl(
   proxyEnc: EncryptedProxyPayload | null | undefined,
-): string | undefined {
+): { dbProxyUrl?: string; chain: ProxyChainEntry[] } {
   const secretsKey = process.env.SCRAPER_SECRETS_KEY?.trim();
+  let dbProxyUrl: string | undefined;
 
   if (proxyEnc && secretsKey) {
     try {
-      return decryptProxy(proxyEnc, secretsKey);
+      dbProxyUrl = decryptProxy(proxyEnc, secretsKey);
     } catch {
       console.warn(
         '[config-loader] Failed to decrypt proxy_enc — falling back to PROXY_URL env',
@@ -49,11 +56,23 @@ function resolveProxyUrl(
     }
   }
 
-  const envProxy = getProxyUrl();
-  if (envProxy) {
-    console.log('[config-loader] Using PROXY_URL from environment');
+  const chain = resolveProxyChain({ dbProxyUrl });
+  if (chain.length === 0) {
+    const envProxy = getProxyUrl();
+    if (envProxy) {
+      console.log('[config-loader] Using PROXY_URL from environment');
+    }
+  } else {
+    console.log(
+      JSON.stringify({
+        event: 'proxy_chain_resolved',
+        providers: chain.map((entry) => entry.provider),
+        hosts: chain.map((entry) => entry.hostMasked),
+      }),
+    );
   }
-  return envProxy;
+
+  return { dbProxyUrl, chain };
 }
 
 function fallbackUrlsForSlug(slug: string): readonly string[] {
@@ -64,7 +83,7 @@ function fallbackUrlsForSlug(slug: string): readonly string[] {
 }
 
 function defaultUseProxyUrl(slug: string): boolean {
-  return slug === 'vinted';
+  return slug === 'vinted' || slug === 'wallapop';
 }
 
 /** Load DB-backed source config merged with global settings (D-18). */
@@ -101,16 +120,21 @@ export async function loadSourceConfig(
 
   const useProxyUrl =
     (source.use_proxy_url as boolean | null | undefined) ?? defaultUseProxyUrl(slug);
-  const proxyUrl = useProxyUrl
+  const resolvedProxy = useProxyUrl
     ? resolveProxyUrl(global?.proxy_enc as EncryptedProxyPayload | null)
-    : undefined;
+    : { chain: [] as ProxyChainEntry[] };
+  const proxyChain = resolvedProxy.chain;
+  const proxyUrls = proxyChain.map((entry) => entry.url);
+  const proxyUrl = proxyUrls[0];
 
   return {
     urls,
     preset: (source.anti_block_preset as AntiBlockPreset) ?? 'standard',
     globalPause: global?.global_pause ?? false,
     proxyUrl,
-    proxyConfigured: Boolean(proxyUrl),
+    proxyUrls,
+    proxyChain,
+    proxyConfigured: proxyUrls.length > 0,
     useProxyUrl,
     enabled: Boolean(source.enabled),
     implementationStatus: source.implementation_status as 'live' | 'coming_soon',

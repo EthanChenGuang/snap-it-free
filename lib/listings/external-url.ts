@@ -3,6 +3,9 @@ const ALLOWED_HOSTS = new Set([
   'www.subito.it',
   'vinted.it',
   'www.vinted.it',
+  'wallapop.com',
+  'www.wallapop.com',
+  'it.wallapop.com',
   'facebook.com',
   'www.facebook.com',
 ]);

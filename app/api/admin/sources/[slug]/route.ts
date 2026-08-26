@@ -158,6 +158,18 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
+  if (parsed.data.enabled === false && existing.enabled) {
+    await session.supabase
+      .from('scrape_jobs')
+      .update({
+        status: 'skipped',
+        message: 'Source disabled',
+        completed_at: new Date().toISOString(),
+      })
+      .eq('source_slug', slug)
+      .eq('status', 'pending');
+  }
+
   const { row } = await selectSourceBySlug(session.supabase, slug);
   if (!row) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });

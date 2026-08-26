@@ -17,7 +17,40 @@ const mockCrawlResult: CrawlResult = {
 };
 
 describe('runSubitoCrawlWithProxyFallback', () => {
-  it('retries once without proxy on ProxyQuotaFatalError', async () => {
+  it('retries next provider in chain before direct fallback', async () => {
+    const runSubitoCrawler = vi
+      .fn<
+        (
+          urls: readonly string[],
+          preset: AntiBlockPreset,
+          proxyUrl?: string,
+        ) => Promise<CrawlResult>
+      >()
+      .mockRejectedValueOnce(new ProxyQuotaFatalError('Proxy quota exhausted'))
+      .mockResolvedValueOnce(mockCrawlResult);
+
+    const result = await runSubitoCrawlWithProxyFallback(
+      runSubitoCrawler,
+      ['https://www.subito.it/annunci-veneto/regalo/'],
+      'standard',
+      'http://user:pass@gw.dataimpulse.com:823',
+      {
+        mode: 'incremental',
+        proxyUrls: [
+          'http://user:pass@gw.dataimpulse.com:823',
+          'http://user:pass@gate.decodo.com:7000',
+        ],
+      },
+    );
+
+    expect(runSubitoCrawler).toHaveBeenCalledTimes(2);
+    expect(runSubitoCrawler.mock.calls[0]?.[2]).toBe('http://user:pass@gw.dataimpulse.com:823');
+    expect(runSubitoCrawler.mock.calls[1]?.[2]).toBe('http://user:pass@gate.decodo.com:7000');
+    expect(result.fallbackDegraded).toBe(true);
+    expect(result.fallbackReason).toMatch(/failover/i);
+  });
+
+  it('retries once without proxy on ProxyQuotaFatalError when chain exhausted', async () => {
     const runSubitoCrawler = vi
       .fn<
         (

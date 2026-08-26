@@ -30,30 +30,36 @@ export function SafetyBanner({ conversationId }: SafetyBannerProps) {
 
   if (collapsed) {
     return (
-      <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-low px-space-md py-space-xs">
-        <span className="text-label-sm text-on-surface-variant">{messages.safety.bannerShort}</span>
-        <button
-          type="button"
-          onClick={handleToggle}
-          className="flex h-9 w-9 items-center justify-center rounded text-on-surface-variant hover:bg-surface-container"
-          aria-label={messages.safety.expand}
-        >
-          <span className="material-symbols-outlined text-base">info</span>
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={handleToggle}
+        className="flex w-full items-center gap-space-sm border-b border-outline-variant bg-[#f1f1f0] px-gutter py-space-xs text-left"
+        aria-label={messages.safety.expand}
+      >
+        <span className="material-symbols-outlined text-base text-on-surface-variant">info</span>
+        <span className="flex-1 truncate text-label-sm text-on-surface-variant">
+          {messages.safety.bannerShort}
+        </span>
+        <span className="material-symbols-outlined text-base text-on-surface-variant">
+          expand_more
+        </span>
+      </button>
     );
   }
 
   return (
-    <div className="border-b border-outline-variant bg-surface-container-low px-space-md py-space-sm">
-      <div className="flex items-start justify-between gap-space-sm">
-        <p className="text-label-sm leading-relaxed text-on-surface-variant">
+    <div className="border-b border-outline-variant bg-[#f1f1f0] px-gutter py-space-sm">
+      <div className="flex items-start gap-space-sm">
+        <span className="material-symbols-outlined mt-0.5 shrink-0 text-base text-on-surface-variant">
+          shield
+        </span>
+        <p className="flex-1 text-label-sm leading-relaxed text-on-surface-variant">
           {messages.safety.bannerShort}
         </p>
         <button
           type="button"
           onClick={handleToggle}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded text-on-surface-variant hover:bg-surface-container"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container"
           aria-label={messages.safety.collapse}
         >
           <span className="material-symbols-outlined text-base">expand_less</span>

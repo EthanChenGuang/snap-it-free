@@ -20,6 +20,17 @@ describe('getProxyFatalFailure', () => {
     );
   });
 
+  it('detects 402 payment required as quota exhaustion', () => {
+    expect(
+      getProxyFatalFailure(
+        new Error(
+          'Proxy responded with 402 Payment Required: Bandwidth limit reached. Please upgrade',
+        ),
+      ),
+    ).toBe(
+      'Proxy quota or account limit reached — check provider dashboard or top up traffic',
+    );
+  });
   it('returns null for transient session errors', () => {
     expect(
       getProxyFatalFailure(new Error('Detected a session error, rotating session... connection reset')),

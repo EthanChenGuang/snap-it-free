@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { DetailHeroControls } from '@/components/detail/DetailHeroControls';
 import { UgcListingDetailContent } from '@/components/detail/UgcListingDetailContent';
+import { OwnerMessagesButton } from '@/components/messages/OwnerMessagesButton';
 import { DmDrawer } from '@/components/messages/DmDrawer';
 import { HiddenReviewBanner } from '@/components/ugc/HiddenReviewBanner';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
@@ -168,6 +169,7 @@ export function UgcListingShell({
         isOwner={isOwner}
         onContact={openContact}
         contactDisabled={isReserved}
+        ownerMessagesAction={isOwner ? <OwnerMessagesButton listingId={listing.id} /> : undefined}
         ownerFooter={ownerFooter}
         banner={showHiddenBanner ? <HiddenReviewBanner /> : undefined}
         heroControls={

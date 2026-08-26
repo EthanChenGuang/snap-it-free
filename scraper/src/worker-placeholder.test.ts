@@ -19,15 +19,9 @@ describe('coming_soon source placeholder (D-05)', () => {
     ).toEqual({ action: 'run' });
   });
 
-  it('skips disabled sources for scheduled runs', () => {
+  it('skips disabled sources for all triggers', () => {
     expect(
       resolveSourceRun({ implementation_status: 'live', enabled: false }),
     ).toEqual({ action: 'skipped', message: 'Source disabled' });
-  });
-
-  it('allows manual runs when source is disabled', () => {
-    expect(
-      resolveSourceRun({ implementation_status: 'live', enabled: false }, { manual: true }),
-    ).toEqual({ action: 'run' });
   });
 });

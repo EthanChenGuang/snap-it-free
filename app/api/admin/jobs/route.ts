@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
   const { data: source, error: sourceError } = await session.supabase
     .from('scraper_sources')
-    .select('slug, implementation_status')
+    .select('slug, implementation_status, enabled')
     .eq('slug', source_slug)
     .maybeSingle();
 
@@ -37,6 +37,9 @@ export async function POST(request: Request) {
   }
   if (!source) {
     return NextResponse.json({ error: 'Source not found' }, { status: 404 });
+  }
+  if (!source.enabled) {
+    return NextResponse.json({ error: sourcesMessages.runSourceDisabled }, { status: 422 });
   }
 
   const isComingSoon = source.implementation_status === 'coming_soon';

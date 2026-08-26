@@ -59,6 +59,11 @@ export const VINTED_MIN_COUNT_RATIO_FULL = 0.2;
  */
 export const FACEBOOK_MIN_COUNT_RATIO_INCREMENTAL = 0;
 export const FACEBOOK_MIN_COUNT_RATIO_FULL = 0.2;
+/**
+ * Wallapop €0 listings may be sparse (D-25-02 spike-gated) — same floor as Vinted/Facebook.
+ */
+export const WALLAPOP_MIN_COUNT_RATIO_INCREMENTAL = 0;
+export const WALLAPOP_MIN_COUNT_RATIO_FULL = 0.2;
 
 export type ValidateBatchHttpParams = {
   listings: unknown[];
@@ -71,6 +76,9 @@ export type ValidateBatchHttpParams = {
   minCountRatioIncremental?: number;
   geoResolutionRate?: number;
   minGeoResolutionRate?: number;
+  /** When every URL was blocked and nothing parsed, surface block rate — not completeness 0. */
+  blockedUrlCount?: number;
+  totalUrlCount?: number;
 };
 
 export function validateBatchHttp(
@@ -80,6 +88,19 @@ export function validateBatchHttp(
   const minCountRatioFull = params.minCountRatioFull ?? MIN_COUNT_RATIO_FULL;
   const minCountRatioIncremental =
     params.minCountRatioIncremental ?? MIN_COUNT_RATIO_INCREMENTAL;
+
+  const totalUrls = params.totalUrlCount ?? 0;
+  const blockedUrls = params.blockedUrlCount ?? 0;
+  if (
+    totalUrls > 0 &&
+    blockedUrls >= totalUrls &&
+    params.listings.length === 0
+  ) {
+    return {
+      ok: false,
+      reason: `${blockedUrls}/${totalUrls} category URLs blocked (no listings extracted)`,
+    };
+  }
 
   if (params.jsonFieldCompleteness < minCompleteness) {
     return {

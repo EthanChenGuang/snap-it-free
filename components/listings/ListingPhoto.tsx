@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRef, useState } from 'react';
 import { useInView } from '@/hooks/useInView';
 import {
+  normalizeSubitoFeedPhotoUrl,
   normalizeSubitoPhotoUrl,
   normalizeSubitoThumbnailUrl,
 } from '@/lib/listings/subito-photo-url';
@@ -18,14 +19,15 @@ type ListingPhotoProps = {
   /** Eager-load for above-the-fold cards (first screen). */
   priority?: boolean;
   /** List cards use a smaller Subito CDN preset; detail/hero keeps the gallery rule. */
-  variant?: 'default' | 'thumbnail';
+  variant?: 'default' | 'thumbnail' | 'feed';
 };
 
-function PhotoPlaceholder({ className }: { className?: string }) {
+function PhotoPlaceholder({ className, shimmer = false }: { className?: string; shimmer?: boolean }) {
   return (
     <div
       className={cn(
-        'absolute inset-0 animate-pulse bg-surface-container-high',
+        'absolute inset-0 bg-surface-container-high',
+        shimmer ? 'feed-photo-shimmer' : 'animate-pulse',
         className,
       )}
       aria-hidden
@@ -48,9 +50,14 @@ export function ListingPhoto({
   const [failed, setFailed] = useState(false);
 
   const normalizePhotoUrl =
-    variant === 'thumbnail' ? normalizeSubitoThumbnailUrl : normalizeSubitoPhotoUrl;
+    variant === 'feed'
+      ? normalizeSubitoFeedPhotoUrl
+      : variant === 'thumbnail'
+        ? normalizeSubitoThumbnailUrl
+        : normalizeSubitoPhotoUrl;
   const resolvedSrc = src ? normalizePhotoUrl(src) : src;
   const shouldLoad = priority || inView;
+  const isFeed = variant === 'feed';
 
   if (!resolvedSrc || failed) {
     return (
@@ -67,7 +74,7 @@ export function ListingPhoto({
 
   return (
     <div ref={containerRef} className="absolute inset-0 overflow-hidden">
-      {(!shouldLoad || !loaded) && <PhotoPlaceholder />}
+      {(!shouldLoad || !loaded) && <PhotoPlaceholder shimmer={isFeed} />}
       {shouldLoad && (
         <Image
           src={resolvedSrc}
@@ -77,8 +84,10 @@ export function ListingPhoto({
           priority={priority}
           unoptimized
           className={cn(
-            'object-cover transition-opacity duration-300',
-            loaded ? 'opacity-100' : 'opacity-0',
+            isFeed
+              ? 'feed-card-image-reveal object-cover'
+              : 'object-cover transition-opacity duration-300',
+            loaded ? (isFeed ? 'feed-card-image-loaded' : 'opacity-100') : 'opacity-0',
             className,
           )}
           onLoad={() => setLoaded(true)}

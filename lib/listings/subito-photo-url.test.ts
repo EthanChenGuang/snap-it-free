@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  normalizeSubitoFeedPhotoUrl,
   normalizeSubitoPhotoUrl,
   normalizeSubitoThumbnailUrl,
+  SUBITO_LISTING_FEED_RULE,
   SUBITO_LISTING_THUMBNAIL_RULE,
 } from './subito-photo-url';
 
@@ -52,5 +54,17 @@ describe('normalizeSubitoThumbnailUrl', () => {
   it('does not modify non-Subito URLs', () => {
     const url = 'https://wnerhajyjjmrtsdmdpzu.supabase.co/storage/v1/object/public/ugc-photos/x.jpg';
     expect(normalizeSubitoThumbnailUrl(url)).toBe(url);
+  });
+});
+
+describe('normalizeSubitoFeedPhotoUrl', () => {
+  it('appends the gallery feed rule to bare sbito CDN URLs', () => {
+    expect(
+      normalizeSubitoFeedPhotoUrl(
+        'https://images.sbito.it/api/v1/sbt-ads-images-pro/images/1f/1f42c45e-b720-48ea-bc45-6f4dca904710',
+      ),
+    ).toBe(
+      `https://images.sbito.it/api/v1/sbt-ads-images-pro/images/1f/1f42c45e-b720-48ea-bc45-6f4dca904710?rule=${SUBITO_LISTING_FEED_RULE}`,
+    );
   });
 });

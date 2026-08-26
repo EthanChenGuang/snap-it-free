@@ -9,12 +9,14 @@ import { isRunNowActivePhase } from '@/lib/admin/use-run-now';
 import { RegaloUrlMatrix } from '@/components/admin/RegaloUrlMatrix';
 import { VintedUrlMatrix } from '@/components/admin/VintedUrlMatrix';
 import { FacebookUrlMatrix } from '@/components/admin/FacebookUrlMatrix';
+import { WallapopUrlMatrix } from '@/components/admin/WallapopUrlMatrix';
 import { ReplaceUrlsConfirmDialog } from '@/components/admin/ReplaceUrlsConfirmDialog';
 import { TargetUrlEditor } from '@/components/admin/TargetUrlEditor';
 import { dedupeUrls } from '@/lib/admin/subito-regalo-catalog';
 import { RECOMMENDED_SUBITO_SEED_URLS } from '@/lib/admin/subito-recommended-seed';
 import { RECOMMENDED_VINTED_SEED_URLS } from '@/lib/admin/vinted-recommended-seed';
 import { RECOMMENDED_FACEBOOK_SEED_URLS } from '@/lib/admin/facebook-recommended-seed';
+import { RECOMMENDED_WALLAPOP_SEED_URLS } from '@/lib/admin/wallapop-recommended-seed';
 import type { AntiBlockPreset, SourceDetail } from '@/lib/admin/types';
 import {
   formatThresholdPercent,
@@ -95,9 +97,10 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
 
   const isSubito = initialSource.slug === 'subito';
   const isVinted = initialSource.slug === 'vinted';
+  const isWallapop = initialSource.slug === 'wallapop';
   const isFacebook = initialSource.slug === 'facebook';
-  const hasUrlMatrix = isSubito || isVinted || isFacebook;
-  const supportsProxyToggle = isSubito || isVinted;
+  const hasUrlMatrix = isSubito || isVinted || isFacebook || isWallapop;
+  const supportsProxyToggle = isSubito || isVinted || isWallapop;
 
   const currentUrlCount = useMemo(
     () =>
@@ -111,9 +114,11 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
   const applyRecommendedSeed = () => {
     const seedUrls = isFacebook
       ? RECOMMENDED_FACEBOOK_SEED_URLS
-      : isVinted
-        ? RECOMMENDED_VINTED_SEED_URLS
-        : RECOMMENDED_SUBITO_SEED_URLS;
+      : isWallapop
+        ? RECOMMENDED_WALLAPOP_SEED_URLS
+        : isVinted
+          ? RECOMMENDED_VINTED_SEED_URLS
+          : RECOMMENDED_SUBITO_SEED_URLS;
     setTargetUrlsText(seedUrls.join('\n'));
     setMatrixResetToken((token) => token + 1);
   };
@@ -272,6 +277,7 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
           >
             <RunNowButton
               slug={initialSource.slug}
+              sourceEnabled={enabled}
               defaultCrawlMode={initialSource.slug === 'vinted' ? 'incremental' : undefined}
               variant="full"
               showStatusLink
@@ -317,6 +323,15 @@ export function SourceDetailClient({ initialSource }: SourceDetailClientProps) {
 
           {isFacebook ? (
             <FacebookUrlMatrix
+              targetUrlsText={targetUrlsText}
+              onTargetUrlsChange={setTargetUrlsText}
+              onApplyRecommendedSeedClick={handleApplyRecommendedSeedClick}
+              resetToAllChecked={matrixResetToken}
+            />
+          ) : null}
+
+          {isWallapop ? (
+            <WallapopUrlMatrix
               targetUrlsText={targetUrlsText}
               onTargetUrlsChange={setTargetUrlsText}
               onApplyRecommendedSeedClick={handleApplyRecommendedSeedClick}

@@ -21,8 +21,8 @@ export function DetailArticle({ listing, isUgc }: DetailArticleProps) {
   if (!body) return null;
 
   return (
-    <article className="rounded-lg border border-outline-variant bg-surface-container-lowest px-space-md py-space-md text-center">
-      <p className="whitespace-pre-line text-body-md leading-relaxed text-on-surface-variant">
+    <article>
+      <p className="whitespace-pre-line text-body-md leading-relaxed text-on-surface">
         {body}
       </p>
     </article>

@@ -23,7 +23,7 @@ export function CompactLocaleChip() {
       <DropdownMenu.Trigger asChild>
         <button
           type="button"
-          className="flex h-10 w-10 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full border border-outline-variant bg-surface-container text-label-sm font-semibold text-on-surface transition-opacity active:opacity-80"
+          className="flex h-10 w-10 shrink-0 touch-manipulation cursor-pointer items-center justify-center rounded-full feed-glass-icon-btn text-label-sm font-semibold text-on-surface transition-all duration-300 active:scale-[0.96]"
           aria-label={messages.header.languageMenu}
           aria-haspopup="listbox"
         >
