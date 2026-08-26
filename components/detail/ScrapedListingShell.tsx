@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { DetailPreviewWall } from '@/components/detail/DetailPreviewWall';
 import { ListingDetailContent } from '@/components/detail/ListingDetailContent';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
+import { buildAuthRedirectPath } from '@/lib/auth/build-auth-redirect';
 import { useAuthSession } from '@/lib/auth/useAuthSession';
 import { isAllowedExternalUrl, openExternalListingUrl } from '@/lib/listings/external-url';
 import type { ListingRow } from '@/lib/listings/types';
@@ -14,14 +15,6 @@ type ScrapedListingShellProps = {
   listing: ListingRow;
   similarListings: ListingRow[];
 };
-
-function buildAuthRedirectPath(pathname: string, searchParamsString: string): string {
-  const path =
-    pathname.startsWith('/') && !pathname.startsWith('//') ? pathname : '/';
-  const query = searchParamsString.replace(/^\?/, '').trim();
-  if (!query) return path;
-  return `${path}?${query}`;
-}
 
 export function ScrapedListingShell({ listing, similarListings }: ScrapedListingShellProps) {
   const { user, loading } = useAuthSession();

@@ -144,6 +144,8 @@ export const messages: Messages = {
     submit: '免费发布',
     submitting: '发布中…',
     guidelines: '发布即表示你同意社区准则。',
+    gateTitle: '登录后即可发布物品',
+    gateDescription: '注册后即可向社区分享免费物品，填写标题、照片和取件地点。',
     successToast: '已发布',
     success: {
       title: '发布成功！',
@@ -177,6 +179,8 @@ export const messages: Messages = {
   auth: {
     modalTitle: '登录以继续',
     detailTitle: '登录查看完整详情并收藏',
+    postTitle: '登录后即可发布物品',
+    favoritesNavTitle: '登录查看和管理收藏',
     favoriteTitle: '登录以收藏',
     alertTitle: '登录以创建提醒',
     modalDescription: '选择登录方式——无需密码。',

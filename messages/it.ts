@@ -148,6 +148,9 @@ export const messages = {
     submit: 'PUBBLICA GRATIS',
     submitting: 'Pubblicazione…',
     guidelines: 'Pubblicando accetti le linee guida della community.',
+    gateTitle: 'Accedi per pubblicare un oggetto',
+    gateDescription:
+      'Crea un account per condividere oggetti gratis — aggiungi foto, titolo e dettagli per il ritiro.',
     successToast: 'Annuncio pubblicato',
     success: {
       title: 'Annuncio pubblicato!',
@@ -184,6 +187,8 @@ export const messages = {
   auth: {
     modalTitle: 'Accedi per continuare',
     detailTitle: 'Accedi per i dettagli completi e i preferiti',
+    postTitle: 'Accedi per pubblicare un oggetto',
+    favoritesNavTitle: 'Accedi per vedere e gestire i preferiti',
     favoriteTitle: 'Accedi per salvare nei preferiti',
     alertTitle: 'Accedi per creare avvisi',
     modalDescription: 'Scegli come accedere — nessuna password richiesta.',

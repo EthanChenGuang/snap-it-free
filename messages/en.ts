@@ -144,6 +144,9 @@ export const messages: Messages = {
     submit: 'POST FOR FREE',
     submitting: 'Publishing…',
     guidelines: 'By posting you agree to the community guidelines.',
+    gateTitle: 'Sign in to post a free item',
+    gateDescription:
+      'Create an account to share free items with the community — add photos, a title, and pickup details.',
     successToast: 'Listing published',
     success: {
       title: 'Listing published!',
@@ -177,6 +180,8 @@ export const messages: Messages = {
   auth: {
     modalTitle: 'Sign in to continue',
     detailTitle: 'Sign in to view full details and save favorites',
+    postTitle: 'Sign in to post a free item',
+    favoritesNavTitle: 'Sign in to view and manage favorites',
     favoriteTitle: 'Sign in to save favorites',
     alertTitle: 'Sign in to create alerts',
     modalDescription: 'Choose how to sign in — no password needed.',
