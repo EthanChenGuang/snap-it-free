@@ -106,9 +106,13 @@ export function AuthPromptModal({
     setStatus(error ? 'error' : 'sent');
   };
 
+  const stopBubble = (event: React.SyntheticEvent) => {
+    event.stopPropagation();
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent onPointerDown={stopBubble} onClick={stopBubble}>
         <DialogHeader>
           <DialogTitle>{modalTitle ?? messages.auth.modalTitle}</DialogTitle>
           <DialogDescription>{messages.auth.modalDescription}</DialogDescription>

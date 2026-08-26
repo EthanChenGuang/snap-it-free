@@ -46,9 +46,13 @@ export function FavoriteButton({
     return () => window.clearTimeout(timer);
   }, [shouldPop]);
 
+  const stopBubble = (event: React.SyntheticEvent) => {
+    event.stopPropagation();
+  };
+
   const handleClick = async (event: React.MouseEvent) => {
     event.preventDefault();
-    event.stopPropagation();
+    stopBubble(event);
 
     if (getSupabaseEnv() && !isAuthed) {
       setAuthOpen(true);
@@ -70,6 +74,7 @@ export function FavoriteButton({
         type="button"
         variant="ghost"
         size={size === 'sm' ? 'sm' : 'icon'}
+        onPointerDown={stopBubble}
         onClick={handleClick}
         aria-label={messages.detail.favorite}
         aria-pressed={favorited}

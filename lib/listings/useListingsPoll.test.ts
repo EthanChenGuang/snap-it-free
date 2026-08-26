@@ -3,15 +3,17 @@
 import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fetchActiveListingsClient } from './client-queries';
+import { fetchActiveListingsClient, fetchActiveListingsCountClient } from './client-queries';
 import { useListingsPoll } from './useListingsPoll';
 import type { ListingRow } from './types';
 
 vi.mock('./client-queries', () => ({
   fetchActiveListingsClient: vi.fn(),
+  fetchActiveListingsCountClient: vi.fn(),
 }));
 
 const mockFetch = vi.mocked(fetchActiveListingsClient);
+const mockFetchCount = vi.mocked(fetchActiveListingsCountClient);
 
 const initialEmpty: ListingRow[] = [];
 
@@ -66,7 +68,9 @@ describe('useListingsPoll', () => {
 
   beforeEach(() => {
     mockFetch.mockReset();
+    mockFetchCount.mockReset();
     mockFetch.mockResolvedValue([padovaListing]);
+    mockFetchCount.mockResolvedValue(42);
   });
 
   afterEach(() => {
@@ -85,7 +89,9 @@ describe('useListingsPoll', () => {
     });
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetchCount).toHaveBeenCalledTimes(1);
     expect(mounted.hook.listings).toContainEqual(padovaListing);
+    expect(mounted.hook.totalCount).toBe(42);
     expect(mounted.hook.isRefreshing).toBe(false);
   });
 });

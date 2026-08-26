@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
   Drawer,
   DrawerContent,
@@ -68,35 +67,22 @@ export function FilterSheet() {
     resetFilters,
   } = useFeedFilter();
 
-  const [activeSnapPoint, setActiveSnapPoint] = useState<number | string | null>(0.85);
-
-  useEffect(() => {
-    if (sheetOpen) {
-      setActiveSnapPoint(0.85);
-    }
-  }, [sheetOpen]);
-
   const handleOpenChange = (open: boolean) => setSheetOpen(open);
   const allCategoriesSelected = applied.categories.length === 0;
   const allCategoryLabel = getSubitoCategoryLabel('all', language, { messages }) ?? 'All';
 
   return (
-    <Drawer
-      open={sheetOpen}
-      onOpenChange={handleOpenChange}
-      modal={false}
-      handleOnly
-      snapPoints={[0.85]}
-      activeSnapPoint={activeSnapPoint}
-      setActiveSnapPoint={setActiveSnapPoint}
-    >
-      <DrawerContent nonModal className="max-h-[85dvh]">
+    <Drawer open={sheetOpen} onOpenChange={handleOpenChange} modal={false} handleOnly>
+      <DrawerContent nonModal className="h-[85dvh] max-h-[85dvh] overflow-hidden">
         <DrawerHeader className="shrink-0 border-b border-outline-variant px-gutter pb-space-md pt-space-sm">
           <DrawerTitle className="text-xl">{messages.feed.filtersTitle}</DrawerTitle>
         </DrawerHeader>
 
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div
+            data-vaul-no-drag
+            className="filter-sheet-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y"
+          >
             <section className="px-gutter py-space-md">
               <h3 className="mb-space-sm text-label-md font-medium text-on-surface-variant">
                 {messages.feed.cityLabel}

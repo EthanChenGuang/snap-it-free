@@ -343,7 +343,7 @@ export const messages: Messages = {
   sheet: {
     newArrivals: 'New arrivals',
     itemsInArea: (count: number) =>
-      count === 1 ? '1 listing in this area' : `${count} listings in this area`,
+      count === 1 ? '1 newly listed item' : `${count} newly listed items`,
     expandSheet: 'Expand bottom sheet',
     collapseSheet: 'Collapse bottom sheet',
     swipeUpHint: 'Swipe up',

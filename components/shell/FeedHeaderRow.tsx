@@ -1,14 +1,15 @@
 'use client';
 
-import Link from 'next/link';
 import { FilterSheet } from '@/components/listings/FilterSheet';
 import { CompactLocaleChip } from '@/components/shell/CompactLocaleChip';
 import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import { useFeedScroll } from '@/components/shell/FeedScrollContext';
 import { useBrowseCenter } from '@/lib/browse-center/context';
+import { consumerCityFilterLabelsFromMessages } from '@/lib/i18n/city-labels';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { getSubitoCategoryLabel } from '@/lib/listings/subito-categories';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 const PILL_CLASS =
   'feed-glass-pill inline-flex items-center gap-space-xs rounded-full px-space-md py-space-xs text-label-sm text-on-surface transition-all duration-300 active:scale-[0.97]';
@@ -41,14 +42,17 @@ function FilterPill({
 function FeedActiveFilterPills() {
   const { messages, language } = useMessages();
   const { searchQuery, setSearchQuery } = useFeedScroll();
-  const { applied, dismissCategory } = useFeedFilter();
+  const { applied, dismissCategory, dismissCity } = useFeedFilter();
 
   const hasSearchPill = searchQuery.trim().length > 0;
+  const hasCityPill = applied.mode === 'city' && applied.city !== 'all';
   const hasCategoryPills = applied.categories.length > 0;
 
-  if (!hasSearchPill && !hasCategoryPills) {
+  if (!hasSearchPill && !hasCityPill && !hasCategoryPills) {
     return null;
   }
+
+  const cityLabels = consumerCityFilterLabelsFromMessages(messages);
 
   return (
     <div className="flex flex-wrap gap-space-sm px-5 pb-space-sm sm:px-6">
@@ -57,6 +61,14 @@ function FeedActiveFilterPills() {
           label={truncateSearchQuery(searchQuery)}
           onDismiss={() => setSearchQuery('')}
           dismissLabel={messages.feed.removeSearchFilter}
+        />
+      )}
+
+      {hasCityPill && (
+        <FilterPill
+          label={cityLabels[applied.city]}
+          onDismiss={dismissCity}
+          dismissLabel={messages.feed.removeFilterAriaLabel(cityLabels[applied.city])}
         />
       )}
 

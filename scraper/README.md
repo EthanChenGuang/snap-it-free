@@ -54,7 +54,7 @@ docker run --env-file .env shou-man-wu-scraper
 
 ## Deploy
 
-**Fly.io (recommended):** `scraper/fly.toml` is configured for a background worker in `ams` (512MB, ~$3.99/mo Aug 2026). No `[http_service]` — process-only scheduler.
+**Fly.io:** Process-only worker config in `ams`. **Production default (D-07-66):** GitHub Actions `--scheduler-tick` — scale Fly to 0 to avoid ~$3/mo. **Optional legacy-free fallback:** 256MB only (legacy allowance covers 256MB, not 512MB). No `[http_service]`.
 
 ```bash
 # One-time: install CLI and log in

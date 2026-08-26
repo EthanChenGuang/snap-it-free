@@ -43,6 +43,7 @@ Hyperlocal free-item discovery for Venice and Padova that combines automated Sub
 - Map-first browse (legacy IA), bottom sheet, zone/category filters, 48h expiry
 - UGC Quick Post + Street Dump, in-app DM, community reports, auto-hide moderation
 - Auth-gated favorites, keyword+zone alerts, push notifications, iOS A2HS onboarding
+- Register-first auth gates (detail preview wall, favorites/post nav) — Phase 19 pending
 - Trilingual UI with locale-aware push fan-out
 - Operator admin console
 
@@ -108,7 +109,7 @@ Hyperlocal free-item discovery for Venice and Padova that combines automated Sub
 ## Product Principles
 
 1. **Real supply first** — Show actual free listings from Subito and verified UGC; never invent inventory or social proof.
-2. **Browse without friction** — No account required to discover items; login gates only favorites, alerts, posting, and UGC contact.
+2. **Register-first growth** — Guests browse the feed and filters without an account; login is required for full listing detail, favorites, posting, messaging, alerts, and other actions that build the registered user base (see `.planning/AUTH-GATE-SPEC.md`).
 3. **Local beats generic** — Distance, zone, and city filters reflect how people actually move through Venice and Padova.
 4. **Stay free** — Validate through usage and retention before any paywall or subscription.
 5. **Operator-maintained pipeline** — Scraping, translation, and moderation are first-class admin workflows, not afterthoughts.

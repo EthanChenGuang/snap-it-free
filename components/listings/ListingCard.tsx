@@ -32,32 +32,34 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
     const isVeniceZoned = listing.zone != null;
 
     return (
-      <Link
-        ref={ref}
-        href={`/listing/${listing.id}`}
-        className="group block w-full cursor-pointer text-left"
-      >
+      <div className="group block w-full text-left">
         <div
           className={cn(
             'relative mb-space-sm aspect-square overflow-hidden rounded-lg border border-outline-variant bg-surface-container-high',
             isSelected && 'ring-1 ring-primary',
           )}
         >
-          {listing.photo_url ? (
-            <Image
-              src={listing.photo_url}
-              alt={displayTitle}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, 320px"
-              unoptimized
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-on-surface-variant">
-              <span className="material-symbols-outlined">image</span>
-            </div>
-          )}
-          <div className="absolute left-2.5 top-2.5 z-10 flex flex-wrap gap-space-xs">
+          <Link
+            ref={ref}
+            href={`/listing/${listing.id}`}
+            className="block h-full w-full cursor-pointer"
+          >
+            {listing.photo_url ? (
+              <Image
+                src={listing.photo_url}
+                alt={displayTitle}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, 320px"
+                unoptimized
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-on-surface-variant">
+                <span className="material-symbols-outlined">image</span>
+              </div>
+            )}
+          </Link>
+          <div className="pointer-events-none absolute left-2.5 top-2.5 z-10 flex flex-wrap gap-space-xs">
             <FreeBadge>{messages.listing.free}</FreeBadge>
             {listing.source === 'ugc' && (
               <span className="rounded-sm border border-outline-variant bg-surface px-space-sm py-space-xs text-label-sm font-bold uppercase tracking-wider text-on-surface-variant">
@@ -66,12 +68,15 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
             )}
             {listing.status === 'claimed' && <ReservedBadge />}
           </div>
-          <div className="absolute right-1 top-1 z-10">
-            <FavoriteButton listingId={listing.id} size="sm" tone="overlay" />
-          </div>
+          <FavoriteButton
+            listingId={listing.id}
+            size="sm"
+            tone="overlay"
+            className="absolute right-1 top-1 z-10"
+          />
         </div>
 
-        <div className="min-w-0">
+        <Link href={`/listing/${listing.id}`} className="block min-w-0 cursor-pointer">
           <div className="mb-1 flex flex-col gap-1">
             {locationText && (
               <p className="text-label-sm uppercase tracking-widest text-secondary">
@@ -95,8 +100,8 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
             {displayTitle}
           </h3>
           <p className="mt-space-xs text-label-sm text-on-surface-variant">{postedLabel}</p>
-        </div>
-      </Link>
+        </Link>
+      </div>
     );
   },
 );

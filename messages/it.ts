@@ -353,7 +353,7 @@ export const messages = {
   sheet: {
     newArrivals: 'Nuovi arrivi',
     itemsInArea: (count: number) =>
-      count === 1 ? '1 annuncio in questa zona' : `${count} annunci in questa zona`,
+      count === 1 ? '1 annuncio appena pubblicato' : `${count} annunci appena pubblicati`,
     expandSheet: 'Espandi pannello inferiore',
     collapseSheet: 'Comprimi pannello inferiore',
     swipeUpHint: "Scorri verso l'alto",

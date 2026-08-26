@@ -16,7 +16,7 @@ function requestFor(path: string): NextRequest {
 }
 
 describe('admin proxy auth redirect', () => {
-  it('preserves the requested admin path in next parameter', async () => {
+  it('redirects unauthenticated visitors to the items list', async () => {
     vi.mocked(updateSession).mockResolvedValue({
       response: NextResponse.next(),
       user: null,
@@ -25,8 +25,20 @@ describe('admin proxy auth redirect', () => {
 
     const response = await proxy(requestFor('/admin/settings'));
 
-    expect(response.headers.get('location')).toBe(
-      'http://localhost:3003/post?next=%2Fadmin%2Fsettings',
-    );
+    expect(response.headers.get('location')).toBe('http://localhost:3003/');
+  });
+
+  it('redirects authenticated non-operators to the items list', async () => {
+    const { hasOperatorAccess } = await import('./operator-access');
+    vi.mocked(updateSession).mockResolvedValue({
+      response: NextResponse.next(),
+      user: { id: 'user-1', email: 'guest@example.com' } as never,
+      supabase: {} as never,
+    });
+    vi.mocked(hasOperatorAccess).mockResolvedValue(false);
+
+    const response = await proxy(requestFor('/admin'));
+
+    expect(response.headers.get('location')).toBe('http://localhost:3003/');
   });
 });

@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "#22c55e",
+        "createdAt": "2026-08-26T09:21:49.719Z",
+        "reason": "user confirmed: FREE badge photo-overlay accent green"
+      }
+    ]
+  }
+}

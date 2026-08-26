@@ -29,6 +29,24 @@ export async function getActiveListings(): Promise<ListingRow[]> {
   return (data ?? []) as ListingRow[];
 }
 
+/** Exact row count on listings_public — head-only, no row payload (D-28 view rules). */
+export async function getActiveListingsCount(): Promise<number | null> {
+  if (!getSupabaseEnv()) {
+    return null;
+  }
+
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from(PUBLIC_LISTINGS)
+    .select('id', { count: 'exact', head: true });
+
+  if (error) {
+    return null;
+  }
+
+  return count ?? 0;
+}
+
 export async function getListingsByIds(ids: string[]): Promise<ListingRow[]> {
   if (!getSupabaseEnv() || ids.length === 0) {
     return [];

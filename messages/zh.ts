@@ -336,7 +336,7 @@ export const messages: Messages = {
   sheet: {
     newArrivals: '新上架',
     itemsInArea: (count: number) =>
-      count === 1 ? '该区域有 1 条物品' : `该区域有 ${count} 条物品`,
+      count === 1 ? '1 条新上架的物品' : `${count} 条新上架的物品`,
     expandSheet: '展开底部面板',
     collapseSheet: '收起底部面板',
     swipeUpHint: '向上滑动',

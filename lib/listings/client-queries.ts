@@ -29,6 +29,23 @@ export async function fetchActiveListingsClient(): Promise<ListingRow[]> {
   return (data ?? []) as ListingRow[];
 }
 
+export async function fetchActiveListingsCountClient(): Promise<number> {
+  if (!getSupabaseEnv()) {
+    return 0;
+  }
+
+  const supabase = createClient();
+  const { count, error } = await supabase
+    .from(PUBLIC_LISTINGS)
+    .select('id', { count: 'exact', head: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return count ?? 0;
+}
+
 export async function fetchListingsByIdsClient(ids: string[]): Promise<ListingRow[]> {
   if (!getSupabaseEnv() || ids.length === 0) {
     return [];

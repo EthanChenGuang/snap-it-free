@@ -127,6 +127,33 @@ describe('getActiveListings', () => {
   });
 });
 
+describe('getActiveListingsCount', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFrom.mockReturnValue({ select: mockSelect });
+  });
+
+  it('queries listings_public with head-only exact count', async () => {
+    mockSelect.mockReturnValue({ count: 2345, error: null });
+
+    const { getActiveListingsCount } = await import('./queries');
+    const result = await getActiveListingsCount();
+
+    expect(mockFrom).toHaveBeenCalledWith('listings_public');
+    expect(mockSelect).toHaveBeenCalledWith('id', { count: 'exact', head: true });
+    expect(result).toBe(2345);
+  });
+
+  it('returns null when count query fails', async () => {
+    mockSelect.mockReturnValue({ count: null, error: { message: 'fail' } });
+
+    const { getActiveListingsCount } = await import('./queries');
+    const result = await getActiveListingsCount();
+
+    expect(result).toBeNull();
+  });
+});
+
 describe('getSimilarListings', () => {
   const mockLimit = vi.fn();
   const mockNeq = vi.fn();
