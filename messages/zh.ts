@@ -176,6 +176,7 @@ export const messages: Messages = {
   },
   auth: {
     modalTitle: '登录以继续',
+    detailTitle: '登录查看完整详情并收藏',
     favoriteTitle: '登录以收藏',
     alertTitle: '登录以创建提醒',
     modalDescription: '选择登录方式——无需密码。',
@@ -365,6 +366,8 @@ export const messages: Messages = {
     shareShared: '已分享',
     shareFailed: '无法分享',
     verifiedFree: '已验证免费',
+    previewSubtitle: '免费好物等你领取 — 注册后可收藏、联系发布者、接收提醒',
+    previewCta: '登录查看完整详情',
     openOnSubito: '在 Subito 打开',
     claimOnSubito: '在 Subito 领取',
     snagIt: '抢先领取',

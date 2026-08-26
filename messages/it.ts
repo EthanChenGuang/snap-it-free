@@ -183,6 +183,7 @@ export const messages = {
   },
   auth: {
     modalTitle: 'Accedi per continuare',
+    detailTitle: 'Accedi per i dettagli completi e i preferiti',
     favoriteTitle: 'Accedi per salvare nei preferiti',
     alertTitle: 'Accedi per creare avvisi',
     modalDescription: 'Scegli come accedere — nessuna password richiesta.',
@@ -382,6 +383,9 @@ export const messages = {
     shareShared: 'Condiviso',
     shareFailed: 'Impossibile condividere',
     verifiedFree: 'Verified Free',
+    previewSubtitle:
+      'Oggetti gratis ti aspettano — registrati per salvare, contattare i venditori e ricevere avvisi',
+    previewCta: 'Accedi per i dettagli completi',
     openOnSubito: 'Apri su Subito',
     claimOnSubito: 'Reclama su Subito',
     snagIt: 'Reclama',

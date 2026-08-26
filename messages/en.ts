@@ -176,6 +176,7 @@ export const messages: Messages = {
   },
   auth: {
     modalTitle: 'Sign in to continue',
+    detailTitle: 'Sign in to view full details and save favorites',
     favoriteTitle: 'Sign in to save favorites',
     alertTitle: 'Sign in to create alerts',
     modalDescription: 'Choose how to sign in — no password needed.',
@@ -372,6 +373,9 @@ export const messages: Messages = {
     shareShared: 'Shared',
     shareFailed: 'Could not share',
     verifiedFree: 'Verified Free',
+    previewSubtitle:
+      'Free finds waiting for you — sign up to save items, contact sellers, and get alerts',
+    previewCta: 'Sign in to view full details',
     openOnSubito: 'Open on Subito',
     claimOnSubito: 'Claim on Subito',
     snagIt: 'Snag It',
