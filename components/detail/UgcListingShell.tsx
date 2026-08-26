@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { DetailHeroControls } from '@/components/detail/DetailHeroControls';
+import { DetailPreviewWall } from '@/components/detail/DetailPreviewWall';
 import { UgcListingDetailContent } from '@/components/detail/UgcListingDetailContent';
 import { OwnerMessagesButton } from '@/components/messages/OwnerMessagesButton';
 import { DmDrawer } from '@/components/messages/DmDrawer';
@@ -18,7 +19,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/toaster';
-import { createClient } from '@/lib/supabase/client';
+import { buildAuthRedirectPath } from '@/lib/auth/build-auth-redirect';
+import { useAuthSession } from '@/lib/auth/useAuthSession';
 import type { ListingRow, OwnerListingRow } from '@/lib/listings/types';
 import { useMessages } from '@/lib/i18n/useMessages';
 
@@ -38,12 +40,14 @@ export function UgcListingShell({
   similarListings,
 }: UgcListingShellProps) {
   const { messages } = useMessages();
-
+  const { user, loading } = useAuthSession();
+  const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-  const [authOpen, setAuthOpen] = useState(false);
+  const sessionUserId = user?.id ?? null;
+  const isLoggedIn = Boolean(user);
+  const [previewAuthOpen, setPreviewAuthOpen] = useState(false);
+  const [contactAuthOpen, setContactAuthOpen] = useState(false);
   const [dmOpen, setDmOpen] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [readOnly, setReadOnly] = useState(false);
@@ -54,22 +58,15 @@ export function UgcListingShell({
   const isAvailable = listing.status === 'active';
   const isHiddenPending =
     listing.status === 'hidden' && listing.hidden_reason === 'pending_review';
-  const authReady = isLoggedIn !== null;
+  const authReady = !loading;
   const isOwner =
     isOwnerView &&
     Boolean(listing.owner_user_id) &&
     (!authReady || listing.owner_user_id === sessionUserId);
   const showHiddenBanner = isOwner && isHiddenPending;
   const showOwnerLifecycle = isOwner && !isHiddenPending && listing.status !== 'expired';
-  const authRedirect = `/listing/${listing.id}?openDm=1`;
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setIsLoggedIn(Boolean(user));
-      setSessionUserId(user?.id ?? null);
-    });
-  }, []);
+  const previewRedirectTo = buildAuthRedirectPath(pathname, searchParams.toString());
+  const contactAuthRedirect = `/listing/${listing.id}?openDm=1`;
 
   useEffect(() => {
     if (searchParams.get('openDm') === '1' && isLoggedIn) {
@@ -89,7 +86,7 @@ export function UgcListingShell({
   const openContact = () => {
     if (isReserved) return;
     if (!isLoggedIn) {
-      setAuthOpen(true);
+      setContactAuthOpen(true);
       return;
     }
     setConversationId(null);
@@ -136,7 +133,7 @@ export function UgcListingShell({
         <Button
           type="button"
           variant="secondary"
-          className="w-full rounded-lg"
+          className="w-full min-h-11"
           disabled={lifecyclePending}
           onClick={() => patchStatus('reserved')}
         >
@@ -145,7 +142,7 @@ export function UgcListingShell({
       )}
       <Button
         type="button"
-        className="w-full rounded-lg"
+        className="w-full min-h-11"
         disabled={lifecyclePending}
         onClick={() => setDeliverConfirmOpen(true)}
       >
@@ -159,6 +156,24 @@ export function UgcListingShell({
       </Link>
     </div>
   ) : undefined;
+
+  if (!isOwnerView && !user) {
+    return (
+      <>
+        <DetailPreviewWall
+          listing={listing}
+          loading={loading}
+          onSignIn={() => setPreviewAuthOpen(true)}
+        />
+        <AuthPromptModal
+          open={previewAuthOpen}
+          onOpenChange={setPreviewAuthOpen}
+          redirectTo={previewRedirectTo}
+          modalTitle={messages.auth.detailTitle}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -182,9 +197,10 @@ export function UgcListingShell({
       />
 
       <AuthPromptModal
-        open={authOpen}
-        onOpenChange={setAuthOpen}
-        redirectTo={authRedirect}
+        open={contactAuthOpen}
+        onOpenChange={setContactAuthOpen}
+        redirectTo={contactAuthRedirect}
+        modalTitle={messages.auth.detailTitle}
       />
 
       <DmDrawer
