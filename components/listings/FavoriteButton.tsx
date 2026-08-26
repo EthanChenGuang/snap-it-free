@@ -1,6 +1,7 @@
 'use client';
 
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
+import { cardOverlayGlassClass } from '@/components/listings/cardOverlayGlass';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toaster';
 import { useFavorites } from '@/lib/favorites/useFavorites';
@@ -72,7 +73,7 @@ export function FavoriteButton({
         favorited
           ? 'text-accent-orange'
           : isOverlay
-            ? 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]'
+            ? 'text-zinc-700 dark:text-zinc-200'
             : 'text-on-surface-variant',
       )}
       style={{
@@ -111,7 +112,10 @@ export function FavoriteButton({
         {isOverlay ? (
           <span
             aria-hidden
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/25 backdrop-blur-md"
+            className={cn(
+              'flex h-8 w-8 items-center justify-center',
+              cardOverlayGlassClass,
+            )}
           >
             {heartIcon}
           </span>
