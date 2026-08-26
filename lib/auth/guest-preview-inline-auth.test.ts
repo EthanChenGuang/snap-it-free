@@ -46,3 +46,33 @@ describe('D-19-02 guest listing preview with inline passwordless auth', () => {
     expect(form).toMatch(/messages\.auth\.oauthError/);
   });
 });
+
+describe('guest preview heart focuses inline form (locked CONTEXT favorite heart)', () => {
+  it('FavoriteButton invokes onUnauthenticated without mounting a dialog when that callback is passed', () => {
+    const source = readSource('components/listings/FavoriteButton.tsx');
+    expect(source).toMatch(/onUnauthenticated\?: \(\) => void/);
+    expect(source).toMatch(/onUnauthenticated\(\)/);
+    expect(source).toMatch(/onUnauthenticated === undefined/);
+    expect(source).toMatch(/AuthPromptModal/);
+  });
+
+  it('default FavoriteButton still mounts AuthPromptModal for feed cards', () => {
+    const source = readSource('components/listings/FavoriteButton.tsx');
+    expect(source).toMatch(/<AuthPromptModal/);
+    expect(source).toMatch(/setAuthOpen\(true\)/);
+  });
+
+  it('DetailHeroControls forwards onFavoriteUnauthed to FavoriteButton as onUnauthenticated', () => {
+    const source = readSource('components/detail/DetailHeroControls.tsx');
+    expect(source).toMatch(/onFavoriteUnauthed\?: \(\) => void/);
+    expect(source).toMatch(/onUnauthenticated=\{onFavoriteUnauthed\}/);
+  });
+
+  it('DetailPreviewWall onFavoriteUnauthed scrolls to and focuses #guest-auth-form', () => {
+    const source = readSource('components/detail/DetailPreviewWall.tsx');
+    expect(source).toMatch(/onFavoriteUnauthed/);
+    expect(source).toMatch(/guest-auth-form/);
+    expect(source).toMatch(/scrollIntoView\(\{\s*behavior:\s*'smooth',\s*block:\s*'nearest'\s*\}\)/);
+    expect(source).toMatch(/querySelector(?:<HTMLElement>)?\(['"]button, input['"]\)/);
+  });
+});
