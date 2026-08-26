@@ -73,4 +73,24 @@ describe('message catalog key parity', () => {
       expect(catalog.app.description.length).toBeGreaterThan(0);
     }
   });
+
+  const phase19GateKeys = [
+    'detail.previewSubtitle',
+    'detail.previewCta',
+    'auth.detailTitle',
+    'auth.postTitle',
+    'auth.favoritesNavTitle',
+    'post.gateTitle',
+    'post.gateDescription',
+  ] as const;
+
+  it('exposes Phase 19 auth gate strings in all catalogs', () => {
+    for (const path of phase19GateKeys) {
+      for (const [locale, catalog] of Object.entries(catalogs)) {
+        const value = getAtPath(catalog as unknown as Record<string, unknown>, path);
+        expect(typeof value, `${locale}:${path}`).toBe('string');
+        expect((value as string).length, `${locale}:${path}`).toBeGreaterThan(0);
+      }
+    }
+  });
 });
