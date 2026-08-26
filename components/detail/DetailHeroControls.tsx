@@ -15,6 +15,7 @@ type DetailHeroControlsProps = {
   listing: ListingRow;
   showFavorite?: boolean;
   showOverflow?: boolean;
+  onFavoriteUnauthed?: () => void;
 };
 
 /** Floating back / favorite / share / more controls on the hero image. */
@@ -22,6 +23,7 @@ export function DetailHeroControls({
   listing,
   showFavorite = true,
   showOverflow = true,
+  onFavoriteUnauthed,
 }: DetailHeroControlsProps) {
   const { messages } = useMessages();
   const router = useRouter();
@@ -60,7 +62,13 @@ export function DetailHeroControls({
 
         <div className="pointer-events-auto flex items-center gap-space-sm">
           {showFavorite ? (
-            <FavoriteButton listingId={listing.id} size="sm" tone="overlay" className="h-10 w-10" />
+            <FavoriteButton
+              listingId={listing.id}
+              size="sm"
+              tone="overlay"
+              className="h-10 w-10"
+              onUnauthenticated={onFavoriteUnauthed}
+            />
           ) : null}
           <Button
             type="button"

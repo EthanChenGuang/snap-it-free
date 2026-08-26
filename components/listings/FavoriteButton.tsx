@@ -16,6 +16,7 @@ type FavoriteButtonProps = {
   className?: string;
   size?: 'sm' | 'default';
   tone?: 'default' | 'overlay';
+  onUnauthenticated?: () => void;
 };
 
 export function FavoriteButton({
@@ -23,6 +24,7 @@ export function FavoriteButton({
   className,
   size = 'default',
   tone = 'default',
+  onUnauthenticated,
 }: FavoriteButtonProps) {
   const { messages } = useMessages();
 
@@ -55,6 +57,10 @@ export function FavoriteButton({
     stopBubble(event);
 
     if (getSupabaseEnv() && !isAuthed) {
+      if (onUnauthenticated) {
+        onUnauthenticated();
+        return;
+      }
       setAuthOpen(true);
       return;
     }
@@ -114,12 +120,14 @@ export function FavoriteButton({
           favorite
         </motion.span>
       </Button>
-      <AuthPromptModal
-        open={authOpen}
-        onOpenChange={setAuthOpen}
-        redirectTo={redirectTo}
-        modalTitle={messages.auth.favoriteTitle}
-      />
+      {onUnauthenticated === undefined ? (
+        <AuthPromptModal
+          open={authOpen}
+          onOpenChange={setAuthOpen}
+          redirectTo={redirectTo}
+          modalTitle={messages.auth.favoriteTitle}
+        />
+      ) : null}
     </>
   );
 }

@@ -30,6 +30,14 @@ export function DetailPreviewWall({ listing, redirectTo }: DetailPreviewWallProp
       ? messages.listing.sourceCommunity
       : listingSourceLabel({ source: listing.source, messages });
 
+  const handleFavoriteUnauthed = () => {
+    const form = document.getElementById('guest-auth-form');
+    if (!form) return;
+    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const focusable = form.querySelector<HTMLElement>('button, input');
+    focusable?.focus();
+  };
+
   return (
     <div className="listing-detail flex h-full flex-col overflow-y-auto bg-surface">
       <div className="relative mx-auto w-full max-w-container-max">
@@ -61,7 +69,12 @@ export function DetailPreviewWall({ listing, redirectTo }: DetailPreviewWallProp
             </span>
           </div>
 
-          <DetailHeroControls listing={listing} showOverflow={false} showFavorite />
+          <DetailHeroControls
+            listing={listing}
+            showOverflow={false}
+            showFavorite
+            onFavoriteUnauthed={handleFavoriteUnauthed}
+          />
         </div>
 
         <div className="px-gutter pt-space-lg">
