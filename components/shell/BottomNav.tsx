@@ -40,6 +40,8 @@ export function BottomNav() {
   const { messages } = useMessages();
   const { user, loading } = useAuthSession();
   const [authOpen, setAuthOpen] = useState(false);
+  const [authRedirectTarget, setAuthRedirectTarget] = useState('/post');
+  const [authGateTitle, setAuthGateTitle] = useState<string | undefined>(undefined);
   const feedScroll = useFeedScrollOptional();
   const navHidden = pathname === '/' && (feedScroll?.headerHidden ?? false);
 
@@ -50,7 +52,7 @@ export function BottomNav() {
   const navItems: NavItem[] = [
     { href: '/', icon: 'home', label: messages.nav.home },
     { href: '/post', icon: 'add_a_photo', label: messages.nav.post, authGate: true },
-    { href: '/favorites', icon: 'favorite', label: messages.nav.favorites },
+    { href: '/favorites', icon: 'favorite', label: messages.nav.favorites, authGate: true },
     { href: '/settings', icon: 'settings', label: messages.nav.settings, showBadge: true },
   ];
 
@@ -62,6 +64,10 @@ export function BottomNav() {
       return;
     }
     event.preventDefault();
+    setAuthRedirectTarget(item.href);
+    setAuthGateTitle(
+      item.href === '/favorites' ? messages.auth.favoritesNavTitle : messages.auth.modalTitle,
+    );
     setAuthOpen(true);
   };
 
@@ -100,8 +106,8 @@ export function BottomNav() {
       <AuthPromptModal
         open={authOpen}
         onOpenChange={setAuthOpen}
-        redirectTo="/post"
-        modalTitle={messages.auth.modalTitle}
+        redirectTo={authRedirectTarget}
+        modalTitle={authGateTitle ?? messages.auth.modalTitle}
       />
     </>
   );
