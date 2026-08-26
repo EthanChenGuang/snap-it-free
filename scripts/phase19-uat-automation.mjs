@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 /**
- * Phase 19 autonomous UAT — register-first auth gates (preview wall, shared links).
- * Usage: E2E_BASE_URL=http://localhost:3003 node scripts/phase19-uat-automation.mjs
+ * Phase 19 autonomous UAT — register-first auth gates (preview wall, post gate, nav regressions).
+ *
+ * Requires E2E_BASE_URL pointing at a running Next.js dev/prod server, e.g.:
+ *   E2E_BASE_URL=http://localhost:3003 node scripts/phase19-uat-automation.mjs
+ *
+ * Supabase env (from .env.local or scraper/.env) is required for seeded listing scenarios.
+ * When E2E_BASE_URL is unset or the server is unreachable, browser scenarios are skipped (exit 0).
  */
 import { chromium } from '../scraper/node_modules/playwright/index.mjs';
 import { createClient } from '@supabase/supabase-js';
@@ -57,7 +62,10 @@ async function runBrowserScenarios() {
       [1, 'Anonymous feed loads without auth redirect'],
       [2, 'Scraped detail preview wall hides description'],
       [3, 'Preview sticky CTA visible for anonymous user'],
+      [6, 'Anonymous Post nav tap opens auth modal without navigation'],
+      [7, 'Anonymous direct /post hides PostForm fields'],
       [8, 'Authenticated user sees full detail content'],
+      [9, 'Heart favorite gate opens auth modal on detail preview'],
       [11, 'Shared listing link shows preview when logged out'],
     ]) {
       record(scenario[0], scenario[1], false, 'Supabase env missing — skipped');
@@ -117,6 +125,62 @@ async function runBrowserScenarios() {
 
     const stillOnListing = page.url().includes(`/listing/${listingId}`);
     record(11, 'Shared listing link shows preview when logged out', stillOnListing && hasPreviewCta);
+
+    const heartButton = page.getByRole('button', { name: /favorites|收藏|preferiti/i }).first();
+    await heartButton.click().catch(() => {});
+    const heartModalVisible = await page
+      .getByRole('dialog')
+      .getByText(/sign in to save favorites|登录.*收藏|accedi.*preferiti/i)
+      .isVisible()
+      .catch(() => false);
+    record(9, 'Heart favorite gate opens auth modal on detail preview', heartModalVisible);
+    await page.keyboard.press('Escape').catch(() => {});
+
+    await page.goto(`${BASE}/post`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+
+    const gateTitleVisible = await page
+      .getByRole('heading', { name: /sign in to post|登录后即可发布|accedi per pubblicare/i })
+      .isVisible()
+      .catch(() => false);
+    const titleInputHidden = !(await page
+      .getByPlaceholder(/what are you giving away|你在送什么|cosa regali/i)
+      .isVisible()
+      .catch(() => false));
+    const submitHidden = !(await page
+      .getByRole('button', { name: /post for free|免费发布|pubblica gratis/i })
+      .isVisible()
+      .catch(() => false));
+    record(
+      7,
+      'Anonymous direct /post hides PostForm fields',
+      gateTitleVisible && titleInputHidden && submitHidden,
+      gateTitleVisible
+        ? titleInputHidden && submitHidden
+          ? 'gate shown, form hidden'
+          : 'form fields still visible'
+        : 'gate empty state not found',
+    );
+
+    await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    const feedUrlBefore = page.url();
+
+    const postNav = page.getByRole('link', { name: /post|发布|pubblica/i });
+    await postNav.click().catch(() => {});
+    await page.waitForTimeout(300);
+
+    const stayedOnFeed = page.url() === feedUrlBefore || !page.url().includes('/post');
+    const postNavModalVisible = await page
+      .getByRole('dialog')
+      .getByText(/sign in to continue|登录以继续|accedi per continuare/i)
+      .isVisible()
+      .catch(() => false);
+    record(
+      6,
+      'Anonymous Post nav tap opens auth modal without navigation',
+      stayedOnFeed && postNavModalVisible,
+      stayedOnFeed ? (postNavModalVisible ? 'modal opened' : 'modal not visible') : `navigated to ${page.url()}`,
+    );
+    await page.keyboard.press('Escape').catch(() => {});
 
     record(8, 'Authenticated user sees full detail content', false, 'stub — auth cookie flow deferred');
   } finally {
