@@ -6,14 +6,6 @@ import {
   RECOMMENDED_FACEBOOK_SEED_URLS,
   RECOMMENDED_FACEBOOK_SEED_COUNT,
 } from './facebook-recommended-seed';
-
-import {
-  buildDefaultFacebookUrl,
-  FACEBOOK_SEARCH_QUERIES,
-  FACEBOOK_SEED_CITY_SLUGS,
-  RECOMMENDED_FACEBOOK_SEED_URLS,
-  RECOMMENDED_FACEBOOK_SEED_COUNT,
-} from './facebook-recommended-seed';
 import { CONSUMER_CITY_KEYS } from '@/lib/geo/italian-cities';
 
 describe('facebook-recommended-seed (D-18-22/21)', () => {

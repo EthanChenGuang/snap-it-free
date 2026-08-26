@@ -55,7 +55,8 @@ describe('fetchDataImpulseUsageInfo', () => {
     vi.stubEnv('DATAIMPULSE_API_LOGIN', 'user');
     vi.stubEnv('DATAIMPULSE_API_PASSWORD', 'pass');
 
-    const fetchFn = vi.fn(async (url: string) => {
+    const fetchFn = vi.fn(async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
       if (url.endsWith('/token/get')) {
         return new Response(JSON.stringify({ token: 'abc' }), { status: 200 });
       }

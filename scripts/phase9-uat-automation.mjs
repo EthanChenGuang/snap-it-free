@@ -13,6 +13,9 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 const BASE = process.env.E2E_BASE_URL ?? 'http://localhost:3003';
+const FEED_SCROLLER = '.feed-home-scroll';
+const NAV_POST = /Post|Pubblica/i;
+const AUTH_MODAL = /Sign in to continue|Accedi per continuare|登录以继续/i;
 
 function loadEnv(path) {
   try {
@@ -128,7 +131,10 @@ async function main() {
   console.log(`=== Phase 9 Autonomous UAT (${BASE}) ===\n`);
 
   const browser = await chromium.launch({ headless: true });
-  const anonContext = await browser.newContext({ viewport: { width: 375, height: 812 } });
+  const anonContext = await browser.newContext({
+    viewport: { width: 375, height: 812 },
+    locale: 'en-US',
+  });
   const anonPage = await anonContext.newPage();
 
   // Test 1 — Feed grid at mobile width (not map home)
@@ -143,12 +149,15 @@ async function main() {
   record(1, 'Feed grid at mobile width', isFeedHome, hasMap ? 'MapLibre canvas on home' : 'feed-first home confirmed');
 
   // Test 2 — Post auth gate (logged out)
-  await anonPage.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' });
-  await anonPage.getByRole('link', { name: 'Post' }).click();
-  const authModal = anonPage.getByRole('dialog').filter({ hasText: /Sign in to continue/i });
-  const modalVisible = await authModal.isVisible({ timeout: 5000 }).catch(() => false);
+  await anonPage.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 45000 });
+  await anonPage.waitForTimeout(1500);
+  await anonPage.locator('a[href="/post"]').click();
+  const authModal = anonPage.getByRole('dialog');
+  const modalVisible = await authModal.isVisible({ timeout: 10000 }).catch(() => false);
+  const authText = modalVisible ? await authModal.innerText() : '';
+  const authTextOk = /Sign in to continue|Accedi per continuare|登录以继续/i.test(authText);
   const stayedOnHome = new URL(anonPage.url()).pathname === '/';
-  record(2, 'Post auth gate (logged out)', modalVisible && stayedOnHome, `modal=${modalVisible} url=${anonPage.url()}`);
+  record(2, 'Post auth gate (logged out)', modalVisible && authTextOk && stayedOnHome, `modal=${modalVisible} url=${anonPage.url()}`);
 
   // Seed listings for scroll test
   await seedListings(8);
@@ -157,25 +166,25 @@ async function main() {
   await anonPage.goto(`${BASE}/`, { waitUntil: 'domcontentloaded', timeout: 45000 });
   await anonPage.locator('section.grid.grid-cols-2 > *').first().waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
   await anonPage.waitForTimeout(1000);
-  const header = anonPage.locator('header').filter({ has: anonPage.locator('input[type="search"]') });
+  const header = anonPage.locator('header.feed-header-glass');
   const headerVisibleBefore = await header.evaluate((el) => {
     const style = window.getComputedStyle(el);
     return style.opacity !== '0' && style.maxHeight !== '0px';
   }).catch(() => true);
 
-  const scroller = anonPage.locator('.no-scrollbar.flex-1.overflow-y-auto').first();
+  const scroller = anonPage.locator(FEED_SCROLLER).first();
   await scroller.waitFor({ state: 'visible', timeout: 10000 });
   await scroller.evaluate(async (el) => {
-    for (let top = 0; top <= 320; top += 40) {
+    for (let top = 0; top <= 480; top += 40) {
       el.scrollTop = top;
-      el.dispatchEvent(new Event('scroll'));
-      await new Promise((r) => setTimeout(r, 50));
+      el.dispatchEvent(new Event('scroll', { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 80));
     }
   });
-  await anonPage.waitForTimeout(400);
+  await anonPage.waitForTimeout(500);
   const headerHiddenAfterScroll = await header.evaluate((el) => {
     const style = window.getComputedStyle(el);
-    return style.opacity === '0' || el.className.includes('opacity-0');
+    return style.opacity === '0' || style.maxHeight === '0px' || el.className.includes('max-h-0');
   }).catch(() => false);
 
   await scroller.evaluate(async (el) => {
@@ -200,11 +209,12 @@ async function main() {
     `hide=${headerHiddenAfterScroll} restore=${headerVisibleAfterScrollUp} nav=${navStillVisible}`,
   );
 
-  // Test 4 — Filter toast stub
+  // Test 4 — Filter sheet opens (Phase 10 superseded toast stub)
   await anonPage.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' });
-  await anonPage.getByRole('button', { name: 'Filters' }).click();
-  const toastVisible = await anonPage.getByText('Filters coming soon').isVisible({ timeout: 5000 }).catch(() => false);
-  record(4, 'Filter toast stub', toastVisible, 'EN locale toast');
+  await anonPage.getByRole('button', { name: /Filters|Filtri|筛选/i }).click();
+  const filterSheet = anonPage.getByRole('dialog').filter({ hasText: /Filters|Filtri|筛选/i });
+  const sheetVisible = await filterSheet.isVisible({ timeout: 5000 }).catch(() => false);
+  record(4, 'Filter sheet opens from feed header', sheetVisible, sheetVisible ? 'filter drawer visible' : 'no sheet');
 
   // Test 6 — Settings chrome (logged out checks)
   await anonPage.goto(`${BASE}/settings`, { waitUntil: 'domcontentloaded' });
@@ -292,9 +302,11 @@ async function main() {
 
   await authContext.close();
 
-  // Test 7 — select-location (delegate to existing script logic inline)
-  const selectPage = await browser.newPage({ viewport: { width: 375, height: 812 } });
-  await selectPage.goto(`${BASE}/select-location`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  // Test 7 — select-location via feed header → confirm → return to feed
+  const selectPage = await browser.newPage({ viewport: { width: 375, height: 812, locale: 'en-US' } });
+  await selectPage.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 45000 });
+  await selectPage.getByRole('link', { name: /Confirm location|location|位置|posizione/i }).click();
+  await selectPage.waitForURL(/\/select-location/, { timeout: 15000 });
   const canvas = selectPage.locator('.maplibregl-canvas');
   const confirmBtn = selectPage.getByRole('button', { name: /Confirm location|确认位置|Conferma posizione/i });
   await Promise.race([
@@ -302,7 +314,7 @@ async function main() {
     confirmBtn.waitFor({ state: 'visible', timeout: 15000 }),
   ]);
   await confirmBtn.click();
-  await selectPage.waitForFunction(() => window.location.pathname === '/', undefined, { timeout: 15000 });
+  await selectPage.waitForFunction(() => window.location.pathname === '/', undefined, { timeout: 30000 });
   const stored = await selectPage.evaluate((key) => {
     const raw = localStorage.getItem(key);
     try {

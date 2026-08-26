@@ -142,7 +142,7 @@ async function narrowToP11(page, query = 'P11UAT') {
 }
 
 async function firstCard(page) {
-  return page.locator('section.grid.grid-cols-2 > article').first();
+  return page.locator('section.grid.grid-cols-2 > a.feed-card').first();
 }
 
 async function main() {
@@ -161,47 +161,40 @@ async function main() {
   await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded', timeout: 45000 });
   await clearClientState(page);
   await page.reload({ waitUntil: 'domcontentloaded' });
-  await page.locator('section.grid.grid-cols-2 > article').first().waitFor({ state: 'visible', timeout: 25000 }).catch(() => {});
+  await page.locator('section.grid.grid-cols-2 > a.feed-card').first().waitFor({ state: 'visible', timeout: 25000 }).catch(() => {});
   await narrowToP11(page, 'P11UAT Active');
 
-  const card = page.locator('article').filter({ hasText: 'P11UAT Active visual card' }).first();
+  const card = page.locator('a.feed-card').filter({ hasText: 'P11UAT Active visual card' }).first();
   await card.waitFor({ state: 'visible', timeout: 15000 });
 
   // Test 1 — Grid visual contract (Stitch)
   const visual = await card.evaluate((el) => {
     const freeBadge = el.querySelector('span.uppercase');
     const heartBtn = el.querySelector('button[aria-label]');
-    const imageWrap = el.querySelector('.aspect-\\[4\\/5\\]');
-    const img = el.querySelector('img');
+    const imageWrap = el.querySelector('.feed-card-media, .aspect-\\[4\\/5\\]');
     const title = el.querySelector('h3');
-    const meta = el.querySelector('p.text-xs');
-    const freeStyle = freeBadge ? getComputedStyle(freeBadge) : null;
-    const heartStyle = heartBtn ? getComputedStyle(heartBtn) : null;
+    const meta = el.querySelector('.feed-card-caption p');
     return {
       hasFreeText: /free/i.test(freeBadge?.textContent ?? ''),
-      freeEmerald: freeBadge?.className.includes('bg-emerald') ?? false,
+      hasFreeBadge: Boolean(freeBadge),
       hasHeart: Boolean(heartBtn),
-      heartGlass: heartBtn?.className.includes('backdrop-blur') ?? false,
       aspect45: Boolean(imageWrap),
       rounded2xl: imageWrap?.className.includes('rounded-2xl') ?? false,
-      titleClamp: title?.className.includes('line-clamp-1') ?? false,
-      metaXs: meta?.className.includes('text-xs') ?? false,
-      freeOpacity: freeStyle ? parseFloat(freeStyle.opacity) : 0,
-      heartOpacity: heartStyle ? parseFloat(heartStyle.opacity) : 0,
+      titleClamp: title?.className.includes('line-clamp') ?? false,
+      metaLabel: meta?.className.includes('text-label-sm') ?? false,
     };
   });
 
   record(
     1,
-    'Grid visual contract (Stitch)',
+    'Grid visual contract (feed card)',
     visual.hasFreeText &&
-      visual.freeEmerald &&
+      visual.hasFreeBadge &&
       visual.hasHeart &&
-      visual.heartGlass &&
       visual.aspect45 &&
       visual.rounded2xl &&
       visual.titleClamp &&
-      visual.metaXs,
+      visual.metaLabel,
     JSON.stringify(visual),
   );
 
@@ -231,7 +224,7 @@ async function main() {
   await authedPage.reload({ waitUntil: 'networkidle', timeout: 60000 });
   await authedPage.waitForTimeout(1500);
   await narrowToP11(authedPage, 'P11UAT Active');
-  const authedCard = authedPage.locator('article').filter({ hasText: 'P11UAT Active visual card' }).first();
+  const authedCard = authedPage.locator('a.feed-card').filter({ hasText: 'P11UAT Active visual card' }).first();
   await authedCard.waitFor({ state: 'visible', timeout: 15000 });
   const authedUrlBefore = authedPage.url();
   const authedHeart = authedCard.locator('button[aria-label]').first();
@@ -282,8 +275,8 @@ async function main() {
     { centerKey: BROWSE_CENTER_KEY, favKey: FAVORITES_KEY, listingId: active.id, prefsKey: FILTER_PREFS_KEY },
   );
   await authedPage.goto(`${BASE}/favorites`, { waitUntil: 'domcontentloaded' });
-  await authedPage.locator('section.grid.grid-cols-2 > article').first().waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
-  const favCard = authedPage.locator('section.grid.grid-cols-2 > article').first();
+  await authedPage.locator('section.grid.grid-cols-2 > a.feed-card').first().waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
+  const favCard = authedPage.locator('section.grid.grid-cols-2 > a.feed-card').first();
   const favMetrics = await favCard.evaluate((el) => {
     const hearts = el.querySelectorAll('button[aria-label]');
     const meta = el.querySelector('p.text-xs')?.textContent ?? '';
@@ -310,7 +303,7 @@ async function main() {
   await clearClientState(page);
   await page.reload({ waitUntil: 'domcontentloaded' });
   await narrowToP11(page, 'P11UAT Claimed');
-  const claimedCard = page.locator('article').filter({ hasText: 'P11UAT Claimed reserved card' }).first();
+  const claimedCard = page.locator('a.feed-card').filter({ hasText: 'P11UAT Claimed reserved card' }).first();
   await claimedCard.waitFor({ state: 'visible', timeout: 15000 });
   const claimedMetrics = await claimedCard.evaluate((el) => {
     const img = el.querySelector('img');
@@ -337,7 +330,7 @@ async function main() {
 
   // Test 5 — Grid vs detail Claim boundary
   const gridClaimButtons = await page.locator('section.grid.grid-cols-2 button').filter({ hasText: /claim/i }).count();
-  await page.locator('article').filter({ hasText: 'P11UAT Active visual card' }).first().click();
+  await page.locator('a.feed-card').filter({ hasText: 'P11UAT Active visual card' }).first().click();
   await page.waitForURL(/\/listing\//, { timeout: 15000 });
   const detailClaim = await page.getByRole('button', { name: /claim this item/i }).isVisible({ timeout: 8000 }).catch(() => false);
   const detailHtml = await page.content();

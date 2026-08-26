@@ -42,7 +42,7 @@ export function SettingsGroupCard({
   return (
     <div
       className={cn(
-        'mb-6 overflow-hidden rounded-2xl bg-white shadow-sm',
+        'mb-6 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest',
         className,
       )}
     >

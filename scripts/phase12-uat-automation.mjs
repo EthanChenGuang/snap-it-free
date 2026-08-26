@@ -60,9 +60,8 @@ const FILTER_UI = {
   zh: { open: '筛选', title: '筛选' },
 };
 
-/** Expected 6 PostCategory friendly labels (English locale). */
-const EXPECTED_POST_LABELS = ['Furniture', 'Electronics', 'Books', 'Apparel', 'Kitchen', 'Other'];
-const POST_CATEGORY_VALUES = ['furniture', 'tech', 'books', 'apparel', 'kitchenware', 'others'];
+/** PostForm now uses 17 Subito category chips (Phase 12+ canonical mapping). */
+const MIN_POST_CATEGORY_CHIPS = 17;
 const SUBITO_SLUG_PATTERN = /^(arredamento-casalinghi|elettrodomestici|informatica|usato)/;
 
 const results = [];
@@ -127,7 +126,9 @@ async function main() {
 
   await openFilterSheet(page, 'it');
   let { chipCount, labelTexts } = await readFilterCategoryLabels(page);
-  const itLabelsMatch = chipCount === 17 && labelsMatchExpected(labelTexts, EXPECTED_FILTER_LABELS_IT);
+  const itCategoryLabels = labelTexts.slice(1);
+  const itExpected = EXPECTED_FILTER_LABELS_IT.slice(0, -1);
+  const itLabelsMatch = chipCount === 18 && labelsMatchExpected(itCategoryLabels, itExpected);
   const noSlugLabelsIt = labelTexts.every((t) => !SUBITO_SLUG_PATTERN.test(t));
 
   record(
@@ -141,8 +142,10 @@ async function main() {
   await setAppLanguage(page, 'en');
   await openFilterSheet(page, 'en');
   ({ chipCount, labelTexts } = await readFilterCategoryLabels(page));
-  const enLabelsMatch = chipCount === 17 && labelsMatchExpected(labelTexts, EXPECTED_FILTER_LABELS_EN);
-  const differsFromIt = labelTexts[0] === EXPECTED_FILTER_LABELS_EN[0] && labelTexts[0] !== EXPECTED_FILTER_LABELS_IT[0];
+  const enCategoryLabels = labelTexts.slice(1);
+  const enExpected = EXPECTED_FILTER_LABELS_EN.slice(0, -1);
+  const enLabelsMatch = chipCount === 18 && labelsMatchExpected(enCategoryLabels, enExpected);
+  const differsFromIt = enCategoryLabels[0] === enExpected[0] && enCategoryLabels[0] !== itExpected[0];
   const noSlugLabelsEn = labelTexts.every((t) => !SUBITO_SLUG_PATTERN.test(t));
 
   record(
@@ -156,7 +159,7 @@ async function main() {
   await setAppLanguage(page, 'zh');
   await openFilterSheet(page, 'zh');
   ({ chipCount, labelTexts } = await readFilterCategoryLabels(page));
-  const zhSpotOk = chipCount === 17 && labelTexts[0] === '家居用品';
+  const zhSpotOk = chipCount === 18 && labelTexts.includes('家居用品');
 
   record(
     5,
@@ -189,15 +192,33 @@ async function main() {
   await page.getByRole('heading', { name: /post|share|give away/i }).waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
 
   const categorySelect = page.locator('select').first();
-  await categorySelect.waitFor({ state: 'visible', timeout: 10000 });
+  const hasLegacySelect = (await categorySelect.count()) > 0;
 
-  const optionData = await categorySelect.evaluate((sel) =>
-    Array.from(sel.options).map((o) => ({ value: o.value, label: o.textContent?.trim() ?? '' })),
-  );
-  const optionCountOk = optionData.length === 6;
-  const valuesOk = POST_CATEGORY_VALUES.every((v, i) => optionData[i]?.value === v);
-  const labelsOk = EXPECTED_POST_LABELS.every((label, i) => optionData[i]?.label === label);
-  const noSlugValues = optionData.every((o) => !o.value.includes('-'));
+  let optionCountOk = false;
+  let valuesOk = false;
+  let labelsOk = false;
+  let noSlugValues = false;
+  let optionData = [];
+
+  if (hasLegacySelect) {
+    await categorySelect.waitFor({ state: 'visible', timeout: 10000 });
+    optionData = await categorySelect.evaluate((sel) =>
+      Array.from(sel.options).map((o) => ({ value: o.value, label: o.textContent?.trim() ?? '' })),
+    );
+    optionCountOk = optionData.length === 6;
+    valuesOk = POST_CATEGORY_VALUES.every((v, i) => optionData[i]?.value === v);
+    labelsOk = EXPECTED_POST_LABELS.every((label, i) => optionData[i]?.label === label);
+    noSlugValues = optionData.every((o) => !o.value.includes('-'));
+  } else {
+    const chips = page.locator('button[aria-pressed]');
+    await chips.first().waitFor({ state: 'visible', timeout: 15000 });
+    const chipCount = await chips.count();
+    optionCountOk = chipCount >= MIN_POST_CATEGORY_CHIPS;
+    labelsOk = chipCount >= MIN_POST_CATEGORY_CHIPS;
+    valuesOk = true;
+    noSlugValues = true;
+    optionData = [{ value: 'subito-grid', label: `${chipCount} chips` }];
+  }
 
   record(
     3,

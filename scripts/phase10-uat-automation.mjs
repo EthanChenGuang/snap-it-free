@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 const BASE = process.env.E2E_BASE_URL ?? 'http://localhost:3003';
+const FEED_SCROLLER = '.feed-home-scroll';
 const FILTER_PREFS_KEY = 'shoumanwu_filter_prefs';
 const BROWSE_CENTER_KEY = 'shoumanwu_browse_center';
 
@@ -239,7 +240,7 @@ async function main() {
   await clearClientState(page);
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.getByText('P10UAT Venice unique item').first().waitFor({ state: 'visible', timeout: 20000 });
-  await page.locator('.no-scrollbar.flex-1.overflow-y-auto').first().evaluate((el) => {
+  await page.locator(FEED_SCROLLER).first().evaluate((el) => {
     el.scrollTop = 0;
     el.dispatchEvent(new Event('scroll'));
   });
@@ -260,8 +261,11 @@ async function main() {
   const searchFilteringOk = searchPillVisible && gridCount >= 1 && padovaCount === 0;
 
   await openFilterSheet(page);
-  const firstCategory = page.locator('section ul li label input[type="checkbox"]').first();
-  await firstCategory.check({ force: true });
+  const firstCategory = page
+    .getByRole('dialog')
+    .locator('section .grid.grid-cols-3 button[aria-pressed]')
+    .nth(1);
+  await firstCategory.click({ force: true });
   await page.getByRole('button', { name: 'Apply', exact: true }).click({ force: true });
   await page.waitForFunction(
     () => JSON.parse(localStorage.getItem('shoumanwu_filter_prefs') || '{}').categories?.length > 0,

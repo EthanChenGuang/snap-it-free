@@ -71,7 +71,7 @@ export function AccountSection() {
   return (
     <section className="mb-6">
       <SettingsSectionTitle>{messages.settings.account.sectionTitle}</SettingsSectionTitle>
-      <SettingsGroupCard className="border border-red-100 bg-red-50/30 p-4">
+      <SettingsGroupCard className="border border-error/20 bg-error-container/30 p-4">
         <h3 className="text-body-md font-bold text-error">{messages.settings.account.deleteTitle}</h3>
         <p className="mb-4 text-label-sm text-secondary">
           {messages.settings.account.deleteDescription}
