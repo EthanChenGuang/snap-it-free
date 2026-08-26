@@ -5,13 +5,14 @@ type FreeBadgeProps = {
   className?: string;
 };
 
-/** Clean white FREE capsule for listing photo overlays (reference: Snag-style feed). */
+/** Solid white FREE capsule for listing photo overlays (reference: Snag feed fig. 2). */
 export function FreeBadge({ children, className }: FreeBadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border border-white/40 bg-white/95',
-        'px-2.5 py-0.5 text-label-sm font-bold uppercase tracking-wider text-emerald-600 shadow-sm',
+        'inline-flex min-h-[28px] items-center justify-center rounded-full',
+        'border border-black/5 bg-white px-3.5 py-1 shadow-sm',
+        'text-label-md font-bold tracking-wide text-emerald-600 uppercase',
         className,
       )}
     >
