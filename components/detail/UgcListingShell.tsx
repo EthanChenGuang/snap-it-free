@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { DetailHeroControls } from '@/components/detail/DetailHeroControls';
 import { DetailPreviewWall } from '@/components/detail/DetailPreviewWall';
+import { ListingDetailSkeleton } from '@/components/detail/ListingDetailSkeleton';
 import { UgcListingDetailContent } from '@/components/detail/UgcListingDetailContent';
 import { OwnerMessagesButton } from '@/components/messages/OwnerMessagesButton';
 import { DmDrawer } from '@/components/messages/DmDrawer';
@@ -32,21 +33,22 @@ type UgcListingShellProps = {
   };
   isOwnerView?: boolean;
   similarListings: ListingRow[];
+  searchParamsString?: string;
+  openDm?: boolean;
 };
 
 export function UgcListingShell({
   listing,
   isOwnerView = false,
   similarListings,
+  searchParamsString = '',
+  openDm = false,
 }: UgcListingShellProps) {
   const { messages } = useMessages();
   const { user, loading } = useAuthSession();
-  const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const sessionUserId = user?.id ?? null;
   const isLoggedIn = Boolean(user);
-  const [previewAuthOpen, setPreviewAuthOpen] = useState(false);
   const [contactAuthOpen, setContactAuthOpen] = useState(false);
   const [dmOpen, setDmOpen] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -65,18 +67,21 @@ export function UgcListingShell({
     (!authReady || listing.owner_user_id === sessionUserId);
   const showHiddenBanner = isOwner && isHiddenPending;
   const showOwnerLifecycle = isOwner && !isHiddenPending && listing.status !== 'expired';
-  const previewRedirectTo = buildAuthRedirectPath(pathname, searchParams.toString());
+  const previewRedirectTo = buildAuthRedirectPath(
+    `/listing/${listing.id}`,
+    searchParamsString,
+  );
   const contactAuthRedirect = `/listing/${listing.id}?openDm=1`;
 
   useEffect(() => {
-    if (searchParams.get('openDm') === '1' && isLoggedIn) {
-      setDmOpen(true);
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete('openDm');
-      const qs = params.toString();
-      router.replace(`/listing/${listing.id}${qs ? `?${qs}` : ''}`, { scroll: false });
-    }
-  }, [searchParams, isLoggedIn, listing.id, router]);
+    if (!openDm || !isLoggedIn) return;
+
+    setDmOpen(true);
+    const params = new URLSearchParams(searchParamsString);
+    params.delete('openDm');
+    const qs = params.toString();
+    router.replace(`/listing/${listing.id}${qs ? `?${qs}` : ''}`, { scroll: false });
+  }, [openDm, isLoggedIn, listing.id, router, searchParamsString]);
 
   const handleConversationReady = useCallback((id: string, nextReadOnly: boolean) => {
     setConversationId(id || null);
@@ -157,22 +162,12 @@ export function UgcListingShell({
     </div>
   ) : undefined;
 
+  if (!isOwnerView && loading) {
+    return <ListingDetailSkeleton />;
+  }
+
   if (!isOwnerView && !user) {
-    return (
-      <>
-        <DetailPreviewWall
-          listing={listing}
-          loading={loading}
-          onSignIn={() => setPreviewAuthOpen(true)}
-        />
-        <AuthPromptModal
-          open={previewAuthOpen}
-          onOpenChange={setPreviewAuthOpen}
-          redirectTo={previewRedirectTo}
-          modalTitle={messages.auth.detailTitle}
-        />
-      </>
-    );
+    return <DetailPreviewWall listing={listing} redirectTo={previewRedirectTo} />;
   }
 
   return (

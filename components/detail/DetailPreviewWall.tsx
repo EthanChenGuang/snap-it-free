@@ -3,7 +3,7 @@
 import '@/app/listing-detail.css';
 import Image from 'next/image';
 import { DetailHeroControls } from '@/components/detail/DetailHeroControls';
-import { Button } from '@/components/ui/button';
+import { AuthPromptForm } from '@/components/ugc/AuthPromptForm';
 import { useListingDistanceMeters } from '@/hooks/useListingDistanceMeters';
 import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { useMessages } from '@/lib/i18n/useMessages';
@@ -13,15 +13,14 @@ import type { ListingRow } from '@/lib/listings/types';
 
 type DetailPreviewWallProps = {
   listing: ListingRow;
-  loading?: boolean;
-  onSignIn: () => void;
+  redirectTo: string;
 };
 
 const chipClassName =
   'rounded border border-outline-variant bg-surface-container-low px-space-sm py-1 text-label-sm font-semibold text-on-surface';
 
-/** Anonymous guest preview on listing detail — hero, metadata, sticky sign-in CTA (AUTH-01). */
-export function DetailPreviewWall({ listing, loading = false, onSignIn }: DetailPreviewWallProps) {
+/** Anonymous guest preview on listing detail — hero, metadata, inline passwordless auth (D-19-02). */
+export function DetailPreviewWall({ listing, redirectTo }: DetailPreviewWallProps) {
   const { language, messages, formatRelativeTime, zoneLabel } = useMessages();
   const displayTitle = resolveListingTitle(listing, language);
   const postedLabel = formatRelativeTime(listing.posted_at);
@@ -31,15 +30,10 @@ export function DetailPreviewWall({ listing, loading = false, onSignIn }: Detail
       ? messages.listing.sourceCommunity
       : listingSourceLabel({ source: listing.source, messages });
 
-  const handleCtaClick = () => {
-    if (loading) return;
-    onSignIn();
-  };
-
   return (
     <div className="listing-detail flex h-full flex-col overflow-y-auto bg-surface">
-      <div className="relative mx-auto w-full max-w-container-max pb-28">
-        <div className="relative aspect-square w-full overflow-hidden bg-surface-container-low md:aspect-[4/3]">
+      <div className="relative mx-auto w-full max-w-container-max">
+        <div className="relative h-[min(36vh,240px)] w-full overflow-hidden bg-surface-container-low md:h-auto md:aspect-[4/3]">
           {listing.photo_url ? (
             <Image
               src={listing.photo_url}
@@ -62,9 +56,7 @@ export function DetailPreviewWall({ listing, loading = false, onSignIn }: Detail
           />
 
           <div className="pointer-events-none absolute left-space-md top-[calc(2.5rem+2*var(--space-md))] z-10">
-            <span
-              className={`${chipClassName} uppercase tracking-wide`}
-            >
+            <span className={`${chipClassName} uppercase tracking-wide`}>
               {messages.detail.verifiedFree}
             </span>
           </div>
@@ -73,7 +65,7 @@ export function DetailPreviewWall({ listing, loading = false, onSignIn }: Detail
         </div>
 
         <div className="px-gutter pt-space-lg">
-          <header className="border-b border-outline-variant pb-space-md">
+          <header className="pb-space-md">
             <h1 className="text-h2 font-semibold leading-tight tracking-[-0.01em] text-on-surface">
               {displayTitle}
             </h1>
@@ -100,21 +92,14 @@ export function DetailPreviewWall({ listing, loading = false, onSignIn }: Detail
           </header>
         </div>
 
-        <div className="relative" aria-hidden="true">
-          <div className="h-24 bg-gradient-to-b from-surface to-surface-container-low" />
-        </div>
-      </div>
-
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-outline-variant bg-surface px-gutter py-space-md pb-[calc(env(safe-area-inset-bottom)+16px)]">
-        <Button
-          type="button"
-          className="w-full"
-          disabled={loading}
-          aria-busy={loading || undefined}
-          onClick={handleCtaClick}
-        >
-          {messages.detail.previewCta}
-        </Button>
+        <section className="border-t border-outline-variant px-gutter pb-space-lg pt-space-md">
+          <AuthPromptForm
+            id="guest-auth-form"
+            redirectTo={redirectTo}
+            heading={messages.auth.detailTitle}
+            description={messages.auth.modalDescription}
+          />
+        </section>
       </div>
     </div>
   );

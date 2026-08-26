@@ -1,29 +1,34 @@
 'use client';
 
-import { useState } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
 import { DetailPreviewWall } from '@/components/detail/DetailPreviewWall';
+import { ListingDetailSkeleton } from '@/components/detail/ListingDetailSkeleton';
 import { ListingDetailContent } from '@/components/detail/ListingDetailContent';
-import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { buildAuthRedirectPath } from '@/lib/auth/build-auth-redirect';
 import { useAuthSession } from '@/lib/auth/useAuthSession';
 import { isAllowedExternalUrl, openExternalListingUrl } from '@/lib/listings/external-url';
 import type { ListingRow } from '@/lib/listings/types';
-import { useMessages } from '@/lib/i18n/useMessages';
 
 type ScrapedListingShellProps = {
   listing: ListingRow;
   similarListings: ListingRow[];
+  searchParamsString?: string;
 };
 
-export function ScrapedListingShell({ listing, similarListings }: ScrapedListingShellProps) {
+export function ScrapedListingShell({
+  listing,
+  similarListings,
+  searchParamsString = '',
+}: ScrapedListingShellProps) {
   const { user, loading } = useAuthSession();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const { messages } = useMessages();
-  const [authOpen, setAuthOpen] = useState(false);
 
-  const redirectTo = buildAuthRedirectPath(pathname, searchParams.toString());
+  const redirectTo = buildAuthRedirectPath(
+    `/listing/${listing.id}`,
+    searchParamsString,
+  );
+
+  if (loading) {
+    return <ListingDetailSkeleton />;
+  }
 
   if (user) {
     const canOpenExternal = isAllowedExternalUrl(listing.external_url);
@@ -46,19 +51,5 @@ export function ScrapedListingShell({ listing, similarListings }: ScrapedListing
     );
   }
 
-  return (
-    <>
-      <DetailPreviewWall
-        listing={listing}
-        loading={loading}
-        onSignIn={() => setAuthOpen(true)}
-      />
-      <AuthPromptModal
-        open={authOpen}
-        onOpenChange={setAuthOpen}
-        redirectTo={redirectTo}
-        modalTitle={messages.auth.detailTitle}
-      />
-    </>
-  );
+  return <DetailPreviewWall listing={listing} redirectTo={redirectTo} />;
 }
