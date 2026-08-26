@@ -94,7 +94,7 @@ function veniceListing(overrides = {}) {
     source: 'ugc',
     external_id: id,
     title: `P9 UAT listing ${id.slice(0, 8)}`,
-    photo_url: 'https://example.com/uat.jpg',
+    photo_url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80&w=800',
     external_url: `/listing/${id}`,
     lat: 45.434,
     lng: 12.338,

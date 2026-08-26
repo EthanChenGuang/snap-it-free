@@ -239,7 +239,7 @@ async function testDeleteAccountFlow() {
     source: 'ugc',
     external_id: listingId,
     title: 'P14 claimed listing',
-    photo_url: 'https://example.com/uat.jpg',
+    photo_url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80&w=800',
     external_url: `/listing/${listingId}`,
     lat: 45.434,
     lng: 12.338,
