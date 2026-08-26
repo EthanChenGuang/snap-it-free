@@ -62,6 +62,35 @@ export function FavoriteButton({
   const redirectTo = pathname.startsWith('/favorites') ? '/favorites' : pathname;
 
   const isOverlay = tone === 'overlay';
+  const iconOpsz = isOverlay && size === 'sm' ? 20 : 24;
+
+  const heartIcon = (
+    <motion.span
+      className={cn(
+        'material-symbols-outlined leading-none',
+        isOverlay ? 'size-4 text-body-md' : size === 'sm' ? 'text-body-lg' : 'text-h3',
+        favorited
+          ? 'text-accent-orange'
+          : isOverlay
+            ? 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]'
+            : 'text-on-surface-variant',
+      )}
+      style={{
+        fontVariationSettings: favorited
+          ? `'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' ${iconOpsz}`
+          : `'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' ${iconOpsz}`,
+      }}
+      whileTap={{ scale: 0.8 }}
+      animate={shouldPop ? { scale: [1, 1.28, 1] } : { scale: 1 }}
+      transition={
+        shouldPop
+          ? { duration: 0.32, ease: [0.16, 1, 0.3, 1] }
+          : { type: 'spring', stiffness: 420, damping: 28 }
+      }
+    >
+      favorite
+    </motion.span>
+  );
 
   return (
     <>
@@ -75,35 +104,20 @@ export function FavoriteButton({
         className={cn(
           'shrink-0',
           isOverlay &&
-            'h-9 w-9 rounded-full border border-white/25 bg-black/20 p-0 shadow-none backdrop-blur-md hover:bg-black/30 dark:border-white/15 dark:bg-white/20 dark:hover:bg-white/30',
+            'relative flex h-11 w-11 min-h-11 min-w-11 touch-manipulation items-center justify-center rounded-full border-0 bg-transparent p-0 shadow-none hover:bg-transparent',
           className,
         )}
       >
-        <motion.span
-          className={cn(
-            'material-symbols-outlined',
-            size === 'sm' ? 'text-body-lg' : 'text-h3',
-            favorited
-              ? 'text-accent-orange'
-              : isOverlay
-                ? 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]'
-                : 'text-on-surface-variant',
-          )}
-          style={{
-            fontVariationSettings: favorited
-              ? "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24"
-              : "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24",
-          }}
-          whileTap={{ scale: 0.8 }}
-          animate={shouldPop ? { scale: [1, 1.28, 1] } : { scale: 1 }}
-          transition={
-            shouldPop
-              ? { duration: 0.32, ease: [0.16, 1, 0.3, 1] }
-              : { type: 'spring', stiffness: 420, damping: 28 }
-          }
-        >
-          favorite
-        </motion.span>
+        {isOverlay ? (
+          <span
+            aria-hidden
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/25 backdrop-blur-md"
+          >
+            {heartIcon}
+          </span>
+        ) : (
+          heartIcon
+        )}
       </Button>
       <AuthPromptModal
         open={authOpen}

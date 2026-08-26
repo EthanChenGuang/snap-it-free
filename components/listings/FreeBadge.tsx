@@ -5,14 +5,14 @@ type FreeBadgeProps = {
   className?: string;
 };
 
-/** iOS-style frosted FREE pill for listing photo overlays. */
+/** iOS high-transparency white glass pill for listing photo overlays. */
 export function FreeBadge({ children, className }: FreeBadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/15',
-        'px-2.5 py-0.5 text-label-sm font-semibold uppercase tracking-widest',
-        'text-emerald-700 backdrop-blur-md dark:text-emerald-300',
+        'inline-flex items-center rounded-full border border-white/40 bg-white/75',
+        'px-2.5 py-0.5 text-label-sm font-medium text-zinc-800 shadow-xs backdrop-blur-md',
+        'dark:border-white/10 dark:bg-zinc-900/75 dark:text-zinc-100',
         className,
       )}
     >
