@@ -1,7 +1,6 @@
 'use client';
 
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
-import { cardOverlayGlassClass } from '@/components/listings/cardOverlayGlass';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toaster';
 import { useFavorites } from '@/lib/favorites/useFavorites';
@@ -63,35 +62,7 @@ export function FavoriteButton({
   const redirectTo = pathname.startsWith('/favorites') ? '/favorites' : pathname;
 
   const isOverlay = tone === 'overlay';
-  const iconOpsz = isOverlay && size === 'sm' ? 20 : 24;
-
-  const heartIcon = (
-    <motion.span
-      className={cn(
-        'material-symbols-outlined leading-none',
-        isOverlay ? 'size-4 text-body-md' : size === 'sm' ? 'text-body-lg' : 'text-h3',
-        favorited
-          ? 'text-accent-orange'
-          : isOverlay
-            ? 'text-zinc-700 dark:text-zinc-200'
-            : 'text-on-surface-variant',
-      )}
-      style={{
-        fontVariationSettings: favorited
-          ? `'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' ${iconOpsz}`
-          : `'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' ${iconOpsz}`,
-      }}
-      whileTap={{ scale: 0.8 }}
-      animate={shouldPop ? { scale: [1, 1.28, 1] } : { scale: 1 }}
-      transition={
-        shouldPop
-          ? { duration: 0.32, ease: [0.16, 1, 0.3, 1] }
-          : { type: 'spring', stiffness: 420, damping: 28 }
-      }
-    >
-      favorite
-    </motion.span>
-  );
+  const iconOpsz = isOverlay ? 20 : size === 'sm' ? 20 : 24;
 
   return (
     <>
@@ -105,23 +76,38 @@ export function FavoriteButton({
         className={cn(
           'shrink-0',
           isOverlay &&
-            'relative flex h-11 w-11 min-h-11 min-w-11 touch-manipulation items-center justify-center rounded-full border-0 bg-transparent p-0 shadow-none hover:bg-transparent',
+            'flex h-10 w-10 touch-manipulation items-center justify-center border-0 bg-transparent p-0 shadow-none hover:bg-transparent',
           className,
         )}
       >
-        {isOverlay ? (
-          <span
-            aria-hidden
-            className={cn(
-              'flex h-8 w-8 items-center justify-center',
-              cardOverlayGlassClass,
-            )}
-          >
-            {heartIcon}
-          </span>
-        ) : (
-          heartIcon
-        )}
+        <motion.span
+          className={cn(
+            'material-symbols-outlined leading-none',
+            isOverlay ? 'size-5' : size === 'sm' ? 'text-body-lg' : 'text-h3',
+            favorited
+              ? cn(
+                  'text-accent-orange',
+                  isOverlay && 'drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]',
+                )
+              : isOverlay
+                ? 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]'
+                : 'text-on-surface-variant',
+          )}
+          style={{
+            fontVariationSettings: favorited
+              ? `'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' ${iconOpsz}`
+              : `'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' ${iconOpsz}`,
+          }}
+          whileTap={{ scale: 0.8 }}
+          animate={shouldPop ? { scale: [1, 1.28, 1] } : { scale: 1 }}
+          transition={
+            shouldPop
+              ? { duration: 0.32, ease: [0.16, 1, 0.3, 1] }
+              : { type: 'spring', stiffness: 420, damping: 28 }
+          }
+        >
+          favorite
+        </motion.span>
       </Button>
       <AuthPromptModal
         open={authOpen}

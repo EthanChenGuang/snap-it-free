@@ -57,7 +57,7 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
               <span className="material-symbols-outlined">image</span>
             </div>
           )}
-          <div className="absolute left-space-sm top-space-sm z-10 flex flex-wrap gap-space-xs">
+          <div className="absolute left-2.5 top-2.5 z-10 flex flex-wrap gap-space-xs">
             <FreeBadge>{messages.listing.free}</FreeBadge>
             {listing.source === 'ugc' && (
               <span className="rounded-sm border border-outline-variant bg-surface px-space-sm py-space-xs text-label-sm font-bold uppercase tracking-wider text-on-surface-variant">
@@ -66,7 +66,7 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
             )}
             {listing.status === 'claimed' && <ReservedBadge />}
           </div>
-          <div className="absolute right-space-sm top-space-sm z-10">
+          <div className="absolute right-1 top-1 z-10">
             <FavoriteButton listingId={listing.id} size="sm" tone="overlay" />
           </div>
         </div>

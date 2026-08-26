@@ -64,7 +64,7 @@ export function ListListingCard({
         <div className="feed-card-media-shine pointer-events-none absolute inset-0 z-[4]" aria-hidden />
 
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 z-[6] h-20 bg-gradient-to-b from-black/20 via-black/5 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 z-[6] h-16 bg-gradient-to-b from-black/10 via-black/3 to-transparent"
           aria-hidden
         />
         <div
@@ -72,7 +72,7 @@ export function ListListingCard({
           aria-hidden
         />
 
-        <div className="absolute left-3.5 top-3.5 z-20">
+        <div className="absolute left-2.5 top-2.5 z-10">
           <FreeBadge>{messages.listing.free}</FreeBadge>
         </div>
 
@@ -80,7 +80,7 @@ export function ListListingCard({
           listingId={listing.id}
           size="sm"
           tone="overlay"
-          className="absolute right-3 top-3 z-20"
+          className="absolute right-1 top-1 z-10"
         />
       </div>
 

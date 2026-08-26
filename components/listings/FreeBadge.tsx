@@ -1,4 +1,3 @@
-import { cardOverlayGlassClass } from '@/components/listings/cardOverlayGlass';
 import { cn } from '@/lib/utils';
 
 type FreeBadgeProps = {
@@ -6,18 +5,16 @@ type FreeBadgeProps = {
   className?: string;
 };
 
-/** iOS white frosted FREE pill with emerald accent dot for listing photo overlays. */
+/** Clean white FREE capsule for listing photo overlays (reference: Snag-style feed). */
 export function FreeBadge({ children, className }: FreeBadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 px-3 py-1',
-        cardOverlayGlassClass,
-        'text-label-md font-semibold text-emerald-700 dark:text-emerald-400',
+        'inline-flex items-center rounded-full border border-white/40 bg-white/95',
+        'px-2.5 py-0.5 text-label-sm font-bold uppercase tracking-wider text-emerald-600 shadow-sm',
         className,
       )}
     >
-      <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden />
       {children}
     </span>
   );
