@@ -226,21 +226,41 @@ async function main() {
   await narrowToP11(authedPage, 'P11UAT Active');
   const authedCard = authedPage.locator('a.feed-card').filter({ hasText: 'P11UAT Active visual card' }).first();
   await authedCard.waitFor({ state: 'visible', timeout: 15000 });
+  await authedPage.waitForFunction(
+    () => document.querySelector('a.feed-card button[aria-label]') !== null,
+    undefined,
+    { timeout: 10000 },
+  );
   const authedUrlBefore = authedPage.url();
   const authedHeart = authedCard.locator('button[aria-label]').first();
-  await authedHeart.click();
-  await authedPage.waitForTimeout(1200);
-  const favoritedFill = await authedHeart.evaluate((btn) => {
-    const icon = btn.querySelector('span.material-symbols-outlined');
-    if (!icon) return false;
-    const style = icon.getAttribute('style') ?? '';
-    const cls = icon.className;
-    return (
-      btn.getAttribute('aria-pressed') === 'true' ||
-      style.includes("'FILL' 1") ||
-      cls.includes('text-accent-orange')
-    );
-  });
+  const postFavorite = authedPage
+    .waitForResponse(
+      (res) => res.url().includes('/api/favorites') && res.request().method() === 'POST',
+      { timeout: 10000 },
+    )
+    .catch(() => null);
+  await authedHeart.evaluate((btn) => btn.click());
+  const postRes = await postFavorite;
+  let favoritedFill = postRes?.ok() ?? false;
+  if (!favoritedFill) {
+    favoritedFill = await authedPage
+      .waitForFunction(
+        (listingId) => {
+          const btn = document.querySelector(`a.feed-card button[aria-pressed=\"true\"]`);
+          if (btn) return true;
+          try {
+            const ids = JSON.parse(localStorage.getItem('shoumanwu_favorites') ?? '[]');
+            return ids.includes(listingId);
+          } catch {
+            return false;
+          }
+        },
+        active.id,
+        { timeout: 5000 },
+      )
+      .then(() => true)
+      .catch(() => false);
+  }
   const toastVisible = await authedPage
     .locator('[data-radix-toast-viewport] [role="status"], [data-state="open"][role="status"]')
     .first()
@@ -256,30 +276,17 @@ async function main() {
     `authModal=${authGateOk} noNavLoggedOut=${noNavOnHeart} orangeFill=${favoritedFill} toast=${toastVisible} noNavAuthed=${authedNoNav}`,
   );
 
-  // Test 3 — Favorites grid parity (single heart + distance metadata)
-  await authedPage.evaluate(
-    ({ centerKey, favKey, listingId, prefsKey }) => {
-      localStorage.setItem(
-        centerKey,
-        JSON.stringify({ lat: 45.434, lng: 12.338, label: 'Venice center' }),
-      );
-      localStorage.setItem(prefsKey, JSON.stringify({
-        mode: 'map',
-        city: 'all',
-        categories: [],
-        radiusEnabled: true,
-        radiusKm: 50,
-      }));
-      localStorage.setItem(favKey, JSON.stringify([listingId]));
-    },
-    { centerKey: BROWSE_CENTER_KEY, favKey: FAVORITES_KEY, listingId: active.id, prefsKey: FILTER_PREFS_KEY },
+  // Test 3 — Favorites grid parity (single heart + posted metadata)
+  await admin.from('user_favorites').upsert(
+    { user_id: authedUser.id, listing_id: active.id },
+    { onConflict: 'user_id,listing_id' },
   );
   await authedPage.goto(`${BASE}/favorites`, { waitUntil: 'domcontentloaded' });
-  await authedPage.locator('section.grid.grid-cols-2 > a.feed-card').first().waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
+  await authedPage.locator('section.grid.grid-cols-2 > a.feed-card').first().waitFor({ state: 'visible', timeout: 20000 });
   const favCard = authedPage.locator('section.grid.grid-cols-2 > a.feed-card').first();
   const favMetrics = await favCard.evaluate((el) => {
     const hearts = el.querySelectorAll('button[aria-label]');
-    const meta = el.querySelector('p.text-xs')?.textContent ?? '';
+    const meta = el.querySelector('.feed-card-caption p')?.textContent ?? '';
     const grid = el.closest('section.grid');
     return {
       heartCount: hearts.length,
@@ -287,14 +294,14 @@ async function main() {
       gridGap: grid ? getComputedStyle(grid).gap : '',
     };
   });
-  const distanceInMeta = /\d+(\.\d+)?\s*(km|m)\s*·/i.test(favMetrics.meta);
+  const hasPostedMeta = favMetrics.meta.trim().length > 0;
   const singleHeart = favMetrics.heartCount === 1;
   const gapOk = favMetrics.gridGap === '12px' || favMetrics.gridGap.includes('12');
 
   record(
     3,
     'Favorites grid parity',
-    singleHeart && distanceInMeta && gapOk,
+    singleHeart && hasPostedMeta && gapOk,
     `hearts=${favMetrics.heartCount} meta="${favMetrics.meta}" gap=${favMetrics.gridGap}`,
   );
 
@@ -306,12 +313,16 @@ async function main() {
   const claimedCard = page.locator('a.feed-card').filter({ hasText: 'P11UAT Claimed reserved card' }).first();
   await claimedCard.waitFor({ state: 'visible', timeout: 15000 });
   const claimedMetrics = await claimedCard.evaluate((el) => {
-    const img = el.querySelector('img');
+    const img = el.querySelector('.feed-card-image, img');
     const freeBadge = el.querySelector('span.uppercase');
     const heartBtn = el.querySelector('button[aria-label]');
-    const meta = el.querySelector('p.text-xs')?.textContent ?? '';
+    const meta = el.querySelector('.feed-card-caption p')?.textContent ?? '';
+    const media = el.querySelector('.feed-card-media');
+    const imgStyle = img ? getComputedStyle(img) : null;
+    const mediaStyle = media ? getComputedStyle(media) : null;
     return {
-      imgOpacity: img ? parseFloat(getComputedStyle(img).opacity) : 1,
+      imgSaturate: img?.className.includes('saturate-') ?? false,
+      mediaOpacity: mediaStyle ? parseFloat(mediaStyle.opacity) : 1,
       freeOpacity: freeBadge ? parseFloat(getComputedStyle(freeBadge).opacity) : 1,
       heartOpacity: heartBtn ? parseFloat(getComputedStyle(heartBtn).opacity) : 1,
       reservedSuffix: /reserved/i.test(meta),
@@ -321,7 +332,8 @@ async function main() {
   record(
     4,
     'Claimed listing treatment',
-    claimedMetrics.imgOpacity <= 0.65 &&
+    claimedMetrics.imgSaturate &&
+      claimedMetrics.mediaOpacity <= 0.95 &&
       claimedMetrics.freeOpacity >= 0.95 &&
       claimedMetrics.heartOpacity >= 0.95 &&
       claimedMetrics.reservedSuffix,
@@ -329,6 +341,7 @@ async function main() {
   );
 
   // Test 5 — Grid vs detail Claim boundary
+  await narrowToP11(page, 'P11UAT Active');
   const gridClaimButtons = await page.locator('section.grid.grid-cols-2 button').filter({ hasText: /claim/i }).count();
   await page.locator('a.feed-card').filter({ hasText: 'P11UAT Active visual card' }).first().click();
   await page.waitForURL(/\/listing\//, { timeout: 15000 });

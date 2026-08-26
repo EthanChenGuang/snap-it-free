@@ -33,25 +33,25 @@ const EXPECTED_FILTER_LABELS_IT = [
   'Tutte le categorie',
 ];
 
-/** Expected 17 Subito catalog labels in English (Phase 12.1 messages.en). */
+/** Expected 17 Subito catalog labels in English (messages/subito-category-labels.ts). */
 const EXPECTED_FILTER_LABELS_EN = [
-  'Home & Kitchen',
+  'Home & furniture',
   'Appliances',
-  'Kids & Toys',
-  'Clothing & Accessories',
-  'Books & Magazines',
-  'Computers & Tech',
+  'Kids & toys',
+  'Clothing & accessories',
+  'Books & magazines',
+  'Computing',
   'Garden & DIY',
   'Sports',
   'Collectibles',
   'Bicycles',
-  'Audio & Video',
+  'Audio / video',
   'Phones',
-  'Music & Movies',
+  'Music & film',
   'Photography',
-  'Games & Consoles',
+  'Games & consoles',
   'Pets',
-  'All categories',
+  'Other',
 ];
 
 const FILTER_UI = {

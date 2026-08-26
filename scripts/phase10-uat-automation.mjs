@@ -173,39 +173,32 @@ async function main() {
   // Clear stale UAT listings from prior runs
   await admin.from('listings').delete().ilike('title', 'P10UAT%');
 
-  // Test 1 — Filter sheet draft / Apply / Reset (city mode; radius on select-location per quick task)
+  // Test 1 — City filter applies immediately on chip tap; Apply closes sheet; Reset clears
   await narrowToP10Uat();
-  const countBefore = await countGridCards(page);
-  const veniceVisibleBefore = await page.getByText('P10UAT Venice unique item').isVisible().catch(() => false);
-  const padovaVisibleBefore = await page.getByText('P10UAT Padova unique item').isVisible().catch(() => false);
 
   await openFilterSheet(page);
   await page.getByRole('button', { name: 'Padova', exact: true }).click({ force: true });
-  await closeFilterSheetWithoutApply(page);
-
-  const prefsAfterDismiss = await readFilterPrefs(page);
-  const draftDiscarded = (prefsAfterDismiss?.city ?? 'all') === 'all';
-
-  await openFilterSheet(page);
-  const padovaBtn = page.getByRole('button', { name: 'Padova', exact: true });
-  const padovaStillUnselected = !(await padovaBtn.evaluate((el) => el.className.includes('bg-primary')).catch(() => false));
-  await closeFilterSheetWithoutApply(page);
-
-  await openFilterSheet(page);
-  await page.getByRole('button', { name: 'Padova', exact: true }).click({ force: true });
-  await page.getByRole('button', { name: 'Apply', exact: true }).click({ force: true });
   await page.waitForFunction(
     () => JSON.parse(localStorage.getItem('shoumanwu_filter_prefs') || '{}').city === 'padova',
     undefined,
-    { timeout: 10000 },
+    { timeout: 5000 },
   );
-  await waitForSheetClosed(page);
+  const prefsAfterCityTap = await readFilterPrefs(page);
+  const cityAppliedImmediately =
+    prefsAfterCityTap?.mode === 'city' && prefsAfterCityTap?.city === 'padova';
 
-  const prefsAfterApply = await readFilterPrefs(page);
-  const padovaOnlyAfterApply =
-    prefsAfterApply?.mode === 'city' && prefsAfterApply?.city === 'padova';
+  await page.getByRole('button', { name: 'Apply', exact: true }).click({ force: true });
+  await waitForSheetClosed(page);
+  const cityPersistedAfterClose = (await readFilterPrefs(page))?.city === 'padova';
 
   await openFilterSheet(page);
+  const padovaStillSelected = await page
+    .getByRole('button', { name: 'Padova', exact: true })
+    .evaluate(
+      (el) => el.className.includes('bg-primary') || el.getAttribute('aria-pressed') === 'true',
+    )
+    .catch(() => false);
+
   await page.getByRole('button', { name: 'Reset', exact: true }).click({ force: true });
   await page.waitForFunction(
     () => {
@@ -226,9 +219,9 @@ async function main() {
 
   record(
     1,
-    'Filter sheet draft/Apply/Reset flow',
-    draftDiscarded && padovaStillUnselected && padovaOnlyAfterApply && resetOk,
-    `dismiss=${draftDiscarded} draftUi=${padovaStillUnselected} apply=${padovaOnlyAfterApply} reset=${resetOk}`,
+    'Filter sheet city apply/Reset flow',
+    cityAppliedImmediately && cityPersistedAfterClose && padovaStillSelected && resetOk,
+    `immediate=${cityAppliedImmediately} persisted=${cityPersistedAfterClose} selected=${padovaStillSelected} reset=${resetOk}`,
   );
 
   // Test 2 — Active filter pills (search + categories; city/radius via sheet/map pin per D-01 refactor)
@@ -327,7 +320,7 @@ async function main() {
     centerAfterConfirm &&
     typeof centerAfterConfirm.lat === 'number';
 
-  const pinIndicator = page.locator('a[aria-label="Choose browse location"] span.bg-error.rounded-full');
+  const pinIndicator = page.locator('a[aria-label="Choose browse location"] span.bg-primary.rounded-full');
   const pinDotVisible = await pinIndicator.isVisible().catch(() => false);
 
   await openFilterSheet(page);
