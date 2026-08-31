@@ -285,7 +285,7 @@ export function NotificationsSection() {
                     type="time"
                     value={dndPrefs.quietStart}
                     onChange={(event) => void handleDndChange({ quietStart: event.target.value })}
-                    className="min-h-11 rounded-lg border border-neutral-200 bg-white px-3 text-body-md text-on-surface"
+                    className="min-h-11 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 text-body-md text-on-surface"
                   />
                 </label>
                 <label className="flex items-center gap-2 text-label-sm text-secondary">
@@ -294,7 +294,7 @@ export function NotificationsSection() {
                     type="time"
                     value={dndPrefs.quietEnd}
                     onChange={(event) => void handleDndChange({ quietEnd: event.target.value })}
-                    className="min-h-11 rounded-lg border border-neutral-200 bg-white px-3 text-body-md text-on-surface"
+                    className="min-h-11 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 text-body-md text-on-surface"
                   />
                 </label>
               </div>

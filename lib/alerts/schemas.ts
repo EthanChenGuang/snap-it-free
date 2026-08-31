@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CONSUMER_CITY_KEYS, type ConsumerCityKey } from '@/lib/geo/italian-cities';
 import type { VeniceZone } from '@/lib/listings/types';
 
 export const veniceZoneSchema = z.enum([
@@ -7,10 +8,15 @@ export const veniceZoneSchema = z.enum([
   'lido_murano',
 ] satisfies [VeniceZone, VeniceZone, VeniceZone]);
 
+export const consumerCityKeySchema = z.enum(
+  CONSUMER_CITY_KEYS as unknown as [ConsumerCityKey, ...ConsumerCityKey[]],
+);
+
 export type AlertRow = {
   id: string;
   keyword: string | null;
   zone: VeniceZone | null;
+  city: ConsumerCityKey | null;
   enabled: boolean;
   created_at: string;
 };
@@ -24,14 +30,16 @@ export const CreateAlertSchema = z
       .optional()
       .transform((value) => (value === '' ? undefined : value)),
     zone: veniceZoneSchema.nullable().optional(),
+    city: consumerCityKeySchema.nullable().optional(),
   })
   .refine(
     (data) => {
       const hasKeyword = data.keyword != null && data.keyword.length > 0;
       const hasZone = data.zone != null;
-      return hasKeyword || hasZone;
+      const hasCity = data.city != null;
+      return hasKeyword || hasZone || hasCity;
     },
-    { message: 'At least one of keyword or zone is required' },
+    { message: 'At least one of keyword, zone, or city is required' },
   );
 
 export const UpdateAlertSchema = z.object({
@@ -44,13 +52,27 @@ export const UpdateAlertSchema = z.object({
     .optional()
     .transform((value) => (value === '' ? null : value)),
   zone: veniceZoneSchema.nullable().optional(),
+  city: consumerCityKeySchema.nullable().optional(),
 });
 
 export type CreateAlertInput = z.infer<typeof CreateAlertSchema>;
 export type UpdateAlertInput = z.infer<typeof UpdateAlertSchema>;
 
-export function alertHasKeywordOrZone(keyword: string | null | undefined, zone: VeniceZone | null | undefined): boolean {
+export function alertHasKeywordOrLocation(
+  keyword: string | null | undefined,
+  zone: VeniceZone | null | undefined,
+  city: ConsumerCityKey | null | undefined,
+): boolean {
   const hasKeyword = keyword != null && keyword.length > 0;
   const hasZone = zone != null;
-  return hasKeyword || hasZone;
+  const hasCity = city != null;
+  return hasKeyword || hasZone || hasCity;
+}
+
+/** @deprecated Use alertHasKeywordOrLocation */
+export function alertHasKeywordOrZone(
+  keyword: string | null | undefined,
+  zone: VeniceZone | null | undefined,
+): boolean {
+  return alertHasKeywordOrLocation(keyword, zone, null);
 }

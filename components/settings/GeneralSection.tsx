@@ -43,11 +43,11 @@ export function GeneralSection() {
 
       <SettingsRowCard onClick={handleAppearanceClick}>
         <div className="flex min-w-0 flex-1 items-center gap-4">
-          <span className="material-symbols-outlined text-[22px] text-neutral-500">dark_mode</span>
+          <span className="material-symbols-outlined text-label-md text-on-surface-variant">dark_mode</span>
           <span className="text-body-md text-on-surface">{messages.settings.appearance}</span>
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <span className="text-label-sm text-neutral-500">
+          <span className="text-label-sm text-on-surface-variant">
             {appearanceLabel(preferences.appearance, messages)}
           </span>
           <SettingsChevron />
@@ -56,7 +56,7 @@ export function GeneralSection() {
 
       <SettingsRowCard href="/post/manage">
         <div className="flex min-w-0 flex-1 items-center gap-4">
-          <span className="material-symbols-outlined text-[22px] text-neutral-500">inventory_2</span>
+          <span className="material-symbols-outlined text-label-md text-on-surface-variant">inventory_2</span>
           <span className="text-body-md text-on-surface">{messages.post.manageLink}</span>
         </div>
         <SettingsChevron />

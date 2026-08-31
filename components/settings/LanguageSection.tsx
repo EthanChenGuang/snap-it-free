@@ -23,7 +23,7 @@ export function LanguageSection() {
     <section className="mb-6">
       <SettingsSectionTitle>{messages.settings.languageSection}</SettingsSectionTitle>
       <SettingsGroupCard className="p-2">
-        <div className="flex rounded-xl bg-neutral-100 p-1">
+        <div className="flex rounded-xl bg-surface-container p-1">
           {LANGUAGES.map((language) => {
             const active = preferences.language === language.id;
             return (
@@ -34,15 +34,15 @@ export function LanguageSection() {
                 className={cn(
                   'flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-2.5 transition-colors',
                   active
-                    ? 'bg-white text-on-surface shadow-sm'
-                    : 'text-on-surface hover:bg-white/50',
+                    ? 'border border-outline-variant bg-surface-container-lowest text-on-surface'
+                    : 'text-on-surface hover:bg-surface-container-lowest/50',
                 )}
               >
                 <span className="text-label-md font-bold">{language.label}</span>
                 <span
                   className={cn(
-                    'text-[10px] font-medium uppercase',
-                    active ? 'text-secondary' : 'text-neutral-400',
+                    'text-label-sm font-medium uppercase',
+                    active ? 'text-secondary' : 'text-on-surface-variant',
                   )}
                 >
                   {language.sublabel}

@@ -8,15 +8,33 @@ function readSource(relativePath: string): string {
   return readFileSync(resolve(root, relativePath), 'utf8');
 }
 
-describe('D-19-02 guest listing preview with inline passwordless auth', () => {
-  it('DetailPreviewWall embeds AuthPromptForm with shortened hero and guest-auth-form', () => {
+describe('D-19-02 guest listing preview with floating Apple auth gate', () => {
+  it('DetailPreviewWall shows teaser metadata and GuestAuthGateCard overlay', () => {
     const source = readSource('components/detail/DetailPreviewWall.tsx');
-    expect(source).toMatch(/AuthPromptForm/);
-    expect(source).toMatch(/messages\.auth\.detailTitle/);
-    expect(source).toMatch(/messages\.detail\.previewSubtitle/);
-    expect(source).toMatch(/h-\[min\(36vh,240px\)\]/);
+    expect(source).toMatch(/GuestAuthGateCard/);
+    expect(source).toMatch(/listing-detail-guest-preview/);
+    expect(source).toMatch(/listing-detail-guest-gate/);
+    expect(source).toMatch(/listing-detail-locked-tease/);
+    expect(source).toMatch(/via-white\/85/);
+    expect(source).not.toMatch(/dark:from-zinc/);
+    expect(source).toMatch(/AnimatePresence/);
+    expect(source).toMatch(/\.join\(' · '\)/);
+    expect(source).not.toMatch(/previewSubtitle/);
+    expect(source).not.toMatch(/AuthPromptForm/);
     expect(source).toMatch(/guest-auth-form/);
     expect(source).toMatch(/redirectTo/);
+    expect(source).toMatch(/verifiedFree/);
+  });
+
+  it('GuestAuthGateCard implements Apple-first OAuth and inline magic-link email', () => {
+    const card = readSource('components/detail/GuestAuthGateCard.tsx');
+    expect(card).toMatch(/signInWithOAuth/);
+    expect(card).toMatch(/signInWithOtp/);
+    expect(card).toMatch(/guestGateTitle/);
+    expect(card).toMatch(/guestGateSubtitle/);
+    expect(card).not.toMatch(/dark:/);
+    expect(card).toMatch(/arrow_forward/);
+    expect(card).toMatch(/APPLE_OAUTH_ENABLED/);
   });
 
   it('ScrapedListingShell guest branch uses DetailPreviewWall with redirectTo and no dialog open-state setter', () => {
@@ -44,10 +62,11 @@ describe('D-19-02 guest listing preview with inline passwordless auth', () => {
     expect(form).toMatch(/messages\.auth\.checkEmail/);
     expect(form).toMatch(/messages\.auth\.sendError/);
     expect(form).toMatch(/messages\.auth\.oauthError/);
+    expect(form).toMatch(/isAuthBusy/);
   });
 });
 
-describe('guest preview heart focuses inline form (locked CONTEXT favorite heart)', () => {
+describe('guest preview heart focuses inline gate email (locked CONTEXT favorite heart)', () => {
   it('FavoriteButton invokes onUnauthenticated without mounting a dialog when that callback is passed', () => {
     const source = readSource('components/listings/FavoriteButton.tsx');
     expect(source).toMatch(/onUnauthenticated\?: \(\) => void/);
@@ -68,11 +87,11 @@ describe('guest preview heart focuses inline form (locked CONTEXT favorite heart
     expect(source).toMatch(/onUnauthenticated=\{onFavoriteUnauthed\}/);
   });
 
-  it('DetailPreviewWall onFavoriteUnauthed scrolls to and focuses #guest-auth-form', () => {
+  it('DetailPreviewWall onFavoriteUnauthed reopens gate and focuses guest-gate-email', () => {
     const source = readSource('components/detail/DetailPreviewWall.tsx');
     expect(source).toMatch(/onFavoriteUnauthed/);
-    expect(source).toMatch(/guest-auth-form/);
-    expect(source).toMatch(/scrollIntoView\(\{\s*behavior:\s*'smooth',\s*block:\s*'nearest'\s*\}\)/);
-    expect(source).toMatch(/querySelector(?:<HTMLElement>)?\(['"]button, input['"]\)/);
+    expect(source).toMatch(/guest-gate-email/);
+    expect(source).toMatch(/preventScroll:\s*true/);
+    expect(source).toMatch(/setGateOpen\(true\)/);
   });
 });

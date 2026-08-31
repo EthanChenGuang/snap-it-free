@@ -381,6 +381,8 @@ export async function runSourceScrape(
     let crawlResult;
     let fallbackDegraded = false;
 
+    const directCrawlOptions = config.useProxyUrl ? {} : { proxyUrlOverride: '' as const };
+
     if (sourceSlug === 'subito') {
       const fallbackResult = await runSubitoCrawlWithProxyFallback(
         runSubitoCrawler,
@@ -394,6 +396,7 @@ export async function runSourceScrape(
           mode: crawlMode,
           runId: run.id,
           proxyUrls: config.proxyUrls,
+          ...directCrawlOptions,
         },
       );
       crawlResult = fallbackResult.crawlResult;
@@ -411,6 +414,7 @@ export async function runSourceScrape(
           mode: crawlMode,
           runId: run.id,
           proxyUrls: config.proxyUrls,
+          ...directCrawlOptions,
         },
       );
       crawlResult = fallbackResult.crawlResult;

@@ -4,8 +4,8 @@ export const SUBITO_LISTING_IMAGE_RULE = 'gallery-mobile-1x-auto';
 /** ~216×164 JPEG (~5.7 KB) — Subito search-card preset; good for 2-col feed thumbs. */
 export const SUBITO_LISTING_THUMBNAIL_RULE = 'card-mobile-new-small-2x-auto';
 
-/** Full gallery preset for premium home-feed cards on retina displays. */
-export const SUBITO_LISTING_FEED_RULE = 'gallery-mobile-1x-auto';
+/** Compact card preset for the home feed grid — ~4 KB JPEG, sharp enough at 2-col ~50vw. */
+export const SUBITO_LISTING_FEED_RULE = 'card-mobile-new-small-2x-auto';
 
 export type SubitoPhotoRule =
   | typeof SUBITO_LISTING_IMAGE_RULE

@@ -1,4 +1,6 @@
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
+import { ListingDetailSkeleton } from '@/components/detail/ListingDetailSkeleton';
 import { z } from 'zod';
 import { ScrapedListingShell } from '@/components/detail/ScrapedListingShell';
 import { UgcListingShell } from '@/components/detail/UgcListingShell';
@@ -8,10 +10,28 @@ const listingIdSchema = z.string().uuid();
 
 type ListingPageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function ListingPage({ params }: ListingPageProps) {
-  const { id } = await params;
+function serializeSearchParams(
+  params: Record<string, string | string[] | undefined>,
+): string {
+  const sp = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) sp.append(key, item);
+    } else {
+      sp.set(key, value);
+    }
+  }
+  return sp.toString();
+}
+
+export default async function ListingPage({ params, searchParams }: ListingPageProps) {
+  const [{ id }, resolvedSearchParams] = await Promise.all([params, searchParams]);
+  const searchParamsString = serializeSearchParams(resolvedSearchParams);
+  const openDm = resolvedSearchParams.openDm === '1';
   const parsed = listingIdSchema.safeParse(id);
   if (!parsed.success) {
     notFound();
@@ -30,11 +50,15 @@ export default async function ListingPage({ params }: ListingPageProps) {
 
   if (listing.source === 'ugc') {
     return (
-      <UgcListingShell
-        listing={listing}
-        isOwnerView={isOwnerView}
-        similarListings={similarListings}
-      />
+      <Suspense fallback={<ListingDetailSkeleton />}>
+        <UgcListingShell
+          listing={listing}
+          isOwnerView={isOwnerView}
+          similarListings={similarListings}
+          searchParamsString={searchParamsString}
+          openDm={openDm}
+        />
+      </Suspense>
     );
   }
 
@@ -44,7 +68,15 @@ export default async function ListingPage({ params }: ListingPageProps) {
     listing.source === 'wallapop' ||
     listing.source === 'facebook'
   ) {
-    return <ScrapedListingShell listing={listing} similarListings={similarListings} />;
+    return (
+      <Suspense fallback={<ListingDetailSkeleton />}>
+        <ScrapedListingShell
+          listing={listing}
+          similarListings={similarListings}
+          searchParamsString={searchParamsString}
+        />
+      </Suspense>
+    );
   }
 
   notFound();

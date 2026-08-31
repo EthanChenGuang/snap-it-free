@@ -72,7 +72,7 @@ describe('runSubitoCrawlWithProxyFallback', () => {
 
     expect(runSubitoCrawler).toHaveBeenCalledTimes(2);
     expect(runSubitoCrawler.mock.calls[0]?.[2]).toBe('http://user:pass@proxy.example:8080');
-    expect(runSubitoCrawler.mock.calls[1]?.[2]).toBeUndefined();
+    expect(runSubitoCrawler.mock.calls[1]?.[2]).toBe('');
     expect(runSubitoCrawler.mock.calls[1]?.[3]).toMatchObject({
       proxyUrlOverride: '',
       runId: undefined,
@@ -155,5 +155,31 @@ describe('runSubitoCrawlWithProxyFallback', () => {
     ).rejects.toThrow('quota on direct');
 
     expect(runSubitoCrawler).toHaveBeenCalledTimes(2);
+  });
+
+  it('crawls direct when proxy list is empty (use_proxy_url=false) without env fallback', async () => {
+    const runSubitoCrawler = vi
+      .fn<
+        (
+          urls: readonly string[],
+          preset: AntiBlockPreset,
+          proxyUrl?: string,
+        ) => Promise<CrawlResult>
+      >()
+      .mockResolvedValueOnce(mockCrawlResult);
+
+    const result = await runSubitoCrawlWithProxyFallback(
+      runSubitoCrawler,
+      ['https://www.subito.it/annunci-veneto/regalo/telefonia/verona/verona/'],
+      'standard',
+      undefined,
+      { mode: 'incremental', proxyUrlOverride: '' },
+    );
+
+    expect(runSubitoCrawler).toHaveBeenCalledTimes(1);
+    expect(runSubitoCrawler.mock.calls[0]?.[2]).toBe('');
+    expect(runSubitoCrawler.mock.calls[0]?.[3]).toMatchObject({ proxyUrlOverride: '' });
+    expect(result.fallbackDegraded).toBe(false);
+    expect(result.fallbackReason).toBeUndefined();
   });
 });

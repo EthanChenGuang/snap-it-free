@@ -1,5 +1,6 @@
 'use client';
 
+import '@/app/listing-detail.css';
 import Image from 'next/image';
 import { DetailArticle } from '@/components/detail/DetailArticle';
 import { DetailHeroControls } from '@/components/detail/DetailHeroControls';
@@ -13,7 +14,6 @@ import {
 } from '@/lib/listings/detail-metadata';
 import type { ListingRow } from '@/lib/listings/types';
 import { useMessages } from '@/lib/i18n/useMessages';
-import { cn } from '@/lib/utils';
 
 type ListingDetailContentProps = {
   listing: ListingRow;
@@ -49,8 +49,8 @@ export function ListingDetailContent({
   const showStickyCta = !lifecycleActions;
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto bg-surface">
-      <div className="relative mx-auto w-full max-w-container-max pb-28">
+    <div className="listing-detail flex h-full flex-col overflow-y-auto bg-surface">
+      <div className="relative mx-auto w-full max-w-container-max pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
         <div className="relative aspect-square w-full overflow-hidden bg-surface-container-low md:aspect-[4/3]">
           {listing.photo_url ? (
             <Image
@@ -74,7 +74,7 @@ export function ListingDetailContent({
           {banner}
 
           <header className="border-b border-outline-variant pb-space-md">
-            <h1 className="text-h2 font-semibold leading-tight tracking-tight text-on-surface">
+            <h1 className="text-h2 font-semibold leading-tight tracking-[-0.01em] text-on-surface">
               {displayTitle}
             </h1>
             <p
@@ -111,7 +111,7 @@ export function ListingDetailContent({
           )}
 
           {similarListings.length > 0 && (
-            <section className="border-t border-outline-variant pt-space-lg">
+            <section className="pt-space-lg">
               <SimilarListings listings={similarListings} />
             </section>
           )}
@@ -119,14 +119,12 @@ export function ListingDetailContent({
       </div>
 
       {showStickyCta && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-outline-variant bg-surface-container-lowest px-gutter py-space-md pb-[calc(env(safe-area-inset-bottom,0px)+16px)]">
+        <div className="listing-detail-sticky-bar">
           <div className="mx-auto max-w-container-max">
             {isAvailable ? (
               <Button
                 type="button"
-                className={cn(
-                  'flex w-full items-center justify-center rounded-lg py-space-md text-label-md font-semibold',
-                )}
+                className="flex min-h-11 w-full items-center justify-center py-space-md text-label-md font-semibold"
                 disabled={primaryDisabled}
                 onClick={onPrimaryAction}
               >
@@ -136,7 +134,7 @@ export function ListingDetailContent({
               <button
                 type="button"
                 disabled
-                className="flex w-full items-center justify-center rounded-lg border border-outline bg-surface-container py-space-md text-label-md font-medium text-secondary"
+                className="flex min-h-11 w-full items-center justify-center rounded border border-outline bg-surface-container py-space-md text-label-md font-medium text-secondary"
               >
                 {messages.listing.claimed}
               </button>

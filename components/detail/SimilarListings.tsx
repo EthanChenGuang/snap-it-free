@@ -19,10 +19,10 @@ export function SimilarListings({ listings }: SimilarListingsProps) {
 
   return (
     <div className="mt-space-md">
-      <h3 className="mb-space-md text-label-sm uppercase tracking-widest text-secondary">
+      <h3 className="mb-space-md text-label-md font-medium text-on-surface">
         {messages.detail.similarNearYou}
       </h3>
-      <div className="flex flex-col gap-space-sm">
+      <div className="flex flex-col gap-space-xs">
         {listings.map((item) => {
           const locationText = listingConsumerLocationLabel(
             item,
@@ -33,9 +33,9 @@ export function SimilarListings({ listings }: SimilarListingsProps) {
             <Link
               key={item.id}
               href={`/listing/${item.id}`}
-              className="group flex items-center gap-space-sm rounded-lg p-space-xs transition-colors hover:bg-surface-container"
+              className="listing-detail-similar-link group flex items-center gap-space-sm rounded-lg p-space-xs transition-colors hover:bg-surface-container"
             >
-              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded bg-surface-variant">
+              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded bg-surface-container-high">
                 {item.photo_url ? (
                   <Image
                     src={item.photo_url}
@@ -52,10 +52,10 @@ export function SimilarListings({ listings }: SimilarListingsProps) {
                 )}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-label-md text-primary group-hover:underline">
+                <p className="truncate text-label-md font-medium text-on-surface group-hover:underline">
                   {item.title}
                 </p>
-                <p className="text-label-sm text-secondary" suppressHydrationWarning>
+                <p className="text-label-sm text-on-surface-variant tabular-nums" suppressHydrationWarning>
                   {locationText} • {formatRelativeTime(item.posted_at)}
                 </p>
               </div>

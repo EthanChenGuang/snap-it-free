@@ -81,11 +81,8 @@ describe('useListingsPoll', () => {
   it('refresh fetches active listings and updates state', async () => {
     mounted = mountUseListingsPoll(initialEmpty);
 
-    expect(mockFetch).not.toHaveBeenCalled();
-    expect(mounted.hook.listings).toEqual([]);
-
     await act(async () => {
-      await mounted!.hook.refresh();
+      await Promise.resolve();
     });
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
@@ -93,5 +90,18 @@ describe('useListingsPoll', () => {
     expect(mounted.hook.listings).toContainEqual(padovaListing);
     expect(mounted.hook.totalCount).toBe(42);
     expect(mounted.hook.isRefreshing).toBe(false);
+  });
+
+  it('refresh on mount does not wipe existing listings when fetch returns empty', async () => {
+    mockFetch.mockResolvedValue([]);
+    mockFetchCount.mockResolvedValue(0);
+    mounted = mountUseListingsPoll([padovaListing]);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mounted.hook.listings).toContainEqual(padovaListing);
   });
 });

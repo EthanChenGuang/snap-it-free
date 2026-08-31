@@ -1,5 +1,6 @@
 'use client';
 
+import '@/app/listing-detail.css';
 import Link from 'next/link';
 import { DetailPhotoGallery } from '@/components/detail/DetailPhotoGallery';
 import { SimilarListings } from '@/components/detail/SimilarListings';
@@ -13,7 +14,6 @@ import {
   stripUgcDescriptionMeta,
 } from '@/lib/ugc/description-meta';
 import { useMessages } from '@/lib/i18n/useMessages';
-import { cn } from '@/lib/utils';
 
 type UgcListingDetailContentProps = {
   listing: ListingRow & { description?: string | null };
@@ -58,15 +58,15 @@ export function UgcListingDetailContent({
   const showOwnerFooter = isOwner && Boolean(ownerFooter);
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto bg-surface">
-      <div className="relative mx-auto w-full max-w-container-max pb-28">
+    <div className="listing-detail flex h-full flex-col overflow-y-auto bg-surface">
+      <div className="relative mx-auto w-full max-w-container-max pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
         <DetailPhotoGallery photos={photos} alt={displayTitle} controls={heroControls} />
 
         <div className="px-gutter pt-space-lg">
           {banner}
 
           <header className="border-b border-outline-variant pb-space-md">
-            <h1 className="text-h2 font-semibold leading-tight tracking-tight text-on-surface">
+            <h1 className="text-h2 font-semibold leading-tight tracking-[-0.01em] text-on-surface">
               {displayTitle}
             </h1>
             <p
@@ -79,14 +79,10 @@ export function UgcListingDetailContent({
             {(categoryLabel || conditionLabel) && (
               <div className="mt-space-md flex flex-wrap gap-space-xs">
                 {categoryLabel ? (
-                  <span className="rounded-full bg-[#f1f1f0] px-space-sm py-0.5 text-label-sm text-on-surface-variant">
-                    {categoryLabel}
-                  </span>
+                  <span className="listing-detail-chip">{categoryLabel}</span>
                 ) : null}
                 {conditionLabel ? (
-                  <span className="rounded-full bg-[#f1f1f0] px-space-sm py-0.5 text-label-sm text-on-surface-variant">
-                    {conditionLabel}
-                  </span>
+                  <span className="listing-detail-chip">{conditionLabel}</span>
                 ) : null}
               </div>
             )}
@@ -131,7 +127,7 @@ export function UgcListingDetailContent({
           ) : null}
 
           {similarListings.length > 0 && (
-            <section className="border-t border-outline-variant pt-space-lg">
+            <section className="pt-space-lg">
               <SimilarListings listings={similarListings} />
             </section>
           )}
@@ -139,13 +135,11 @@ export function UgcListingDetailContent({
       </div>
 
       {showBuyerFooter && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-outline-variant bg-surface-container-lowest px-gutter py-space-md pb-[calc(env(safe-area-inset-bottom,0px)+16px)]">
+        <div className="listing-detail-sticky-bar">
           <div className="mx-auto max-w-container-max">
             <Button
               type="button"
-              className={cn(
-                'flex w-full items-center justify-center rounded-lg py-space-md text-label-md font-semibold',
-              )}
+              className="flex min-h-11 w-full items-center justify-center py-space-md text-label-md font-semibold"
               disabled={contactDisabled}
               onClick={onContact}
             >
@@ -156,7 +150,7 @@ export function UgcListingDetailContent({
       )}
 
       {showOwnerFooter && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-outline-variant bg-surface-container-lowest px-gutter py-space-md pb-[calc(env(safe-area-inset-bottom,0px)+16px)]">
+        <div className="listing-detail-sticky-bar">
           <div className="mx-auto max-w-container-max">{ownerFooter}</div>
         </div>
       )}

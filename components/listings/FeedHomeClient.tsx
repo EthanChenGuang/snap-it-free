@@ -27,17 +27,25 @@ const CONTENT_MOTION = {
   transition: { duration: 0.28, ease: [0.16, 1, 0.3, 1] as const },
 };
 
+/** First paint batch — keeps DOM light so above-the-fold images win bandwidth. */
+const INITIAL_RENDER_COUNT = 24;
+/** Cards appended per scroll near the feed bottom. */
+const RENDER_STEP = 20;
+/** Scroll proximity (px) before loading the next batch. */
+const SCROLL_LOAD_AHEAD_PX = 900;
+
 export function FeedHomeClient({
   initialListings,
   initialTotalCount = null,
 }: FeedHomeClientProps) {
   const { messages, language } = useMessages();
   const { searchQuery, registerScrollContainer } = useFeedScroll();
-  const { applied } = useFeedFilter();
+  const { applied, sheetOpen } = useFeedFilter();
   const mapModeActive = applied.mode === 'map' && applied.radiusEnabled;
   const { center } = useDistanceCenter(mapModeActive);
   const scrollRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
+  const [renderLimit, setRenderLimit] = useState(INITIAL_RENDER_COUNT);
 
   const { listings, totalCount, isRefreshing } = useListingsPoll(initialListings, {
     initialTotalCount,
@@ -57,6 +65,11 @@ export function FeedHomeClient({
     registerScrollContainer(scrollRef.current);
     return () => registerScrollContainer(null);
   }, [registerScrollContainer]);
+
+  useEffect(() => {
+    if (!sheetOpen || !scrollRef.current) return;
+    scrollRef.current.scrollTop = 0;
+  }, [sheetOpen]);
 
   const cityLabels = useMemo(
     () => consumerCityLabelsFromMessages(messages),
@@ -90,6 +103,36 @@ export function FeedHomeClient({
       applied.radiusEnabled ? applied.radiusKm : '',
     ].join('|');
   }, [searchQuery, applied, center, mapModeActive]);
+
+  useEffect(() => {
+    setRenderLimit(INITIAL_RENDER_COUNT);
+  }, [filterKey]);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const onScroll = () => {
+      const nearBottom =
+        container.scrollTop + container.clientHeight >=
+        container.scrollHeight - SCROLL_LOAD_AHEAD_PX;
+      if (!nearBottom) return;
+
+      setRenderLimit((prev) => {
+        if (prev >= filteredListings.length) return prev;
+        return Math.min(prev + RENDER_STEP, filteredListings.length);
+      });
+    };
+
+    container.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => container.removeEventListener('scroll', onScroll);
+  }, [filteredListings.length, filterKey]);
+
+  const visibleListings = useMemo(
+    () => filteredListings.slice(0, renderLimit),
+    [filteredListings, renderLimit],
+  );
 
   const hasSearchQuery = searchQuery.trim().length > 0;
   const hasCategoryFilter = applied.categories.length > 0;
@@ -128,7 +171,7 @@ export function FeedHomeClient({
     <main className="feed-home flex h-full min-h-0 flex-col overflow-hidden">
       <RubberbandScroll
         ref={scrollRef}
-        className="feed-home-scroll no-scrollbar h-full flex-1 px-5 pt-1 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:px-6"
+        className="feed-home-scroll no-scrollbar h-full flex-1 px-gutter pt-space-xs pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]"
       >
         <AnimatePresence mode="wait" initial={false}>
           {viewState === 'loading' && (
@@ -180,19 +223,19 @@ export function FeedHomeClient({
 
               <p
                 className={cn(
-                  'feed-count-label mb-4 px-0.5 text-label-sm text-on-surface-variant',
+                  'feed-count-label mb-space-md px-0.5 text-label-sm text-on-surface-variant',
                   countPulse && 'is-updating',
                 )}
               >
                 {messages.sheet.itemsInArea(displayCount)}
               </p>
 
-              <section className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-5 sm:gap-y-12">
-                {filteredListings.map((listing, index) => (
+              <section className="grid grid-cols-2 gap-x-space-md gap-y-space-lg sm:grid-cols-3 lg:grid-cols-4">
+                {visibleListings.map((listing, index) => (
                   <ListListingCard
                     key={listing.id}
                     listing={listing}
-                    priority={index < 6}
+                    priority={index < 4}
                     index={index}
                   />
                 ))}

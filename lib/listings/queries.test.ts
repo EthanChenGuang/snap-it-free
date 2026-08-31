@@ -7,19 +7,30 @@ const mockSelect = vi.fn();
 const mockEq = vi.fn();
 const mockNot = vi.fn();
 const mockOrder = vi.fn();
+const mockLimit = vi.fn();
 const mockMaybeSingle = vi.fn();
 
 mockMaybeSingle.mockReturnValue({ data: null, error: null });
-mockOrder.mockReturnValue({ data: [], error: null });
+mockLimit.mockReturnValue({ data: [], error: null });
+mockOrder.mockReturnValue({ data: [], error: null, limit: mockLimit });
 mockNot.mockReturnValue({ order: mockOrder, maybeSingle: mockMaybeSingle });
 mockEq.mockReturnValue({ eq: mockEq, not: mockNot });
 mockSelect.mockReturnValue({ eq: mockEq, not: mockNot, order: mockOrder });
 
 const mockFrom = vi.fn(() => ({ select: mockSelect }));
 
+vi.mock('@/lib/supabase/anon', () => ({
+  createAnonClient: vi.fn(() => ({
+    from: mockFrom,
+  })),
+}));
+
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({
     from: mockFrom,
+    auth: {
+      getUser: vi.fn(async () => ({ data: { user: null } })),
+    },
   })),
 }));
 
@@ -34,18 +45,29 @@ describe('getActiveListings', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockMaybeSingle.mockReturnValue({ data: null, error: null });
-    mockOrder.mockReturnValue({ data: [], error: null });
+    mockLimit.mockReturnValue({ data: [], error: null });
+    mockOrder.mockReturnValue({ data: [], error: null, limit: mockLimit });
     mockNot.mockReturnValue({ order: mockOrder, maybeSingle: mockMaybeSingle });
     mockEq.mockReturnValue({ eq: mockEq, not: mockNot });
     mockSelect.mockReturnValue({ eq: mockEq, not: mockNot, order: mockOrder });
     mockFrom.mockReturnValue({ select: mockSelect });
   });
 
+  it('applies limit when provided (feed SSR payload cap)', async () => {
+    const { getActiveListings } = await import('./queries');
+
+    await getActiveListings({ limit: 24 });
+
+    expect(mockLimit).toHaveBeenCalledWith(24);
+  });
+
   it('queries listings_public without zone filter — view handles D-28 visibility', async () => {
     const { getActiveListings } = await import('./queries');
+    const { createAnonClient } = await import('@/lib/supabase/anon');
 
     await getActiveListings();
 
+    expect(createAnonClient).toHaveBeenCalled();
     expect(mockFrom).toHaveBeenCalledWith('listings_public');
     expect(mockSelect).toHaveBeenCalledWith(ACTIVE_COLUMNS);
     expect(mockNot).not.toHaveBeenCalled();

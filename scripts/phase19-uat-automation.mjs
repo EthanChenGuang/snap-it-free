@@ -147,6 +147,21 @@ async function setAppLanguage(page, language) {
   );
 }
 
+function navLink(page, href) {
+  return page.locator(`.feed-glass-bottom-nav a[href="${href}"]`);
+}
+
+async function waitForListingPreview(page, title) {
+  await page.waitForSelector('h1', { timeout: 15000 });
+  await page.getByRole('heading', { level: 1, name: title }).waitFor({ timeout: 15000 });
+  await page.waitForTimeout(500);
+}
+
+async function waitForAuthSettled(page) {
+  await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+  await page.waitForTimeout(800);
+}
+
 async function cleanupAll(admin) {
   for (const listingId of cleanup.listings) {
     await admin.from('listings').delete().eq('id', listingId);
@@ -215,8 +230,9 @@ async function runBrowserScenarios(env) {
       waitUntil: 'domcontentloaded',
       timeout: 45000,
     });
+    await waitForListingPreview(page, 'P19UAT Preview wall scraped item');
     const titleVisible = await page
-      .getByText('P19UAT Preview wall scraped item')
+      .getByRole('heading', { level: 1, name: 'P19UAT Preview wall scraped item' })
       .isVisible()
       .catch(() => false);
     const descriptionHidden = !(await page
@@ -230,14 +246,15 @@ async function runBrowserScenarios(env) {
       titleVisible ? (descriptionHidden ? 'description gated' : 'description leaked') : 'title missing',
     );
 
-    // Scenario 3 — Preview sticky CTA
+    // Scenario 3 — Guest auth gate card visible by default on preview wall
+    // (D-260826: replaced the sticky "Sign in to view full details" CTA button
+    // with a GuestAuthGateCard that's open on load — locale-independent anchor
+    // is the #guest-gate-email input, present for every locale.)
     const hasPreviewCta = await page
-      .getByRole('button', {
-        name: /sign in to view full details|登录查看完整详情|accedi per i dettagli/i,
-      })
+      .locator('#guest-gate-email')
       .isVisible()
       .catch(() => false);
-    record(3, 'Preview sticky CTA visible for anonymous user', hasPreviewCta);
+    record(3, 'Guest auth gate card visible for anonymous user', hasPreviewCta);
 
     // Scenario 11 — Shared link preview (same session, logged out)
     const stillOnListing = page.url().includes(`/listing/${scrapedId}`);
@@ -249,20 +266,23 @@ async function runBrowserScenarios(env) {
     );
 
     // Scenario 9 — Heart favorite gate on preview
-    const heartButton = page.getByRole('button', { name: /favorites|收藏|preferiti/i }).first();
+    // (D-260826: heart tap no longer opens a separate dialog — the gate card is
+    // already open; it keeps the gate open and focuses #guest-gate-email.)
+    const heartButton = page.getByRole('button', { name: /favorite/i }).first();
     await heartButton.click().catch(() => {});
-    const heartModalVisible = await page
-      .getByRole('dialog')
-      .getByText(/sign in to save favorites|登录.*收藏|accedi.*preferiti/i)
-      .isVisible()
+    await page.waitForTimeout(300);
+    const heartGateVisible = await page.locator('#guest-gate-email').isVisible().catch(() => false);
+    const heartEmailFocused = await page
+      .evaluate(() => document.activeElement?.id === 'guest-gate-email')
       .catch(() => false);
-    record(9, 'Heart favorite gate opens auth modal on detail preview', heartModalVisible);
-    await page.keyboard.press('Escape').catch(() => {});
+    const heartModalVisible = heartGateVisible && heartEmailFocused;
+    record(9, 'Heart favorite tap keeps guest auth gate open and focuses email field', heartModalVisible);
 
     // Scenario 4 — Favorites nav auth gate
     await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await waitForAuthSettled(page);
     const feedUrlBeforeFav = page.url();
-    await page.getByRole('link', { name: /favorites|收藏|preferiti/i }).click().catch(() => {});
+    await navLink(page, '/favorites').click().catch(() => {});
     await page.waitForTimeout(400);
     const stayedOffFavorites =
       !page.url().includes('/favorites') || page.url() === feedUrlBeforeFav;
@@ -295,6 +315,7 @@ async function runBrowserScenarios(env) {
 
     // Scenario 7 — Direct /post page gate
     await page.goto(`${BASE}/post`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await waitForAuthSettled(page);
     const gateTitleVisible = await page
       .getByRole('heading', { name: /sign in to post|登录后即可发布|accedi per pubblicare/i })
       .isVisible()
@@ -316,8 +337,9 @@ async function runBrowserScenarios(env) {
 
     // Scenario 6 — Post nav auth gate
     await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await waitForAuthSettled(page);
     const feedUrlBeforePost = page.url();
-    await page.getByRole('link', { name: /post|发布|pubblica/i }).click().catch(() => {});
+    await navLink(page, '/post').click().catch(() => {});
     await page.waitForTimeout(400);
     const stayedOnFeed =
       page.url() === feedUrlBeforePost || !page.url().includes('/post');
@@ -347,9 +369,7 @@ async function runBrowserScenarios(env) {
     });
     await authedPage.waitForTimeout(1500);
     const noPreviewCta = !(await authedPage
-      .getByRole('button', {
-        name: /sign in to view full details|登录查看完整详情|accedi per i dettagli/i,
-      })
+      .locator('#guest-gate-email')
       .isVisible()
       .catch(() => false));
     const fullDescriptionVisible = await authedPage
@@ -360,7 +380,7 @@ async function runBrowserScenarios(env) {
       8,
       'Authenticated user sees full detail content',
       noPreviewCta && fullDescriptionVisible,
-      noPreviewCta ? (fullDescriptionVisible ? 'full detail' : 'description not visible') : 'preview CTA still shown',
+      noPreviewCta ? (fullDescriptionVisible ? 'full detail' : 'description not visible') : 'guest auth gate still shown',
     );
 
     // Scenario 10 — UGC DM regression (authenticated)
@@ -375,7 +395,8 @@ async function runBrowserScenarios(env) {
     await messageBtn.click().catch(() => {});
     await authedPage.waitForTimeout(500);
     const dmDrawerVisible = await authedPage
-      .getByText(/write a message|写一条消息|scrivi un messaggio/i)
+      .getByText(/Messages|消息|Messaggi|Message the owner to arrange pickup|给发布者留言|Scrivi al proprietario/i)
+      .first()
       .isVisible()
       .catch(() => false);
     record(
@@ -387,10 +408,12 @@ async function runBrowserScenarios(env) {
     await authedContext.close();
 
     // Scenario 12 — Locale switch spot-check (automated via preferences)
+    // (D-260826: assert the GuestAuthGateCard's localized title instead of the
+    // retired previewCta button copy.)
     const localeChecks = [
-      { lang: 'zh', pattern: /登录查看完整详情/ },
-      { lang: 'en', pattern: /Sign in to view full details/i },
-      { lang: 'it', pattern: /Accedi per i dettagli completi/i },
+      { lang: 'zh', pattern: /登录以免费领取/ },
+      { lang: 'en', pattern: /Sign in to claim for free/i },
+      { lang: 'it', pattern: /Accedi per ritirare gratis/i },
     ];
     const localeResults = [];
     for (const { lang, pattern } of localeChecks) {
@@ -401,9 +424,10 @@ async function runBrowserScenarios(env) {
         waitUntil: 'domcontentloaded',
         timeout: 45000,
       });
-      await localePage.waitForTimeout(800);
+      await waitForListingPreview(localePage, 'P19UAT Preview wall scraped item');
+      await localePage.waitForTimeout(1200);
       const ctaOk = await localePage
-        .getByRole('button', { name: pattern })
+        .getByRole('dialog', { name: pattern })
         .isVisible()
         .catch(() => false);
       localeResults.push(`${lang}=${ctaOk ? 'ok' : 'fail'}`);

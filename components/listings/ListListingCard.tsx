@@ -61,14 +61,12 @@ export function ListListingCard({
               sizes="(max-width: 768px) 50vw, 280px"
             />
 
-            <div className="feed-card-media-shine pointer-events-none absolute inset-0 z-[4]" aria-hidden />
-
             <div
-              className="pointer-events-none absolute inset-x-0 top-0 z-[6] h-16 bg-gradient-to-b from-black/10 via-black/3 to-transparent"
+              className="pointer-events-none absolute inset-x-0 top-0 z-[6] h-14 bg-gradient-to-b from-black/12 to-transparent"
               aria-hidden
             />
             <div
-              className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-24 bg-gradient-to-t from-black/30 via-black/10 to-transparent"
+              className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-20 bg-gradient-to-t from-black/28 via-black/8 to-transparent"
               aria-hidden
             />
 

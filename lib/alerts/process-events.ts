@@ -1,4 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import type { ConsumerCityKey } from '@/lib/geo/italian-cities';
+import { selectEnabledAlerts } from '@/lib/alerts/db';
 import { alertMatchesListing } from './matcher';
 import type { VeniceZone } from '@/lib/listings/types';
 import { fanOutMatchPush } from '@/lib/notifications/web-push';
@@ -17,6 +19,9 @@ type ListingRow = {
   id: string;
   title: string;
   zone: VeniceZone | null;
+  city: string | null;
+  lat: number | null;
+  lng: number | null;
 };
 
 type EnabledAlert = {
@@ -24,6 +29,7 @@ type EnabledAlert = {
   user_id: string;
   keyword: string | null;
   zone: VeniceZone | null;
+  city: ConsumerCityKey | null;
 };
 
 async function markEvent(
@@ -48,7 +54,7 @@ async function processOneEvent(
 ): Promise<boolean> {
   const { data: listing, error: listingError } = await supabase
     .from('listings')
-    .select('id, title, zone')
+    .select('id, title, zone, city, lat, lng')
     .eq('id', event.listing_id)
     .maybeSingle();
 
@@ -60,8 +66,8 @@ async function processOneEvent(
   const listingRow = listing as ListingRow;
   const matches = alerts.filter((alert) =>
     alertMatchesListing(
-      { keyword: alert.keyword, zone: alert.zone },
-      { title: listingRow.title, zone: listingRow.zone },
+      { keyword: alert.keyword, zone: alert.zone, city: alert.city },
+      listingRow,
     ),
   );
 
@@ -125,13 +131,10 @@ export async function processPendingListingEvents(
     return 0;
   }
 
-  const { data: alerts, error: alertsError } = await supabase
-    .from('alerts')
-    .select('id, user_id, keyword, zone')
-    .eq('enabled', true);
+  const { data: alerts, error: alertsError } = await selectEnabledAlerts(supabase);
 
   if (alertsError) {
-    throw new Error(alertsError.message);
+    throw new Error(alertsError);
   }
 
   const enabledAlerts = (alerts ?? []) as EnabledAlert[];

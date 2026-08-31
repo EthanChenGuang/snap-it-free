@@ -83,8 +83,14 @@ export async function runCrawlWithProxyFallback(
 
   if (proxyList.length === 0) {
     if (allowDirectFallback) {
-      const crawlResult = await runCrawler(urls, preset, undefined, options);
-      return { crawlResult, fallbackDegraded: true, fallbackReason: PROXY_QUOTA_FALLBACK_REASON };
+      // Explicit '' — do not let resolveCrawlerProxyUrl fall back to PROXY_URL env
+      // when the source has use_proxy_url=false (admin direct crawl).
+      const directOptions = {
+        ...options,
+        proxyUrlOverride: options.proxyUrlOverride ?? '',
+      };
+      const crawlResult = await runCrawler(urls, preset, '', directOptions);
+      return { crawlResult, fallbackDegraded: false };
     }
     throw new Error('No proxy configured for crawl');
   }
@@ -140,7 +146,7 @@ export async function runCrawlWithProxyFallback(
   const directRunId = options.runId ? `${options.runId}-direct` : undefined;
   console.log('[worker] All proxy providers exhausted — retrying crawl without proxy');
 
-  const crawlResult = await runCrawler(urls, preset, undefined, {
+  const crawlResult = await runCrawler(urls, preset, '', {
     ...options,
     proxyUrlOverride: '',
     runId: directRunId,

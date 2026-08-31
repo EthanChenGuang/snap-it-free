@@ -11,8 +11,10 @@ import { AppChrome } from '@/components/shell/AppChrome';
 import { DocumentLang } from '@/components/shell/DocumentLang';
 import { Toaster } from '@/components/ui/toaster';
 import { APPEARANCE_INIT_SCRIPT } from '@/lib/settings/resolve-appearance';
+import { SUPPRESS_REACT_DEVTOOLS_SUSPENSE_WARNING_SCRIPT } from '@/lib/dev/suppress-react-devtools-suspense-warning-script';
 import { DEV_UNREGISTER_SW_SCRIPT } from '@/lib/pwa/dev-unregister-sw-script';
 import './globals.css';
+import './theme-dark.css';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -36,8 +38,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
           rel="stylesheet"
         />
+        <link rel="dns-prefetch" href="https://images.sbito.it" />
+        <link rel="preconnect" href="https://images.sbito.it" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://images1.vinted.net" />
+        <link rel="preconnect" href="https://images1.vinted.net" crossOrigin="anonymous" />
         {isDev ? (
-          <InlineScript id="dev-unregister-sw" html={DEV_UNREGISTER_SW_SCRIPT} />
+          <>
+            <InlineScript
+              id="dev-suppress-react-devtools-suspense"
+              html={SUPPRESS_REACT_DEVTOOLS_SUSPENSE_WARNING_SCRIPT}
+            />
+            <InlineScript id="dev-unregister-sw" html={DEV_UNREGISTER_SW_SCRIPT} />
+          </>
         ) : null}
         <InlineScript id="appearance-init" html={APPEARANCE_INIT_SCRIPT} />
       </head>

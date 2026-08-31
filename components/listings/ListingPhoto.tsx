@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useRef, useState } from 'react';
 import { useInView } from '@/hooks/useInView';
 import {
@@ -76,14 +75,17 @@ export function ListingPhoto({
     <div ref={containerRef} className="absolute inset-0 overflow-hidden">
       {(!shouldLoad || !loaded) && <PhotoPlaceholder shimmer={isFeed} />}
       {shouldLoad && (
-        <Image
+        // Native img — external CDN already resizes; avoids Next/Image unoptimized overhead.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
           src={resolvedSrc}
           alt={alt}
-          fill
           sizes={sizes}
-          priority={priority}
-          unoptimized
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          fetchPriority={priority ? 'high' : 'auto'}
           className={cn(
+            'absolute inset-0 h-full w-full',
             isFeed
               ? 'feed-card-image-reveal object-cover'
               : 'object-cover transition-opacity duration-300',

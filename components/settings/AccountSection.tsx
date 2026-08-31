@@ -86,7 +86,7 @@ export function AccountSection() {
           onClick={() => void handleDelete()}
           onBlur={() => setConfirming(false)}
           disabled={deleting}
-          className="rounded-xl border border-error bg-white px-4 py-2 text-label-md text-error transition-colors active:bg-error active:text-on-error"
+          className="rounded-xl border border-error bg-surface-container-lowest px-4 py-2 text-label-md text-error transition-colors active:bg-error active:text-on-error"
         >
           {confirming ? messages.settings.account.confirmDelete : messages.settings.account.deleteButton}
         </button>

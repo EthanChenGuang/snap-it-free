@@ -33,9 +33,9 @@ export function DetailPhotoGallery({ photos, alt, controls }: DetailPhotoGallery
 
   if (photos.length === 0) {
     return (
-      <div className="relative aspect-square w-full bg-surface-container-low">
+      <div className="relative aspect-square w-full bg-surface-container-low md:aspect-[4/3]">
         <div className="flex h-full items-center justify-center text-on-surface-variant">
-          <span className="material-symbols-outlined text-[48px]">image</span>
+          <span className="material-symbols-outlined text-h2">image</span>
         </div>
         {controls}
       </div>
@@ -47,7 +47,7 @@ export function DetailPhotoGallery({ photos, alt, controls }: DetailPhotoGallery
       <div
         ref={scrollRef}
         className={cn(
-          'flex aspect-square w-full snap-x snap-mandatory overflow-x-auto',
+          'flex aspect-square w-full snap-x snap-mandatory overflow-x-auto md:aspect-[4/3]',
           '[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
         )}
       >

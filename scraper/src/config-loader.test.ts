@@ -189,5 +189,27 @@ describe('loadSourceConfig', () => {
     const config = await loadSourceConfig(supabase, 'vinted');
     expect(config!.proxyUrl).toBeUndefined();
     expect(config!.proxyConfigured).toBe(false);
+    expect(config!.useProxyUrl).toBe(false);
+  });
+
+  it('disables PROXY_URL for subito when use_proxy_url is false', async () => {
+    process.env.PROXY_URL = 'http://env-proxy.example:8080';
+    process.env.PROXY_URL_DATAIMPULSE = 'http://user:pass@gw.dataimpulse.com:823';
+    const supabase = mockSupabase({
+      source: {
+        slug: 'subito',
+        target_urls: ['https://www.subito.it/annunci-veneto/regalo/telefonia/verona/verona/'],
+        anti_block_preset: 'conservative',
+        enabled: true,
+        implementation_status: 'live',
+        use_proxy_url: false,
+      },
+      global: { global_pause: false, proxy_enc: null },
+    });
+
+    const config = await loadSourceConfig(supabase, 'subito');
+    expect(config!.useProxyUrl).toBe(false);
+    expect(config!.proxyUrl).toBeUndefined();
+    expect(config!.proxyUrls).toEqual([]);
   });
 });

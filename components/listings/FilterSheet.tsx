@@ -19,6 +19,10 @@ import { cn } from '@/lib/utils';
 
 const CITY_OPTIONS = CONSUMER_CITY_FILTER_OPTIONS;
 
+/** Filter sheet body height — 85% viewport; footer clears floating bottom nav. */
+const FILTER_SHEET_HEIGHT_CLASS =
+  'bottom-0 h-[85dvh] max-h-[85dvh] overflow-hidden';
+
 function ConsumerCityChipSelector({
   value,
   onChange,
@@ -73,12 +77,12 @@ export function FilterSheet() {
 
   return (
     <Drawer open={sheetOpen} onOpenChange={handleOpenChange} modal={false} handleOnly>
-      <DrawerContent nonModal className="h-[85dvh] max-h-[85dvh] overflow-hidden">
+      <DrawerContent nonModal className={FILTER_SHEET_HEIGHT_CLASS}>
         <DrawerHeader className="shrink-0 border-b border-outline-variant px-gutter pb-space-md pt-space-sm">
           <DrawerTitle className="text-xl">{messages.feed.filtersTitle}</DrawerTitle>
         </DrawerHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
           <div
             data-vaul-no-drag
             className="filter-sheet-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y"
@@ -146,7 +150,7 @@ export function FilterSheet() {
             </section>
           </div>
 
-          <footer className="shrink-0 flex gap-3 border-t border-outline-variant bg-surface p-4 pt-3">
+          <footer className="shrink-0 flex gap-3 border-t border-outline-variant bg-surface p-4 pt-3 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))]">
             <button
               type="button"
               className="flex-1 rounded-full bg-surface-container py-3.5 text-sm font-semibold text-on-surface transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline"

@@ -26,12 +26,12 @@ export function SettingsToggle({ checked, disabled, onChange, ariaLabel }: Setti
         onChange={(event) => onChange(event.target.checked)}
         aria-label={ariaLabel}
       />
-      <span className="relative h-[31px] w-[51px] rounded-full bg-neutral-200 transition-colors after:absolute after:start-[2px] after:top-[2px] after:h-[27px] after:w-[27px] after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:bg-primary peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary" />
+      <span className="relative h-[31px] w-[51px] rounded-full bg-surface-container-high transition-colors after:absolute after:start-[2px] after:top-[2px] after:h-[27px] after:w-[27px] after:rounded-full after:bg-surface-container-lowest after:shadow-sm after:transition-transform peer-checked:bg-primary peer-checked:after:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary" />
     </label>
   );
 }
 
-/** iOS inset grouped white card container */
+/** iOS inset grouped card container */
 export function SettingsGroupCard({
   children,
   className,
@@ -51,7 +51,7 @@ export function SettingsGroupCard({
   );
 }
 
-/** Standalone single-row iOS card (e.g. Appearance, My Posts) */
+/** Standalone single-row card (e.g. Appearance, My Posts) */
 export function SettingsRowCard({
   children,
   className,
@@ -64,7 +64,7 @@ export function SettingsRowCard({
   href?: string;
 }) {
   const baseClass = cn(
-    'mb-3 flex w-full items-center justify-between rounded-2xl bg-white p-4 shadow-sm transition-transform active:scale-[0.98]',
+    'mb-3 flex w-full items-center justify-between rounded-lg border border-outline-variant bg-surface-container-lowest p-4 transition-transform active:scale-[0.98]',
     className,
   );
 
@@ -85,19 +85,19 @@ export function SettingsRowCard({
 
 export function SettingsSectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mb-2 px-4 text-xs font-medium uppercase tracking-wide text-neutral-500">
+    <h2 className="mb-2 px-4 text-label-sm font-medium uppercase tracking-wide text-on-surface-variant">
       {children}
     </h2>
   );
 }
 
 export function SettingsRowDivider() {
-  return <div className="mx-4 border-b border-neutral-100/80" />;
+  return <div className="mx-4 border-b border-outline-variant" />;
 }
 
 export function SettingsChevron() {
   return (
-    <span className="material-symbols-outlined shrink-0 text-[20px] text-neutral-300" aria-hidden>
+    <span className="material-symbols-outlined shrink-0 text-label-md text-outline" aria-hidden>
       chevron_right
     </span>
   );
@@ -107,7 +107,7 @@ export function SettingsAccountCard({ children, className }: { children: React.R
   return (
     <div
       className={cn(
-        'mb-6 flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm',
+        'mb-6 flex items-center gap-4 rounded-lg border border-outline-variant bg-surface-container-lowest p-4',
         className,
       )}
     >

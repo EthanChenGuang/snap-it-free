@@ -43,16 +43,16 @@ describe('isMislabeledFree', () => {
 });
 
 describe('computeExpiresAt', () => {
-  it('uses posted_at plus 30 days while still inside the window', () => {
+  it('uses posted_at plus TTL while still inside the window', () => {
     const postedAt = new Date('2026-07-28T10:00:00.000Z');
     const now = new Date('2026-07-29T10:00:00.000Z');
-    expect(computeExpiresAt(postedAt, now).toISOString()).toBe('2026-08-27T10:00:00.000Z');
+    expect(computeExpiresAt(postedAt, now).toISOString()).toBe('2027-01-24T10:00:00.000Z');
   });
 
   it('extends from now when posted_at window has elapsed (re-seen listing)', () => {
     const postedAt = new Date('2026-07-28T10:00:00.000Z');
-    const now = new Date('2026-08-28T08:00:00.000Z');
-    expect(computeExpiresAt(postedAt, now).toISOString()).toBe('2026-09-27T08:00:00.000Z');
+    const now = new Date('2027-01-25T08:00:00.000Z');
+    expect(computeExpiresAt(postedAt, now).toISOString()).toBe('2027-07-24T08:00:00.000Z');
   });
 });
 
@@ -65,7 +65,7 @@ describe('normalizeRawListing', () => {
     expect(result).toEqual({ reject: expect.stringMatching(/price pattern/i) });
   });
 
-  it('accepts clean listings and sets expires_at to posted_at plus 30 days', () => {
+  it('accepts clean listings and sets expires_at to posted_at plus TTL', () => {
     const postedAt = new Date(Date.now() - 60 * 60 * 1000);
     const result = normalizeRawListing({
       ...baseRaw,

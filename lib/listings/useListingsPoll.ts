@@ -38,7 +38,7 @@ export function useListingsPoll(
         fetchActiveListingsClient(),
         fetchActiveListingsCountClient(),
       ]);
-      setListings(next);
+      setListings((prev) => (next.length > 0 || prev.length === 0 ? next : prev));
       setTotalCount(count);
     } catch {
       // Keep last good snapshot on transient fetch errors
@@ -48,8 +48,14 @@ export function useListingsPoll(
   }, []);
 
   useEffect(() => {
-    setListings(initialListings);
+    if (initialListings.length > 0) {
+      setListings(initialListings);
+    }
   }, [initialListings]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   useEffect(() => {
     setTotalCount(initialTotalCount);

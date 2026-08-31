@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { canCreateAlert } from '@/lib/alerts/limit';
-import { CreateAlertSchema, type AlertRow } from '@/lib/alerts/schemas';
+import { insertAlert, selectUserAlerts } from '@/lib/alerts/db';
+import { CreateAlertSchema } from '@/lib/alerts/schemas';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
 import { getMessages } from '@/messages';
@@ -14,17 +15,13 @@ export async function GET() {
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('alerts')
-    .select('id, keyword, zone, enabled, created_at')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const { data, error } = await selectUserAlerts(supabase, user.id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error }, { status: 500 });
   }
 
-  return NextResponse.json({ alerts: (data ?? []) as AlertRow[] });
+  return NextResponse.json({ alerts: data ?? [] });
 }
 
 export async function POST(request: Request) {
@@ -61,22 +58,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: messages.settings.alerts.limitReached }, { status: 422 });
   }
 
-  const { keyword, zone } = parsed.data;
+  const { keyword, zone, city } = parsed.data;
 
-  const { data, error } = await supabase
-    .from('alerts')
-    .insert({
-      user_id: user.id,
-      keyword: keyword ?? null,
-      zone: zone ?? null,
-      enabled: true,
-    })
-    .select('id, keyword, zone, enabled, created_at')
-    .single();
+  const { data, error } = await insertAlert(supabase, {
+    user_id: user.id,
+    keyword: keyword ?? null,
+    zone: zone ?? null,
+    city: city ?? null,
+    enabled: true,
+  });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error }, { status: 500 });
   }
 
-  return NextResponse.json({ alert: data as AlertRow }, { status: 201 });
+  return NextResponse.json({ alert: data }, { status: 201 });
 }

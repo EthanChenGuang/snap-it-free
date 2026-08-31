@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState, useEffect } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { isIosPushDismissed, needsIosInstallGuide } from '@/lib/pwa/ios-detect';
 
@@ -72,12 +72,14 @@ export function PwaOnboardingProvider({ children }: { children: React.ReactNode 
   return (
     <PwaOnboardingContext.Provider value={value}>
       {children}
-      <IosGuideAutoOpen onOpen={handleAutoOpen} />
-      <IosInstallGuide
-        open={guideOpen}
-        onOpenChange={setGuideOpen}
-        onDismiss={handleDismiss}
-      />
+      <Suspense fallback={null}>
+        <IosGuideAutoOpen onOpen={handleAutoOpen} />
+        <IosInstallGuide
+          open={guideOpen}
+          onOpenChange={setGuideOpen}
+          onDismiss={handleDismiss}
+        />
+      </Suspense>
     </PwaOnboardingContext.Provider>
   );
 }

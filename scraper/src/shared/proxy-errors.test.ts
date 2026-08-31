@@ -20,6 +20,20 @@ describe('getProxyFatalFailure', () => {
     );
   });
 
+  it('detects DataImpulse-style 407 TRAFFIC_EXHAUSTED without response body', () => {
+    expect(
+      getProxyFatalFailure(
+        new Error(`Detected a session error, rotating session...
+Proxy responded with 407 TRAFFIC_EXHAUSTED: 0 bytes.
+
+Below is the first 100 bytes of the proxy response body:
+`),
+      ),
+    ).toBe(
+      'Proxy quota or account limit reached — check provider dashboard or top up traffic',
+    );
+  });
+
   it('detects 402 payment required as quota exhaustion', () => {
     expect(
       getProxyFatalFailure(

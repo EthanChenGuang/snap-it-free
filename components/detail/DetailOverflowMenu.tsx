@@ -6,9 +6,10 @@ import { useMessages } from '@/lib/i18n/useMessages';
 
 type DetailOverflowMenuProps = {
   onReport: () => void;
+  triggerClassName?: string;
 };
 
-export function DetailOverflowMenu({ onReport }: DetailOverflowMenuProps) {
+export function DetailOverflowMenu({ onReport, triggerClassName }: DetailOverflowMenuProps) {
   const { messages } = useMessages();
 
   const [open, setOpen] = useState(false);
@@ -42,6 +43,7 @@ export function DetailOverflowMenu({ onReport }: DetailOverflowMenuProps) {
         aria-label={messages.report.menuTrigger}
         aria-expanded={open}
         aria-haspopup="menu"
+        className={triggerClassName}
       >
         <span className="material-symbols-outlined text-primary">more_horiz</span>
       </Button>
@@ -54,7 +56,7 @@ export function DetailOverflowMenu({ onReport }: DetailOverflowMenuProps) {
           <button
             type="button"
             role="menuitem"
-            className="w-full px-space-md py-space-sm text-left text-label-md text-on-surface hover:bg-surface-container-low"
+            className="listing-detail-menu-item w-full px-space-md py-space-sm text-left text-label-md text-on-surface hover:bg-surface-container-low"
             onClick={handleReport}
           >
             {messages.report.menuItem}

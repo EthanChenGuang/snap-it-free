@@ -167,7 +167,11 @@ export function UgcListingShell({
   }
 
   if (!isOwnerView && !user) {
-    return <DetailPreviewWall listing={listing} redirectTo={previewRedirectTo} />;
+    return (
+      <div className="h-full min-h-0">
+        <DetailPreviewWall listing={listing} redirectTo={previewRedirectTo} />
+      </div>
+    );
   }
 
   return (

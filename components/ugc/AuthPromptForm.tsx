@@ -4,12 +4,18 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { cn } from '@/lib/utils';
 
 type AuthPromptFormProps = {
   redirectTo: string;
   heading?: string;
   description?: string;
   id?: string;
+  headingId?: string;
+  /** Guest preview wall — larger heading as the page's primary action label. */
+  prominentHeading?: boolean;
+  /** Tighter spacing for one-screen guest preview layouts. */
+  compact?: boolean;
 };
 
 const APPLE_OAUTH_ENABLED = process.env.NEXT_PUBLIC_APPLE_OAUTH_ENABLED === 'true';
@@ -54,12 +60,16 @@ export function AuthPromptForm({
   heading,
   description,
   id,
+  headingId,
+  prominentHeading = false,
+  compact = false,
 }: AuthPromptFormProps) {
   const { messages } = useMessages();
 
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [oauthStatus, setOauthStatus] = useState<'idle' | 'loading' | 'error'>('idle');
+  const isAuthBusy = oauthStatus === 'loading' || status === 'sending';
 
   const handleOAuth = async (provider: 'google' | 'apple') => {
     setOauthStatus('loading');
@@ -91,10 +101,30 @@ export function AuthPromptForm({
   };
 
   return (
-    <div id={id} className="flex flex-col gap-space-md">
+    <div
+      id={id}
+      className={cn(
+        'flex flex-col',
+        compact ? 'gap-space-md' : prominentHeading ? 'gap-space-lg' : 'gap-space-md',
+      )}
+      aria-labelledby={heading && headingId ? headingId : undefined}
+    >
       {heading ? (
-        <div className="flex flex-col gap-space-xs">
-          <h2 className="text-label-md font-medium text-on-surface">{heading}</h2>
+        <div className={cn('flex flex-col', compact ? 'gap-space-xs' : 'gap-space-xs')}>
+          <h2
+            id={headingId}
+            className={cn(
+              'text-on-surface',
+              compact &&
+                'text-body-lg font-semibold leading-snug tracking-[-0.01em] text-balance',
+              !compact &&
+                prominentHeading &&
+                'text-h3 font-semibold leading-snug tracking-[-0.01em]',
+              !compact && !prominentHeading && 'text-label-md font-medium',
+            )}
+          >
+            {heading}
+          </h2>
           {description ? (
             <p className="text-body-md text-on-surface-variant">{description}</p>
           ) : null}
@@ -105,55 +135,98 @@ export function AuthPromptForm({
         <p className="text-body-md text-on-surface">{messages.auth.checkEmail}</p>
       ) : (
         <>
-          <div className="flex flex-col gap-space-sm">
-            <Button
-              type="button"
-              variant="secondary"
-              className="w-full"
-              disabled={oauthStatus === 'loading'}
-              onClick={() => handleOAuth('google')}
-            >
-              <GoogleIcon />
-              {messages.auth.googleSignIn}
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              className="w-full"
-              disabled={!APPLE_OAUTH_ENABLED || oauthStatus === 'loading'}
-              title={APPLE_OAUTH_ENABLED ? undefined : messages.auth.appleSignInDisabled}
-              onClick={() => APPLE_OAUTH_ENABLED && handleOAuth('apple')}
-            >
-              <AppleIcon />
-              {messages.auth.appleSignIn}
-            </Button>
-            {oauthStatus === 'error' && (
-              <p className="text-label-sm text-error">{messages.auth.oauthError}</p>
-            )}
-          </div>
+          {compact ? (
+            <div className="overflow-hidden rounded-lg border border-outline-variant">
+              <Button
+                type="button"
+                variant="secondary"
+                className="min-h-11 w-full justify-center rounded-none border-0 border-b border-outline-variant bg-surface-container-lowest px-space-md font-normal hover:bg-surface-container"
+                disabled={isAuthBusy}
+                onClick={() => handleOAuth('google')}
+              >
+                <GoogleIcon />
+                {messages.auth.googleSignIn}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                className="min-h-11 w-full justify-center rounded-none border-0 bg-surface-container-lowest px-space-md font-normal hover:bg-surface-container"
+                disabled={!APPLE_OAUTH_ENABLED || isAuthBusy}
+                title={APPLE_OAUTH_ENABLED ? undefined : messages.auth.appleSignInDisabled}
+                onClick={() => APPLE_OAUTH_ENABLED && handleOAuth('apple')}
+              >
+                <AppleIcon />
+                {messages.auth.appleSignIn}
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-space-sm">
+              <Button
+                type="button"
+                variant="secondary"
+                className={cn(
+                  'w-full justify-start px-space-md font-normal min-h-11',
+                  prominentHeading && 'bg-surface-container-lowest',
+                )}
+                disabled={isAuthBusy}
+                onClick={() => handleOAuth('google')}
+              >
+                <GoogleIcon />
+                {messages.auth.googleSignIn}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                className={cn(
+                  'w-full justify-start px-space-md font-normal min-h-11',
+                  prominentHeading && 'bg-surface-container-lowest',
+                )}
+                disabled={!APPLE_OAUTH_ENABLED || isAuthBusy}
+                title={APPLE_OAUTH_ENABLED ? undefined : messages.auth.appleSignInDisabled}
+                onClick={() => APPLE_OAUTH_ENABLED && handleOAuth('apple')}
+              >
+                <AppleIcon />
+                {messages.auth.appleSignIn}
+              </Button>
+            </div>
+          )}
+          {oauthStatus === 'error' && (
+            <p className="text-label-sm text-error">{messages.auth.oauthError}</p>
+          )}
 
-          <div className="flex items-center gap-space-sm">
+          <div className={cn('flex items-center gap-space-sm', compact && 'py-0')}>
             <span className="h-px flex-1 bg-outline-variant" aria-hidden="true" />
             <span className="text-label-sm text-on-surface-variant">{messages.auth.orDivider}</span>
             <span className="h-px flex-1 bg-outline-variant" aria-hidden="true" />
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-space-md">
+          <form
+            onSubmit={handleSubmit}
+            className={cn('flex flex-col', compact ? 'gap-space-sm' : 'gap-space-md')}
+          >
             <label className="flex flex-col gap-space-xs">
-              <span className="text-label-md text-on-surface-variant">{messages.auth.emailLabel}</span>
+              <span className="text-label-sm font-medium text-on-surface-variant">
+                {messages.auth.emailLabel}
+              </span>
               <input
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder={messages.auth.emailPlaceholder}
-                className="rounded border border-outline-variant bg-surface px-space-sm py-space-sm text-body-md text-on-surface outline-none focus:border-primary"
+                disabled={isAuthBusy}
+                autoComplete="email"
+                inputMode="email"
+                className={cn(
+                  'rounded-lg border border-outline-variant bg-surface-container-low px-space-md text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant/70 focus:border-on-surface focus:ring-1 focus:ring-outline disabled:opacity-50',
+                  compact ? 'min-h-11 py-2.5' : 'min-h-11',
+                )}
                 required
               />
             </label>
             {status === 'error' && (
               <p className="text-label-sm text-error">{messages.auth.sendError}</p>
             )}
-            <Button type="submit" disabled={status === 'sending'} className="w-full">
+            <Button type="submit" disabled={isAuthBusy} className="min-h-11 w-full rounded-lg">
               {status === 'sending' ? messages.auth.sending : messages.auth.sendLink}
             </Button>
           </form>

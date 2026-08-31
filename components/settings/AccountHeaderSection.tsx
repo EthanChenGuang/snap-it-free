@@ -5,6 +5,7 @@ import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { SettingsAccountCard } from '@/components/settings/SettingsUi';
 import { Button } from '@/components/ui/button';
 import { useAuthSession } from '@/lib/auth/useAuthSession';
+import { createClient } from '@/lib/supabase/client';
 import { useMessages } from '@/lib/i18n/useMessages';
 
 function emailInitials(email: string): string {
@@ -34,10 +35,10 @@ export function AccountHeaderSection() {
       <>
         <SettingsAccountCard>
           <div
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-neutral-800"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface-container text-on-surface"
             aria-hidden
           >
-            <span className="material-symbols-outlined text-[20px] text-neutral-500">person</span>
+            <span className="material-symbols-outlined text-label-md text-on-surface-variant">person</span>
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-body-md font-medium text-on-surface">{messages.settings.profilePlaceholder}</p>
@@ -58,10 +59,15 @@ export function AccountHeaderSection() {
     );
   }
 
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+  };
+
   return (
     <SettingsAccountCard>
       <div
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-sm font-bold text-neutral-800"
+        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface-container text-sm font-bold text-on-surface"
         aria-hidden
       >
         {emailInitials(email)}
@@ -70,6 +76,9 @@ export function AccountHeaderSection() {
         <p className="truncate text-body-md font-medium text-on-surface">{email}</p>
         <p className="text-label-sm text-secondary">{messages.settings.profileSignedIn}</p>
       </div>
+      <Button type="button" size="sm" className="shrink-0" onClick={() => void handleSignOut()}>
+        {messages.settings.signOut}
+      </Button>
     </SettingsAccountCard>
   );
 }

@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
 import { canCreateAlert } from '@/lib/alerts/limit';
+import { selectAlertById, updateAlertRow } from '@/lib/alerts/db';
 import {
-  alertHasKeywordOrZone,
+  alertHasKeywordOrLocation,
   UpdateAlertSchema,
-  type AlertRow,
 } from '@/lib/alerts/schemas';
+import type { ConsumerCityKey } from '@/lib/geo/italian-cities';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
 import { getMessages } from '@/messages';
+import type { VeniceZone } from '@/lib/listings/types';
 
 const messages = getMessages('zh');
 
@@ -35,29 +37,33 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   const supabase = await createClient();
 
-  const { data: existing, error: fetchError } = await supabase
-    .from('alerts')
-    .select('id, keyword, zone, enabled')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const { data: existing, error: fetchError } = await selectAlertById(supabase, id, user.id);
 
   if (fetchError) {
-    return NextResponse.json({ error: fetchError.message }, { status: 500 });
+    return NextResponse.json({ error: fetchError }, { status: 500 });
   }
 
   if (!existing) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
-  const nextEnabled = parsed.data.enabled ?? existing.enabled;
+  const nextEnabled = parsed.data.enabled ?? Boolean(existing.enabled);
   const nextKeyword =
-    parsed.data.keyword !== undefined ? parsed.data.keyword : existing.keyword;
-  const nextZone = parsed.data.zone !== undefined ? parsed.data.zone : existing.zone;
+    parsed.data.keyword !== undefined
+      ? parsed.data.keyword
+      : ((existing.keyword as string | null) ?? null);
+  const nextZone =
+    parsed.data.zone !== undefined
+      ? parsed.data.zone
+      : ((existing.zone as VeniceZone | null) ?? null);
+  const nextCity =
+    parsed.data.city !== undefined
+      ? parsed.data.city
+      : ((existing.city as ConsumerCityKey | null) ?? null);
 
-  if (!alertHasKeywordOrZone(nextKeyword, nextZone)) {
+  if (!alertHasKeywordOrLocation(nextKeyword, nextZone, nextCity)) {
     return NextResponse.json(
-      { error: 'At least one of keyword or zone is required' },
+      { error: 'At least one of keyword, zone, or city is required' },
       { status: 400 },
     );
   }
@@ -78,23 +84,18 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
   }
 
-  const { data, error } = await supabase
-    .from('alerts')
-    .update({
-      enabled: nextEnabled,
-      keyword: nextKeyword,
-      zone: nextZone,
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select('id, keyword, zone, enabled, created_at')
-    .single();
+  const { data, error } = await updateAlertRow(supabase, id, user.id, {
+    enabled: nextEnabled,
+    keyword: nextKeyword,
+    zone: nextZone,
+    city: nextCity,
+  });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error }, { status: 500 });
   }
 
-  return NextResponse.json({ alert: data as AlertRow });
+  return NextResponse.json({ alert: data });
 }
 
 export async function DELETE(_request: Request, context: RouteContext) {

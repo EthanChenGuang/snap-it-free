@@ -8,6 +8,12 @@
         "value": "#22c55e",
         "createdAt": "2026-08-26T09:21:49.719Z",
         "reason": "user confirmed: FREE badge photo-overlay accent green"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "material symbols outlined",
+        "createdAt": "2026-08-26T23:16:01.773Z",
+        "reason": "workspace stitch rule: Material Symbols Outlined is the documented icon system"
       }
     ]
   }

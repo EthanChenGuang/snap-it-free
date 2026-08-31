@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 
 const ICON_STYLE_OUTLINE = "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24";
 const ICON_STYLE_ACTIVE = "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24";
@@ -96,7 +96,11 @@ export function BottomNav() {
                   >
                     {item.icon}
                   </span>
-                  {item.showBadge && <UnreadMatchBadge />}
+                  {item.showBadge && (
+                    <Suspense fallback={null}>
+                      <UnreadMatchBadge />
+                    </Suspense>
+                  )}
                 </span>
               </Link>
             );

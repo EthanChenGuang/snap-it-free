@@ -1,0 +1,29 @@
+/* Dark mode palette refinements — iOS-style grouped elevation (cards elevated above page) */
+
+.dark {
+  --color-background: #1c1c1e;
+  --color-on-background: #f1f1f0;
+  --color-surface: #1c1c1e;
+  --color-surface-dim: #000000;
+  --color-surface-bright: #2c2c2e;
+  --color-surface-container-lowest: #2c2c2e;
+  --color-surface-container-low: #3a3a3c;
+  --color-surface-container: #3a3a3c;
+  --color-surface-container-high: #48484a;
+  --color-surface-container-highest: #636366;
+  --color-surface-variant: #48484a;
+  --color-on-surface: #f1f1f0;
+  --color-on-surface-variant: #aeaeb2;
+  --color-primary: #f1f1f0;
+  --color-on-primary: #1c1c1e;
+  --color-primary-container: #48484a;
+  --color-on-primary-container: #f1f1f0;
+  --color-secondary: #aeaeb2;
+  --color-on-secondary: #1c1c1e;
+  --color-secondary-container: #48484a;
+  --color-on-secondary-container: #cbc6bd;
+  --color-secondary-fixed: #48484a;
+  --color-secondary-fixed-dim: #636366;
+  --color-outline: #8e9192;
+  --color-outline-variant: #48484a;
+}

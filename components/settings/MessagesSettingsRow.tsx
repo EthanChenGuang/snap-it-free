@@ -33,17 +33,17 @@ export function MessagesSettingsRow() {
         href="/messages"
         onClick={handleClick}
         className={cn(
-          'mb-3 flex w-full items-center justify-between rounded-2xl bg-white p-4 shadow-sm transition-transform active:scale-[0.98]',
+          'mb-3 flex w-full items-center justify-between rounded-lg border border-outline-variant bg-surface-container-lowest p-4 transition-transform active:scale-[0.98]',
         )}
       >
         <div className="flex min-w-0 flex-1 items-center gap-4">
-          <span className="material-symbols-outlined text-[22px] text-neutral-500">chat_bubble</span>
+          <span className="material-symbols-outlined text-label-md text-on-surface-variant">chat_bubble</span>
           <span className="text-body-md text-on-surface">{messages.settings.myMessages}</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {count > 0 && (
             <span
-              className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-bold leading-none text-on-primary"
+              className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-label-sm font-bold leading-none text-on-primary"
               aria-label={messages.settings.messages.badgeLabel(count)}
             >
               {badgeLabel(count)}

@@ -2,6 +2,7 @@ import { CriticalError } from '@crawlee/core';
 
 const FATAL_PROXY_PATTERNS = [
   /traffic limit/i,
+  /traffic.?exhausted/i,
   /quota (exceeded|reached|limit)/i,
   /bandwidth limit/i,
   /payment required/i,

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { DetailOverflowMenu } from '@/components/detail/DetailOverflowMenu';
 import { ReportListingMenu } from '@/components/detail/ReportListingMenu';
 import { FavoriteButton } from '@/components/listings/FavoriteButton';
-import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toaster';
 import { shareListing } from '@/lib/listings/share';
 import type { ListingRow } from '@/lib/listings/types';
@@ -53,11 +52,16 @@ export function DetailHeroControls({
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between p-space-md">
         <button
           type="button"
-          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-lowest/90 text-primary backdrop-blur-sm transition hover:bg-surface-container-lowest"
+          className="listing-detail-hero-btn pointer-events-auto"
           onClick={handleBack}
           aria-label={messages.detail.back}
         >
-          <span className="material-symbols-outlined">arrow_back</span>
+          <span
+            className="material-symbols-outlined text-h3"
+            style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
+          >
+            arrow_back
+          </span>
         </button>
 
         <div className="pointer-events-auto flex items-center gap-space-sm">
@@ -70,20 +74,24 @@ export function DetailHeroControls({
               onUnauthenticated={onFavoriteUnauthed}
             />
           ) : null}
-          <Button
+          <button
             type="button"
-            variant="ghost"
-            size="icon"
             onClick={handleShare}
             aria-label={messages.detail.share}
-            className="h-10 w-10 rounded-full bg-surface-container-lowest/90 backdrop-blur-sm transition hover:bg-surface-container-lowest"
+            className="listing-detail-hero-btn"
           >
-            <span className="material-symbols-outlined text-primary">share</span>
-          </Button>
+            <span
+              className="material-symbols-outlined text-h3"
+              style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
+            >
+              share
+            </span>
+          </button>
           {showOverflow ? (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-lowest/90 backdrop-blur-sm">
-              <DetailOverflowMenu onReport={() => setReportOpen(true)} />
-            </div>
+            <DetailOverflowMenu
+              triggerClassName="listing-detail-hero-btn"
+              onReport={() => setReportOpen(true)}
+            />
           ) : null}
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { createAnonClient } from '@/lib/supabase/anon';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseEnv } from '@/lib/supabase/env';
 import type { ListingRow, OwnerListingRow } from './types';
@@ -5,24 +6,41 @@ import type { ListingRow, OwnerListingRow } from './types';
 const PUBLIC_LISTINGS = 'listings_public';
 const BASE_LISTINGS = 'listings';
 
+/** SSR feed payload cap — keeps RSC/hydration under dev chunk limits (D-28, 260805-ws8). */
+export const FEED_SSR_LISTING_LIMIT = 24;
+
 const ACTIVE_LISTING_COLUMNS =
   'id, source, title, title_en, title_zh, description, description_en, description_zh, photo_url, photo_urls, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status';
+
+export type GetActiveListingsOptions = {
+  /** When set, caps rows returned (used by feed SSR to avoid oversized RSC payloads). */
+  limit?: number;
+};
 
 const OWNER_LISTING_COLUMNS =
   'id, source, title, photo_url, photo_urls, external_url, lat, lng, zone, posted_at, expires_at, status, owner_user_id, hidden_reason, description';
 
-export async function getActiveListings(): Promise<ListingRow[]> {
+export async function getActiveListings(
+  options: GetActiveListingsOptions = {},
+): Promise<ListingRow[]> {
   if (!getSupabaseEnv()) {
     return [];
   }
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
+  const supabase = createAnonClient();
+  let query = supabase
     .from(PUBLIC_LISTINGS)
     .select(ACTIVE_LISTING_COLUMNS)
     .order('posted_at', { ascending: false });
 
+  if (options.limit != null) {
+    query = query.limit(options.limit);
+  }
+
+  const { data, error } = await query;
+
   if (error) {
+    console.error('[listings] getActiveListings failed:', error.message);
     return [];
   }
 
@@ -35,7 +53,7 @@ export async function getActiveListingsCount(): Promise<number | null> {
     return null;
   }
 
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const { count, error } = await supabase
     .from(PUBLIC_LISTINGS)
     .select('id', { count: 'exact', head: true });
@@ -52,7 +70,7 @@ export async function getListingsByIds(ids: string[]): Promise<ListingRow[]> {
     return [];
   }
 
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const { data, error } = await supabase
     .from(PUBLIC_LISTINGS)
     .select(ACTIVE_LISTING_COLUMNS)
@@ -71,7 +89,7 @@ export async function getListingById(id: string): Promise<ListingRow | null> {
     return null;
   }
 
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const { data, error } = await supabase
     .from(PUBLIC_LISTINGS)
     .select(ACTIVE_LISTING_COLUMNS)
@@ -149,7 +167,7 @@ export async function getSimilarListings(
     return [];
   }
 
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const baseQuery = () =>
     supabase
       .from(PUBLIC_LISTINGS)

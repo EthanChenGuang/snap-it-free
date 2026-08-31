@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { CreateAlertSchema } from './schemas';
 
 describe('CreateAlertSchema', () => {
-  it('rejects empty keyword and zone', () => {
+  it('rejects empty keyword, zone, and city', () => {
     const result = CreateAlertSchema.safeParse({});
     expect(result.success).toBe(false);
   });
 
-  it('rejects blank keyword with no zone', () => {
+  it('rejects blank keyword with no zone or city', () => {
     const result = CreateAlertSchema.safeParse({ keyword: '   ' });
     expect(result.success).toBe(false);
   });
@@ -18,15 +18,24 @@ describe('CreateAlertSchema', () => {
     if (result.success) {
       expect(result.data.keyword).toBe('bici');
       expect(result.data.zone).toBeUndefined();
+      expect(result.data.city).toBeUndefined();
     }
   });
 
-  it('accepts zone-only', () => {
+  it('accepts legacy zone-only', () => {
     const result = CreateAlertSchema.safeParse({ zone: 'centro_storico' });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.zone).toBe('centro_storico');
       expect(result.data.keyword).toBeUndefined();
+    }
+  });
+
+  it('accepts city-only', () => {
+    const result = CreateAlertSchema.safeParse({ city: 'milano' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.city).toBe('milano');
     }
   });
 
@@ -38,10 +47,10 @@ describe('CreateAlertSchema', () => {
     }
   });
 
-  it('accepts keyword and zone together', () => {
+  it('accepts keyword and city together', () => {
     const result = CreateAlertSchema.safeParse({
       keyword: 'divano',
-      zone: 'mestre_marghera',
+      city: 'padova',
     });
     expect(result.success).toBe(true);
   });

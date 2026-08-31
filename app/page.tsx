@@ -1,5 +1,10 @@
 import { FeedHomeClient } from '@/components/listings/FeedHomeClient';
-import { getActiveListings, getActiveListingsCount } from '@/lib/listings/queries';
+import { FeedImagePreloads } from '@/components/listings/FeedImagePreloads';
+import {
+  FEED_SSR_LISTING_LIMIT,
+  getActiveListings,
+  getActiveListingsCount,
+} from '@/lib/listings/queries';
 import type { ListingRow } from '@/lib/listings/types';
 
 export const dynamic = 'force-dynamic';
@@ -9,7 +14,7 @@ export default async function FeedHomePage() {
   let totalCount: number | null = null;
   try {
     [listings, totalCount] = await Promise.all([
-      getActiveListings(),
+      getActiveListings({ limit: FEED_SSR_LISTING_LIMIT }),
       getActiveListingsCount(),
     ]);
   } catch (error) {
@@ -17,6 +22,9 @@ export default async function FeedHomePage() {
   }
 
   return (
-    <FeedHomeClient initialListings={listings} initialTotalCount={totalCount} />
+    <>
+      <FeedImagePreloads listings={listings} />
+      <FeedHomeClient initialListings={listings} initialTotalCount={totalCount} />
+    </>
   );
 }

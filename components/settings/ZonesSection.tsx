@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AuthPromptModal } from '@/components/ugc/AuthPromptModal';
 import { AlertCreateSheet } from '@/components/settings/AlertCreateSheet';
-import { SettingsGroupCard, SettingsSectionTitle } from '@/components/settings/SettingsUi';
+import { SettingsGroupCard } from '@/components/settings/SettingsUi';
 import { Button } from '@/components/ui/button';
 import { useAuthSession } from '@/lib/auth/useAuthSession';
 import type { AlertRow } from '@/lib/alerts/schemas';
+import { consumerCityFilterLabelsFromMessages } from '@/lib/i18n/city-labels';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
@@ -14,38 +15,28 @@ type ZonesSectionProps = {
   autoOpenCreate?: boolean;
 };
 
-function alertTitle(
+function alertLocationLabel(
   alert: AlertRow,
-  messages: ReturnType<typeof useMessages>['messages'],
+  cityLabels: ReturnType<typeof consumerCityFilterLabelsFromMessages>,
   zoneLabel: ReturnType<typeof useMessages>['zoneLabel'],
-): string {
-  if (alert.keyword && alert.zone) {
-    return `${alert.keyword} · ${zoneLabel(alert.zone)}`;
-  }
-  if (alert.keyword) return alert.keyword;
+): string | null {
+  if (alert.city) return cityLabels[alert.city];
   if (alert.zone) return zoneLabel(alert.zone);
-  return messages.settings.zones.unnamed;
+  return null;
 }
 
-function alertDescription(
+function alertRegionLabel(
   alert: AlertRow,
-  messages: ReturnType<typeof useMessages>['messages'],
+  cityLabels: ReturnType<typeof consumerCityFilterLabelsFromMessages>,
   zoneLabel: ReturnType<typeof useMessages>['zoneLabel'],
+  allCitiesLabel: string,
 ): string {
-  if (alert.keyword && alert.zone) {
-    return messages.settings.zones.keywordInZone(alert.keyword, zoneLabel(alert.zone));
-  }
-  if (alert.keyword) {
-    return messages.settings.zones.keywordAllZones;
-  }
-  if (alert.zone) {
-    return messages.settings.zones.zoneOnly(zoneLabel(alert.zone));
-  }
-  return messages.settings.zones.defaultDescription;
+  const location = alertLocationLabel(alert, cityLabels, zoneLabel);
+  return location ?? allCitiesLabel;
 }
 
 function alertIcon(alert: AlertRow): string {
-  return alert.keyword && !alert.zone ? 'search' : 'location_on';
+  return alert.keyword && !alert.city && !alert.zone ? 'search' : 'location_on';
 }
 
 function formatZoneUpdatedAt(
@@ -97,7 +88,7 @@ function ZoneCardMenu({
         <span className="material-symbols-outlined">more_vert</span>
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-10 mt-space-xs min-w-[160px] overflow-hidden rounded border border-outline-variant bg-surface-container-lowest shadow-sm">
+        <div className="absolute right-0 top-full z-10 mt-space-xs min-w-[160px] overflow-hidden rounded border border-outline-variant bg-surface-container-lowest">
           <button
             type="button"
             className="block w-full px-space-md py-space-sm text-left text-label-md text-on-surface hover:bg-surface-container-low"
@@ -126,6 +117,7 @@ function ZoneCardMenu({
 
 export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
   const { messages, zoneLabel } = useMessages();
+  const cityLabels = consumerCityFilterLabelsFromMessages(messages);
 
   const { user, loading: authLoading } = useAuthSession();
   const isLoggedIn = Boolean(user);
@@ -148,7 +140,7 @@ export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
     }
     const payload = (await response.json()) as { alerts: AlertRow[] };
     setAlerts(payload.alerts ?? []);
-  }, []);
+  }, [messages.settings.alerts.loadError]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -203,17 +195,17 @@ export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
 
   return (
     <>
-      <section id="zones" className="mb-6 scroll-mt-space-lg">
+      <section id="zones" className="mb-space-lg scroll-mt-space-lg">
         <div className="mb-2 flex items-center justify-between px-4">
-          <h2 className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+          <h2 className="text-label-sm font-medium uppercase tracking-wide text-on-surface-variant">
             {messages.settings.zones.sectionTitle}
           </h2>
           <button
             type="button"
             onClick={handleCreateClick}
-            className="flex items-center gap-0.5 text-label-sm font-medium text-primary active:opacity-70"
+            className="flex items-center gap-0.5 text-label-sm font-medium text-primary transition-opacity hover:opacity-80 active:opacity-70"
           >
-            <span className="material-symbols-outlined text-[16px]">add</span>
+            <span className="material-symbols-outlined text-label-md">add</span>
             {messages.settings.zones.addZone}
           </button>
         </div>
@@ -221,7 +213,13 @@ export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
         {!isLoggedIn ? (
           <SettingsGroupCard className="p-4">
             <p className="text-body-md text-on-surface-variant">{messages.settings.alerts.signInPrompt}</p>
-            <Button type="button" className="mt-4 w-fit" onClick={() => setAuthOpen(true)}>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="mt-3 h-auto px-0 py-0 text-label-sm font-medium"
+              onClick={() => setAuthOpen(true)}
+            >
               {messages.settings.signIn}
             </Button>
           </SettingsGroupCard>
@@ -230,19 +228,15 @@ export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
             <p className="text-body-md text-on-surface-variant">{messages.settings.profileLoading}</p>
           </SettingsGroupCard>
         ) : alerts.length === 0 ? (
-          <SettingsGroupCard className="border border-neutral-100 p-4">
+          <SettingsGroupCard className="p-4">
             <p className="text-body-md font-medium text-on-surface">{messages.settings.zones.emptyTitle}</p>
-            <p className="mt-1 text-label-sm text-secondary">
+            <p className="mt-1 text-label-sm text-on-surface-variant">
               {messages.settings.zones.emptyDescription}
             </p>
-            <button
-              type="button"
-              onClick={() => setCreateOpen(true)}
-              className="mt-4 inline-flex items-center gap-1 rounded-xl bg-primary px-4 py-2 text-label-md font-medium text-on-primary transition-transform active:scale-[0.98]"
-            >
-              <span className="material-symbols-outlined text-[18px]">add</span>
+            <Button type="button" size="sm" variant="secondary" className="mt-4 gap-1" onClick={() => setCreateOpen(true)}>
+              <span className="material-symbols-outlined text-label-md">add</span>
               {messages.settings.zones.addZone}
-            </button>
+            </Button>
           </SettingsGroupCard>
         ) : (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -258,14 +252,27 @@ export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
                     onDelete={() => handleDelete(alert)}
                   />
                 </div>
-                <div>
-                  <h3 className="text-body-md font-bold text-on-surface">{alertTitle(alert, messages, zoneLabel)}</h3>
-                  <p className="text-label-sm text-secondary">{alertDescription(alert, messages, zoneLabel)}</p>
+                <div className="space-y-1">
+                  {alert.keyword ? (
+                    <p className="text-body-md text-on-surface">
+                      <span className="text-on-surface-variant">{messages.settings.zones.keywordField}：</span>
+                      {alert.keyword}
+                    </p>
+                  ) : null}
+                  <p className="text-body-md text-on-surface">
+                    <span className="text-on-surface-variant">{messages.settings.zones.regionField}：</span>
+                    {alertRegionLabel(
+                      alert,
+                      cityLabels,
+                      zoneLabel,
+                      messages.settings.zones.allCities,
+                    )}
+                  </p>
                 </div>
                 <div className="mt-space-xs flex items-center gap-space-sm">
                   <span
                     className={cn(
-                      'rounded-sm px-2 py-0.5 text-[10px] font-bold uppercase',
+                      'rounded-sm px-2 py-0.5 text-label-sm font-medium uppercase',
                       alert.enabled
                         ? 'bg-secondary-fixed text-on-surface'
                         : 'bg-surface-container-high text-on-surface-variant',
@@ -273,7 +280,7 @@ export function ZonesSection({ autoOpenCreate = false }: ZonesSectionProps) {
                   >
                     {alert.enabled ? messages.settings.zones.active : messages.settings.zones.paused}
                   </span>
-                  <span className="text-[10px] text-secondary">
+                  <span className="text-label-sm text-on-surface-variant">
                     {alert.enabled
                       ? formatZoneUpdatedAt(alert.created_at, messages)
                       : messages.settings.zones.noRecentActivity}
