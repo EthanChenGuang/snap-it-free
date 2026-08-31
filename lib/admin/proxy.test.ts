@@ -8,7 +8,7 @@ vi.mock('../supabase/middleware', () => ({
 }));
 
 vi.mock('./operator-access', () => ({
-  hasOperatorAccess: vi.fn(),
+  hasOperatorAccessForUser: vi.fn(),
 }));
 
 function requestFor(path: string): NextRequest {
@@ -29,13 +29,13 @@ describe('admin proxy auth redirect', () => {
   });
 
   it('redirects authenticated non-operators to the items list', async () => {
-    const { hasOperatorAccess } = await import('./operator-access');
+    const { hasOperatorAccessForUser } = await import('./operator-access');
     vi.mocked(updateSession).mockResolvedValue({
       response: NextResponse.next(),
       user: { id: 'user-1', email: 'guest@example.com' } as never,
       supabase: {} as never,
     });
-    vi.mocked(hasOperatorAccess).mockResolvedValue(false);
+    vi.mocked(hasOperatorAccessForUser).mockResolvedValue(false);
 
     const response = await proxy(requestFor('/admin'));
 

@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { getOperatorDataClient } from '@/lib/admin/operator-access';
 import {
   defaultUseProxyUrl,
   selectSourceBySlug,
@@ -61,7 +62,7 @@ function computeShowDegradedBanner(params: {
 }
 
 async function getLatestSubitoRunDegraded(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: SupabaseClient,
 ): Promise<boolean> {
   const { data } = await supabase
     .from('scrape_runs')
@@ -87,7 +88,10 @@ function mapLastRun(row: ScrapeRunRow) {
 
 export async function getSourcesWithLastRun(): Promise<SourceWithLastRun[]> {
   try {
-    const supabase = await createClient();
+    const supabase = await getOperatorDataClient();
+    if (!supabase) {
+      throw new Error('operator_data_unavailable');
+    }
 
     const { rows: sources } = await selectSourcesForList(supabase);
 
@@ -143,7 +147,10 @@ export async function getSourcesWithLastRun(): Promise<SourceWithLastRun[]> {
 
 export async function getSourceBySlug(slug: string): Promise<SourceDetail | null> {
   try {
-    const supabase = await createClient();
+    const supabase = await getOperatorDataClient();
+    if (!supabase) {
+      throw new Error('operator_data_unavailable');
+    }
 
     const [{ row: source, sessionEncAvailable }, { data: globalConfig }] = await Promise.all([
       selectSourceBySlug(supabase, slug),
@@ -195,7 +202,10 @@ export async function getSourceBySlug(slug: string): Promise<SourceDetail | null
 
 export async function getRecentAlerts(limit = 5): Promise<AdminAlert[]> {
   try {
-    const supabase = await createClient();
+    const supabase = await getOperatorDataClient();
+    if (!supabase) {
+      throw new Error('operator_data_unavailable');
+    }
 
     const { data, error } = await supabase
       .from('scrape_runs')
@@ -222,7 +232,10 @@ export async function getRecentAlerts(limit = 5): Promise<AdminAlert[]> {
 
 export async function getGlobalAdminStatus(): Promise<GlobalAdminStatus | null> {
   try {
-    const supabase = await createClient();
+    const supabase = await getOperatorDataClient();
+    if (!supabase) {
+      throw new Error('operator_data_unavailable');
+    }
 
     const [
       { data: globalConfig, error: globalError },
@@ -282,7 +295,7 @@ function targetUrlCountFromRun(row: SubitoBlockedRatioRow): number {
 }
 
 export async function getSubitoBlockedRatio7d(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: SupabaseClient,
 ): Promise<number | null> {
   const since = new Date();
   since.setUTCDate(since.getUTCDate() - 7);
@@ -319,7 +332,10 @@ export async function getSubitoBlockedRatio7d(
 
 export async function getGlobalSettingsConfig(): Promise<GlobalSettingsConfig | null> {
   try {
-    const supabase = await createClient();
+    const supabase = await getOperatorDataClient();
+    if (!supabase) {
+      throw new Error('operator_data_unavailable');
+    }
     const [{ data, error }, latestSubitoRunDegraded, blockedRatio7d] = await Promise.all([
       supabase
         .from('scraper_global_config')
@@ -373,7 +389,10 @@ export async function getGlobalSettingsConfig(): Promise<GlobalSettingsConfig | 
 
 export async function getOperatorAllowlist(): Promise<string[]> {
   try {
-    const supabase = await createClient();
+    const supabase = await getOperatorDataClient();
+    if (!supabase) {
+      throw new Error('operator_data_unavailable');
+    }
     const { data, error } = await supabase
       .from('operator_allowlist')
       .select('email')
@@ -397,7 +416,7 @@ function monthRange(offsetMonths = 0): { start: string; end: string } {
 }
 
 async function countTranslatedListingsSince(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: SupabaseClient,
   startIso: string,
   endIso: string,
 ): Promise<number> {
@@ -416,7 +435,10 @@ async function countTranslatedListingsSince(
 
 export async function getTranslationCostSummary(): Promise<TranslationCostSummary> {
   try {
-    const supabase = await createClient();
+    const supabase = await getOperatorDataClient();
+    if (!supabase) {
+      throw new Error('operator_data_unavailable');
+    }
     const thisMonth = monthRange(0);
     const lastMonth = monthRange(1);
 
@@ -473,7 +495,10 @@ export async function getTranslationCostSummary(): Promise<TranslationCostSummar
 
 export async function getPendingTranslationCount(): Promise<number> {
   try {
-    const supabase = await createClient();
+    const supabase = await getOperatorDataClient();
+    if (!supabase) {
+      throw new Error('operator_data_unavailable');
+    }
     const { count, error } = await supabase
       .from('translation_queue')
       .select('*', { count: 'exact', head: true })
@@ -533,7 +558,10 @@ export async function getTranslationQueue(options?: {
     const page = Math.max(1, options?.page ?? 1);
     const offset = (page - 1) * pageSize;
 
-    const supabase = await createClient();
+    const supabase = await getOperatorDataClient();
+    if (!supabase) {
+      throw new Error('operator_data_unavailable');
+    }
     const [{ data, error }, { data: configRow }] = await Promise.all([
       supabase
         .from('translation_queue')
@@ -617,7 +645,10 @@ export async function getFooterStats(): Promise<FooterStats> {
   const empty = { inserted24h: 0, failedRuns7d: 0, avgSelectorRate: null };
 
   try {
-    const supabase = await createClient();
+    const supabase = await getOperatorDataClient();
+    if (!supabase) {
+      throw new Error('operator_data_unavailable');
+    }
     const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -715,7 +746,10 @@ export async function getScrapeRuns(options?: {
   const sinceIso = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000).toISOString();
 
   try {
-    const supabase = await createClient();
+    const supabase = await getOperatorDataClient();
+    if (!supabase) {
+      throw new Error('operator_data_unavailable');
+    }
     let query = supabase
       .from('scrape_runs')
       .select(
@@ -745,7 +779,10 @@ export async function getScrapeRuns(options?: {
 
 export async function getScrapeRunById(id: string): Promise<ScrapeRunDetail | null> {
   try {
-    const supabase = await createClient();
+    const supabase = await getOperatorDataClient();
+    if (!supabase) {
+      throw new Error('operator_data_unavailable');
+    }
     const { data, error } = await supabase
       .from('scrape_runs')
       .select(
@@ -825,7 +862,10 @@ export async function getScrapeRejects(options?: {
   const limit = options?.limit ?? 200;
 
   try {
-    const supabase = await createClient();
+    const supabase = await getOperatorDataClient();
+    if (!supabase) {
+      throw new Error('operator_data_unavailable');
+    }
     let query = supabase
       .from('scrape_rejects')
       .select(

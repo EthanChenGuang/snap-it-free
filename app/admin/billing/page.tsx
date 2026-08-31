@@ -1,11 +1,23 @@
 import { Suspense } from 'react';
-import { createClient } from '@/lib/supabase/server';
+import { getOperatorDataClient } from '@/lib/admin/operator-access';
+import { adminShellMessages } from '@/components/admin/admin-messages';
 import { BillingClient, BillingSkeleton } from '@/components/admin/BillingClient';
 import { collectPlatformUsageSnapshot } from '@/lib/admin/platform-usage-collect';
 import { buildBillingServiceMeta } from '@/lib/admin/service-dashboard-links';
 
 async function BillingContent() {
-  const supabase = await createClient();
+  const supabase = await getOperatorDataClient();
+  if (!supabase) {
+    const serviceMeta = buildBillingServiceMeta(null);
+    return (
+      <BillingClient
+        initialSnapshot={null}
+        initialError={adminShellMessages.loadError}
+        serviceMeta={serviceMeta}
+      />
+    );
+  }
+
   try {
     const snapshot = await collectPlatformUsageSnapshot(supabase);
     const serviceMeta = buildBillingServiceMeta(snapshot);

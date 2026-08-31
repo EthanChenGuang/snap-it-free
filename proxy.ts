@@ -1,11 +1,11 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { hasOperatorAccess } from '@/lib/admin/operator-access';
+import { hasOperatorAccessForUser } from '@/lib/admin/operator-access';
 import { updateSession } from '@/lib/supabase/middleware';
 
 export async function proxy(request: NextRequest) {
   const { response, user, supabase } = await updateSession(request);
 
-  if (!user?.email) {
+  if (!user) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
@@ -13,7 +13,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  const allowed = await hasOperatorAccess(supabase, user.email);
+  const allowed = await hasOperatorAccessForUser(supabase, user);
   if (!allowed) {
     return NextResponse.redirect(new URL('/', request.url));
   }

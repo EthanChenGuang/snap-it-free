@@ -1,5 +1,6 @@
 import type { User } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { getOperatorServiceClient, hasOperatorAccessForUser } from '@/lib/admin/operator-access';
 import { requireAuth } from '@/lib/supabase/auth';
 import { createClient } from '@/lib/supabase/server';
 
@@ -63,17 +64,21 @@ export type OperatorSession = {
 /** Route Handler gate: authenticated user on operator allowlist, or null. */
 export async function getOperatorSession(): Promise<OperatorSession | null> {
   const user = await requireAuth();
-  if (!user?.email) {
+  if (!user) {
     return null;
   }
 
-  const supabase = await createClient();
-  const allowed = await requireOperator(supabase, user.email);
+  const authClient = await createClient();
+  const allowed = await hasOperatorAccessForUser(authClient, user);
   if (!allowed) {
     return null;
   }
 
-  return { user, supabase };
+  try {
+    return { user, supabase: getOperatorServiceClient() };
+  } catch {
+    return null;
+  }
 }
 
 export function canEnableSource(

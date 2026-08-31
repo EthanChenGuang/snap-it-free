@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   isScraperAdminOperatorEmail,
   parseScraperAdminOperatorEmails,
+  resolveUserEmail,
 } from './operator-access';
 
 describe('scraper admin operator env', () => {
@@ -23,5 +24,36 @@ describe('scraper admin operator env', () => {
   it('falls back to legacy OPERATOR_BOOTSTRAP_EMAILS', () => {
     vi.stubEnv('OPERATOR_BOOTSTRAP_EMAILS', 'legacy@example.com');
     expect(parseScraperAdminOperatorEmails()).toEqual(['legacy@example.com']);
+  });
+});
+
+describe('resolveUserEmail', () => {
+  it('prefers top-level user.email', () => {
+    expect(
+      resolveUserEmail({
+        id: '1',
+        email: 'ops@example.com',
+        user_metadata: { email: 'meta@example.com' },
+      } as never),
+    ).toBe('ops@example.com');
+  });
+
+  it('falls back to user_metadata.email for Google OAuth sessions', () => {
+    expect(
+      resolveUserEmail({
+        id: '1',
+        user_metadata: { email: 'chen.guang.regis@gmail.com' },
+        identities: [{ identity_data: { email: 'other@example.com' } }],
+      } as never),
+    ).toBe('chen.guang.regis@gmail.com');
+  });
+
+  it('falls back to identity email when needed', () => {
+    expect(
+      resolveUserEmail({
+        id: '1',
+        identities: [{ identity_data: { email: 'chen.guang.regis@gmail.com' } }],
+      } as never),
+    ).toBe('chen.guang.regis@gmail.com');
   });
 });

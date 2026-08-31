@@ -1,6 +1,7 @@
-import { createClient } from '@/lib/supabase/server';
+import { resolveUserEmail } from '@/lib/admin/operator-access';
 import { AdminShell } from '@/components/admin/AdminShell';
 import { getFooterStats, getPendingTranslationCount } from '@/lib/admin/queries';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -15,7 +16,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <AdminShell
-      operatorEmail={user?.email ?? ''}
+      operatorEmail={user ? (resolveUserEmail(user) ?? '') : ''}
       pendingTranslationsCount={pendingTranslationsCount}
       footerStats={footerStats}
     >
