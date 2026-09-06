@@ -22,9 +22,9 @@ Run against the canonical production URL (`APP_URL` from `docs/DEPLOY-RUNBOOK.md
 
 | # | Check | Severity | Result |
 |---|-------|----------|--------|
-| 5 | Google login completes end-to-end on the production URL and lands on the intended `next` path via `/auth/callback` | Blocker | ☐ |
+| 5 | Google login completes end-to-end on the production URL and lands on the intended `next` path via `/auth/callback` | Blocker | ☑ pass (2026-09-06 — Plan 01 human-verify: `/post` → Continue with Google → authenticated posting form on `https://zerodollar-blond.vercel.app`; Supabase Site URL fix documented in DEPLOY-RUNBOOK §4/§5; re-confirmed Plan 07-04) |
 | 6 | Email OTP login completes end-to-end | Blocker | ☐ |
-| 7 | Session persists across reload | Blocker | ☐ |
+| 7 | Session persists across reload | Blocker | ☑ pass (2026-09-06 — same Plan 01 session; Settings shows linked account after refresh on production) |
 
 ## Register-First Auth Gates (Phase 19 — D-19-01/04/05/06/11)
 
