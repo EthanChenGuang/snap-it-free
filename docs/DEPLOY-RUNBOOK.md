@@ -107,9 +107,9 @@ Used by `.github/workflows/subito-scheduler.yml` (D-07-29):
 
 | Setting | Required | Verification |
 |---------|----------|---------------|
-| Site URL | yes | Points to Vercel production URL |
-| Additional Redirect URLs | yes | Includes prod `/**` **and** preserves localhost dev entries (D-07-35/36) |
-| Google OAuth provider enabled | yes | Matches currently enabled providers (D-07-28) |
+| Site URL | yes | Points to Vercel production URL — confirmed live 2026-09-06: updated to `https://zerodollar-blond.vercel.app` (was still `http://localhost:3003`, which caused Google OAuth to complete but redirect back to localhost instead of production — caught during the Plan 01 human-verify checkpoint and fixed) |
+| Additional Redirect URLs | yes | Includes prod `/**` **and** preserves localhost dev entries (D-07-35/36) — confirmed live: `https://zerodollar-blond.vercel.app/**` added alongside existing `http://localhost:3003/**` |
+| Google OAuth provider enabled | yes | Matches currently enabled providers (D-07-28) — confirmed live: Google sign-in on `/post` completes end-to-end on production URL post-fix |
 
 ### Google Cloud Console (OAuth client — no env vars)
 
@@ -137,6 +137,7 @@ Note: the auto-generated team-scoped alias `https://zerodollar-chenguangregis-gm
    - Homepage returns 2xx and renders the feed grid — confirmed: `GET /` → 200, real Subito listings rendered server-side.
    - `GET /api/cron/match-alerts` (no header) → 401 — confirmed live.
    - `GET /manifest.webmanifest` → `name`/`short_name` literal `ZeroDollar` — confirmed live (brand audit, §8).
+   - Google OAuth sign-in on `/post` → Continue with Google → lands back on `/post` authenticated (not `localhost`) — confirmed live 2026-09-06 after fixing Supabase Site URL/Redirect URLs above.
    - Use `scripts/phase7-production-smoke.mjs` with `E2E_BASE_URL` set to the canonical URL — no manual curl fallback required. **Result (2026-09-06): 3/3 passed** (`/` 2xx, cron 401 without Bearer, cron 200 with `CRON_SECRET`).
 
 ### 5.1 Hobby-plan deploy-time adjustments (2026-09-06)
