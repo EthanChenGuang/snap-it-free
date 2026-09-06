@@ -113,11 +113,19 @@ Used by `.github/workflows/subito-scheduler.yml` (D-07-29):
 
 ### Google Cloud Console (OAuth client — no env vars)
 
-| Setting | Required | Verification |
-|---------|----------|---------------|
-| Authorized JavaScript origin | yes | = Vercel production URL |
-| Authorized redirect URI | yes | = `https://<supabase-project-ref>.supabase.co/auth/v1/callback` |
-| OAuth consent screen app name | yes (D-07-13) | Matches public brand (§8) — verify only, no client secret recorded here |
+| Setting | Required | Value (Plan 07-04) | Verification |
+|---------|----------|-------------------|---------------|
+| Authorized JavaScript origin | yes | `https://zerodollar-blond.vercel.app` | Must match canonical `APP_URL` (D-07-27/36) — **not** the team-scoped Vercel alias |
+| Authorized redirect URI | yes | `https://wnerhajyjjmrtsdmdpzu.supabase.co/auth/v1/callback` | Unchanged Supabase callback — Google never redirects to Vercel directly |
+| OAuth consent screen app name | yes (D-07-13) | Should read `ZeroDollar` (or localized equivalent) | Operator verifies in Google Cloud Console — no client secret recorded here |
+
+**Three-surface alignment (D-07-35/36, TD-03):** production Google OAuth requires all three surfaces to agree on the canonical origin:
+
+1. **Supabase Auth → URL Configuration:** Site URL = `https://zerodollar-blond.vercel.app`; Additional Redirect URLs include `https://zerodollar-blond.vercel.app/**` and `http://localhost:3003/**` (dev preserved).
+2. **Google Cloud Console → OAuth client:** Authorized JavaScript origin = `https://zerodollar-blond.vercel.app` (table above).
+3. **App code:** `buildRedirectToUrl` / `buildAuthRedirectPath` pass production-relative paths; `/auth/callback` applies `safeNextPath` on the `next` query param (T-07-09).
+
+After any `APP_URL` change, update Supabase Site URL and Google JS origin together, then re-run TD-03 on `/post` (Continue with Google → lands authenticated on production, not localhost).
 
 ---
 
