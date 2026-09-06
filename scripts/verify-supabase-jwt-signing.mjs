@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 /**
- * Detect Supabase JWT signing mismatch: GoTrue ES256 sessions vs legacy HS256 API keys.
+ * End-to-end Supabase JWT signing migration probe.
  *
  * Usage:
  *   node scripts/verify-supabase-jwt-signing.mjs
- *   node scripts/verify-supabase-jwt-signing.mjs --session-token "<access_token>"
  *
- * Loads .env.local then .env via dotenv (same pattern as other scripts).
+ * Loads .env.local then .env via dotenv.
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { config } from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
 
 const root = resolve(import.meta.dirname, '..');
 for (const file of ['.env.local', '.env']) {
@@ -27,17 +27,14 @@ const url =
   `https://${projectRef}.supabase.co`;
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-const sessionArgIdx = process.argv.indexOf('--session-token');
-const sessionToken =
-  sessionArgIdx >= 0 ? process.argv[sessionArgIdx + 1]?.trim() : undefined;
+const legacyJwt =
+  process.env.SUPABASE_SERVICE_ROLE_JWT?.trim() ||
+  process.env.SCRAPER_ADMIN_SERVICE_ROLE_KEY?.trim();
 
 function decodeJwtHeader(token) {
   const [headerB64] = token.split('.');
-  if (!headerB64) {
-    return null;
-  }
-  const padded = headerB64.replace(/-/g, '+').replace(/_/g, '/');
-  const json = Buffer.from(padded, 'base64').toString('utf8');
+  if (!headerB64) return null;
+  const json = Buffer.from(headerB64.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');
   return JSON.parse(json);
 }
 
@@ -48,11 +45,7 @@ function classifyKey(token) {
   if (token.startsWith('eyJ')) {
     try {
       const header = decodeJwtHeader(token);
-      return {
-        kind: 'legacy-jwt',
-        alg: header?.alg ?? 'unknown',
-        kid: header?.kid ?? '(none)',
-      };
+      return { kind: 'legacy-jwt', alg: header?.alg ?? 'unknown', kid: header?.kid ?? '(none)' };
     } catch (err) {
       return { kind: 'invalid', error: String(err) };
     }
@@ -60,47 +53,66 @@ function classifyKey(token) {
   return { kind: 'unknown' };
 }
 
-function keySummary(token, label) {
-  const classified = classifyKey(token);
-  if (classified.kind === 'missing') {
-    return { label, present: false };
-  }
-  if (classified.kind === 'publishable') {
-    return { label, present: true, detail: 'sb_publishable (new API key, not a JWT)' };
-  }
-  if (classified.kind === 'secret') {
-    return { label, present: true, detail: 'sb_secret (new API key, not a JWT)' };
-  }
-  if (classified.kind === 'legacy-jwt') {
-    return { label, present: true, detail: `legacy JWT alg=${classified.alg} ${classified.kid}` };
-  }
-  return { label, present: true, error: classified.error ?? 'unrecognized key format' };
-}
-
-async function fetchJwks(baseUrl) {
-  const res = await fetch(`${baseUrl.replace(/\/$/, '')}/auth/v1/.well-known/jwks.json`);
-  if (!res.ok) {
-    throw new Error(`JWKS fetch failed: ${res.status} ${res.statusText}`);
-  }
-  return res.json();
-}
-
-async function probeRest(baseUrl, token, label) {
-  const res = await fetch(`${baseUrl.replace(/\/$/, '')}/rest/v1/`, {
-    headers: {
-      apikey: token,
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return { label, status: res.status, ok: res.ok };
-}
-
 function printSection(title) {
   console.log(`\n── ${title} ${'─'.repeat(Math.max(0, 50 - title.length))}`);
 }
 
+async function fetchJwks(baseUrl) {
+  const res = await fetch(`${baseUrl.replace(/\/$/, '')}/auth/v1/.well-known/jwks.json`);
+  if (!res.ok) throw new Error(`JWKS fetch failed: ${res.status}`);
+  return res.json();
+}
+
+async function probeListings(baseUrl, { label, apikey, authorization }) {
+  const headers = { apikey };
+  if (authorization) headers.Authorization = authorization.startsWith('Bearer ') ? authorization : `Bearer ${authorization}`;
+  const res = await fetch(`${baseUrl.replace(/\/$/, '')}/rest/v1/listings_public?select=id&limit=1`, { headers });
+  const body = await res.text();
+  let message = '';
+  try {
+    message = JSON.parse(body).message ?? body.slice(0, 80);
+  } catch {
+    message = body.slice(0, 80);
+  }
+  return { label, status: res.status, ok: res.ok, message };
+}
+
+async function probeRpc(baseUrl, key, label) {
+  const res = await fetch(`${baseUrl.replace(/\/$/, '')}/rest/v1/rpc/delete_account_data`, {
+    method: 'POST',
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ target_user_id: '00000000-0000-0000-0000-000000000099' }),
+  });
+  const body = await res.text();
+  return { label, status: res.status, ok: res.status === 204 || res.status === 200, message: body.slice(0, 80) };
+}
+
+async function mintSessionToken(baseUrl, anon, legacyServiceJwt) {
+  if (!legacyServiceJwt?.startsWith('eyJ')) return null;
+  const admin = createClient(baseUrl, legacyServiceJwt, { auth: { persistSession: false } });
+  const email = `jwt-verify-${Date.now()}@snap-it-free.test`;
+  const password = 'JwtVerifyPass123!';
+  const { data, error } = await admin.auth.admin.createUser({ email, email_confirm: true, password });
+  if (error) {
+    console.log(`  (session mint skipped: ${error.message})`);
+    return null;
+  }
+  const anonClient = createClient(baseUrl, anon);
+  const { data: session, error: signInErr } = await anonClient.auth.signInWithPassword({ email, password });
+  await admin.auth.admin.deleteUser(data.user.id).catch(() => {});
+  if (signInErr) {
+    console.log(`  (session mint skipped: ${signInErr.message})`);
+    return null;
+  }
+  return session.session.access_token;
+}
+
 async function main() {
-  console.log('Supabase JWT signing probe');
+  console.log('Supabase JWT signing probe (end-to-end)');
   console.log(`URL: ${url}`);
 
   printSection('JWKS (GoTrue verify keys)');
@@ -108,59 +120,83 @@ async function main() {
   for (const key of jwks.keys ?? []) {
     console.log(`  alg=${key.alg} kid=${key.kid} kty=${key.kty}`);
   }
-  const jwksUsesEs256 = (jwks.keys ?? []).some((k) => k.alg === 'ES256');
 
   printSection('Configured API keys (env)');
-  for (const summary of [keySummary(anonKey, 'anon'), keySummary(serviceKey, 'service_role')]) {
-    if (!summary.present) {
-      console.log(`  ${summary.label}: (not set)`);
-    } else if (summary.error) {
-      console.log(`  ${summary.label}: ${summary.error}`);
-    } else {
-      console.log(`  ${summary.label}: ${summary.detail}`);
-    }
+  for (const [label, key] of [
+    ['anon', anonKey],
+    ['service_role', serviceKey],
+    ['legacy JWT fallback', legacyJwt],
+  ]) {
+    const c = classifyKey(key);
+    if (c.kind === 'missing') console.log(`  ${label}: (not set)`);
+    else if (c.kind === 'publishable') console.log(`  ${label}: sb_publishable`);
+    else if (c.kind === 'secret') console.log(`  ${label}: sb_secret`);
+    else if (c.kind === 'legacy-jwt') console.log(`  ${label}: legacy JWT alg=${c.alg}`);
+    else console.log(`  ${label}: ${c.kind}`);
   }
 
-  const anonKind = classifyKey(anonKey).kind;
-  const serviceKind = classifyKey(serviceKey).kind;
-  const usesNewApiKeys = anonKind === 'publishable' && serviceKind === 'secret';
-  const usesLegacyHs256 = anonKind === 'legacy-jwt' && classifyKey(anonKey).alg === 'HS256';
-
-  printSection('REST smoke');
+  printSection('PostgREST probes');
   const probes = [];
   if (anonKey) {
-    probes.push(await probeRest(url, anonKey, 'anon / publishable key'));
+    probes.push(await probeListings(url, { label: 'publishable (apikey only)', apikey: anonKey }));
   }
   if (serviceKey) {
-    probes.push(await probeRest(url, serviceKey, 'service_role / secret key'));
+    probes.push(await probeListings(url, { label: 'sb_secret (apikey+bearer)', apikey: serviceKey, authorization: serviceKey }));
+    probes.push(await probeRpc(url, serviceKey, 'sb_secret RPC delete_account_data'));
   }
-  if (sessionToken) {
-    probes.push(await probeRest(url, sessionToken, 'user session token'));
-  } else {
-    console.log('  (skip user session — pass --session-token to test logged-in JWT)');
+  if (legacyJwt?.startsWith('eyJ')) {
+    probes.push(await probeListings(url, { label: 'legacy JWT (apikey+bearer)', apikey: legacyJwt, authorization: legacyJwt }));
+    probes.push(await probeRpc(url, legacyJwt, 'legacy JWT RPC'));
   }
+
+  const sessionToken = await mintSessionToken(url, anonKey, legacyJwt);
+  if (sessionToken && anonKey) {
+    const hdr = decodeJwtHeader(sessionToken);
+    console.log(`  user session JWT: alg=${hdr?.alg} kid=${hdr?.kid}`);
+    probes.push(
+      await probeListings(url, {
+        label: 'user ES256 session (publishable apikey + bearer session)',
+        apikey: anonKey,
+        authorization: sessionToken,
+      }),
+    );
+  }
+
+  let passCount = 0;
   for (const p of probes) {
-    console.log(`  ${p.label}: HTTP ${p.status}${p.ok ? ' OK' : ''}`);
+    const mark = p.ok ? 'PASS' : 'FAIL';
+    if (p.ok) passCount++;
+    console.log(`  [${mark}] ${p.label}: HTTP ${p.status}${p.message ? ` — ${p.message}` : ''}`);
   }
 
   printSection('Verdict');
-  if (jwksUsesEs256 && usesNewApiKeys) {
-    console.log('  OK — ES256 JWKS + new publishable/secret API keys.');
-    console.log('  Next: sign out and back in, then unfavorite on /favorites.');
+  const userSessionProbe = probes.find((p) => p.label.includes('user ES256'));
+  const secretProbe = probes.find((p) => p.label.startsWith('sb_secret (apikey'));
+  const publishableOk = probes.find((p) => p.label.includes('publishable'))?.ok ?? false;
+
+  if (userSessionProbe?.ok && secretProbe?.ok && publishableOk) {
+    console.log('  MIGRATION COMPLETE — PostgREST accepts ES256 sessions and sb_secret.');
+    console.log('  Safe to revoke legacy JWT secret in Dashboard (after token expiry window).');
     return;
   }
-  if (jwksUsesEs256 && usesLegacyHs256) {
-    console.log('  MISMATCH — GoTrue publishes ES256 JWKS but env API keys are HS256 legacy.');
-    console.log('  Use Dashboard → API Keys → sb_publishable_ / sb_secret_ (not eyJ... JWTs).');
-    console.log('  See: docs/ops/supabase-jwt-signing-runbook.md');
+
+  if (userSessionProbe && !userSessionProbe.ok && publishableOk) {
+    console.log('  INCOMPLETE — GoTrue issues ES256 but PostgREST rejects user sessions.');
+    console.log('  Action: Dashboard → JWT Keys → Rotate keys (or wait 10–20m after rotate).');
+    console.log('  Guide: docs/ops/supabase-jwt-migration-checklist.md');
     process.exitCode = 1;
     return;
   }
-  if (!jwksUsesEs256 && usesLegacyHs256) {
-    console.log('  OK — legacy HS256 mode (JWKS empty or HS256-only).');
+
+  if (secretProbe && !secretProbe.ok) {
+    console.log('  INCOMPLETE — sb_secret rejected by PostgREST (PGRST303).');
+    console.log('  Use legacy eyJ JWT via SUPABASE_SERVICE_ROLE_JWT until migration completes.');
+    console.log('  Guide: docs/ops/supabase-jwt-migration-checklist.md');
+    process.exitCode = 1;
     return;
   }
-  console.log('  REVIEW — mixed or unknown state; inspect JWKS + key prefixes manually.');
+
+  console.log('  REVIEW — see probe results above.');
   process.exitCode = 1;
 }
 

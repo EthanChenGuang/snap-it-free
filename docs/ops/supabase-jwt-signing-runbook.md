@@ -35,8 +35,11 @@ node scripts/verify-supabase-jwt-signing.mjs
 Expected output while broken:
 
 - JWKS: `ES256` with kid `8530bc5d-3607-4c3c-9001-79a67a43ac0d`
-- Anon key header: `alg: HS256`
-- Verdict: **MISMATCH** — user sessions will fail on REST
+- `[PASS] publishable (apikey only)`
+- `[FAIL] user ES256 session` and `[FAIL] sb_secret` — often `"JWT issued at future"` (PGRST303)
+- Verdict: **INCOMPLETE** — user sessions will fail on REST
+
+Step-by-step Dashboard actions: **`docs/ops/supabase-jwt-migration-checklist.md`**
 
 Manual spot-check:
 
@@ -93,6 +96,16 @@ This is likely an internal Supabase platform inconsistency. Open a support ticke
 - JWKS kid: `8530bc5d-3607-4c3c-9001-79a67a43ac0d`
 - Error: PostgREST 500 `"JWT issued at future"` on user JWT; service_role works
 - Evidence: JWKS returns ES256; env API keys decode as HS256
+
+## Application workaround (2026-09-06)
+
+Until Dashboard signing migration is complete, server routes use `resolveServiceRoleKey()` (`lib/supabase/service-role-key.ts`):
+
+1. If `SUPABASE_SERVICE_ROLE_KEY` is legacy `eyJ...` JWT → use it.
+2. If primary is `sb_secret_*` → prefer `SUPABASE_SERVICE_ROLE_JWT`, then `SCRAPER_ADMIN_SERVICE_ROLE_KEY` when those are legacy JWTs.
+3. Delete-account GET no longer queries PostgREST with the user session JWT (uses service role + `user.id`).
+
+Local dev: `.env.local` already has `SCRAPER_ADMIN_SERVICE_ROLE_KEY=eyJ...`; no extra env change required unless that var is absent.
 
 ## Not fixable in application code
 
