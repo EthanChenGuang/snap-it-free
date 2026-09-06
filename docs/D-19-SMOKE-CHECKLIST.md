@@ -79,8 +79,8 @@ Cross-reference scenarios 1–12 from `scripts/phase19-uat-automation.mjs` and `
 
 | # | Check | Severity | Result |
 |---|-------|----------|--------|
-| 30 | `curl -H "Authorization: Bearer $CRON_SECRET" $APP_URL/api/cron/match-alerts` returns 200 with a `processed` count (may be 0) | Blocker | ☐ |
-| 31 | `curl $APP_URL/api/cron/match-alerts` (no header) returns 401 | Blocker | ☐ |
+| 30 | `curl -H "Authorization: Bearer $CRON_SECRET" $APP_URL/api/cron/match-alerts` returns 200 with a `processed` count (may be 0) | Blocker | ☑ pass (2026-09-06 — `scripts/phase7-production-smoke.mjs` 3/3 against `https://zerodollar-blond.vercel.app`) |
+| 31 | `curl $APP_URL/api/cron/match-alerts` (no header) returns 401 | Blocker | ☑ pass (2026-09-06 — same smoke script) |
 | 32 | Whichever operator alert channel is already configured (Telegram / WhatsApp / WeChat / email) delivers a test message | Blocker | ☐ |
 
 ## Rollback Readiness

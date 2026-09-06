@@ -272,22 +272,45 @@ Production feed at `https://zerodollar-blond.vercel.app/` serves Subito listings
 
 ## 7. External Alert Cron (DEPLOY-04)
 
-Use cron-job.org (or an equivalent free HTTP cron service) — D-07-37/44.
+Use cron-job.org (or an equivalent free HTTP cron service) — D-07-37/44. The Vercel-native cron in `vercel.json` (`0 3 * * *`, daily) is a **backup only** — Hobby plan forbids sub-daily schedules (§5.1). The external Bearer-authenticated job is the canonical alert-matcher trigger for Phase 7.
 
-1. Create a job that sends `GET https://<APP_URL>/api/cron/match-alerts`.
-2. Set a custom header: `Authorization: Bearer <CRON_SECRET>` (cron-job.org supports custom headers; it does **not** allow customizing User-Agent, so the route's secondary `vercel-cron` User-Agent fallback must **not** be relied upon for external cron — D-07-32).
-3. Interval: 5–15 minutes recommended (route batches up to 50 pending events per call).
-4. Verify:
+### 7.1 Operator setup (cron-job.org)
+
+1. Sign in at [cron-job.org](https://console.cron-job.org/) (free tier acceptable, D-07-44).
+2. **Create cronjob** → Title: `ZeroDollar alert matcher` (or similar).
+3. **URL:** `https://zerodollar-blond.vercel.app/api/cron/match-alerts`  
+   *(Use the full canonical `APP_URL` path — do **not** prepend `https://` twice; D-07-27.)*
+4. **Schedule:** every **10 minutes** (any 5–15 min interval is acceptable; route batches up to 50 pending events per call).
+5. **Request method:** `GET`.
+6. **Headers** (custom header — cron-job.org does **not** allow User-Agent customization, so do **not** rely on the route's `vercel-cron` User-Agent fallback, D-07-32):
+
+   | Header | Value |
+   |--------|-------|
+   | `Authorization` | `Bearer <CRON_SECRET>` |
+
+   Paste the same `CRON_SECRET` value already set in Vercel Production (§4). Use cron-job.org's secret/password field if available — never commit or paste the value into this runbook.
+
+7. **Save** and enable the job. Record the cron-job.org job ID in your operator notes (not in git).
+
+### 7.2 Verification (D-07-50)
+
+**API boundary — confirmed live 2026-09-06 (Plan 07-04):**
 
 ```bash
-curl -sS -H "Authorization: Bearer $CRON_SECRET" "https://<APP_URL>/api/cron/match-alerts"
-# Expect: {"processed":N} (N may be 0)
+# Expect 401 (no auth)
+curl -sS -o /dev/null -w "%{http_code}\n" \
+  "https://zerodollar-blond.vercel.app/api/cron/match-alerts"
 
-curl -sS "https://<APP_URL>/api/cron/match-alerts"
-# Expect: 401 {"error":"Unauthorized"}
+# Expect 200 + {"processed":N} (N may be 0)
+curl -sS -H "Authorization: Bearer $CRON_SECRET" \
+  "https://zerodollar-blond.vercel.app/api/cron/match-alerts"
 ```
 
-(D-07-50). Never echo `$CRON_SECRET` to logs or docs.
+Automated: `E2E_BASE_URL=https://zerodollar-blond.vercel.app node scripts/phase7-production-smoke.mjs` → **3/3 passed** (includes both cron probes when `CRON_SECRET` is in env or `.env.local`).
+
+**External scheduler — pending operator action:** cron-job.org job not yet created as of Plan 07-04 execution. After creating §7.1, confirm in the cron-job.org dashboard that executions return HTTP 200 (not 401). First successful external tick should appear in Vercel function logs for `/api/cron/match-alerts`.
+
+Never echo `$CRON_SECRET` to logs or docs.
 
 ---
 
@@ -340,7 +363,7 @@ fly scale count 0 -a shoumanwu-scraper
 
 ### Cron disable
 
-Pause or delete the cron-job.org job from its dashboard. No code change required.
+Pause or delete the cron-job.org job from its dashboard (job title: `ZeroDollar alert matcher` or whatever was set in §7.1). No code change required. If the job ID was recorded in operator notes, reference it here during incident response.
 
 ### Source disable / global pause
 
