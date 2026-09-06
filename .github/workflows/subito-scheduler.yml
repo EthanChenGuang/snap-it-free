@@ -21,7 +21,8 @@ concurrency:
 jobs:
   scheduler-tick:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Subito incremental tick: crawl ~3 min + listing upsert for 2k+ rows can exceed 15 min on GH runners (07-03).
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4

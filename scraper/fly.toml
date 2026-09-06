@@ -1,3 +1,5 @@
+# Optional legacy-free fallback only (D-07-67). Default production path scales this app to 0
+# and uses GitHub Actions `.github/workflows/subito-scheduler.yml` instead (D-07-66).
 app = "shoumanwu-scraper"
 primary_region = "ams"
 

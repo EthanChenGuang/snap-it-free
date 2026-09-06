@@ -161,13 +161,29 @@ The first two `vercel --prod` attempts against a linked local `git remote origin
 
 ### 6.1 Default $0 path — GitHub Actions `--scheduler-tick` (D-07-66)
 
-1. Add the repo secrets listed in §4 (GitHub Actions table) under **Settings → Secrets and variables → Actions**.
-2. Confirm `.github/workflows/subito-scheduler.yml` exists with a `schedule` trigger (every 2 hours by default — tune to stay under the 2000 min/mo private-repo quota) and a `workflow_dispatch` trigger for manual runs.
-3. Trigger one manual run via **Actions → Subito Scheduler → Run workflow** and confirm:
+**Production status (Plan 07-03, 2026-09-06):**
+
+| Item | Value |
+|------|-------|
+| Worker host | `github-actions-worker` (Plan 01 decision) |
+| Workflow | [Subito Scheduler](https://github.com/EthanChenGuang/snap-it-free/actions/workflows/subito-scheduler.yml) |
+| Schedule | `0 */2 * * *` (every 2 hours UTC) |
+| Fly `shoumanwu-scraper` | **Scaled to 0** — no paid 24/7 compute (D-07-67) |
+| Repo secrets | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SCRAPER_SECRETS_KEY`, `PROXY_URL`, plus alert channel secrets (names only — configured via `gh secret set`) |
+| Job timeout | 45 minutes (crawl + upsert for ~2k listings exceeded the original 15 min ceiling on first dispatch) |
+
+**Cutover steps:**
+
+1. Add the repo secrets listed in §4 (GitHub Actions table) under **Settings → Secrets and variables → Actions** (or `gh secret set <NAME>`).
+2. Confirm `.github/workflows/subito-scheduler.yml` is on the default branch with `schedule` + `workflow_dispatch`.
+3. Scale Fly to 0: `fly scale count 0 -a shoumanwu-scraper` (stops ~$3/mo billing while secrets remain on Fly until explicitly removed).
+4. Trigger one manual run: **Actions → Subito Scheduler → Run workflow** (or `gh workflow run subito-scheduler.yml`) and confirm:
    - The workflow succeeds (green check).
-   - Exactly one Subito run appears in `/admin` → Runs (D-07-20/21 — a failed first Subito run is a deploy blocker).
+   - Exactly one Subito run appears in `/admin` → Runs with `success` status (D-07-20/21 — a failed first Subito run is a deploy blocker).
    - Scheduler behavior matches DB `next_run_at` / `scraper_sources` config (D-07-18) — no hardcoded cadence in workflow logic.
-4. Disabled sources (Vinted, Facebook, Wallapop, others): confirm admin/config surfaces for these sources load without error. No manual run of a disabled source is required or in scope (D-07-16/17/21).
+5. Disabled sources (Vinted, Facebook, Wallapop, others): confirm admin/config surfaces for these sources load without error. No manual run of a disabled source is required or in scope (D-07-16/17/21).
+
+**Disable / rollback:** see §9 — `gh workflow disable subito-scheduler.yml` and/or `fly scale count 0`.
 
 ### 6.2 Optional legacy-free Fly fallback
 
