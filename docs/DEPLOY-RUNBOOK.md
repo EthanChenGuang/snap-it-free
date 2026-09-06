@@ -163,6 +163,26 @@ The first two `vercel --prod` attempts against a linked local `git remote origin
 
 **If this recurs on a future redeploy:** either repeat the remote-remove/redeploy/remote-add workaround, or (preferred long-term fix, requires a human) add a Login Connection at `vercel.com/account/login-connections` linking the `EthanChenGuang` GitHub account to this Vercel account.
 
+### 5.3 VAPID push env (Plan 07-04, DEPLOY-03)
+
+All four VAPID Production env vars confirmed on Vercel (names only — never values, D-07-29):
+
+| Variable | Set on Vercel Production |
+|----------|--------------------------|
+| `VAPID_SUBJECT` | yes |
+| `VAPID_PUBLIC_KEY` | yes |
+| `VAPID_PRIVATE_KEY` | yes (sensitive) |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | yes (must match `VAPID_PUBLIC_KEY` before build, D-07-31) |
+
+**Redeploy:** Production deployment `zerodollar-3twk3tx0r` (Ready, 2026-09-06) includes all VAPID vars plus `SUPABASE_DB_PASSWORD` — build ran after `NEXT_PUBLIC_VAPID_PUBLIC_KEY` was set.
+
+**Live verification (2026-09-06):**
+- Settings → Alerts & notifications shows **Push notifications** toggle (not `iosDisabled` copy) on desktop Chrome against `https://zerodollar-blond.vercel.app/settings` — confirms client bundle received `NEXT_PUBLIC_VAPID_PUBLIC_KEY`.
+- `npm run test:lib -- lib/pwa/ios-detect.test.ts` → pass (iosDisabled gating logic unchanged).
+- Full TD-02 iPhone standalone push delivery deferred to Plan 05 human checkpoint.
+
+**Rotation:** if `VAPID_PRIVATE_KEY` is compromised, generate a new keypair (`npx web-push generate-vapid-keys`), update all four vars on Vercel Production, redeploy, and have users re-enable push in Settings.
+
 ---
 
 ## 6. Worker Deploy
