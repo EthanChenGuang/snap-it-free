@@ -213,6 +213,33 @@ fly scale count 0 -a shoumanwu-scraper
 
 Run one instance only if Fly is used (`fly scale count 1`) — never run parallel Fly + GitHub Actions workers against the same due sources (D-07-23/24).
 
+### 6.3 Production Subito ingest verification (Plan 07-03, 2026-09-06)
+
+**Single-source config (D-07-16/17) — verified via Supabase REST, not mutated:**
+
+| Source | `enabled` | `next_run_at` (after tick) |
+|--------|-----------|----------------------------|
+| subito | `true` | `2026-09-06T22:07:19Z` (advanced ~2h after successful run — D-07-18) |
+| vinted | `false` | stale (disabled) |
+| facebook | `false` | — |
+| wallapop | `false` | — |
+| ebay | `false` | — |
+
+**`global_pause` (D-07-22):** `false` at pre-flight (Plan 01) and re-verified here — **not changed** during cutover.
+
+**GitHub Actions scheduler tick evidence:**
+
+| Run | Workflow | Conclusion | Scrape run | Status | Listings |
+|-----|----------|------------|------------|--------|----------|
+| [34057181731](https://github.com/EthanChenGuang/snap-it-free/actions/runs/34057181731) | 1st dispatch | cancelled (15 min timeout during upsert) | `77c0b655…` | `partial` | 0 persisted |
+| [34058038341](https://github.com/EthanChenGuang/snap-it-free/actions/runs/34058038341) | 2nd dispatch (45 min timeout) | **success** | `7c1d4c13…` | **success** | 1808 found, 13 inserted |
+
+Production feed at `https://zerodollar-blond.vercel.app/` serves Subito listings (server-rendered HTML contains `subito` source markers). Admin routes `/admin/sources` and `/admin/runs` return 307 (auth redirect) — not 5xx launch failures for disabled-source surfaces (D-07-17/41).
+
+**Proxy (D-07-19):** `proxy_enc` set in `scraper_global_config`; worker decrypts via shared `SCRAPER_SECRETS_KEY`. First tick logged `[worker] No proxy configured` (Subito `use_proxy_url=false` default) — operator proxy available via DB/env for sources that require it.
+
+**Scheduler unit tests:** `cd scraper && npm test -- scheduler.test.ts` → 7/7 passed.
+
 ---
 
 ## 7. External Alert Cron (DEPLOY-04)
