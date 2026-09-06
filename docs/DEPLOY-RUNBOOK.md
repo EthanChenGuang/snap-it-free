@@ -308,7 +308,7 @@ curl -sS -H "Authorization: Bearer $CRON_SECRET" \
 
 Automated: `E2E_BASE_URL=https://zerodollar-blond.vercel.app node scripts/phase7-production-smoke.mjs` → **3/3 passed** (includes both cron probes when `CRON_SECRET` is in env or `.env.local`).
 
-**External scheduler — pending operator action:** cron-job.org job not yet created as of Plan 07-04 execution. After creating §7.1, confirm in the cron-job.org dashboard that executions return HTTP 200 (not 401). First successful external tick should appear in Vercel function logs for `/api/cron/match-alerts`.
+**External scheduler — confirmed live 2026-09-06 (Plan 07-04 human-verify + Plan 07-05):** cron-job.org job created and firing; executions return HTTP 200. Re-verify in cron-job.org dashboard if alert volume drops unexpectedly.
 
 Never echo `$CRON_SECRET` to logs or docs.
 
@@ -421,14 +421,26 @@ Terms of Service and Privacy Policy pages are **not Phase 7 blockers**. If these
 
 Complete after production go-live. Completion criteria for the phase: production live + D-19 smoke pass + this runbook complete + 24h observation with no blockers (D-07-48).
 
+**Observation started:** 2026-09-06T21:10Z (Plan 07-05, post D-19 automated smoke)
+
 | Hour | Vercel logs | GitHub Actions / Fly logs | Supabase/admin | Alert cron | Push delivery | Notes |
 |------|-------------|---------------------------|-----------------|------------|----------------|-------|
-| +1h  |             |                           |                 |            |                |       |
+| +1h  | `/` 200, `/sw.js` 200, cron API 401/200 via smoke script | Subito Scheduler run 34058038341 success (1808 listings); Fly scaled 0 | Admin surfaces load; `subito.enabled=true`; last run `success` | cron-job.org verified (operator); API boundary 3/3 | VAPID toggle visible; TD-02 iPhone push **pending human**; desktop push delivery unverified | D-19 automated smoke complete except TD-02 + OG tags (#13 fail) |
 | +6h  |             |                           |                 |            |                |       |
 | +12h |             |                           |                 |            |                |       |
 | +24h |             |                           |                 |            |                |       |
 
-**Blockers found during observation:** _none / describe_
+**Blockers found during observation:** TD-02 iPhone standalone push pending human verify; D-19 check #13 OG meta tags missing on listing SSR (sharing preview gap). No feed/auth/worker regressions observed in +1h window.
+
+**Rollback triggers (D-07-53) — act if observed during 24h window:**
+
+| Trigger | Action |
+|---------|--------|
+| Auth login failure on production | §9 Vercel rollback + re-verify Supabase Site URL / Google JS origin (§4) |
+| Feed down / sustained 5xx on `/` | §9 Vercel promote previous deployment |
+| Sustained Subito worker failure (2+ consecutive GH Actions failures) | §9 disable workflow; check proxy/Subito block; consider `global_pause` |
+| Push breakage (TD-02 fail or desktop delivery regression) | §5.3 VAPID rotation + redeploy; pause alert cron if spam risk |
+| Secret exposure | Rotate affected secret on Vercel/GH/Fly; §9 cron pause until rotated |
 
 ---
 
