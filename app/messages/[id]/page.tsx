@@ -1,60 +1,29 @@
 import { notFound, redirect } from 'next/navigation';
 import { z } from 'zod';
 import { ConversationPageClient } from '@/components/messages/ConversationPageClient';
-import { createClient } from '@/lib/supabase/server';
+import { getConversationPageData } from '@/lib/messages/conversation-actions';
+import { requireAuth } from '@/lib/supabase/auth';
 
 const conversationIdSchema = z.string().uuid();
 
-type ConversationPageProps = {
+type PageProps = {
   params: Promise<{ id: string }>;
 };
 
-export default async function ConversationPage({ params }: ConversationPageProps) {
+export default async function MessageThreadPage({ params }: PageProps) {
   const { id } = await params;
   const parsed = conversationIdSchema.safeParse(id);
   if (!parsed.success) {
     notFound();
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await requireAuth();
   if (!user) {
     redirect('/messages');
   }
 
-  const { data: conversation, error } = await supabase
-    .from('conversations')
-    .select(
-      `
-      id,
-      buyer_user_id,
-      seller_user_id,
-      listings (id, title, photo_url, status)
-    `,
-    )
-    .eq('id', parsed.data)
-    .maybeSingle();
-
-  if (error || !conversation) {
-    notFound();
-  }
-
-  if (conversation.buyer_user_id !== user.id && conversation.seller_user_id !== user.id) {
-    notFound();
-  }
-
-  const listingRaw = conversation.listings;
-  const listing = (Array.isArray(listingRaw) ? listingRaw[0] : listingRaw) as {
-    id: string;
-    title: string;
-    photo_url: string | null;
-    status: string;
-  } | null;
-
-  if (!listing) {
+  const conversation = await getConversationPageData(parsed.data, user.id);
+  if (!conversation) {
     notFound();
   }
 
@@ -62,11 +31,7 @@ export default async function ConversationPage({ params }: ConversationPageProps
     <main className="app-shell flex min-h-full flex-col">
       <ConversationPageClient
         conversationId={conversation.id}
-        listing={{
-          id: listing.id,
-          title: listing.title,
-          photo_url: listing.photo_url ?? '',
-        }}
+        listing={conversation.listing}
         readOnly={false}
       />
     </main>

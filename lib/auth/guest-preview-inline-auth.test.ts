@@ -75,10 +75,23 @@ describe('guest preview heart focuses inline gate email (locked CONTEXT favorite
     expect(source).toMatch(/AuthPromptModal/);
   });
 
-  it('default FavoriteButton still mounts AuthPromptModal for feed cards', () => {
+  it('feed FavoriteButton toggles locally without opening auth modal', () => {
     const source = readSource('components/listings/FavoriteButton.tsx');
-    expect(source).toMatch(/<AuthPromptModal/);
-    expect(source).toMatch(/setAuthOpen\(true\)/);
+    expect(source).toMatch(/setPendingFavorited\(!wasFavorited\)/);
+    expect(source).toMatch(/await toggle\(listingId, wasFavorited\)/);
+    expect(source).not.toMatch(/setAuthOpen\(true\)/);
+  });
+
+  it('FavoriteButton uses remove on /favorites so guests can unfavorite saved items', () => {
+    const source = readSource('components/listings/FavoriteButton.tsx');
+    expect(source).toMatch(/pathname\.startsWith\('\/favorites'\)/);
+    expect(source).toMatch(/await remove\(listingId\)/);
+  });
+
+  it('FavoritesPageClient optimistically prunes cards when favorites change', () => {
+    const source = readSource('components/listings/FavoritesPageClient.tsx');
+    expect(source).toMatch(/readFavoriteIds\(\)/);
+    expect(source).toMatch(/setListings\(\(prev\) => prev\.filter/);
   });
 
   it('DetailHeroControls forwards onFavoriteUnauthed to FavoriteButton as onUnauthenticated', () => {

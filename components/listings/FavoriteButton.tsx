@@ -17,6 +17,8 @@ type FavoriteButtonProps = {
   size?: 'sm' | 'default';
   tone?: 'default' | 'overlay';
   onUnauthenticated?: () => void;
+  /** Called after a successful unfavorite (e.g. favorites page list pruning). */
+  onRemoved?: (listingId: string) => void;
 };
 
 export function FavoriteButton({
@@ -25,22 +27,31 @@ export function FavoriteButton({
   size = 'default',
   tone = 'default',
   onUnauthenticated,
+  onRemoved,
 }: FavoriteButtonProps) {
   const { messages } = useMessages();
 
   const pathname = usePathname();
-  const { isFavorite, toggle, hydrated, isAuthed } = useFavorites();
+  const { isFavorite, toggle, remove, isAuthed } = useFavorites();
   const [authOpen, setAuthOpen] = useState(false);
   const [shouldPop, setShouldPop] = useState(false);
+  const [pendingFavorited, setPendingFavorited] = useState<boolean | null>(null);
   const prevFavoritedRef = useRef(false);
-  const favorited = hydrated && isFavorite(listingId);
+  const storeFavorited = isFavorite(listingId);
+  const favorited = pendingFavorited ?? storeFavorited;
 
   useEffect(() => {
-    if (hydrated && favorited && !prevFavoritedRef.current) {
+    if (pendingFavorited !== null && pendingFavorited === storeFavorited) {
+      setPendingFavorited(null);
+    }
+  }, [pendingFavorited, storeFavorited]);
+
+  useEffect(() => {
+    if (favorited && !prevFavoritedRef.current) {
       setShouldPop(true);
     }
     prevFavoritedRef.current = favorited;
-  }, [favorited, hydrated]);
+  }, [favorited]);
 
   useEffect(() => {
     if (!shouldPop) return;
@@ -56,17 +67,24 @@ export function FavoriteButton({
     event.preventDefault();
     stopBubble(event);
 
-    if (getSupabaseEnv() && !isAuthed) {
-      if (onUnauthenticated) {
-        onUnauthenticated();
-        return;
-      }
-      setAuthOpen(true);
+    const managingLocalFavorites = pathname.startsWith('/favorites');
+
+    if (getSupabaseEnv() && !isAuthed && onUnauthenticated) {
+      onUnauthenticated();
       return;
     }
 
-    const added = await toggle(listingId);
-    toast(added ? messages.favorites.added : messages.favorites.removed);
+    if (managingLocalFavorites) {
+      await remove(listingId);
+      onRemoved?.(listingId);
+      toast(messages.favorites.removed);
+      return;
+    }
+
+    const wasFavorited = favorited;
+    setPendingFavorited(!wasFavorited);
+    const nowFavorited = await toggle(listingId, wasFavorited);
+    setPendingFavorited(nowFavorited);
   };
 
   const redirectTo = pathname.startsWith('/favorites') ? '/favorites' : pathname;

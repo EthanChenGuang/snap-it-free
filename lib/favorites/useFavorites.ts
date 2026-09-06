@@ -4,6 +4,7 @@ import { useCallback, useSyncExternalStore } from 'react';
 import {
   getFavoritesSnapshot,
   getServerFavoritesSnapshot,
+  removeFavorite,
   subscribeFavorites,
   toggleFavorite,
 } from './store';
@@ -26,5 +27,6 @@ export function useFavorites() {
     isAuthed,
     isFavorite,
     toggle: toggleFavorite,
+    remove: removeFavorite,
   };
 }

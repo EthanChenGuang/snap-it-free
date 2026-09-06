@@ -1,0 +1,689 @@
+{
+  "meta": {
+    "origin": "http://localhost:3003",
+    "startedAt": "2026-09-06T13:28:54.273Z",
+    "finishedAt": "2026-09-06T13:33:04.418Z",
+    "gitHash": "285efb3",
+    "authed": true,
+    "cookieInjection": true
+  },
+  "summary": {
+    "Guest /": {
+      "PASS": 28,
+      "FAIL": 0,
+      "BLOCKED": 1,
+      "total": 29
+    },
+    "Guest gates": {
+      "PASS": 9,
+      "FAIL": 0,
+      "BLOCKED": 0,
+      "total": 9
+    },
+    "Guest /settings": {
+      "PASS": 6,
+      "FAIL": 0,
+      "BLOCKED": 0,
+      "total": 6
+    },
+    "Authed": {
+      "PASS": 14,
+      "FAIL": 2,
+      "BLOCKED": 1,
+      "total": 17
+    },
+    "Cross-page": {
+      "PASS": 2,
+      "FAIL": 0,
+      "BLOCKED": 0,
+      "total": 2
+    },
+    "Desktop 1280×800": {
+      "PASS": 2,
+      "FAIL": 1,
+      "BLOCKED": 0,
+      "total": 3
+    }
+  },
+  "controls": [
+    {
+      "page": "Guest /",
+      "name": "Bottom nav /",
+      "type": "link",
+      "expected": "visible",
+      "actual": "visible",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Bottom nav /post",
+      "type": "link",
+      "expected": "visible",
+      "actual": "visible",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Bottom nav /favorites",
+      "type": "link",
+      "expected": "visible",
+      "actual": "visible",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Bottom nav /settings",
+      "type": "link",
+      "expected": "visible",
+      "actual": "visible",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Post nav auth modal",
+      "type": "button",
+      "expected": "dialog",
+      "actual": "open",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Favorites nav auth modal",
+      "type": "button",
+      "expected": "dialog",
+      "actual": "open",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Settings nav",
+      "type": "link",
+      "expected": "/settings",
+      "actual": "http://localhost:3003/settings",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Search with results",
+      "type": "input",
+      "expected": "no crash",
+      "actual": "filled",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Search no results",
+      "type": "input",
+      "expected": "no crash",
+      "actual": "filled",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Search special chars",
+      "type": "input",
+      "expected": "no error",
+      "actual": "ok",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter sheet open",
+      "type": "sheet",
+      "expected": "open",
+      "actual": "open",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #0 (all)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #1 (milano)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #2 (roma)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #3 (prato)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #4 (torino)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #5 (firenze)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #6 (bologna)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #7 (napoli)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #8 (brescia)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #9 (venice)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #10 (genova)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #11 (padova)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #12 (perugia)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #13 (verona)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter city #14 (other)",
+      "type": "chip",
+      "expected": "selected",
+      "actual": "true",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter categories all",
+      "type": "chip",
+      "expected": "18",
+      "actual": "18",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Filter sheet close",
+      "type": "sheet",
+      "expected": "closed",
+      "actual": "closed",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /",
+      "name": "Listing card click",
+      "type": "link",
+      "expected": "/listing/[id]",
+      "actual": "no cards",
+      "status": "BLOCKED",
+      "evidence": "feed empty after filters"
+    },
+    {
+      "page": "Guest gates",
+      "name": "/post gate",
+      "type": "page",
+      "expected": "gateTitle",
+      "actual": "shown",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest gates",
+      "name": "/post open Auth modal",
+      "type": "button",
+      "expected": "dialog",
+      "actual": "open",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest gates",
+      "name": "/favorites gate",
+      "type": "page",
+      "expected": "empty+signIn",
+      "actual": "shown",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest gates",
+      "name": "/messages gate",
+      "type": "page",
+      "expected": "redirect/wall",
+      "actual": "http://localhost:3003/messages",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest gates",
+      "name": "/messages/[id] gate",
+      "type": "page",
+      "expected": "redirect/wall",
+      "actual": "http://localhost:3003/messages",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest gates",
+      "name": "/post/manage gate",
+      "type": "page",
+      "expected": "gate",
+      "actual": "shown",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest gates",
+      "name": "/select-location map",
+      "type": "page",
+      "expected": "map",
+      "actual": "yes",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest gates",
+      "name": "/select-location confirm btn",
+      "type": "button",
+      "expected": "visible",
+      "actual": "visible",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest gates",
+      "name": "/list redirect",
+      "type": "page",
+      "expected": "→ /",
+      "actual": "http://localhost:3003",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /settings",
+      "name": "Appearance cycle",
+      "type": "button",
+      "expected": "cycle",
+      "actual": "3 clicks",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /settings",
+      "name": "Language zh",
+      "type": "button",
+      "expected": "change",
+      "actual": "clicked",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /settings",
+      "name": "Language en",
+      "type": "button",
+      "expected": "change",
+      "actual": "clicked",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /settings",
+      "name": "Language it",
+      "type": "button",
+      "expected": "change",
+      "actual": "clicked",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /settings",
+      "name": "Language affects feed",
+      "type": "flow",
+      "expected": "localized",
+      "actual": "yes",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /settings",
+      "name": "Delete account hidden",
+      "type": "button",
+      "expected": "hidden",
+      "actual": "hidden",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Cookie injection login",
+      "type": "session",
+      "expected": "logged in",
+      "actual": "yes",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Post nav no modal",
+      "type": "link",
+      "expected": "no auth modal",
+      "actual": "ok",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Empty form validation",
+      "type": "form",
+      "expected": "field errors",
+      "actual": "shown",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Photo upload preview",
+      "type": "file",
+      "expected": "preview",
+      "actual": "set",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Category selection",
+      "type": "chip",
+      "expected": "one category",
+      "actual": "0",
+      "status": "FAIL",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Condition brand_new",
+      "type": "chip",
+      "expected": "select",
+      "actual": "clicked",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Condition like_new",
+      "type": "chip",
+      "expected": "select",
+      "actual": "clicked",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Condition good",
+      "type": "chip",
+      "expected": "select",
+      "actual": "clicked",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Condition fair",
+      "type": "chip",
+      "expected": "select",
+      "actual": "clicked",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Condition poor",
+      "type": "chip",
+      "expected": "select",
+      "actual": "clicked",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Post submit",
+      "type": "button",
+      "expected": "success",
+      "actual": "http://localhost:3003/listing/10c48f85-a86a-44fc-b771-eec6c7a75aa7/posted",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Post no double-create",
+      "type": "button",
+      "expected": "single",
+      "actual": "one submit",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "/post/manage list",
+      "type": "page",
+      "expected": "own posts",
+      "actual": "2",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "/settings?tab=alerts",
+      "type": "page",
+      "expected": "alerts tab",
+      "actual": "yes",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Logout",
+      "type": "button",
+      "expected": "guest",
+      "actual": "clicked",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Unread badge",
+      "type": "badge",
+      "expected": "when unread",
+      "actual": "no seed data",
+      "status": "BLOCKED",
+      "evidence": "cannot seed unread"
+    },
+    {
+      "page": "Authed",
+      "name": "Delete account",
+      "type": "button",
+      "expected": "→ guest /",
+      "actual": "still authed",
+      "status": "FAIL",
+      "evidence": ""
+    },
+    {
+      "page": "Cross-page",
+      "name": "Filter persists after detail back",
+      "type": "flow",
+      "expected": "kept",
+      "actual": "back ok",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Cross-page",
+      "name": "Language persists",
+      "type": "flow",
+      "expected": "en nav",
+      "actual": "en",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Desktop 1280×800",
+      "name": "Bottom nav",
+      "type": "nav",
+      "expected": "visible",
+      "actual": "yes",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Desktop 1280×800",
+      "name": "Filter sheet",
+      "type": "sheet",
+      "expected": "open",
+      "actual": "open",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Desktop 1280×800",
+      "name": "Desktop suite",
+      "type": "layout",
+      "expected": "complete",
+      "actual": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiti",
+      "status": "FAIL",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /listing/[id]",
+      "name": "Guest gate email (scraped)",
+      "type": "input",
+      "expected": "visible",
+      "actual": "visible",
+      "status": "PASS",
+      "evidence": "8e68ef74-156e-44c7-9ee9-504905702894"
+    },
+    {
+      "page": "Guest /listing/[id]",
+      "name": "Valid email OTP message",
+      "type": "input",
+      "expected": "check email",
+      "actual": "not shown",
+      "status": "FAIL",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /listing/[id]",
+      "name": "Google OAuth btn",
+      "type": "button",
+      "expected": "visible",
+      "actual": "visible",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Guest /listing/[id]",
+      "name": "Share button",
+      "type": "button",
+      "expected": "click",
+      "actual": "clicked",
+      "status": "PASS",
+      "evidence": ""
+    },
+    {
+      "page": "Authed",
+      "name": "Delete account (retest)",
+      "type": "button",
+      "expected": "→ /",
+      "actual": "http://localhost:3003/settings",
+      "status": "FAIL",
+      "evidence": ""
+    }
+  ]
+}

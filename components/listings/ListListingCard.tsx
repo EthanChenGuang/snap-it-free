@@ -16,6 +16,7 @@ type ListListingCardProps = {
   priority?: boolean;
   /** Stagger entrance animation on the home feed. */
   index?: number;
+  onUnfavorite?: (listingId: string) => void;
 };
 
 /**
@@ -25,6 +26,7 @@ export function ListListingCard({
   listing,
   priority = false,
   index = 0,
+  onUnfavorite,
 }: ListListingCardProps) {
   const { language, messages, formatRelativeTime } = useMessages();
   const displayTitle = resolveListingTitle(listing, language);
@@ -81,6 +83,7 @@ export function ListListingCard({
           size="sm"
           tone="overlay"
           className="absolute right-1 top-1 z-10"
+          onRemoved={onUnfavorite}
         />
       </div>
 

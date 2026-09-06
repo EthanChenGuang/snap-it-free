@@ -9,6 +9,7 @@ const withSerwist = withSerwistInit({
 const nextConfig: NextConfig = {
   // Hide the floating "N" dev-tools badge — it overlaps the bottom nav on mobile.
   devIndicators: false,
+  serverExternalPackages: ['pg'],
   // Next.js 16 returns 403 for cross-origin /_next/* dev requests (including the
   // webpack-hmr websocket). Without the tunnel/LAN hosts allowlisted, the dev
   // client never boots and the app never hydrates when opened on a phone.

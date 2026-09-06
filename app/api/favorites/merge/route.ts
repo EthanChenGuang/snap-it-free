@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { MergeFavoritesSchema } from '@/lib/favorites/schemas';
 import { requireAuth } from '@/lib/supabase/auth';
+import { restErrorResponse } from '@/lib/supabase/rest-error';
 import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
     .upsert(rows, { onConflict: 'user_id,listing_id', ignoreDuplicates: true });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return restErrorResponse(error);
   }
 
   return NextResponse.json({ ok: true, merged: listingIds.length });

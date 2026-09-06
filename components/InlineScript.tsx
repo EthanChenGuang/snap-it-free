@@ -1,16 +1,15 @@
+import Script from 'next/script';
+
 type InlineScriptProps = {
-  id?: string;
+  id: string;
   html: string;
 };
 
-/** Inline script that runs during HTML parse without React 19 client-render warnings. */
+/** Critical inline scripts via next/script (React 19 disallows raw <script> in components). */
 export function InlineScript({ id, html }: InlineScriptProps) {
   return (
-    <script
-      id={id}
-      type={typeof window === 'undefined' ? 'text/javascript' : 'text/plain'}
-      suppressHydrationWarning
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+    <Script id={id} strategy="beforeInteractive">
+      {html}
+    </Script>
   );
 }

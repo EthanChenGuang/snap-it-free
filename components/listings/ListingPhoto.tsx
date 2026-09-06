@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useInView } from '@/hooks/useInView';
 import {
   normalizeSubitoFeedPhotoUrl,
@@ -44,6 +44,7 @@ export function ListingPhoto({
   variant = 'default',
 }: ListingPhotoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const inView = useInView(containerRef, { enabled: !priority });
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -57,6 +58,14 @@ export function ListingPhoto({
   const resolvedSrc = src ? normalizePhotoUrl(src) : src;
   const shouldLoad = priority || inView;
   const isFeed = variant === 'feed';
+
+  // Cached images (or a failed hydration pass) may finish loading before onLoad attaches.
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img?.complete && img.naturalWidth > 0) {
+      setLoaded(true);
+    }
+  }, [resolvedSrc, shouldLoad]);
 
   if (!resolvedSrc || failed) {
     return (
@@ -78,6 +87,7 @@ export function ListingPhoto({
         // Native img — external CDN already resizes; avoids Next/Image unoptimized overhead.
         // eslint-disable-next-line @next/next/no-img-element
         <img
+          ref={imgRef}
           src={resolvedSrc}
           alt={alt}
           sizes={sizes}
@@ -85,11 +95,10 @@ export function ListingPhoto({
           decoding="async"
           fetchPriority={priority ? 'high' : 'auto'}
           className={cn(
-            'absolute inset-0 h-full w-full',
-            isFeed
-              ? 'feed-card-image-reveal object-cover'
-              : 'object-cover transition-opacity duration-300',
-            loaded ? (isFeed ? 'feed-card-image-loaded' : 'opacity-100') : 'opacity-0',
+            'absolute inset-0 z-[1] h-full w-full object-cover',
+            isFeed && 'feed-card-image',
+            isFeed && (loaded ? 'feed-card-image-loaded' : 'feed-card-image-reveal'),
+            !isFeed && 'transition-opacity duration-300',
             className,
           )}
           onLoad={() => setLoaded(true)}

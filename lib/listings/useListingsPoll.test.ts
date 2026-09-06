@@ -32,11 +32,16 @@ const padovaListing: ListingRow = {
   status: 'active',
 };
 
+function listing(id: string, postedAt: string): ListingRow {
+  return { ...padovaListing, id, posted_at: postedAt };
+}
+
 function mountUseListingsPoll(initialListings: ListingRow[]) {
   const hookRef: { current: ReturnType<typeof useListingsPoll> | null } = { current: null };
+  let seed = initialListings;
 
   function Harness() {
-    const hook = useListingsPoll(initialListings);
+    const hook = useListingsPoll(seed);
     hookRef.current = hook;
     return null;
   }
@@ -54,6 +59,12 @@ function mountUseListingsPoll(initialListings: ListingRow[]) {
         throw new Error('useListingsPoll hook not mounted');
       }
       return hookRef.current;
+    },
+    rerender(nextInitial: ListingRow[]) {
+      seed = nextInitial;
+      act(() => {
+        root.render(createElement(Harness));
+      });
     },
     unmount() {
       act(() => {
@@ -103,5 +114,28 @@ describe('useListingsPoll', () => {
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(mounted.hook.listings).toContainEqual(padovaListing);
+  });
+
+  it('does not replace a full client snapshot with a shorter SSR seed', async () => {
+    const ssrNewest = listing('ssr-1', '2026-09-06T10:00:00.000Z');
+    const fullFeed = [
+      listing('a', '2026-09-06T10:00:00.000Z'),
+      listing('b', '2026-08-01T10:00:00.000Z'),
+      listing('c', '2026-04-01T10:00:00.000Z'),
+    ];
+    mockFetch.mockResolvedValue(fullFeed);
+    mockFetchCount.mockResolvedValue(fullFeed.length);
+    mounted = mountUseListingsPoll([ssrNewest]);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(mounted.hook.listings).toHaveLength(3);
+
+    mounted.rerender([listing('ssr-2', '2026-09-06T10:05:00.000Z')]);
+
+    expect(mounted.hook.listings).toHaveLength(3);
+    expect(mounted.hook.listings.map((row) => row.id)).toEqual(['a', 'b', 'c']);
   });
 });

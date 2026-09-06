@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -96,22 +97,38 @@ export function ManageListingsClient({ listings, userId }: ManageListingsClientP
               {isHidden && <HiddenReviewBanner />}
 
               <div className="flex items-start justify-between gap-space-md">
-                <div className="min-w-0 flex-1">
-                  <Link
-                    href={`/listing/${listing.id}`}
-                    className="text-label-md font-semibold text-on-surface hover:underline"
-                  >
-                    {listing.title}
-                  </Link>
-                  <p className="mt-space-xs text-label-sm text-on-surface-variant">
-                    {formatRelativeTime(listing.posted_at)}
-                  </p>
-                  {isReserved && (
-                    <span className="mt-space-sm inline-flex rounded border border-outline-variant bg-surface-container-highest px-space-sm py-space-xs text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">
-                      {messages.listing.reserved}
-                    </span>
-                  )}
-                </div>
+                <Link
+                  href={`/listing/${listing.id}`}
+                  className="flex min-w-0 flex-1 items-start gap-space-md"
+                >
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-low">
+                    {listing.photo_url || listing.photo_urls?.[0] ? (
+                      <Image
+                        src={listing.photo_urls?.[0] ?? listing.photo_url}
+                        alt={listing.title}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-on-surface-variant">
+                        <span className="material-symbols-outlined">image</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-label-md font-semibold text-on-surface">{listing.title}</p>
+                    <p className="mt-space-xs text-label-sm text-on-surface-variant">
+                      {formatRelativeTime(listing.posted_at)}
+                    </p>
+                    {isReserved && (
+                      <span className="mt-space-sm inline-flex rounded border border-outline-variant bg-surface-container-highest px-space-sm py-space-xs text-label-sm font-medium text-on-surface-variant">
+                        {messages.listing.reserved}
+                      </span>
+                    )}
+                  </div>
+                </Link>
                 <Link
                   href={`/listing/${listing.id}`}
                   className="shrink-0 text-label-sm text-on-surface-variant hover:underline"

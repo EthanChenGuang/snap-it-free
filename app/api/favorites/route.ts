@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { FavoriteListingIdSchema } from '@/lib/favorites/schemas';
 import { requireAuth } from '@/lib/supabase/auth';
+import { restErrorResponse } from '@/lib/supabase/rest-error';
 import { createClient } from '@/lib/supabase/server';
 
 export async function GET() {
@@ -16,7 +17,7 @@ export async function GET() {
     .eq('user_id', user.id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return restErrorResponse(error);
   }
 
   const listingIds = (data ?? []).map((row) => row.listing_id as string);
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
   );
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return restErrorResponse(error);
   }
 
   return NextResponse.json({ ok: true, listingId: parsed.data.listingId });
@@ -77,7 +78,7 @@ export async function DELETE(request: Request) {
     .eq('listing_id', parsed.data.listingId);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return restErrorResponse(error);
   }
 
   return NextResponse.json({ ok: true, listingId: parsed.data.listingId });

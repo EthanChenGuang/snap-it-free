@@ -1,6 +1,8 @@
 import { createAnonClient } from '@/lib/supabase/anon';
 import { createClient } from '@/lib/supabase/server';
 import { getSupabaseEnv } from '@/lib/supabase/env';
+import { feedLookbackSinceIso, fetchPagedRows } from './feed-window';
+import { getOwnerListingFromDb, getOwnerListingsFromDb } from './owner-db';
 import type { ListingRow, OwnerListingRow } from './types';
 
 const PUBLIC_LISTINGS = 'listings_public';
@@ -28,23 +30,39 @@ export async function getActiveListings(
   }
 
   const supabase = createAnonClient();
-  let query = supabase
-    .from(PUBLIC_LISTINGS)
-    .select(ACTIVE_LISTING_COLUMNS)
-    .order('posted_at', { ascending: false });
+  const since = feedLookbackSinceIso();
 
   if (options.limit != null) {
-    query = query.limit(options.limit);
+    const { data, error } = await supabase
+      .from(PUBLIC_LISTINGS)
+      .select(ACTIVE_LISTING_COLUMNS)
+      .gte('posted_at', since)
+      .order('posted_at', { ascending: false })
+      .limit(options.limit);
+
+    if (error) {
+      console.error('[listings] getActiveListings failed:', error.message);
+      return [];
+    }
+
+    return (data ?? []) as ListingRow[];
   }
 
-  const { data, error } = await query;
+  const { data, error } = await fetchPagedRows<ListingRow>((from, to) =>
+    supabase
+      .from(PUBLIC_LISTINGS)
+      .select(ACTIVE_LISTING_COLUMNS)
+      .gte('posted_at', since)
+      .order('posted_at', { ascending: false })
+      .range(from, to),
+  );
 
   if (error) {
     console.error('[listings] getActiveListings failed:', error.message);
     return [];
   }
 
-  return (data ?? []) as ListingRow[];
+  return data;
 }
 
 /** Exact row count on listings_public — head-only, no row payload (D-28 view rules). */
@@ -56,7 +74,8 @@ export async function getActiveListingsCount(): Promise<number | null> {
   const supabase = createAnonClient();
   const { count, error } = await supabase
     .from(PUBLIC_LISTINGS)
-    .select('id', { count: 'exact', head: true });
+    .select('id', { count: 'exact', head: true })
+    .gte('posted_at', feedLookbackSinceIso());
 
   if (error) {
     return null;
@@ -124,11 +143,12 @@ export async function getOwnerListingById(id: string): Promise<OwnerListingRow |
     .eq('owner_user_id', user.id)
     .maybeSingle();
 
-  if (error) {
-    return null;
+  if (!error && data) {
+    return data as OwnerListingRow;
   }
 
-  return (data as OwnerListingRow | null) ?? null;
+  // PostgREST rejects current user JWTs; the listing was written via Postgres.
+  return getOwnerListingFromDb(id, user.id);
 }
 
 export async function getOwnerListings(): Promise<OwnerListingRow[]> {
@@ -152,11 +172,11 @@ export async function getOwnerListings(): Promise<OwnerListingRow[]> {
     .eq('source', 'ugc')
     .order('posted_at', { ascending: false });
 
-  if (error) {
-    return [];
+  if (!error && data && data.length > 0) {
+    return data as OwnerListingRow[];
   }
 
-  return (data ?? []) as OwnerListingRow[];
+  return getOwnerListingsFromDb(user.id);
 }
 
 export async function getSimilarListings(

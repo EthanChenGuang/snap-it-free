@@ -149,7 +149,7 @@ function PhotoTile({
         className="object-contain p-1"
         unoptimized
       />
-      <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-black/40 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
+      <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-black/40 px-1.5 py-0.5 text-label-sm font-semibold text-white backdrop-blur-md">
         {index + 1}/{total}
       </span>
       <button
@@ -198,6 +198,9 @@ function AddPhotoTile({
 export function PostForm() {
   const { messages, language } = useMessages();
   const addPhotosInputId = useId();
+  const titleInputId = useId();
+  const descriptionInputId = useId();
+  const titleRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   const router = useRouter();
@@ -216,6 +219,7 @@ export function PostForm() {
   const [authOpen, setAuthOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ title?: string; description?: string }>({});
 
   const primaryPhotoFile = photos[0]?.file ?? null;
   const photosRef = useRef<PhotoItem[]>([]);
@@ -293,7 +297,7 @@ export function PostForm() {
     const el = descriptionRef.current;
     if (!el) return;
     el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
+    el.style.height = `${Math.max(el.scrollHeight, 96)}px`;
   }, [description]);
 
   // Text fields persist without touching photoDataUrls; mergePostDraft preserves the
@@ -371,7 +375,19 @@ export function PostForm() {
       return;
     }
 
-    if (!primaryPhotoFile || !title.trim()) {
+    const nextFieldErrors: { title?: string; description?: string } = {};
+    if (!title.trim()) nextFieldErrors.title = messages.post.titleRequired;
+    if (!description.trim()) nextFieldErrors.description = messages.post.descriptionRequired;
+    setFieldErrors(nextFieldErrors);
+
+    if (nextFieldErrors.title || nextFieldErrors.description) {
+      const firstInvalid = nextFieldErrors.title ? titleRef.current : descriptionRef.current;
+      firstInvalid?.focus();
+      firstInvalid?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    if (!primaryPhotoFile) {
       setError(messages.post.missingFields);
       return;
     }
@@ -507,7 +523,7 @@ export function PostForm() {
                     : 'text-on-surface-variant hover:text-on-surface',
                 )}
               >
-                <span className="material-symbols-outlined text-[20px]">view_carousel</span>
+                <span className="material-symbols-outlined text-h3">view_carousel</span>
               </button>
               <button
                 type="button"
@@ -521,7 +537,7 @@ export function PostForm() {
                     : 'text-on-surface-variant hover:text-on-surface',
                 )}
               >
-                <span className="material-symbols-outlined text-[20px]">grid_view</span>
+                <span className="material-symbols-outlined text-h3">grid_view</span>
               </button>
             </div>
           </div>
@@ -572,23 +588,86 @@ export function PostForm() {
           )}
         </section>
 
-        <section className="rounded-2xl border border-outline-variant/50 bg-surface-container-low/60 p-4 transition-all focus-within:border-primary focus-within:bg-surface-container-lowest focus-within:ring-1 focus-within:ring-primary/10">
-          <input
-            type="text"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder={messages.post.titlePlaceholder}
-            className="w-full border-0 bg-transparent text-base font-semibold text-on-surface outline-none placeholder:font-normal placeholder:text-outline-variant"
-          />
-          <div className="my-3 h-px bg-outline-variant/40" />
-          <textarea
-            ref={descriptionRef}
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder={messages.post.descriptionPlaceholder}
-            rows={1}
-            className="w-full resize-none overflow-hidden border-0 bg-transparent text-sm text-on-surface outline-none placeholder:text-outline-variant"
-          />
+        <section className="space-y-4">
+          <div className="space-y-2">
+            <label
+              htmlFor={titleInputId}
+              className="block text-label-md font-medium text-on-surface"
+            >
+              {messages.post.titleLabel}
+            </label>
+            <input
+              id={titleInputId}
+              ref={titleRef}
+              type="text"
+              value={title}
+              onChange={(event) => {
+                setTitle(event.target.value);
+                if (fieldErrors.title) {
+                  setFieldErrors((current) => ({ ...current, title: undefined }));
+                }
+              }}
+              placeholder={messages.post.titlePlaceholder}
+              aria-invalid={Boolean(fieldErrors.title)}
+              aria-describedby={fieldErrors.title ? `${titleInputId}-error` : undefined}
+              className={cn(
+                'w-full rounded border bg-surface-container-lowest px-3 py-3 text-body-lg font-semibold text-on-surface outline-none placeholder:font-normal placeholder:text-on-surface-variant',
+                fieldErrors.title
+                  ? 'border-error'
+                  : 'border-outline-variant focus:border-primary',
+              )}
+            />
+            {fieldErrors.title && (
+              <p
+                id={`${titleInputId}-error`}
+                role="alert"
+                className="text-label-sm text-error"
+              >
+                {fieldErrors.title}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor={descriptionInputId}
+              className="block text-label-md font-medium text-on-surface"
+            >
+              {messages.post.descriptionLabel}
+            </label>
+            <textarea
+              id={descriptionInputId}
+              ref={descriptionRef}
+              value={description}
+              onChange={(event) => {
+                setDescription(event.target.value);
+                if (fieldErrors.description) {
+                  setFieldErrors((current) => ({ ...current, description: undefined }));
+                }
+              }}
+              placeholder={messages.post.descriptionPlaceholder}
+              rows={3}
+              aria-invalid={Boolean(fieldErrors.description)}
+              aria-describedby={
+                fieldErrors.description ? `${descriptionInputId}-error` : undefined
+              }
+              className={cn(
+                'w-full min-h-24 resize-none overflow-hidden rounded border bg-surface-container-lowest px-3 py-3 text-body-md text-on-surface outline-none placeholder:text-on-surface-variant',
+                fieldErrors.description
+                  ? 'border-error'
+                  : 'border-outline-variant focus:border-primary',
+              )}
+            />
+            {fieldErrors.description && (
+              <p
+                id={`${descriptionInputId}-error`}
+                role="alert"
+                className="text-label-sm text-error"
+              >
+                {fieldErrors.description}
+              </p>
+            )}
+          </div>
         </section>
 
         <section className="space-y-4">

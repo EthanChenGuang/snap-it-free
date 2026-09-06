@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   Drawer,
   DrawerClose,
@@ -40,6 +40,7 @@ export function DmDrawer({
     readOnly,
     enabled: open && Boolean(conversationId),
   });
+  const startAttemptedRef = useRef(false);
 
   const startConversation = useCallback(async () => {
     setLoading(true);
@@ -78,7 +79,13 @@ export function DmDrawer({
   }, [listing.id, onConversationReady, messages.dm.sendError, setLoading]);
 
   useEffect(() => {
-    if (open && !conversationId && !readOnly && !loading) {
+    if (!open) {
+      startAttemptedRef.current = false;
+      return;
+    }
+
+    if (open && !conversationId && !readOnly && !loading && !startAttemptedRef.current) {
+      startAttemptedRef.current = true;
       void startConversation();
     }
   }, [open, conversationId, readOnly, loading, startConversation]);

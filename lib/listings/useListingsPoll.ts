@@ -48,9 +48,12 @@ export function useListingsPoll(
   }, []);
 
   useEffect(() => {
-    if (initialListings.length > 0) {
-      setListings(initialListings);
+    if (initialListings.length === 0) {
+      return;
     }
+    setListings((prev) =>
+      prev.length > initialListings.length ? prev : initialListings,
+    );
   }, [initialListings]);
 
   useEffect(() => {

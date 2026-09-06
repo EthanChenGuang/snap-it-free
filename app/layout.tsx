@@ -42,6 +42,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://images.sbito.it" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://images1.vinted.net" />
         <link rel="preconnect" href="https://images1.vinted.net" crossOrigin="anonymous" />
+      </head>
+      <body
+        className="overflow-hidden bg-background text-on-background"
+        suppressHydrationWarning
+      >
         {isDev ? (
           <>
             <InlineScript
@@ -52,11 +57,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </>
         ) : null}
         <InlineScript id="appearance-init" html={APPEARANCE_INIT_SCRIPT} />
-      </head>
-      <body
-        className="overflow-hidden bg-background text-on-background"
-        suppressHydrationWarning
-      >
         <AppThemeProvider>
           <BrowseCenterProvider>
             <DocumentLang />

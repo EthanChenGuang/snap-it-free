@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/supabase/auth';
+import { restErrorResponse } from '@/lib/supabase/rest-error';
 import { createClient } from '@/lib/supabase/server';
 
 /** D-113: unread in-app match count for BottomNav badge. */
@@ -10,14 +11,14 @@ export async function GET() {
   }
 
   const supabase = await createClient();
-  const { count, error } = await supabase
+  const { count, error, status } = await supabase
     .from('alert_matches')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', user.id)
     .is('read_at', null);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return restErrorResponse(error, { httpStatus: status });
   }
 
   return NextResponse.json({ count: count ?? 0 });

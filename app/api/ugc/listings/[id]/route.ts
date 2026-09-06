@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import {
+  applyOwnerListingStatusUpdate,
+  resolveOwnerListingStatus,
+} from '@/lib/ugc/patch-listing-status';
 import { requireAuth } from '@/lib/supabase/auth';
-import { createClient } from '@/lib/supabase/server';
-import { mapDeliveredTransition, mapReservedTransition, canDeliver, canReserve, type ListingStatus } from '@/lib/ugc/status';
+import {
+  mapDeliveredTransition,
+  mapReservedTransition,
+  canDeliver,
+  canReserve,
+} from '@/lib/ugc/status';
 import { getMessages } from '@/messages';
 
 const messages = getMessages('zh');
@@ -39,30 +47,22 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const supabase = await createClient();
-
-  const { data: current, error: fetchError } = await supabase
-    .from('listings')
-    .select('status')
-    .eq('id', parsedId.data)
-    .eq('owner_user_id', user.id)
-    .eq('source', 'ugc')
-    .maybeSingle();
-
-  if (fetchError) {
-    return NextResponse.json({ error: fetchError.message }, { status: 500 });
-  }
-
-  if (!current) {
+  const currentStatus = await resolveOwnerListingStatus(parsedId.data, user.id);
+  if (!currentStatus) {
     return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
   }
 
-  const currentStatus = current.status as ListingStatus;
   if (parsed.data.action === 'reserved' && !canReserve(currentStatus)) {
-    return NextResponse.json({ error: 'Listing cannot be reserved in its current state' }, { status: 422 });
+    return NextResponse.json(
+      { error: 'Listing cannot be reserved in its current state' },
+      { status: 422 },
+    );
   }
   if (parsed.data.action === 'delivered' && !canDeliver(currentStatus)) {
-    return NextResponse.json({ error: 'Listing cannot be marked delivered in its current state' }, { status: 422 });
+    return NextResponse.json(
+      { error: 'Listing cannot be marked delivered in its current state' },
+      { status: 422 },
+    );
   }
 
   const update =
@@ -70,24 +70,13 @@ export async function PATCH(request: Request, context: RouteContext) {
       ? mapReservedTransition()
       : mapDeliveredTransition();
 
-  const { data, error } = await supabase
-    .from('listings')
-    .update(update)
-    .eq('id', parsedId.data)
-    .eq('owner_user_id', user.id)
-    .select('status')
-    .maybeSingle();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  if (!data) {
+  const nextStatus = await applyOwnerListingStatusUpdate(parsedId.data, user.id, update);
+  if (!nextStatus) {
     return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
   }
 
   return NextResponse.json({
-    status: data.status,
+    status: nextStatus,
     message:
       parsed.data.action === 'reserved'
         ? messages.manage.reservedToast

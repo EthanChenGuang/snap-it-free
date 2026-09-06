@@ -136,7 +136,6 @@
 }
 
 .feed-card-image-reveal {
-  opacity: 0;
   transform: scale(1.02);
   filter: blur(3px);
 }

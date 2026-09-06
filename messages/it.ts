@@ -118,6 +118,7 @@ export const messages = {
     removePhoto: 'Rimuovi foto',
     titleLabel: 'Titolo annuncio',
     titlePlaceholder: 'Cosa stai regalando?',
+    titleRequired: 'Inserisci il titolo dell\'oggetto',
     categoryLabel: 'Categoria',
     categoryMeta: 'Categoria',
     conditionLabel: 'Condizione',
@@ -145,6 +146,7 @@ export const messages = {
     descriptionLabel: 'Descrizione',
     descriptionPlaceholder:
       'Raccontaci di più sull\'oggetto (condizioni, dimensioni, storia)…',
+    descriptionRequired: 'Aggiungi una breve descrizione',
     submit: 'PUBBLICA GRATIS',
     submitting: 'Pubblicazione…',
     guidelines: 'Pubblicando accetti le linee guida della community.',

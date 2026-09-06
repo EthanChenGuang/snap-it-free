@@ -8,14 +8,18 @@ const mockEq = vi.fn();
 const mockNot = vi.fn();
 const mockOrder = vi.fn();
 const mockLimit = vi.fn();
+const mockGte = vi.fn();
+const mockRange = vi.fn();
 const mockMaybeSingle = vi.fn();
 
 mockMaybeSingle.mockReturnValue({ data: null, error: null });
 mockLimit.mockReturnValue({ data: [], error: null });
-mockOrder.mockReturnValue({ data: [], error: null, limit: mockLimit });
+mockRange.mockReturnValue({ data: [], error: null });
+mockOrder.mockReturnValue({ data: [], error: null, limit: mockLimit, range: mockRange });
+mockGte.mockReturnValue({ order: mockOrder, count: 0, error: null });
 mockNot.mockReturnValue({ order: mockOrder, maybeSingle: mockMaybeSingle });
 mockEq.mockReturnValue({ eq: mockEq, not: mockNot });
-mockSelect.mockReturnValue({ eq: mockEq, not: mockNot, order: mockOrder });
+mockSelect.mockReturnValue({ eq: mockEq, not: mockNot, order: mockOrder, gte: mockGte });
 
 const mockFrom = vi.fn(() => ({ select: mockSelect }));
 
@@ -46,10 +50,12 @@ describe('getActiveListings', () => {
     vi.clearAllMocks();
     mockMaybeSingle.mockReturnValue({ data: null, error: null });
     mockLimit.mockReturnValue({ data: [], error: null });
-    mockOrder.mockReturnValue({ data: [], error: null, limit: mockLimit });
+    mockRange.mockReturnValue({ data: [], error: null });
+    mockOrder.mockReturnValue({ data: [], error: null, limit: mockLimit, range: mockRange });
+    mockGte.mockReturnValue({ order: mockOrder, count: 0, error: null });
     mockNot.mockReturnValue({ order: mockOrder, maybeSingle: mockMaybeSingle });
     mockEq.mockReturnValue({ eq: mockEq, not: mockNot });
-    mockSelect.mockReturnValue({ eq: mockEq, not: mockNot, order: mockOrder });
+    mockSelect.mockReturnValue({ eq: mockEq, not: mockNot, order: mockOrder, gte: mockGte });
     mockFrom.mockReturnValue({ select: mockSelect });
   });
 
@@ -58,6 +64,7 @@ describe('getActiveListings', () => {
 
     await getActiveListings({ limit: 24 });
 
+    expect(mockGte).toHaveBeenCalled();
     expect(mockLimit).toHaveBeenCalledWith(24);
   });
 
@@ -70,6 +77,8 @@ describe('getActiveListings', () => {
     expect(createAnonClient).toHaveBeenCalled();
     expect(mockFrom).toHaveBeenCalledWith('listings_public');
     expect(mockSelect).toHaveBeenCalledWith(ACTIVE_COLUMNS);
+    expect(mockGte).toHaveBeenCalled();
+    expect(mockRange).toHaveBeenCalledWith(0, 999);
     expect(mockNot).not.toHaveBeenCalled();
     expect(mockOrder).toHaveBeenCalledWith('posted_at', { ascending: false });
   });
@@ -98,7 +107,7 @@ describe('getActiveListings', () => {
       expires_at: '2026-09-15T10:00:00.000Z',
       status: 'active',
     };
-    mockOrder.mockReturnValue({ data: [vintedRow], error: null });
+    mockRange.mockReturnValue({ data: [vintedRow], error: null });
 
     const { getActiveListings } = await import('./queries');
     const result = await getActiveListings();
@@ -135,7 +144,7 @@ describe('getActiveListings', () => {
       expires_at: '2026-09-15T11:00:00.000Z',
       status: 'active',
     };
-    mockOrder.mockReturnValue({ data: [facebookRow], error: null });
+    mockRange.mockReturnValue({ data: [facebookRow], error: null });
 
     const { getActiveListings } = await import('./queries');
     const result = await getActiveListings();
@@ -156,18 +165,21 @@ describe('getActiveListingsCount', () => {
   });
 
   it('queries listings_public with head-only exact count', async () => {
-    mockSelect.mockReturnValue({ count: 2345, error: null });
+    mockGte.mockReturnValue({ count: 2345, error: null });
+    mockSelect.mockReturnValue({ gte: mockGte });
 
     const { getActiveListingsCount } = await import('./queries');
     const result = await getActiveListingsCount();
 
     expect(mockFrom).toHaveBeenCalledWith('listings_public');
     expect(mockSelect).toHaveBeenCalledWith('id', { count: 'exact', head: true });
+    expect(mockGte).toHaveBeenCalled();
     expect(result).toBe(2345);
   });
 
   it('returns null when count query fails', async () => {
-    mockSelect.mockReturnValue({ count: null, error: { message: 'fail' } });
+    mockGte.mockReturnValue({ count: null, error: { message: 'fail' } });
+    mockSelect.mockReturnValue({ gte: mockGte });
 
     const { getActiveListingsCount } = await import('./queries');
     const result = await getActiveListingsCount();

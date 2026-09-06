@@ -19,9 +19,14 @@ import { cn } from '@/lib/utils';
 
 const CITY_OPTIONS = CONSUMER_CITY_FILTER_OPTIONS;
 
-/** Filter sheet body height — 85% viewport; footer clears floating bottom nav. */
+/**
+ * Filter sheet height — 60% viewport so ~40% of the feed stays visible.
+ * That peek is one full 4:5 card row under the sticky header (search + count),
+ * which is the threshold for “I can still see the items I’m filtering.”
+ * Sheet content already scrolls; footer clears the floating bottom nav.
+ */
 const FILTER_SHEET_HEIGHT_CLASS =
-  'bottom-0 h-[85dvh] max-h-[85dvh] overflow-hidden';
+  'bottom-0 h-[60dvh] max-h-[60dvh] overflow-hidden';
 
 function ConsumerCityChipSelector({
   value,

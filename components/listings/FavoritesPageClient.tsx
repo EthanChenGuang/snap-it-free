@@ -35,6 +35,10 @@ export function FavoritesPageClient() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
 
+  const handleUnfavorite = useCallback((listingId: string) => {
+    setListings((prev) => prev.filter((listing) => listing.id !== listingId));
+  }, []);
+
   const loadFavorites = useCallback(async (authed: boolean) => {
     const ids = await fetchFavoriteIds(authed);
     if (ids.length === 0) {
@@ -80,7 +84,11 @@ export function FavoritesPageClient() {
       await loadFavorites(authed);
     };
 
-    const onFavoritesChange = () => void reload();
+    const onFavoritesChange = () => {
+      const ids = new Set(readFavoriteIds());
+      setListings((prev) => prev.filter((listing) => ids.has(listing.id)));
+      void reload();
+    };
     window.addEventListener(FAVORITES_CHANGE_EVENT, onFavoritesChange);
 
     const {
@@ -168,6 +176,7 @@ export function FavoritesPageClient() {
                 key={listing.id}
                 listing={listing}
                 priority={index < 6}
+                onUnfavorite={handleUnfavorite}
               />
             ))}
           </section>

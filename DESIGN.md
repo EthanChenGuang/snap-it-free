@@ -278,7 +278,7 @@ Square checkboxes use 2px radius per Stitch HTML prototypes.
 
 ### Drawers / Sheets
 
-- **Filter sheet:** Vaul drawer, 85dvh max, `rounded-t-lg`, `border-outline-variant`, handle-only on map context.
+- **Filter sheet:** Vaul drawer, 60dvh max (~40% feed peek / one card row), `rounded-t-lg`, `border-outline-variant`, handle-only on map context.
 - **Admin dialogs:** Radix dialog restyled — flat surface, thin border, no default shadcn shadow stack.
 
 ### Icons
