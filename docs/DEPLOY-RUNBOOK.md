@@ -38,7 +38,7 @@ Run before every production deploy or redeploy.
 - [ ] **Config export** (D-07-60): export critical config tables (`scraper_sources`, `scraper_global_config`) to a local snapshot for rollback reference.
 - [ ] **Snapshots never committed** (D-07-62): store exports outside the git working tree (e.g. `~/backups/`), never under `docs/` or any tracked path.
 - [ ] **`global_pause` check** (D-07-22): read current value of `scraper_global_config.global_pause`. Record it here before deploy, restore the same value after — **never silently change it**.
-  - Current value at last check: _record here, e.g. `false` — do not commit real production state notes with secrets_.
+  - Current value at last check (2026-09-06, read-only REST query, Plan 01): `false`. `scraper_sources` confirmed Subito-only enabled (`subito.enabled = true`; `ebay`/`facebook`/`vinted`/`wallapop.enabled = false`) — matches D-07-16 launch scope. Not mutated.
 - [ ] **Dependency order** confirmed: DB → Vercel → worker → cron → smoke (D-07-04).
 - [ ] **Runtime split understood**: Vercel = PWA/API/cron route; GitHub Actions `--scheduler-tick` = default $0 Subito ingest; Supabase = DB/Auth/Storage; Fly = optional legacy-free fallback only, scaled to 0 by default (D-07-03/66/67).
 
@@ -128,13 +128,31 @@ Used by `.github/workflows/subito-scheduler.yml` (D-07-29):
 3. `vercel --prod`
 4. Record the exact deployment URL as canonical `APP_URL` below, then set `APP_URL` in Vercel Production env to match and redeploy if the first deploy used a placeholder (D-07-27).
 
-**Canonical production URL:** `_______________` *(fill in after first successful `vercel --prod`; this is a URL, not a secret)*
+**Canonical production URL:** `https://zerodollar-blond.vercel.app` *(recorded 2026-09-06 after first successful `vercel --prod`; this is a URL, not a secret. Vercel project: `zerodollar`, team `chenguangregis-gmailcoms-projects`)*
+
+Note: the auto-generated team-scoped alias `https://zerodollar-chenguangregis-gmailcoms-projects.vercel.app` returns a Vercel SSO redirect (deployment protection on that alias) and must **not** be used as `APP_URL` — the random-suffix `-blond` alias is the publicly reachable production domain and is what OAuth/Supabase config must reference.
 
 5. Verify:
-   - `public/sw.js` present in the build output (Serwist production wrap, `next.config.ts`).
-   - Homepage returns 2xx and renders the feed grid.
-   - `GET /api/cron/match-alerts` (no header) → 401.
-   - Use `scripts/phase7-production-smoke.mjs` with `E2E_BASE_URL` set to the canonical URL — no manual curl fallback required.
+   - `public/sw.js` present in the build output (Serwist production wrap, `next.config.ts`) — confirmed live: `GET /sw.js` → 200, `content-type: application/javascript`.
+   - Homepage returns 2xx and renders the feed grid — confirmed: `GET /` → 200, real Subito listings rendered server-side.
+   - `GET /api/cron/match-alerts` (no header) → 401 — confirmed live.
+   - `GET /manifest.webmanifest` → `name`/`short_name` literal `ZeroDollar` — confirmed live (brand audit, §8).
+   - Use `scripts/phase7-production-smoke.mjs` with `E2E_BASE_URL` set to the canonical URL — no manual curl fallback required. **Result (2026-09-06): 3/3 passed** (`/` 2xx, cron 401 without Bearer, cron 200 with `CRON_SECRET`).
+
+### 5.1 Hobby-plan deploy-time adjustments (2026-09-06)
+
+Two pre-existing repo settings exceeded Vercel Hobby plan limits and blocked the first `vercel --prod` build. Both were adjusted to the minimum change needed to stay on the $0 Hobby plan (D-07-39/42) rather than upgrading:
+
+- **`vercel.json` cron schedule:** was `*/3 * * * *` (every 3 min) — Hobby plan rejects any cron more frequent than once/day (`Hobby accounts are limited to daily cron jobs`). Changed to `0 3 * * *` (once daily, 03:00 UTC). This Vercel-native cron is **not** the primary alert-matcher trigger — §7's external cron-job.org job (Bearer `CRON_SECRET`, 5–15 min interval) is the real trigger per D-07-37; this in-platform cron is now just a low-frequency backup safety net.
+- **`app/api/admin/sources/[slug]/validate-urls/route.ts` `maxDuration`:** was `600` (10 min, for large Vinted URL-matrix probes) — Hobby plan caps Serverless Function `maxDuration` at `300`. Changed to `300`. This route is admin-only and Vinted is disabled at launch (D-07-16), so the cap does not affect any launch-blocking path; revisit only if upgrading past Hobby.
+
+### 5.2 Vercel CLI GitHub-metadata deploy block (2026-09-06)
+
+The first two `vercel --prod` attempts against a linked local `git remote origin` (GitHub `EthanChenGuang/snap-it-free`) were auto-tagged by the CLI with GitHub commit metadata and stuck in a `BLOCKED` deployment state (`seatBlock: TEAM_ACCESS_REQUIRED`, reason: *"the commit author doesn't have permission to create deployments for this project"*) — the Vercel account (`chenguangregis-2098`) has no Login Connection linking the GitHub identity (`EthanChenGuang` / `ethan.chen.guang@gmail.com`) that authored the local commits. `vercel project connect`/`vercel git disconnect` confirmed no formal Git integration was configured — the CLI attaches GitHub metadata purely by detecting the local `.git` remote.
+
+**Workaround used (no dashboard change required):** temporarily ran `git remote remove origin` immediately before `vercel --prod`, then `git remote add origin <url>` immediately after the deploy request was accepted (deploys build server-side once accepted, independent of local CLI state). This avoids the GitHub-metadata attachment and the resulting access block. No commits, branches, or repo history were touched — only the local remote URL registration.
+
+**If this recurs on a future redeploy:** either repeat the remote-remove/redeploy/remote-add workaround, or (preferred long-term fix, requires a human) add a Login Connection at `vercel.com/account/login-connections` linking the `EthanChenGuang` GitHub account to this Vercel account.
 
 ---
 

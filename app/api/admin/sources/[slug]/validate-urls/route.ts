@@ -4,8 +4,12 @@ import { getOperatorSession } from '@/lib/admin/require-operator';
 import { ValidateTargetUrlsSchema } from '@/lib/admin/schemas';
 import { validateTargetUrlList } from '@/lib/admin/url-test';
 
-/** Large Vinted matrices probe serially — allow up to ~10 min. */
-export const maxDuration = 600;
+/**
+ * Large Vinted matrices probe serially. Vercel Hobby plan caps Serverless Function
+ * maxDuration at 300s (Pro/Enterprise allow more) — capped here to the Hobby ceiling
+ * so production builds succeed on the $0 plan (D-07-39). Revisit if upgrading plans.
+ */
+export const maxDuration = 300;
 
 type RouteContext = { params: Promise<{ slug: string }> };
 
