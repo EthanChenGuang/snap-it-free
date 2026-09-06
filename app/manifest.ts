@@ -1,12 +1,15 @@
 import type { MetadataRoute } from 'next';
-import { getMessages } from '@/messages';
 
-const messages = getMessages('zh');
+// D-07-14: PWA manifest name/short_name is the brand-neutral literal "ZeroDollar" —
+// this drives the Android/desktop install prompt and iOS A2HS label, which should
+// stay consistent regardless of the visitor's browser locale. Per-locale in-app UI
+// strings (zh 零元 / en ZeroDollar / it ZeroEuro) are unaffected — see messages/*.ts.
+const MANIFEST_APP_NAME = 'ZeroDollar';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: messages.app.title,
-    short_name: messages.app.title,
+    name: MANIFEST_APP_NAME,
+    short_name: MANIFEST_APP_NAME,
     description: 'Venice free finds on a map',
     display: 'standalone',
     start_url: '/',

@@ -14,5 +14,8 @@ primary_region = "ams"
   size = "shared-cpu-1x"
   memory = "256mb"
 
+[[restart]]
+  policy = "always"
+
 kill_signal = "SIGTERM"
 kill_timeout = "120s"
