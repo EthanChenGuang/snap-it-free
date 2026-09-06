@@ -724,11 +724,13 @@ async function guardedRunSourceScrape(
 type WorkerCliArgs = {
   source: string;
   once: boolean;
+  schedulerTick: boolean;
 };
 
-function parseWorkerArgs(argv: string[]): WorkerCliArgs {
+export function parseWorkerArgs(argv: string[]): WorkerCliArgs {
   let source = 'subito';
   let once = false;
+  let schedulerTick = false;
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -738,14 +740,18 @@ function parseWorkerArgs(argv: string[]): WorkerCliArgs {
     }
     if (arg === '--once') {
       once = true;
+      continue;
+    }
+    if (arg === '--scheduler-tick') {
+      schedulerTick = true;
     }
   }
 
-  return { source, once };
+  return { source, once, schedulerTick };
 }
 
-async function main(): Promise<void> {
-  const { source, once } = parseWorkerArgs(process.argv.slice(2));
+export async function main(): Promise<void> {
+  const { source, once, schedulerTick } = parseWorkerArgs(process.argv.slice(2));
 
   try {
     const reconciled = await reconcileOrphanScrapeRuns(supabaseAdmin);
@@ -754,6 +760,17 @@ async function main(): Promise<void> {
     }
   } catch (err) {
     console.error('Failed to reconcile orphaned scrape runs:', err);
+  }
+
+  // D-07-66: default $0 production path — GitHub Actions invokes the worker once per
+  // scheduled run with `--scheduler-tick`. This processes DB `next_run_at`-due sources
+  // AND pending admin manual jobs in one pass (same semantics as the Fly in-process
+  // scheduler tick) then returns — it never starts the setInterval loop below, and it
+  // ignores CRON_ENABLED entirely (the flag is the single source of truth for this path).
+  if (schedulerTick) {
+    console.log('Running single scheduler tick (--scheduler-tick, D-07-66)');
+    await runSchedulerTick(supabaseAdmin, guardedRunSourceScrape);
+    return;
   }
 
   if (once || !CRON_ENABLED) {

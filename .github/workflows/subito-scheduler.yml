@@ -1,0 +1,60 @@
+name: Subito Scheduler
+
+# D-07-66: default $0 production ingest path. Runs the scraper worker's
+# `--scheduler-tick` once per invocation — this processes DB `next_run_at`-due
+# sources (Subito only at launch, D-07-16) AND any pending admin manual jobs in
+# a single pass, then exits. It does not run a long-lived process, so it fits
+# entirely within the GitHub Actions free tier (private repos: 2000 min/mo).
+#
+# Tune the cron schedule below to stay under that quota. Every 2 hours is
+# ~360 runs/month at a few minutes each — comfortably under the limit.
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: subito-scheduler
+  cancel-in-progress: false
+
+jobs:
+  scheduler-tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: scraper/package-lock.json
+
+      - name: Install scraper dependencies
+        working-directory: scraper
+        run: npm ci
+
+      - name: Install Playwright browsers (fallback path)
+        working-directory: scraper
+        run: npx playwright install --with-deps chromium
+
+      - name: Run scheduler tick
+        working-directory: scraper
+        env:
+          CRON_ENABLED: 'false'
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SCRAPER_SECRETS_KEY: ${{ secrets.SCRAPER_SECRETS_KEY }}
+          PROXY_URL: ${{ secrets.PROXY_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          CALLMEBOT_PHONE: ${{ secrets.CALLMEBOT_PHONE }}
+          CALLMEBOT_APIKEY: ${{ secrets.CALLMEBOT_APIKEY }}
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERT_FROM: ${{ secrets.ALERT_FROM }}
+          ALERT_TO: ${{ secrets.ALERT_TO }}
+        run: node --import tsx src/worker.ts -- --scheduler-tick
