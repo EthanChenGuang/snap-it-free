@@ -6,17 +6,23 @@
 
 > 需使用 **项目 Owner** 账号登录。当前 CLI 账号对该项目返回 403，无法代你点击 Dashboard。
 
-## 当前探测结果（迁移未完成）
+> ## ✅ 2026-09-06：迁移已完成，验证全部 PASS
+>
+> 步骤 1–5 已做完。残留的 `PGRST303 "JWT issued at future"` **与签名迁移无关** ——
+> 是 PostgREST 实例缓存的「当前时间」卡住了（上游 bug），**重启项目后消失**。
+> 详见 [`supabase-jwt-signing-runbook.md`](./supabase-jwt-signing-runbook.md)。
+>
+> 剩下的只有步骤 6（Revoke legacy）。以下内容保留作为操作记录。
 
-| 探测项 | 状态 | 说明 |
-|--------|------|------|
-| JWKS | ES256 `kid=8530bc5d-...` | GoTrue 已在发 ES256 session |
-| `sb_publishable` + REST | **200** | 匿名读可用 |
-| 用户 ES256 session + REST | **401 PGRST303** | PostgREST 尚未验 ES256 用户 JWT |
-| `sb_secret` + REST/RPC | **401 PGRST303** | Gateway 内签 JWT 被 PostgREST 拒 |
-| legacy `eyJ` service role | **200** | 仅 legacy JWT 可用 |
+## 当前探测结果（重启后）
 
-**结论:** Auth 侧已切 ES256，但 Data API（PostgREST）仍在 legacy 验证路径 — 需在 Dashboard **完成 Rotate + 等平台同步**，必要时 Revoke legacy。
+| 探测项 | 状态 |
+|--------|------|
+| JWKS | ES256 `kid=8530bc5d-...` ✅ |
+| `sb_publishable` + REST | **200** ✅ |
+| 用户 ES256 session + REST | **200** ✅ |
+| `sb_secret` + REST/RPC | **200 / 204** ✅ |
+| legacy `eyJ` service role | **200** ✅（可以吊销了） |
 
 ---
 

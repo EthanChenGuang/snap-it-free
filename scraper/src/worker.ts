@@ -531,8 +531,7 @@ export async function runSourceScrape(
       useHttpValidation && httpRequests === 0 && config.urls.length > 0
         ? {
             ok: false as const,
-            reason:
-              'no category URLs fetched (0 HTTP requests — Crawlee deduped handled URLs on long-lived worker; redeploy worker after fix)',
+            reason: `no category URLs fetched (0 HTTP requests for ${config.urls.length} configured URL(s)) — check for a duplicate worker running cron against this database, then proxy reachability`,
           }
         : useHttpValidation
       ? validateBatchHttp({
@@ -782,10 +781,18 @@ export async function main(): Promise<void> {
     `Scheduler enabled — ticking every ${TICK_INTERVAL_MS / 1000}s (D-13, D-33)`,
   );
 
-  const tick = () => runSchedulerTick(supabaseAdmin, guardedRunSourceScrape);
+  // A rejected tick must never reach the process. Before this, any Supabase blip inside a
+  // tick (gateway 5xx, PGRST303) became an unhandled rejection and killed the worker.
+  const tick = async () => {
+    try {
+      await runSchedulerTick(supabaseAdmin, guardedRunSourceScrape);
+    } catch (err) {
+      console.error('[worker] Scheduler tick failed:', err);
+    }
+  };
 
   await tick();
-  setInterval(tick, TICK_INTERVAL_MS);
+  setInterval(() => void tick(), TICK_INTERVAL_MS);
 }
 
 const isMain =

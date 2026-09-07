@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { FavoriteListingIdSchema } from '@/lib/favorites/schemas';
 import { requireAuth } from '@/lib/supabase/auth';
 import { restErrorResponse } from '@/lib/supabase/rest-error';
+import { withRestRetry } from '@/lib/supabase/rest-retry';
 import { createClient } from '@/lib/supabase/server';
 
 export async function GET() {
@@ -11,10 +12,9 @@ export async function GET() {
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('user_favorites')
-    .select('listing_id')
-    .eq('user_id', user.id);
+  const { data, error } = await withRestRetry(() =>
+    supabase.from('user_favorites').select('listing_id').eq('user_id', user.id),
+  );
 
   if (error) {
     return restErrorResponse(error);
@@ -43,12 +43,14 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from('user_favorites').upsert(
-    {
-      user_id: user.id,
-      listing_id: parsed.data.listingId,
-    },
-    { onConflict: 'user_id,listing_id', ignoreDuplicates: true },
+  const { error } = await withRestRetry(() =>
+    supabase.from('user_favorites').upsert(
+      {
+        user_id: user.id,
+        listing_id: parsed.data.listingId,
+      },
+      { onConflict: 'user_id,listing_id', ignoreDuplicates: true },
+    ),
   );
 
   if (error) {
@@ -71,11 +73,13 @@ export async function DELETE(request: Request) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
-    .from('user_favorites')
-    .delete()
-    .eq('user_id', user.id)
-    .eq('listing_id', parsed.data.listingId);
+  const { error } = await withRestRetry(() =>
+    supabase
+      .from('user_favorites')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('listing_id', parsed.data.listingId),
+  );
 
   if (error) {
     return restErrorResponse(error);

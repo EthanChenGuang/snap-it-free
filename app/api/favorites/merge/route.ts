@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { MergeFavoritesSchema } from '@/lib/favorites/schemas';
 import { requireAuth } from '@/lib/supabase/auth';
 import { restErrorResponse } from '@/lib/supabase/rest-error';
+import { withRestRetry } from '@/lib/supabase/rest-retry';
 import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
@@ -33,9 +34,11 @@ export async function POST(request: Request) {
     listing_id: listingId,
   }));
 
-  const { error } = await supabase
-    .from('user_favorites')
-    .upsert(rows, { onConflict: 'user_id,listing_id', ignoreDuplicates: true });
+  const { error } = await withRestRetry(() =>
+    supabase
+      .from('user_favorites')
+      .upsert(rows, { onConflict: 'user_id,listing_id', ignoreDuplicates: true }),
+  );
 
   if (error) {
     return restErrorResponse(error);

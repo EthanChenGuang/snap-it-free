@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { deleteAccountData } from '@/lib/account/delete-account';
 import { requireAuth } from '@/lib/supabase/auth';
 import { restErrorResponse } from '@/lib/supabase/rest-error';
+import { withRestRetry } from '@/lib/supabase/rest-retry';
 import { createServiceClient } from '@/lib/supabase/service';
 
 export async function GET() {
@@ -11,11 +12,13 @@ export async function GET() {
   }
 
   const serviceClient = createServiceClient();
-  const { count, error } = await serviceClient
-    .from('listings')
-    .select('id', { count: 'exact', head: true })
-    .eq('owner_user_id', user.id)
-    .eq('status', 'claimed');
+  const { count, error } = await withRestRetry(() =>
+    serviceClient
+      .from('listings')
+      .select('id', { count: 'exact', head: true })
+      .eq('owner_user_id', user.id)
+      .eq('status', 'claimed'),
+  );
 
   if (error) {
     return restErrorResponse(error, { fallbackStatus: 500 });

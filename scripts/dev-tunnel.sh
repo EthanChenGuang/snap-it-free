@@ -16,6 +16,7 @@ fi
 PORT="${PORT:-3003}"
 NGROK_DOMAIN="${NGROK_DOMAIN:-mawkish-masonically-damon.ngrok-free.dev}"
 WITH_SCRAPER="${WITH_SCRAPER:-0}"
+SCRAPER_CRON="${SCRAPER_CRON:-0}"
 PIDFILE="$ROOT/.dev-tunnel.pids"
 DEV_PID=""
 NGROK_PID=""
@@ -116,8 +117,16 @@ if [[ "$WITH_SCRAPER" == "1" ]]; then
   if [[ ! -f "$ROOT/scraper/.env" ]]; then
     echo "WARNING: scraper/.env not found — copy scraper/.env.example and configure." >&2
   fi
-  echo "Starting scraper worker (scheduler tick, CRON_ENABLED=true)..."
-  (cd "$ROOT/scraper" && CRON_ENABLED=true CRAWLEE_PERSIST_STORAGE=false npm start) &
+  # Cron runs are guarded only in-process, so a local scheduler competes with the Fly worker
+  # for the same sources and fills scrape_runs with failures. Opt in explicitly.
+  if [[ "$SCRAPER_CRON" == "1" ]]; then
+    echo "Starting scraper worker (scheduler tick every 60s, CRON_ENABLED=true)..."
+    echo "  WARNING: this duplicates the Fly worker's cron against the same database." >&2
+    (cd "$ROOT/scraper" && CRON_ENABLED=true CRAWLEE_PERSIST_STORAGE=false npm start) &
+  else
+    echo "Starting scraper worker (one-shot; set SCRAPER_CRON=1 for the 60s scheduler)..."
+    (cd "$ROOT/scraper" && CRON_ENABLED=false CRAWLEE_PERSIST_STORAGE=false npm start) &
+  fi
   SCRAPER_PID=$!
 fi
 

@@ -111,7 +111,7 @@ export async function runSchedulerTick(
     .maybeSingle();
 
   if (globalError) {
-    throw globalError;
+    throw new Error(`scraper_global_config read failed: ${globalError.message}`);
   }
 
   const globalPause = Boolean(globalConfig?.global_pause);
@@ -127,10 +127,10 @@ export async function runSchedulerTick(
   ]);
 
   if (sourcesResult.error) {
-    throw sourcesResult.error;
+    throw new Error(`scraper_sources read failed: ${sourcesResult.error.message}`);
   }
   if (jobsResult.error) {
-    throw jobsResult.error;
+    throw new Error(`scrape_jobs read failed: ${jobsResult.error.message}`);
   }
 
   const allSources = sourcesResult.data ?? [];

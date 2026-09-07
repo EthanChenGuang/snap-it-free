@@ -180,18 +180,32 @@ async function main() {
     return;
   }
 
+  // "JWT issued at future" is a PostgREST-side stale-clock bug, not a signing mismatch:
+  // an old-enough iat (legacy token) is accepted, and the sb_secret path sends no JWT at all.
+  const staleClock = [userSessionProbe, secretProbe].some(
+    (p) => p && !p.ok && /issued at future/i.test(p.message ?? ''),
+  );
+
+  if (staleClock) {
+    console.log('  BLOCKED — PostgREST rejects fresh JWTs as "issued at future" (PGRST303).');
+    console.log('  This is NOT a signing-key problem. Do not roll back the JWT migration.');
+    console.log('  Action: Dashboard → Settings → General/Infrastructure → Restart project.');
+    console.log('  Guide: docs/ops/supabase-jwt-signing-runbook.md');
+    process.exitCode = 1;
+    return;
+  }
+
   if (userSessionProbe && !userSessionProbe.ok && publishableOk) {
     console.log('  INCOMPLETE — GoTrue issues ES256 but PostgREST rejects user sessions.');
-    console.log('  Action: Dashboard → JWT Keys → Rotate keys (or wait 10–20m after rotate).');
-    console.log('  Guide: docs/ops/supabase-jwt-migration-checklist.md');
+    console.log('  Guide: docs/ops/supabase-jwt-signing-runbook.md');
     process.exitCode = 1;
     return;
   }
 
   if (secretProbe && !secretProbe.ok) {
-    console.log('  INCOMPLETE — sb_secret rejected by PostgREST (PGRST303).');
-    console.log('  Use legacy eyJ JWT via SUPABASE_SERVICE_ROLE_JWT until migration completes.');
-    console.log('  Guide: docs/ops/supabase-jwt-migration-checklist.md');
+    console.log('  INCOMPLETE — sb_secret rejected by PostgREST.');
+    console.log('  Use legacy eyJ JWT via SUPABASE_SERVICE_ROLE_JWT as a stopgap.');
+    console.log('  Guide: docs/ops/supabase-jwt-signing-runbook.md');
     process.exitCode = 1;
     return;
   }

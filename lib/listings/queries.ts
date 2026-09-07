@@ -48,7 +48,7 @@ export async function getActiveListings(
     return (data ?? []) as ListingRow[];
   }
 
-  const { data, error } = await fetchPagedRows<ListingRow>((from, to) =>
+  const { data, error } = await fetchPagedRows<ListingRow>(async (from, to) =>
     supabase
       .from(PUBLIC_LISTINGS)
       .select(ACTIVE_LISTING_COLUMNS)

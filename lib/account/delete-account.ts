@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { withRestRetry } from '@/lib/supabase/rest-retry';
 
 export async function deleteAccountData(
   serviceClient: SupabaseClient,
@@ -38,9 +39,12 @@ export async function deleteAccountData(
     }
   }
 
-  const { error: rpcError } = await serviceClient.rpc('delete_account_data', {
-    target_user_id: userId,
-  });
+  // Safe to retry: PGRST303 is rejected during auth, so no rows were touched.
+  const { error: rpcError } = await withRestRetry(() =>
+    serviceClient.rpc('delete_account_data', {
+      target_user_id: userId,
+    }),
+  );
 
   if (rpcError) {
     return { error: rpcError.message };

@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { Configuration } from 'crawlee';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createSupabaseRetryFetch } from './supabase-fetch.js';
 
 // Long-lived workers (Fly) must not persist Crawlee queues to disk — otherwise
 // category URLs are deduped as "already handled" and http_requests stays 0.
@@ -17,7 +18,10 @@ function requireEnv(name: string): string {
 export const supabaseAdmin: SupabaseClient = createClient(
   requireEnv('SUPABASE_URL'),
   requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
-  { auth: { persistSession: false, autoRefreshToken: false } },
+  {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { fetch: createSupabaseRetryFetch() },
+  },
 );
 
 export const SCRAPE_MIN_SELECTOR_RATE = 0.9;

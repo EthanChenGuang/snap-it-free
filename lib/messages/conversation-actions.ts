@@ -12,7 +12,7 @@ import {
   listMessagesFromDb,
   listingHasOtherBuyerConversationFromDb,
 } from '@/lib/messages/conversations-db';
-import { isRestJwtError } from '@/lib/supabase/rest-error';
+import { isRestJwtError, isTransientRestError } from '@/lib/supabase/rest-error';
 import { createClient } from '@/lib/supabase/server';
 import { RateLimitError } from '@/lib/ugc/rate-limit';
 
@@ -23,7 +23,11 @@ type RestErrorLike = { message?: string; code?: string };
 
 function shouldFallback(error: RestErrorLike | null | undefined): boolean {
   if (!error) return false;
-  return isRestJwtError(error.message, error.code) || error.code === 'PGRST000';
+  return (
+    isRestJwtError(error.message, error.code) ||
+    isTransientRestError(error.message, error.code) ||
+    error.code === 'PGRST000'
+  );
 }
 
 async function assertCanStartConversationFromDb(userId: string): Promise<void> {

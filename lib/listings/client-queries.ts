@@ -15,7 +15,7 @@ export async function fetchActiveListingsClient(): Promise<ListingRow[]> {
 
   const supabase = createAnonClient();
   const since = feedLookbackSinceIso();
-  const { data, error } = await fetchPagedRows<ListingRow>((from, to) =>
+  const { data, error } = await fetchPagedRows<ListingRow>(async (from, to) =>
     supabase
       .from(PUBLIC_LISTINGS)
       .select(ACTIVE_LISTING_COLUMNS)
