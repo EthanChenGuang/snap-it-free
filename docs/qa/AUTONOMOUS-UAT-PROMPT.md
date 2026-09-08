@@ -11,7 +11,7 @@
 - 不要测已废弃的 Vite 原型 `src/`。只测 Next.js：`app/` + `components/`。
 - 本轮范围：消费者端。`/admin` 整站跳过（报告末尾列作下一轮）。
 - 截一张图不等于测过。必须看到点击/输入之后的 URL、文案、列表、弹层、toast 或状态变化。
-- 不要用真实邮箱发 OTP，不要走真实 Google/Apple 登录到第三方账号。不要碰生产用户数据。
+- 不要用真实邮箱发 OTP，不要走真实 Google/Facebook 登录到第三方账号。不要碰生产用户数据。
 - 报告里禁止写入任何 secret、service role key、真实密码、完整 JWT。
 
 ## 1. 启动（你自己做完，不要让我开服务器）
@@ -33,14 +33,13 @@
 
 ## 2. 登录策略（UI 测一遍，会话用脚本注入）
 
-产品登录 UI 是 **Google / Apple OAuth + 邮箱 OTP**，没有密码框。因此：
+产品登录 UI 是 **Google / Facebook OAuth + 邮箱 OTP**，没有密码框。因此：
 
 **A. 一定要测登录 UI（未真正登入也算覆盖）**
 
 - 打开 Auth 弹层 / `/post` 门禁 / `/favorites` 门禁 / 详情页 guest 墙。
 - 空邮箱提交、非法邮箱、合法邮箱提交后出现「去邮箱查看」而不是白屏。
 - 点 Google：允许跳到 IdP 或出现 OAuth 错误文案；不要用真实 Google 账号完成授权。点完用浏览器后退或关弹层回到本站。
-- Apple：若按钮 disabled，记 PASS（符合 `NEXT_PUBLIC_APPLE_OAUTH_ENABLED`）；若可点，同样只验证不崩。
 - 关闭弹层后页面可滚动，`body` overflow 恢复。
 
 **B. 已登录会话：你自己建临时用户并注入 cookie**

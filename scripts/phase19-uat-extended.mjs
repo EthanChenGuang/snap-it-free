@@ -143,13 +143,13 @@ async function main() {
     await page.waitForSelector('h1', { timeout: 15000 });
     await page.waitForTimeout(800);
     const googleVisible = await page.getByRole('button', { name: /google/i }).isVisible().catch(() => false);
-    const appleVisible = await page.getByRole('button', { name: /apple/i }).isVisible().catch(() => false);
+    const facebookVisible = await page.getByRole('button', { name: /facebook/i }).isVisible().catch(() => false);
     const emailVisible = await page.locator('#guest-gate-email').isVisible().catch(() => false);
     record(
       13,
-      'AUTH-07 guest gate card shows Google + email OTP (Apple visible or disabled per env)',
+      'AUTH-07 guest gate card shows Google + email OTP (Facebook visible or hidden per env)',
       googleVisible && emailVisible,
-      `google=${googleVisible} email=${emailVisible} apple=${appleVisible}`,
+      `google=${googleVisible} email=${emailVisible} facebook=${facebookVisible}`,
     );
 
     // 14 — Filter sheet + search without auth modal (AUTH-08)

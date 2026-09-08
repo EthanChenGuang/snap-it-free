@@ -192,8 +192,6 @@ export const messages: Messages = {
     modalDescription: '选择登录方式——无需密码。',
     moreSignInOptions: '更多登录方式',
     googleSignIn: '使用 Google 继续',
-    appleSignIn: '使用 Apple 继续',
-    appleSignInDisabled: 'Apple 登录暂未开放',
     orDivider: '或',
     emailLabel: '邮箱',
     emailPlaceholder: '你的@email.com',
@@ -338,6 +336,51 @@ export const messages: Messages = {
       zoneUnknown: '未知区域',
       badgeLabel: (n: number) => (n === 1 ? '1 个新匹配' : `${n > 9 ? '9+' : n} 个新匹配`),
     },
+  },
+  privacy: {
+    title: '隐私政策',
+    lastUpdated: '最后更新：2025年9月7日',
+    intro:
+      'ZeroDollar（「我们」）帮助用户在威尼斯发现与分享免费物品。本政策说明我们收集哪些个人信息以及如何使用。',
+    collectTitle: '我们收集的信息',
+    collectBody:
+      '登录时的账户信息（姓名、邮箱、头像）；你发布的 listing、消息与收藏；以及在设置中保存的通知与区域偏好。',
+    useTitle: '信息用途',
+    useBody:
+      '用于身份验证、运营 marketplace（listing、私信、收藏）、发送你启用的提醒，以及保障服务安全。',
+    authTitle: '第三方登录',
+    authBody:
+      '若使用 Google 登录，我们会接收对方提供的资料字段（通常为姓名、邮箱与头像），用于创建并关联你的账户。',
+    sharingTitle: '服务提供商',
+    sharingBody:
+      '我们使用 Supabase 进行认证与数据存储，使用 Vercel 托管应用。我们不会向第三方出售你的个人信息。',
+    retentionTitle: '你的选择',
+    retentionBody:
+      '你可随时在设置中删除账户。删除后将移除我们存储的 listing、消息、收藏及其他账户数据。',
+    contactTitle: '联系我们',
+    contactBody: '如有隐私相关问题，请通过应用页脚的「联系」或使用你常用的 ZeroDollar 支持渠道与我们联系。',
+    backHome: '返回首页',
+  },
+  terms: {
+    title: '服务条款',
+    lastUpdated: '最后更新：2025年9月8日',
+    intro:
+      '本条款适用于 ZeroDollar 社区免费物品平台。登录或使用本服务即表示你同意这些条款。',
+    serviceTitle: '服务说明',
+    serviceBody:
+      'ZeroDollar 帮助用户在本地发现与分享免费物品。listing 可能来自社区成员或外部来源。我们不保证物品仍可取、成色或交接安排。',
+    accountTitle: '账户',
+    accountBody:
+      '你可以使用 Google 或邮箱登录。你须对账户下的活动负责。可随时在设置中删除账户。',
+    contentTitle: '你的内容',
+    contentBody:
+      '你应发布真实信息并尊重其他用户。我们可移除违反本条款或适用法律的内容。',
+    liabilityTitle: '免责声明',
+    liabilityBody:
+      'ZeroDollar 按「现状」提供。取件与交接在用户之间直接进行。我们不对线下交换产生的纠纷、伤害或损失负责。',
+    contactTitle: '联系我们',
+    contactBody: '如有条款相关问题，请通过应用页脚的「联系」或使用你常用的 ZeroDollar 支持渠道与我们联系。',
+    backHome: '返回首页',
   },
   pwa: {
     install: {

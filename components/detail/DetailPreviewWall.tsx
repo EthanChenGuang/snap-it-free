@@ -20,7 +20,7 @@ type DetailPreviewWallProps = {
   redirectTo: string;
 };
 
-/** Anonymous guest preview — visible teaser + frosted gate overlay + floating Apple auth card (D-19-02). */
+/** Anonymous guest preview — visible teaser + frosted gate overlay + floating auth card (D-19-02). */
 export function DetailPreviewWall({ listing, redirectTo }: DetailPreviewWallProps) {
   const router = useRouter();
   const reduceMotion = useReducedMotion();

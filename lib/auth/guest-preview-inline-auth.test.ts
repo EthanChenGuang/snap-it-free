@@ -8,7 +8,7 @@ function readSource(relativePath: string): string {
   return readFileSync(resolve(root, relativePath), 'utf8');
 }
 
-describe('D-19-02 guest listing preview with floating Apple auth gate', () => {
+describe('D-19-02 guest listing preview with floating auth gate', () => {
   it('DetailPreviewWall shows teaser metadata and GuestAuthGateCard overlay', () => {
     const source = readSource('components/detail/DetailPreviewWall.tsx');
     expect(source).toMatch(/GuestAuthGateCard/);
@@ -26,15 +26,16 @@ describe('D-19-02 guest listing preview with floating Apple auth gate', () => {
     expect(source).toMatch(/verifiedFree/);
   });
 
-  it('GuestAuthGateCard implements Apple-first OAuth and inline magic-link email', () => {
+  it('GuestAuthGateCard implements Google-primary OAuth and inline magic-link email', () => {
     const card = readSource('components/detail/GuestAuthGateCard.tsx');
-    expect(card).toMatch(/signInWithOAuth/);
+    expect(card).toMatch(/useOAuthSignIn/);
     expect(card).toMatch(/signInWithOtp/);
     expect(card).toMatch(/guestGateTitle/);
     expect(card).toMatch(/guestGateSubtitle/);
     expect(card).not.toMatch(/dark:/);
     expect(card).toMatch(/arrow_forward/);
-    expect(card).toMatch(/APPLE_OAUTH_ENABLED/);
+    expect(card).not.toMatch(/isFacebookOAuthEnabled/);
+    expect(card).not.toMatch(/facebookSignIn/);
   });
 
   it('ScrapedListingShell guest branch uses DetailPreviewWall with redirectTo and no dialog open-state setter', () => {
@@ -51,14 +52,15 @@ describe('D-19-02 guest listing preview with floating Apple auth gate', () => {
     expect(source).toMatch(/contactAuthOpen/);
   });
 
-  it('AuthPromptModal wraps AuthPromptForm so other gates keep Google / Apple / email OTP', () => {
+  it('AuthPromptModal wraps AuthPromptForm so other gates keep Google / email OTP', () => {
     const modal = readSource('components/ugc/AuthPromptModal.tsx');
     expect(modal).toMatch(/AuthPromptForm/);
     const form = readSource('components/ugc/AuthPromptForm.tsx');
-    expect(form).toMatch(/signInWithOAuth/);
+    expect(form).toMatch(/useOAuthSignIn/);
     expect(form).toMatch(/signInWithOtp/);
-    expect(form).toMatch(/APPLE_OAUTH_ENABLED/);
-    expect(form).toMatch(/buildRedirectToUrl/);
+    expect(form).not.toMatch(/facebookSignIn/);
+    expect(form).not.toMatch(/isFacebookOAuthEnabled/);
+    expect(form).toMatch(/buildOAuthCallbackUrl/);
     expect(form).toMatch(/messages\.auth\.checkEmail/);
     expect(form).toMatch(/messages\.auth\.sendError/);
     expect(form).toMatch(/messages\.auth\.oauthError/);

@@ -6,7 +6,7 @@
 
 ## Symptom
 
-- Email / Google / Apple **login succeeds** (GoTrue accepts credentials)
+- Email / Google **login succeeds** (GoTrue accepts credentials)
 - Immediately after login, **every database call fails** with HTTP 500
 - PostgREST error body often includes `"JWT issued at future"` (misleading — not a clock skew issue)
 - **Service role** queries still work (200) — only user session JWTs fail

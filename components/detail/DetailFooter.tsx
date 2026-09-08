@@ -14,7 +14,7 @@ export function DetailFooter() {
           <p className="text-label-sm text-secondary">{messages.detail.footerTagline}</p>
         </div>
         <div className="flex gap-space-lg text-label-md text-on-surface-variant">
-          <Link href="/settings" className="transition-colors hover:text-primary">
+          <Link href="/privacy" className="transition-colors hover:text-primary">
             {messages.detail.footerPrivacy}
           </Link>
           <Link href="/settings" className="transition-colors hover:text-primary">

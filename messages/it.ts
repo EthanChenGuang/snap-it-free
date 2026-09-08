@@ -200,8 +200,6 @@ export const messages = {
     modalDescription: 'Scegli come accedere — nessuna password richiesta.',
     moreSignInOptions: 'Altre opzioni di accesso',
     googleSignIn: 'Continua con Google',
-    appleSignIn: 'Continua con Apple',
-    appleSignInDisabled: 'Accedi con Apple non ancora disponibile',
     orDivider: 'oppure',
     emailLabel: 'Email',
     emailPlaceholder: 'tua@email.it',
@@ -355,6 +353,53 @@ export const messages = {
       badgeLabel: (n: number) =>
         n === 1 ? '1 nuovo match' : `${n > 9 ? '9+' : n} nuovi match`,
     },
+  },
+  privacy: {
+    title: 'Informativa sulla privacy',
+    lastUpdated: 'Ultimo aggiornamento: 7 settembre 2025',
+    intro:
+      'ZeroDollar («noi») aiuta le persone a trovare e condividere oggetti gratis a Venezia. Questa informativa descrive quali dati personali raccogliamo e come li usiamo.',
+    collectTitle: 'Informazioni che raccogliamo',
+    collectBody:
+      'Dati dell\'account (nome, email, foto profilo) quando accedi; annunci, messaggi e preferiti che crei; preferenze di notifica e zone salvate in Impostazioni.',
+    useTitle: 'Come usiamo le informazioni',
+    useBody:
+      'Per autenticarti, gestire il marketplace (annunci, messaggi, preferiti), inviare avvisi che attivi e mantenere il servizio sicuro.',
+    authTitle: 'Provider di accesso',
+    authBody:
+      'Se accedi con Google, riceviamo i campi del profilo che quel provider condividono (di solito nome, email e foto profilo) per creare e collegare il tuo account.',
+    sharingTitle: 'Fornitori di servizi',
+    sharingBody:
+      'Usiamo Supabase per autenticazione e archiviazione dati e Vercel per l\'hosting. Non vendiamo i tuoi dati personali a terzi.',
+    retentionTitle: 'Le tue scelte',
+    retentionBody:
+      'Puoi eliminare il tuo account in qualsiasi momento in Impostazioni. L\'eliminazione rimuove annunci, messaggi, preferiti e altri dati dell\'account che conserviamo.',
+    contactTitle: 'Contatti',
+    contactBody:
+      'Per domande sulla privacy, usa il link Contatti nel footer dell\'app o il tuo canale di supporto abituale per ZeroDollar.',
+    backHome: 'Torna alla home',
+  },
+  terms: {
+    title: 'Termini di servizio',
+    lastUpdated: 'Ultimo aggiornamento: 8 settembre 2025',
+    intro:
+      'Questi termini regolano l\'uso di ZeroDollar, un marketplace comunitario per oggetti gratis. Accedendo o usando il servizio, accetti questi termini.',
+    serviceTitle: 'Il servizio',
+    serviceBody:
+      'ZeroDollar aiuta a scoprire e condividere oggetti gratis in locale. Gli annunci possono provenire da membri della community o da fonti esterne. Non garantiamo disponibilità, condizioni o accordi di ritiro.',
+    accountTitle: 'Account',
+    accountBody:
+      'Puoi accedere con Google o email. Sei responsabile dell\'attività sul tuo account. Puoi eliminare l\'account in qualsiasi momento in Impostazioni.',
+    contentTitle: 'I tuoi contenuti',
+    contentBody:
+      'Devi pubblicare informazioni accurate e trattare gli altri utenti con rispetto. Possiamo rimuovere contenuti che violano questi termini o la legge applicabile.',
+    liabilityTitle: 'Esclusione di responsabilità',
+    liabilityBody:
+      'ZeroDollar è fornito così com\'è. Ritiro e consegna avvengono direttamente tra utenti. Non siamo responsabili per dispute, danni o perdite derivanti da scambi di persona.',
+    contactTitle: 'Contatti',
+    contactBody:
+      'Per domande su questi termini, usa il link Contatti nel footer dell\'app o il tuo canale di supporto abituale per ZeroDollar.',
+    backHome: 'Torna alla home',
   },
   pwa: {
     install: {

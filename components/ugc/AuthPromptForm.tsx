@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
+import { buildOAuthCallbackUrl } from '@/lib/auth/build-oauth-callback-url';
+import { useOAuthSignIn } from '@/lib/auth/use-oauth-sign-in';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
@@ -17,12 +19,6 @@ type AuthPromptFormProps = {
   /** Tighter spacing for one-screen guest preview layouts. */
   compact?: boolean;
 };
-
-const APPLE_OAUTH_ENABLED = process.env.NEXT_PUBLIC_APPLE_OAUTH_ENABLED === 'true';
-
-function buildRedirectToUrl(redirectTo: string): string {
-  return `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
-}
 
 function GoogleIcon() {
   return (
@@ -47,14 +43,6 @@ function GoogleIcon() {
   );
 }
 
-function AppleIcon() {
-  return (
-    <svg aria-hidden="true" className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-    </svg>
-  );
-}
-
 export function AuthPromptForm({
   redirectTo,
   heading,
@@ -65,25 +53,11 @@ export function AuthPromptForm({
   compact = false,
 }: AuthPromptFormProps) {
   const { messages } = useMessages();
+  const { signIn, status: oauthStatus, isBusy: oauthBusy } = useOAuthSignIn(redirectTo);
 
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
-  const [oauthStatus, setOauthStatus] = useState<'idle' | 'loading' | 'error'>('idle');
-  const isAuthBusy = oauthStatus === 'loading' || status === 'sending';
-
-  const handleOAuth = async (provider: 'google' | 'apple') => {
-    setOauthStatus('loading');
-    const supabase = createClient();
-    const redirectToUrl = buildRedirectToUrl(redirectTo);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: redirectToUrl },
-    });
-
-    if (error) {
-      setOauthStatus('error');
-    }
-  };
+  const isAuthBusy = oauthBusy || status === 'sending';
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -91,7 +65,7 @@ export function AuthPromptForm({
 
     setStatus('sending');
     const supabase = createClient();
-    const redirectToUrl = buildRedirectToUrl(redirectTo);
+    const redirectToUrl = buildOAuthCallbackUrl(redirectTo, window.location.origin);
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: { emailRedirectTo: redirectToUrl },
@@ -140,53 +114,27 @@ export function AuthPromptForm({
               <Button
                 type="button"
                 variant="secondary"
-                className="min-h-11 w-full justify-center rounded-none border-0 border-b border-outline-variant bg-surface-container-lowest px-space-md font-normal hover:bg-surface-container"
+                className="min-h-11 w-full justify-center rounded-none border-0 bg-surface-container-lowest px-space-md font-normal hover:bg-surface-container"
                 disabled={isAuthBusy}
-                onClick={() => handleOAuth('google')}
+                onClick={() => signIn('google')}
               >
                 <GoogleIcon />
                 {messages.auth.googleSignIn}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                className="min-h-11 w-full justify-center rounded-none border-0 bg-surface-container-lowest px-space-md font-normal hover:bg-surface-container"
-                disabled={!APPLE_OAUTH_ENABLED || isAuthBusy}
-                title={APPLE_OAUTH_ENABLED ? undefined : messages.auth.appleSignInDisabled}
-                onClick={() => APPLE_OAUTH_ENABLED && handleOAuth('apple')}
-              >
-                <AppleIcon />
-                {messages.auth.appleSignIn}
               </Button>
             </div>
           ) : (
             <div className="flex flex-col gap-space-sm">
               <Button
                 type="button"
-                variant="secondary"
                 className={cn(
                   'w-full justify-start px-space-md font-normal min-h-11',
                   prominentHeading && 'bg-surface-container-lowest',
                 )}
                 disabled={isAuthBusy}
-                onClick={() => handleOAuth('google')}
+                onClick={() => signIn('google')}
               >
                 <GoogleIcon />
                 {messages.auth.googleSignIn}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                className={cn(
-                  'w-full justify-start px-space-md font-normal min-h-11',
-                  prominentHeading && 'bg-surface-container-lowest',
-                )}
-                disabled={!APPLE_OAUTH_ENABLED || isAuthBusy}
-                title={APPLE_OAUTH_ENABLED ? undefined : messages.auth.appleSignInDisabled}
-                onClick={() => APPLE_OAUTH_ENABLED && handleOAuth('apple')}
-              >
-                <AppleIcon />
-                {messages.auth.appleSignIn}
               </Button>
             </div>
           )}

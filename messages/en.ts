@@ -193,8 +193,6 @@ export const messages: Messages = {
     modalDescription: 'Choose how to sign in — no password needed.',
     moreSignInOptions: 'More sign-in options',
     googleSignIn: 'Continue with Google',
-    appleSignIn: 'Continue with Apple',
-    appleSignInDisabled: 'Sign in with Apple is not available yet',
     orDivider: 'or',
     emailLabel: 'Email',
     emailPlaceholder: 'you@email.com',
@@ -345,6 +343,53 @@ export const messages: Messages = {
       zoneUnknown: 'Unknown zone',
       badgeLabel: (n: number) => (n === 1 ? '1 new match' : `${n > 9 ? '9+' : n} new matches`),
     },
+  },
+  privacy: {
+    title: 'Privacy Policy',
+    lastUpdated: 'Last updated: September 7, 2025',
+    intro:
+      'ZeroDollar ("we") helps people find and share free items in Venice. This policy describes what personal information we collect and how we use it.',
+    collectTitle: 'Information we collect',
+    collectBody:
+      'Account details (name, email, profile picture) when you sign in; listings, messages, and favorites you create; notification and zone preferences you save in Settings.',
+    useTitle: 'How we use information',
+    useBody:
+      'To authenticate you, operate the marketplace (listings, messaging, favorites), send alerts you opt into, and keep the service secure.',
+    authTitle: 'Sign-in providers',
+    authBody:
+      'If you choose Google sign-in, we receive the profile fields that provider shares (typically name, email, and profile picture) to create and link your account.',
+    sharingTitle: 'Service providers',
+    sharingBody:
+      'We use Supabase for authentication and data storage and Vercel for hosting. We do not sell your personal information to third parties.',
+    retentionTitle: 'Your choices',
+    retentionBody:
+      'You may delete your account at any time in Settings. Deletion removes your listings, messages, favorites, and other account data we store.',
+    contactTitle: 'Contact',
+    contactBody:
+      'For privacy questions, use the Contact link in the app footer or reach out through your usual support channel for ZeroDollar.',
+    backHome: 'Back to home',
+  },
+  terms: {
+    title: 'Terms of Service',
+    lastUpdated: 'Last updated: September 8, 2025',
+    intro:
+      'These terms govern your use of ZeroDollar, a community marketplace for free items. By signing in or using the service, you agree to these terms.',
+    serviceTitle: 'The service',
+    serviceBody:
+      'ZeroDollar helps people discover and share free items locally. Listings may come from community members or external sources. We do not guarantee item availability, condition, or pickup arrangements.',
+    accountTitle: 'Accounts',
+    accountBody:
+      'You may sign in with Google or email. You are responsible for activity on your account. You may delete your account at any time in Settings.',
+    contentTitle: 'Your content',
+    contentBody:
+      'You must post accurate information and treat other users respectfully. We may remove content that violates these terms or applicable law.',
+    liabilityTitle: 'Disclaimer',
+    liabilityBody:
+      'ZeroDollar is provided as-is. Pickup and handoff happen directly between users. We are not responsible for disputes, injuries, or losses from in-person exchanges.',
+    contactTitle: 'Contact',
+    contactBody:
+      'Questions about these terms: use the Contact link in the app footer or your usual support channel for ZeroDollar.',
+    backHome: 'Back to home',
   },
   pwa: {
     install: {

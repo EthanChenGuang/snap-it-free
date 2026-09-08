@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { buildOAuthCallbackUrl } from '@/lib/auth/build-oauth-callback-url';
+import { useOAuthSignIn } from '@/lib/auth/use-oauth-sign-in';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
@@ -11,12 +13,6 @@ type GuestAuthGateCardProps = {
   onClose: () => void;
   className?: string;
 };
-
-const APPLE_OAUTH_ENABLED = process.env.NEXT_PUBLIC_APPLE_OAUTH_ENABLED === 'true';
-
-function buildRedirectToUrl(redirectTo: string): string {
-  return `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
-}
 
 function GoogleIcon() {
   return (
@@ -41,40 +37,18 @@ function GoogleIcon() {
   );
 }
 
-function AppleIcon() {
-  return (
-    <svg aria-hidden="true" className="h-4 w-4 shrink-0 text-white" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-    </svg>
-  );
-}
-
 const cardSpring = { type: 'spring' as const, stiffness: 380, damping: 30 };
 
 export { cardSpring };
 
-/** Apple HIG light frosted-glass auth card for guest listing detail. */
+/** Frosted-glass auth card for guest listing detail (D-19-02). */
 export function GuestAuthGateCard({ redirectTo, id, onClose, className }: GuestAuthGateCardProps) {
   const { messages } = useMessages();
+  const { signIn, status: oauthStatus, isBusy: oauthBusy } = useOAuthSignIn(redirectTo);
 
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
-  const [oauthStatus, setOauthStatus] = useState<'idle' | 'loading' | 'error'>('idle');
-  const isAuthBusy = oauthStatus === 'loading' || status === 'sending';
-
-  const handleOAuth = async (provider: 'google' | 'apple') => {
-    setOauthStatus('loading');
-    const supabase = createClient();
-    const redirectToUrl = buildRedirectToUrl(redirectTo);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: redirectToUrl },
-    });
-
-    if (error) {
-      setOauthStatus('error');
-    }
-  };
+  const isAuthBusy = oauthBusy || status === 'sending';
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -82,7 +56,7 @@ export function GuestAuthGateCard({ redirectTo, id, onClose, className }: GuestA
 
     setStatus('sending');
     const supabase = createClient();
-    const redirectToUrl = buildRedirectToUrl(redirectTo);
+    const redirectToUrl = buildOAuthCallbackUrl(redirectTo, window.location.origin);
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: { emailRedirectTo: redirectToUrl },
@@ -90,6 +64,9 @@ export function GuestAuthGateCard({ redirectTo, id, onClose, className }: GuestA
 
     setStatus(error ? 'error' : 'sent');
   };
+
+  const primaryButtonClass =
+    'flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-black text-label-md font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50';
 
   return (
     <div
@@ -131,20 +108,9 @@ export function GuestAuthGateCard({ redirectTo, id, onClose, className }: GuestA
 
           <button
             type="button"
-            disabled={!APPLE_OAUTH_ENABLED || isAuthBusy}
-            title={APPLE_OAUTH_ENABLED ? undefined : messages.auth.appleSignInDisabled}
-            onClick={() => APPLE_OAUTH_ENABLED && handleOAuth('apple')}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-black text-label-md font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
-          >
-            <AppleIcon />
-            {messages.auth.appleSignIn}
-          </button>
-
-          <button
-            type="button"
             disabled={isAuthBusy}
-            onClick={() => handleOAuth('google')}
-            className="mt-2.5 flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white text-label-md font-medium text-zinc-800 shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all hover:bg-zinc-50 active:scale-[0.98] disabled:opacity-50"
+            onClick={() => signIn('google')}
+            className={primaryButtonClass}
           >
             <GoogleIcon />
             {messages.auth.googleSignIn}
