@@ -8,6 +8,7 @@ import { GeneralSection } from '@/components/settings/GeneralSection';
 import { LanguageSection } from '@/components/settings/LanguageSection';
 import { NotificationsSection } from '@/components/settings/NotificationsSection';
 import { ZonesSection } from '@/components/settings/ZonesSection';
+import { SETTINGS_FEATURES } from '@/lib/features/settings';
 import { useMessages } from '@/lib/i18n/useMessages';
 
 export function SettingsPageClient() {
@@ -26,8 +27,8 @@ export function SettingsPageClient() {
 
       <AccountHeaderSection />
       <GeneralSection />
-      <NotificationsSection />
-      <ZonesSection autoOpenCreate={autoOpenCreate} />
+      {SETTINGS_FEATURES.notifications && <NotificationsSection />}
+      {SETTINGS_FEATURES.pushManagement && <ZonesSection autoOpenCreate={autoOpenCreate} />}
       <LanguageSection />
       <AccountSection />
       <AdvancedSection />
