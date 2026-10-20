@@ -6,12 +6,12 @@ name: Subito Scheduler
 # a single pass, then exits. It does not run a long-lived process, so it fits
 # entirely within the GitHub Actions free tier (private repos: 2000 min/mo).
 #
-# Tune the cron schedule below to stay under that quota. Every 2 hours is
-# ~360 runs/month at a few minutes each — comfortably under the limit.
+# Tune the cron schedule below to stay under that quota. Every 12 hours is
+# ~60 runs/month at ~15 minutes each (~900 min) — under the limit.
 
 on:
   schedule:
-    - cron: '0 */2 * * *'
+    - cron: '0 */12 * * *'
   workflow_dispatch: {}
 
 concurrency:
