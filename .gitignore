@@ -23,3 +23,11 @@ coverage/
 scraper/node_modules/
 scraper/dist/
 scraper/coverage/
+
+# Playwright / browser login sessions (storage state) — never commit
+.tmp-pw-session*
+.tmp-*session*.json
+*storage-state*.json
+*storageState*.json
+playwright/.auth/
+.auth/
