@@ -5,8 +5,8 @@ Paywall after onboarding and from "See plans". Weekly €1.99, monthly €4.99, 
 ## Sub-features
 
 - `pw-plans` three radio cards, per-week equivalent, renewal text follows the selection.
-- `pw-links` Restore (honest nothing-to-restore message), `/terms`, `/privacy` in a new tab.
-- `pw-cta` coming-soon state, then Close lands on the locked feed.
+- `pw-links` Restore calls `GET /api/subscription`: a guest is asked to sign in, a signed-in non-subscriber sees nothing-to-restore, and a subscriber reloads into the open feed. `/terms` and `/privacy` open in a new tab.
+- `pw-cta` CTA posts `/api/stripe/checkout`: 503 (no Stripe env) shows coming soon, 401 asks to sign in, 200 redirects to Stripe Checkout. Close lands on the locked feed.
 - `lock-home` `/` for a non-subscriber: real total count and 6 blurred real photos, no listing links, no listing payload in HTML.
 - `lock-detail` `/listing/<id>` locked (owner view of own UGC exempt). `lock-favorites` `/favorites` locked (flag-on builds only).
 
@@ -25,6 +25,8 @@ Preconditions: doctor OK.
 - **Desktop.** `desktop-paywall` asserts the card is at most 440px wide at 1280x800.
 
 ## Gotchas
+
+- A real Checkout redirect needs Stripe test env (`STRIPE_*`) plus `SUPABASE_SERVICE_ROLE_KEY` and a signed-in user. Without them the journey proves the 503 path only.
 
 - The gate is UI and SSR only. `listings_public` stays readable with the anon key until RLS changes.
 - `/favorites` deliberately ignores `?onboarding=1` so it stays a static page with the flag off.

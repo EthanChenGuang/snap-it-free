@@ -155,7 +155,8 @@ async function onboarding(browser) {
   const weekly = (await page.getByTestId('paywall-renewal').innerText()).trim();
   check(weekly.startsWith('€1.99 per week.'), `renewal text follows the selected plan: "${weekly}"`);
   await page.getByRole('button', { name: 'Restore purchases' }).click();
-  check((await page.getByText('Nothing to restore').count()) === 1, 'Restore reports honestly that nothing exists');
+  await page.getByText('Sign in first to restore').waitFor({ timeout: 10000 });
+  check(true, 'Restore as a guest asks to sign in (GET /api/subscription → signedIn:false)');
   await shot(page, '08-paywall-weekly-restore');
 
   await page.getByTestId('paywall-cta').click();
