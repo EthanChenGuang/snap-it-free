@@ -457,6 +457,12 @@ export const messages: Messages = {
     comingSoonTitle: '支付功能尚未开放',
     comingSoonBody: '没有产生任何扣款。订阅功能即将开放。',
     comingSoonContinue: '关闭',
+    pending: '正在打开支付页面…',
+    checkoutError: '无法开始支付，请重试。',
+    signInTitle: '登录后订阅',
+    signInBody: '订阅与你的账号绑定，可在任何设备上使用。请先在设置中登录，然后选择方案。',
+    goToSettings: '前往设置',
+    restoreSignIn: '请先登录再恢复订阅。',
   },
   locked: {
     title: '订阅后查看信息',
@@ -473,6 +479,15 @@ export const messages: Messages = {
     favoritesTitle: '收藏仅限订阅用户查看',
     favoritesBody: '订阅后即可查看你收藏的信息。',
     backHome: '返回首页',
+    checkoutPending: '已经付款？激活可能需要一分钟，请稍后刷新此页面。',
+  },
+  subscription: {
+    sectionTitle: '订阅',
+    manage: '管理订阅',
+    active: (plan: string) => `当前方案：${plan}`,
+    inactive: '没有有效的订阅',
+    endsAtPeriodEnd: '将在当前周期结束时取消',
+    portalError: '无法打开账单管理页面，请重试。',
   },
   pwa: {
     install: {

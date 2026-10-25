@@ -480,6 +480,12 @@ export const messages = {
     comingSoonTitle: 'I pagamenti non sono ancora attivi',
     comingSoonBody: 'Non ti è stato addebitato nulla. Gli abbonamenti apriranno a breve.',
     comingSoonContinue: 'Chiudi',
+    pending: 'Apertura del pagamento…',
+    checkoutError: 'Impossibile avviare il pagamento. Riprova.',
+    signInTitle: 'Accedi per abbonarti',
+    signInBody: 'L’abbonamento è legato al tuo account, così puoi usarlo su ogni dispositivo. Accedi da Impostazioni, poi scegli un piano.',
+    goToSettings: 'Vai a Impostazioni',
+    restoreSignIn: 'Accedi prima per ripristinare un abbonamento.',
   },
   locked: {
     title: 'Abbonati per vedere gli annunci',
@@ -496,6 +502,15 @@ export const messages = {
     favoritesTitle: 'I preferiti sono per gli abbonati',
     favoritesBody: 'Abbonati per vedere gli annunci che hai salvato.',
     backHome: 'Torna alla home',
+    checkoutPending: 'Pagamento effettuato? L’attivazione può richiedere un minuto. Ricarica la pagina tra poco.',
+  },
+  subscription: {
+    sectionTitle: 'Abbonamento',
+    manage: 'Gestisci abbonamento',
+    active: (plan: string) => `Piano attivo: ${plan}`,
+    inactive: 'Nessun abbonamento attivo',
+    endsAtPeriodEnd: 'Si annulla alla fine del periodo in corso',
+    portalError: 'Impossibile aprire il portale di fatturazione. Riprova.',
   },
   pwa: {
     install: {

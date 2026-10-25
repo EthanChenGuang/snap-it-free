@@ -470,6 +470,12 @@ export const messages: Messages = {
     comingSoonTitle: 'Payments aren’t enabled yet',
     comingSoonBody: 'You were not charged. Subscriptions open soon.',
     comingSoonContinue: 'Close',
+    pending: 'Opening checkout…',
+    checkoutError: 'Couldn’t start checkout. Please try again.',
+    signInTitle: 'Sign in to subscribe',
+    signInBody: 'Your subscription is linked to your account, so you can use it on any device. Sign in from Settings, then choose a plan.',
+    goToSettings: 'Go to Settings',
+    restoreSignIn: 'Sign in first to restore a subscription.',
   },
   locked: {
     title: 'Subscribe to see the listings',
@@ -486,6 +492,15 @@ export const messages: Messages = {
     favoritesTitle: 'Favorites are for subscribers',
     favoritesBody: 'Subscribe to see the listings you saved.',
     backHome: 'Back to home',
+    checkoutPending: 'Payment received? Activation can take a minute. Refresh this page shortly.',
+  },
+  subscription: {
+    sectionTitle: 'Subscription',
+    manage: 'Manage subscription',
+    active: (plan: string) => `Active plan: ${plan}`,
+    inactive: 'No active subscription',
+    endsAtPeriodEnd: 'Cancels at the end of the current period',
+    portalError: 'Couldn’t open the billing portal. Please try again.',
   },
   pwa: {
     install: {

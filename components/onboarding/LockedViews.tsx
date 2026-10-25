@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
 import { PaywallDialog } from '@/components/onboarding/PaywallDialog';
 import { SymbolIcon } from '@/components/onboarding/SymbolIcon';
@@ -21,6 +21,13 @@ function LockedCard({
   const { messages } = useMessages();
   const copy = messages.locked;
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [checkoutReturned, setCheckoutReturned] = useState(false);
+
+  // Back from Stripe but still locked: the webhook has not landed yet.
+  useEffect(() => {
+    const state = new URLSearchParams(window.location.search).get('checkout');
+    setCheckoutReturned(state === 'success' || state === 'pending');
+  }, []);
 
   return (
     <section
@@ -30,6 +37,11 @@ function LockedCard({
       <SymbolIcon name="lock" className="text-[32px] text-on-surface" />
       <h1 className="mt-space-md text-h3 text-on-surface">{title}</h1>
       <p className="mt-space-sm text-body-md text-on-surface-variant">{body}</p>
+      {checkoutReturned && (
+        <p role="status" className="mt-space-md rounded-lg border border-outline-variant p-space-md text-body-md text-on-surface">
+          {copy.checkoutPending}
+        </p>
+      )}
       <Button
         type="button"
         className="mt-space-lg h-12 w-full"

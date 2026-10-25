@@ -407,13 +407,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
           </footer>
         </>
       ) : (
-        <PaywallScreen
-          purchase={state.purchase}
-          titleRef={titleRef}
-          titleId={TITLE_ID}
-          onStartPurchase={() => dispatch({ type: 'startPurchase' })}
-          onFinish={() => dispatch({ type: 'finish' })}
-        />
+        <PaywallScreen titleId={TITLE_ID} onFinish={() => dispatch({ type: 'finish' })} />
       )}
     </OverlayShell>
   );
