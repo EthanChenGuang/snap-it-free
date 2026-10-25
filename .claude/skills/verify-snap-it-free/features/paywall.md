@@ -10,6 +10,9 @@ Paywall after onboarding and from "See plans". Weekly €1.99, monthly €4.99, 
 - `lock-home` `/` for a non-subscriber: real total count and 6 blurred real photos, no listing links, no listing payload in HTML.
 - `lock-detail` `/listing/<id>` locked (owner view of own UGC exempt). `lock-favorites` `/favorites` locked (flag-on builds only).
 
+- `db-gate` (migration 044, go-live only): anon and non-subscribers read zero rows from `listings_public` and `listings`. Subscribers (active/trialing, or past_due under 3 days) and authors read theirs. `listings_paywall_teaser()` returns only `(listing_count, photo_urls)`. Proved by `supabase/tests/run-local.sh`, not by the browser journeys, which run against a remote database without 044.
+- `legal` Terms and Privacy show subscription, cancellation, Stripe and stored-data sections only on flag-on builds.
+
 ## How to get to it (user POV)
 
 - Finish or skip onboarding.
@@ -28,5 +31,5 @@ Preconditions: doctor OK.
 
 - A real Checkout redirect needs Stripe test env (`STRIPE_*`) plus `SUPABASE_SERVICE_ROLE_KEY` and a signed-in user. Without them the journey proves the 503 path only.
 
-- The gate is UI and SSR only. `listings_public` stays readable with the anon key until RLS changes.
+- Until 044 is applied the gate is UI and SSR only, and `listings_public` stays readable with the anon key. After 044 the browser and server read listings with the user's session when the flag is on. A subscriber whose session has expired sees an empty feed until it refreshes.
 - `/favorites` deliberately ignores `?onboarding=1` so it stays a static page with the flag off.

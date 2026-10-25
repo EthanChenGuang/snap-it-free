@@ -63,6 +63,9 @@ async function flagOff(browser) {
   const cards = await page.locator('a[href^="/listing/"]').count();
   check(cards > 0, `flag off: real listing cards render (${cards} links)`);
   await shot(page, '00-flag-off');
+  await page.goto(`${url}/terms`, { waitUntil: 'networkidle' });
+  const freeTerms = await page.locator('main').innerText();
+  check(!freeTerms.includes('Subscriptions') && !freeTerms.includes('Stripe'), 'flag off: Terms carry no subscription or Stripe text');
   await context.close();
 }
 
@@ -239,6 +242,30 @@ async function persist(browser) {
   await page.goto(`${url}/favorites`, { waitUntil: 'networkidle' });
   check(await page.getByTestId('locked-favorites').isVisible(), 'flag on: favorites locked');
   await shot(page, '17-flag-on-favorites-locked');
+
+  await page.goto(`${url}/terms`, { waitUntil: 'networkidle' });
+  const terms = await page.locator('main').innerText();
+  check(
+    ['€1.99 per week', '€4.99 per month', '€19.99 per year', 'renews automatically', 'Stripe Payments Europe', 'up to 3 days'].every((s) => terms.includes(s)),
+    'flag on: Terms state prices, auto-renewal, Stripe as processor and the 3-day retry window',
+  );
+  await page.getByRole('heading', { name: 'Subscriptions' }).scrollIntoViewIfNeeded();
+  await shot(page, '18-flag-on-terms-subscriptions');
+  await page.goto(`${url}/privacy`, { waitUntil: 'networkidle' });
+  const privacy = await page.locator('main').innerText();
+  check(privacy.includes('We never see or store them') && privacy.includes('Stripe customer and subscription identifiers'), 'flag on: Privacy explains what Stripe handles and what we store');
+  await page.getByRole('heading', { name: 'Payments and subscriptions' }).scrollIntoViewIfNeeded();
+  await shot(page, '19-flag-on-privacy-payments');
+
+  await page.goto(`${url}/?onboarding=1`, { waitUntil: 'networkidle' });
+  await overlay(page).waitFor({ timeout: 15000 });
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.getByRole('radio', { name: 'Rome' }).click();
+  await page.waitForFunction(() => !document.querySelector('[data-testid="onboarding-teaser"]')?.textContent?.includes('Counting'), null, { timeout: 30000 });
+  const teaser = (await page.getByTestId('onboarding-teaser').innerText()).trim();
+  check(/^[\d,]+ free listings active in Rome/.test(teaser), `flag on: city teaser shows a real count for a non-subscriber: "${teaser.split('\n')[0]}"`);
+  await shot(page, '20-flag-on-city-teaser');
   await context.close();
 }
 
