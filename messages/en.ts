@@ -347,6 +347,7 @@ export const messages: Messages = {
   privacy: {
     title: 'Privacy Policy',
     lastUpdated: 'Last updated: September 7, 2025',
+    lastUpdatedPaid: 'Last updated: October 25, 2026',
     intro:
       'ZeroDollar ("we") helps people find and share free items in Venice. This policy describes what personal information we collect and how we use it.',
     collectTitle: 'Information we collect',
@@ -361,9 +362,16 @@ export const messages: Messages = {
     sharingTitle: 'Service providers',
     sharingBody:
       'We use Supabase for authentication and data storage and Vercel for hosting. We do not sell your personal information to third parties.',
+    sharingBodyPaid:
+      'We use Supabase for authentication and data storage, Vercel for hosting and Stripe for subscription payments. We do not sell your personal information to third parties.',
     retentionTitle: 'Your choices',
     retentionBody:
       'You may delete your account at any time in Settings. Deletion removes your listings, messages, favorites, and other account data we store.',
+    retentionBodyPaid:
+      'You may delete your account at any time in Settings. Deletion first cancels an active subscription, then removes your listings, messages, favorites, subscription record and other account data we store. Stripe keeps its own records of past payments under its privacy policy.',
+    paymentsTitle: 'Payments and subscriptions',
+    paymentsBody:
+      'If you subscribe, Stripe (Stripe Payments Europe, Limited) processes your payment. You enter your card and payment details on Stripe pages, and Stripe handles them under its own privacy policy. We never see or store them. We store your Stripe customer and subscription identifiers, your plan, the subscription status and the end of the current period, together with the email address of your account, so that we can unlock listings for you.',
     contactTitle: 'Contact',
     contactBody:
       'For privacy questions, use the Contact link in the app footer or reach out through your usual support channel for ZeroDollar.',
@@ -372,6 +380,7 @@ export const messages: Messages = {
   terms: {
     title: 'Terms of Service',
     lastUpdated: 'Last updated: September 8, 2025',
+    lastUpdatedPaid: 'Last updated: October 25, 2026',
     intro:
       'These terms govern your use of ZeroDollar, a community marketplace for free items. By signing in or using the service, you agree to these terms.',
     serviceTitle: 'The service',
@@ -386,6 +395,15 @@ export const messages: Messages = {
     liabilityTitle: 'Disclaimer',
     liabilityBody:
       'ZeroDollar is provided as-is. Pickup and handoff happen directly between users. We are not responsible for disputes, injuries, or losses from in-person exchanges.',
+    subscriptionTitle: 'Subscriptions',
+    subscriptionBody:
+      'Seeing listings requires a ZeroDollar Plus subscription. Plans cost €1.99 per week, €4.99 per month or €19.99 per year. The price and billing period are shown before you pay. A subscription renews automatically at the end of each period and is charged to your payment method until you cancel.',
+    cancelTitle: 'Cancelling',
+    cancelBody:
+      'You can cancel at any time in Settings → Manage subscription, which opens the Stripe customer portal. Cancelling stops future renewals. You keep access until the end of the period you have already paid for. Cancelling does not refund that period.',
+    paymentsTitle: 'Payments',
+    paymentsBody:
+      'Payments are processed by Stripe (Stripe Payments Europe, Limited). If a renewal payment fails, you keep access for up to 3 days while Stripe retries the payment. After that, listings are locked until the payment succeeds or you subscribe again.',
     contactTitle: 'Contact',
     contactBody:
       'Questions about these terms: use the Contact link in the app footer or your usual support channel for ZeroDollar.',

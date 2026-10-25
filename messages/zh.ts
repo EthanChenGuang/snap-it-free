@@ -340,6 +340,7 @@ export const messages: Messages = {
   privacy: {
     title: '隐私政策',
     lastUpdated: '最后更新：2025年9月7日',
+    lastUpdatedPaid: '最后更新：2026年10月25日',
     intro:
       'ZeroDollar（「我们」）帮助用户在威尼斯发现与分享免费物品。本政策说明我们收集哪些个人信息以及如何使用。',
     collectTitle: '我们收集的信息',
@@ -354,9 +355,16 @@ export const messages: Messages = {
     sharingTitle: '服务提供商',
     sharingBody:
       '我们使用 Supabase 进行认证与数据存储，使用 Vercel 托管应用。我们不会向第三方出售你的个人信息。',
+    sharingBodyPaid:
+      '我们使用 Supabase 进行认证与数据存储，使用 Vercel 托管应用，使用 Stripe 处理订阅付款。我们不会向第三方出售你的个人信息。',
     retentionTitle: '你的选择',
     retentionBody:
       '你可随时在设置中删除账户。删除后将移除我们存储的 listing、消息、收藏及其他账户数据。',
+    retentionBodyPaid:
+      '你可随时在设置中删除账户。删除时会先取消有效的订阅，然后移除我们存储的 listing、消息、收藏、订阅记录及其他账户数据。Stripe 会按其隐私政策保留过往付款的记录。',
+    paymentsTitle: '付款与订阅',
+    paymentsBody:
+      '如果你订阅，付款由 Stripe（Stripe Payments Europe, Limited）处理。你在 Stripe 的页面上输入银行卡和付款信息，Stripe 按其自身的隐私政策处理这些信息，我们不会看到或保存它们。我们保存 Stripe 客户和订阅标识、方案、订阅状态和当前周期的结束时间，以及你账号的邮箱地址，以便为你解锁信息。',
     contactTitle: '联系我们',
     contactBody: '如有隐私相关问题，请通过应用页脚的「联系」或使用你常用的 ZeroDollar 支持渠道与我们联系。',
     backHome: '返回首页',
@@ -364,6 +372,7 @@ export const messages: Messages = {
   terms: {
     title: '服务条款',
     lastUpdated: '最后更新：2025年9月8日',
+    lastUpdatedPaid: '最后更新：2026年10月25日',
     intro:
       '本条款适用于 ZeroDollar 社区免费物品平台。登录或使用本服务即表示你同意这些条款。',
     serviceTitle: '服务说明',
@@ -378,6 +387,15 @@ export const messages: Messages = {
     liabilityTitle: '免责声明',
     liabilityBody:
       'ZeroDollar 按「现状」提供。取件与交接在用户之间直接进行。我们不对线下交换产生的纠纷、伤害或损失负责。',
+    subscriptionTitle: '订阅',
+    subscriptionBody:
+      '查看信息需要零元 Plus 订阅。方案价格为每周 €1.99、每月 €4.99 或每年 €19.99。付款前会显示价格和计费周期。订阅在每个周期结束时自动续订，并从你的付款方式扣款，直到你取消为止。',
+    cancelTitle: '取消订阅',
+    cancelBody:
+      '你可以随时在“设置 → 管理订阅”中取消，该入口会打开 Stripe 客户门户。取消后不再续订，已付款的周期结束前仍可继续使用。取消不会退还该周期的费用。',
+    paymentsTitle: '付款',
+    paymentsBody:
+      '付款由 Stripe（Stripe Payments Europe, Limited）处理。如果续订付款失败，在 Stripe 重试付款期间你最多可继续使用 3 天。之后信息将被锁定，直到付款成功或你重新订阅。',
     contactTitle: '联系我们',
     contactBody: '如有条款相关问题，请通过应用页脚的「联系」或使用你常用的 ZeroDollar 支持渠道与我们联系。',
     backHome: '返回首页',
