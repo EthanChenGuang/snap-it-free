@@ -1,0 +1,24 @@
+# supabase/tests/run-local.sh on 2026-10-25T23:57Z, commit base bb5c090 + 261025-wba working tree
+# image public.ecr.aws/supabase/postgres:17.11.0.002 (throwaway, local only)
+applied 47 migrations in order
+== supabase/tests/042_subscriptions.check.sql
+CHECKS PASSED
+== supabase/tests/044_listings_paywall_rls.check.sql
+PASS anon -> view 0 rows, table no grant rows, entitled f
+PASS authenticated, no subscription -> view 0 rows, table 0 rows, entitled f
+PASS active subscriber -> view 7 rows, table 7 rows, entitled t
+PASS past_due 3 days minus 1 minute (in grace) -> view 7 rows, table 7 rows, entitled t
+PASS past_due 3 days plus 1 minute (grace over) -> view 0 rows, table 0 rows, entitled f
+PASS active but period ended -> view 0 rows, table 0 rows, entitled f
+PASS author without subscription -> view 1 rows, table 1 rows, entitled f
+PASS author reads exactly their own listing
+PASS listings_public gate evaluates once per query (InitPlan, no per-row SubPlan)
+PASS anon filters cannot widen listings_public
+PASS service_role insert/update/delete/select on listings and full listings_public
+PASS teaser returns (listing_count bigint, photo_urls text[]) and both functions are definer with fixed search_path
+PASS anon teaser: count 17, 6 urls: {https://img.test/m1.jpg,https://img.test/m2.jpg,https://img.test/m4.jpg,https://img.test/m5.jpg,https://img.test/v1.jpg,https://img.test/u1.jpg}
+PASS milano teaser since 1 day: count 5 (Rome-geocoded row excluded, lookback applied)
+PASS venice=1 and verona=0 teasers
+PASS authenticated non-subscriber teaser count 17
+PASS 043 apply_subscription_state stamps, keeps and clears past_due_since
+CHECKS PASSED 044
