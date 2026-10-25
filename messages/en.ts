@@ -420,7 +420,7 @@ export const messages: Messages = {
       teaserCount: (count: number, city: string) =>
         count === 1
           ? `1 free listing active in ${city} right now`
-          : `${count} free listings active in ${city} right now`,
+          : `${count.toLocaleString('en-US')} free listings active in ${city} right now`,
       teaserEmpty: (city: string) =>
         `No free listings active in ${city} right now. You can still browse every city.`,
       teaserError: 'Couldn’t load listings right now. You can still continue.',
@@ -446,12 +446,11 @@ export const messages: Messages = {
   paywall: {
     close: 'Close',
     title: 'ZeroDollar Plus',
-    subtitle: 'For people who want to reach the best finds first.',
-    benefitInstantAlerts: 'Instant alerts the moment a matching listing appears',
-    benefitMoreAlerts: 'More keyword alerts',
-    benefitNewCities: 'Early access to new cities',
+    subtitle: 'Subscribe to see every free listing near you.',
+    benefitListings: 'Every active free listing, from all sources',
+    benefitMap: 'The full feed, map and filters',
+    benefitAlerts: 'Keyword alerts when a match appears',
     benefitSupport: 'Support an independent project',
-    freeNote: 'Browsing free listings stays free.',
     plansLabel: 'Choose a plan',
     planWeekly: 'Weekly',
     planMonthly: 'Monthly',
@@ -461,7 +460,6 @@ export const messages: Messages = {
     periodYearly: 'year',
     bestValue: 'Best value',
     perWeek: (price: string) => `${price} / week`,
-    placeholderNote: 'Preview: plans, prices and benefits are not final.',
     cta: 'Continue',
     renewal: (price: string, period: string) =>
       `${price} per ${period}. Renews automatically until you cancel. Cancel anytime.`,
@@ -469,10 +467,25 @@ export const messages: Messages = {
     restoreNothing: 'Nothing to restore: no purchases have been made yet.',
     terms: 'Terms',
     privacy: 'Privacy',
-    continueFree: 'Continue for free',
     comingSoonTitle: 'Payments aren’t enabled yet',
-    comingSoonBody: 'You were not charged. Plus is still a preview, so keep browsing for free.',
-    comingSoonContinue: 'Go to the feed',
+    comingSoonBody: 'You were not charged. Subscriptions open soon.',
+    comingSoonContinue: 'Close',
+  },
+  locked: {
+    title: 'Subscribe to see the listings',
+    body: (count: number) =>
+      count > 0
+        ? `${count.toLocaleString('en-US')} free listings are active right now across all cities. Subscribe to see them all, with photos, details and the map.`
+        : 'Subscribe to see every free listing, with photos, details and the map.',
+    previewLabel: 'Blurred preview of current listings',
+    seePlans: 'See plans',
+    signInHint: 'Already subscribed?',
+    signIn: 'Sign in',
+    detailTitle: 'This listing is for subscribers',
+    detailBody: 'Subscribe to see photos, details and how to collect it.',
+    favoritesTitle: 'Favorites are for subscribers',
+    favoritesBody: 'Subscribe to see the listings you saved.',
+    backHome: 'Back to home',
   },
   pwa: {
     install: {

@@ -430,7 +430,7 @@ export const messages = {
       teaserCount: (count: number, city: string) =>
         count === 1
           ? `1 annuncio gratis attivo a ${city} in questo momento`
-          : `${count} annunci gratis attivi a ${city} in questo momento`,
+          : `${count.toLocaleString('it-IT')} annunci gratis attivi a ${city} in questo momento`,
       teaserEmpty: (city: string) =>
         `Nessun annuncio gratis attivo a ${city} in questo momento. Puoi comunque sfogliare tutte le città.`,
       teaserError: 'Impossibile caricare gli annunci ora. Puoi continuare lo stesso.',
@@ -456,12 +456,11 @@ export const messages = {
   paywall: {
     close: 'Chiudi',
     title: 'ZeroEuro Plus',
-    subtitle: 'Per chi vuole arrivare prima sugli oggetti migliori.',
-    benefitInstantAlerts: 'Avvisi immediati appena compare un annuncio corrispondente',
-    benefitMoreAlerts: 'Più avvisi per parole chiave',
-    benefitNewCities: 'Accesso anticipato alle nuove città',
+    subtitle: 'Abbonati per vedere tutti gli annunci gratis vicino a te.',
+    benefitListings: 'Tutti gli annunci gratis attivi, da tutte le fonti',
+    benefitMap: 'Feed completo, mappa e filtri',
+    benefitAlerts: 'Avvisi per parole chiave quando c’è una corrispondenza',
     benefitSupport: 'Sostieni un progetto indipendente',
-    freeNote: 'Sfogliare gli annunci gratis resta gratis.',
     plansLabel: 'Scegli un piano',
     planWeekly: 'Settimanale',
     planMonthly: 'Mensile',
@@ -471,7 +470,6 @@ export const messages = {
     periodYearly: 'anno',
     bestValue: 'Più conveniente',
     perWeek: (price: string) => `${price} / settimana`,
-    placeholderNote: 'Anteprima: piani, prezzi e vantaggi non sono definitivi.',
     cta: 'Continua',
     renewal: (price: string, period: string) =>
       `${price} ogni ${period}. Si rinnova automaticamente finché non annulli. Puoi annullare quando vuoi.`,
@@ -479,10 +477,25 @@ export const messages = {
     restoreNothing: 'Niente da ripristinare: non è ancora stato effettuato alcun acquisto.',
     terms: 'Termini',
     privacy: 'Privacy',
-    continueFree: 'Continua gratis',
     comingSoonTitle: 'I pagamenti non sono ancora attivi',
-    comingSoonBody: 'Non ti è stato addebitato nulla. Plus è ancora in anteprima: continua a sfogliare gratis.',
-    comingSoonContinue: 'Vai al feed',
+    comingSoonBody: 'Non ti è stato addebitato nulla. Gli abbonamenti apriranno a breve.',
+    comingSoonContinue: 'Chiudi',
+  },
+  locked: {
+    title: 'Abbonati per vedere gli annunci',
+    body: (count: number) =>
+      count > 0
+        ? `${count.toLocaleString('it-IT')} annunci gratis sono attivi ora in tutte le città. Abbonati per vederli tutti, con foto, dettagli e mappa.`
+        : 'Abbonati per vedere tutti gli annunci gratis, con foto, dettagli e mappa.',
+    previewLabel: 'Anteprima sfocata degli annunci attuali',
+    seePlans: 'Vedi i piani',
+    signInHint: 'Sei già abbonato?',
+    signIn: 'Accedi',
+    detailTitle: 'Questo annuncio è per gli abbonati',
+    detailBody: 'Abbonati per vedere foto, dettagli e come ritirarlo.',
+    favoritesTitle: 'I preferiti sono per gli abbonati',
+    favoritesBody: 'Abbonati per vedere gli annunci che hai salvato.',
+    backHome: 'Torna alla home',
   },
   pwa: {
     install: {

@@ -4,7 +4,6 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_PLAN_ID,
   PAYWALL_PLANS,
-  PLAN_PRICES_ARE_PLACEHOLDER,
   formatCents,
   getPlan,
   perWeekCents,
@@ -20,10 +19,19 @@ describe('paywall plan config', () => {
     expect(DEFAULT_PLAN_ID).toBe('yearly');
   });
 
-  it('is marked as placeholder pricing with the pending-decision TODO', () => {
-    expect(PLAN_PRICES_ARE_PLACEHOLDER).toBe(true);
+  it('shows the decided prices and drops the placeholder TODO', () => {
+    expect(PAYWALL_PLANS.map((plan) => formatCents(plan.priceCents, plan.currency, 'en'))).toEqual([
+      '€1.99',
+      '€4.99',
+      '€19.99',
+    ]);
+    expect(PAYWALL_PLANS.map((plan) => formatCents(perWeekCents(plan), plan.currency, 'en'))).toEqual([
+      '€1.99',
+      '€1.15',
+      '€0.38',
+    ]);
     const source = readFileSync(path.join(__dirname, 'plans.ts'), 'utf8');
-    expect(source).toContain("TODO: pending Guang's pricing decision");
+    expect(source).not.toContain('TODO');
   });
 });
 

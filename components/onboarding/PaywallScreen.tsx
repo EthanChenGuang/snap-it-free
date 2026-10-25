@@ -9,7 +9,6 @@ import type { OnboardingState } from '@/lib/paywall/onboarding-flow';
 import {
   DEFAULT_PLAN_ID,
   PAYWALL_PLANS,
-  PLAN_PRICES_ARE_PLACEHOLDER,
   formatCents,
   getPlan,
   perWeekCents,
@@ -105,7 +104,7 @@ export function PaywallScreen({ purchase, titleRef, titleId, onStartPurchase, on
         <p className="mt-space-sm text-body-md text-on-surface-variant">{copy.subtitle}</p>
 
         <ul className="mt-space-lg space-y-space-sm">
-          {[copy.benefitInstantAlerts, copy.benefitMoreAlerts, copy.benefitNewCities, copy.benefitSupport].map(
+          {[copy.benefitListings, copy.benefitMap, copy.benefitAlerts, copy.benefitSupport].map(
             (benefit) => (
               <li key={benefit} className="flex items-start gap-space-sm text-body-md text-on-surface">
                 <SymbolIcon name="check" className="mt-0.5 text-[20px]" />
@@ -115,10 +114,6 @@ export function PaywallScreen({ purchase, titleRef, titleId, onStartPurchase, on
           )}
         </ul>
 
-        <p className="mt-space-md flex items-center gap-space-sm text-label-sm text-on-surface-variant">
-          <SymbolIcon name="lock_open" className="text-[18px]" />
-          {copy.freeNote}
-        </p>
 
         <div className="mt-space-lg flex flex-col gap-space-sm" role="radiogroup" aria-label={copy.plansLabel}>
           {PAYWALL_PLANS.map((plan) => {
@@ -171,11 +166,6 @@ export function PaywallScreen({ purchase, titleRef, titleId, onStartPurchase, on
           })}
         </div>
 
-        {PLAN_PRICES_ARE_PLACEHOLDER && (
-          <p className="mt-space-sm text-label-sm text-on-surface-variant" data-testid="paywall-placeholder-note">
-            {copy.placeholderNote}
-          </p>
-        )}
       </div>
 
       <footer className="shrink-0 border-t border-outline-variant px-gutter pt-space-md pb-space-sm">
@@ -185,16 +175,7 @@ export function PaywallScreen({ purchase, titleRef, titleId, onStartPurchase, on
         <p className="mt-space-sm text-center text-label-sm text-on-surface-variant" data-testid="paywall-renewal">
           {copy.renewal(price(selected.priceCents), copy[PLAN_COPY[selected.id].period])}
         </p>
-        <Button
-          type="button"
-          variant="ghost"
-          className="mt-space-xs h-11 w-full text-on-surface"
-          onClick={onFinish}
-          data-testid="paywall-continue-free"
-        >
-          {copy.continueFree}
-        </Button>
-        <nav className="flex items-center justify-center gap-space-md text-label-sm text-on-surface-variant">
+        <nav className="mt-space-xs flex items-center justify-center gap-space-md text-label-sm text-on-surface-variant">
           <button
             type="button"
             className="min-h-9 underline-offset-2 hover:underline"

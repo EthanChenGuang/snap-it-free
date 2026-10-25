@@ -26,16 +26,22 @@ const rows: ListingRow[] = [
   // Tagged Milano but geocoded in Rome: the feed excludes it, so the teaser must too.
   listing({ id: 'm4', city: 'milano', lat: 41.9, lng: 12.5, photo_url: 'https://img/m4.jpg' }),
   listing({ id: 'm5', city: 'milano', photo_url: 'https://img/m5.jpg' }),
+  listing({ id: 'm6', city: 'milano', photo_url: 'https://img/m1.jpg' }),
 ];
 
 describe('summarizeCityTeaser', () => {
   it('counts with the feed city predicate and picks photo thumbnails in order', () => {
     const teaser = summarizeCityTeaser(rows, 'milano', 2);
-    expect(teaser.count).toBe(4);
+    expect(teaser.count).toBe(5);
     expect(teaser.thumbnails.map((thumb) => [thumb.id, thumb.photoUrl])).toEqual([
       ['m1', 'https://img/m1.jpg'],
       ['m3', 'https://img/m3a.jpg'],
     ]);
+  });
+
+  it('skips reposts that reuse a photo already shown', () => {
+    const ids = summarizeCityTeaser(rows, 'milano', 4).thumbnails.map((thumb) => thumb.id);
+    expect(ids).toEqual(['m1', 'm3', 'm5']);
   });
 
   it('maps Venice zones to venice', () => {

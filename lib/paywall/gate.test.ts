@@ -3,9 +3,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   ONBOARDING_COMPLETED_STORAGE_KEY,
   hasOnboardingForceParam,
+  isForceParamValue,
   isPaywallFlagEnabled,
   markOnboardingCompleted,
   readOnboardingCompleted,
+  resolveListingAccess,
   resolveOnboardingGate,
   shouldShowOnboarding,
   urlWithoutForceParam,
@@ -99,5 +101,26 @@ describe('urlWithoutForceParam', () => {
   it('removes only the onboarding param', () => {
     expect(urlWithoutForceParam('http://localhost:3000/?onboarding=1')).toBe('/');
     expect(urlWithoutForceParam('http://localhost:3000/?q=sofa&onboarding=1#top')).toBe('/?q=sofa#top');
+  });
+});
+
+describe('resolveListingAccess', () => {
+  it.each([
+    [{ flagEnabled: false, preview: false, subscribed: false }, 'open'],
+    [{ flagEnabled: true, preview: false, subscribed: false }, 'locked'],
+    [{ flagEnabled: true, preview: false, subscribed: true }, 'open'],
+    [{ flagEnabled: false, preview: true, subscribed: false }, 'locked'],
+    [{ flagEnabled: false, preview: true, subscribed: true }, 'open'],
+  ])('%o → %s', (input, expected) => {
+    expect(resolveListingAccess(input)).toBe(expected);
+  });
+});
+
+describe('isForceParamValue', () => {
+  it('accepts only a single "1"', () => {
+    expect(isForceParamValue('1')).toBe(true);
+    expect(isForceParamValue(undefined)).toBe(false);
+    expect(isForceParamValue(['1', '1'])).toBe(false);
+    expect(isForceParamValue('yes')).toBe(false);
   });
 });

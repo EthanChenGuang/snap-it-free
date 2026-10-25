@@ -408,7 +408,7 @@ export const messages: Messages = {
       emphasis: '城市',
       body: '信息流会从这里开始。之后随时可以在筛选中更改。',
       teaserLoading: '正在统计有效信息…',
-      teaserCount: (count: number, city: string) => `${city}目前有 ${count} 条有效的免费信息`,
+      teaserCount: (count: number, city: string) => `${city}目前有 ${count.toLocaleString('zh-CN')} 条有效的免费信息`,
       teaserEmpty: (city: string) => `${city}目前没有有效的免费信息。你仍然可以浏览所有城市。`,
       teaserError: '暂时无法加载信息。你仍然可以继续。',
       teaserPhotosLabel: '最新信息',
@@ -433,12 +433,11 @@ export const messages: Messages = {
   paywall: {
     close: '关闭',
     title: '零元 Plus',
-    subtitle: '想更早抢到好东西的人可以选择。',
-    benefitInstantAlerts: '匹配信息一出现就即时提醒',
-    benefitMoreAlerts: '更多关键词提醒',
-    benefitNewCities: '抢先体验新城市',
+    subtitle: '订阅后即可查看身边所有免费信息。',
+    benefitListings: '所有来源的全部有效免费信息',
+    benefitMap: '完整信息流、地图和筛选',
+    benefitAlerts: '出现匹配时的关键词提醒',
     benefitSupport: '支持一个独立项目',
-    freeNote: '浏览免费信息永远免费。',
     plansLabel: '选择方案',
     planWeekly: '周付',
     planMonthly: '月付',
@@ -448,7 +447,6 @@ export const messages: Messages = {
     periodYearly: '年',
     bestValue: '最划算',
     perWeek: (price: string) => `${price} / 周`,
-    placeholderNote: '预览：方案、价格和权益均未最终确定。',
     cta: '继续',
     renewal: (price: string, period: string) =>
       `每${period} ${price}。到期自动续订，直到你取消。可随时取消。`,
@@ -456,10 +454,25 @@ export const messages: Messages = {
     restoreNothing: '没有可恢复的购买：目前还没有任何购买记录。',
     terms: '条款',
     privacy: '隐私',
-    continueFree: '免费继续使用',
     comingSoonTitle: '支付功能尚未开放',
-    comingSoonBody: '没有产生任何扣款。Plus 仍处于预览阶段，请继续免费浏览。',
-    comingSoonContinue: '前往信息流',
+    comingSoonBody: '没有产生任何扣款。订阅功能即将开放。',
+    comingSoonContinue: '关闭',
+  },
+  locked: {
+    title: '订阅后查看信息',
+    body: (count: number) =>
+      count > 0
+        ? `所有城市目前共有 ${count.toLocaleString('zh-CN')} 条有效的免费信息。订阅后即可查看全部内容，包括照片、详情和地图。`
+        : '订阅后即可查看所有免费信息，包括照片、详情和地图。',
+    previewLabel: '当前信息的模糊预览',
+    seePlans: '查看方案',
+    signInHint: '已经订阅？',
+    signIn: '登录',
+    detailTitle: '此信息仅限订阅用户查看',
+    detailBody: '订阅后即可查看照片、详情和领取方式。',
+    favoritesTitle: '收藏仅限订阅用户查看',
+    favoritesBody: '订阅后即可查看你收藏的信息。',
+    backHome: '返回首页',
   },
   pwa: {
     install: {

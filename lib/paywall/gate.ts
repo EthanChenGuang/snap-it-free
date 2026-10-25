@@ -62,3 +62,22 @@ export function urlWithoutForceParam(href: string): string {
   url.searchParams.delete(ONBOARDING_FORCE_PARAM);
   return `${url.pathname}${url.search}${url.hash}`;
 }
+
+export type ListingAccess = 'open' | 'locked';
+
+export type ListingAccessInput = {
+  flagEnabled: boolean;
+  /** `?onboarding=1` previews the hard gate for QA even with the flag off. */
+  preview: boolean;
+  subscribed: boolean;
+};
+
+/** Hard paywall: once enabled (or previewed), real listings need an active subscription. */
+export function resolveListingAccess({ flagEnabled, preview, subscribed }: ListingAccessInput): ListingAccess {
+  if (!flagEnabled && !preview) return 'open';
+  return subscribed ? 'open' : 'locked';
+}
+
+export function isForceParamValue(value: string | string[] | undefined): boolean {
+  return value === '1';
+}

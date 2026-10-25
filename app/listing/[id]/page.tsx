@@ -4,7 +4,9 @@ import { ListingDetailSkeleton } from '@/components/detail/ListingDetailSkeleton
 import { z } from 'zod';
 import { ScrapedListingShell } from '@/components/detail/ScrapedListingShell';
 import { UgcListingShell } from '@/components/detail/UgcListingShell';
+import { LockedPanel } from '@/components/onboarding/LockedViews';
 import { getListingForDetail, getSimilarListings } from '@/lib/listings/queries';
+import { getListingAccess } from '@/lib/paywall/server-access';
 
 const listingIdSchema = z.string().uuid();
 
@@ -43,6 +45,9 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
   }
 
   const { listing, isOwnerView } = result;
+  if (!isOwnerView && (await getListingAccess(resolvedSearchParams)) === 'locked') {
+    return <LockedPanel variant="detail" />;
+  }
   const similarListings =
     listing.status === 'active'
       ? await getSimilarListings(listing)

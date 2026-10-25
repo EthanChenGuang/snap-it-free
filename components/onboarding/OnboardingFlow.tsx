@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
+import { OverlayShell } from '@/components/onboarding/OverlayShell';
 import { PaywallScreen } from '@/components/onboarding/PaywallScreen';
 import { usePwaOnboarding } from '@/components/providers/PwaOnboardingProvider';
 import { CompactLocaleChip } from '@/components/shell/CompactLocaleChip';
@@ -287,142 +288,133 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
   const isIntro = state.screen !== 'paywall';
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={TITLE_ID}
-      data-testid="onboarding-overlay"
-      data-screen={state.screen}
-      className="fixed inset-0 z-[150] flex justify-center bg-background sm:items-center sm:bg-surface-container-low sm:p-space-lg"
-    >
-      <div className="flex h-full w-full max-w-[440px] flex-col overflow-hidden bg-background pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] sm:h-[min(820px,100%)] sm:rounded-lg sm:border sm:border-outline-variant">
-        {isIntro ? (
-          <>
-            <IntroHeader state={state} dispatch={dispatch} messages={messages} />
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={state.screen}
-                className="no-scrollbar flex-1 overflow-y-auto px-gutter pt-space-lg pb-space-md"
-                {...motionProps}
-              >
-                {state.screen === 'welcome' && (
-                  <>
-                    <StepHero icon="redeem" />
-                    <StepTitle titleRef={titleRef} title={copy.welcome.title} emphasis={copy.welcome.emphasis} />
-                    <p className="mt-space-md text-body-lg text-on-surface-variant">{copy.welcome.body}</p>
-                  </>
-                )}
-
-                {state.screen === 'how' && (
-                  <>
-                    <StepHero icon="grid_view" />
-                    <StepTitle titleRef={titleRef} title={copy.how.title} emphasis={copy.how.emphasis} />
-                    <ul className="mt-space-lg">
-                      <FeatureRow icon="view_agenda" title={copy.how.feedTitle} body={copy.how.feedBody} />
-                      <FeatureRow icon="map" title={copy.how.mapTitle} body={copy.how.mapBody} />
-                      <FeatureRow icon="tune" title={copy.how.filterTitle} body={copy.how.filterBody} />
-                    </ul>
-                  </>
-                )}
-
-                {state.screen === 'city' && (
-                  <>
-                    <StepTitle titleRef={titleRef} title={copy.city.title} emphasis={copy.city.emphasis} />
-                    <p className="mt-space-sm text-body-md text-on-surface-variant">{copy.city.body}</p>
-                    <div className="mt-space-lg flex flex-wrap gap-space-sm" role="radiogroup" aria-labelledby={TITLE_ID}>
-                      {CONSUMER_CITY_FILTER_ORDER.map((city) => {
-                        const active = state.city === city;
-                        return (
-                          <Button
-                            key={city}
-                            type="button"
-                            role="radio"
-                            aria-checked={active}
-                            variant={active ? 'chipActive' : 'chip'}
-                            className="h-10 rounded-full px-space-md"
-                            onClick={() => dispatch({ type: 'selectCity', city })}
-                          >
-                            {cityLabels[city]}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                    {state.city && (
-                      <section
-                        className="mt-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest p-space-md"
-                        aria-live="polite"
-                        data-testid="onboarding-teaser"
-                      >
-                        <CityTeaserPanel city={state.city} source={teaserSource} messages={messages} />
-                      </section>
-                    )}
-                  </>
-                )}
-
-                {state.screen === 'alerts' && (
-                  <>
-                    <StepHero icon="notifications_active" />
-                    <StepTitle titleRef={titleRef} title={copy.alerts.title} emphasis={copy.alerts.emphasis} />
-                    <p className="mt-space-md text-body-lg text-on-surface-variant">{copy.alerts.body}</p>
-                    <ul className="mt-space-lg">
-                      <FeatureRow icon="sell" title={copy.alerts.pointKeywords} />
-                      <FeatureRow icon="bedtime" title={copy.alerts.pointQuiet} />
-                    </ul>
-                    {push.status === 'settled' && (
-                      <p
-                        role="status"
-                        className="mt-space-md rounded-lg border border-outline-variant bg-surface-container-lowest p-space-md text-body-md text-on-surface"
-                      >
-                        {pushResultMessage(push.result, copy.alerts)}
-                      </p>
-                    )}
-                  </>
-                )}
-              </motion.div>
-            </AnimatePresence>
-
-            <footer className="flex shrink-0 flex-col gap-space-sm border-t border-outline-variant px-gutter py-space-md">
-              {state.screen === 'alerts' && push.status !== 'settled' ? (
+    <OverlayShell labelledBy={TITLE_ID} testId="onboarding-overlay" screen={state.screen}>
+      {isIntro ? (
+        <>
+          <IntroHeader state={state} dispatch={dispatch} messages={messages} />
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={state.screen}
+              className="no-scrollbar flex-1 overflow-y-auto px-gutter pt-space-lg pb-space-md"
+              {...motionProps}
+            >
+              {state.screen === 'welcome' && (
                 <>
-                  <Button
-                    type="button"
-                    className="h-12 w-full text-label-md"
-                    disabled={push.status === 'pending'}
-                    onClick={() => void enablePush()}
-                  >
-                    {push.status === 'pending' ? copy.alerts.enabling : copy.alerts.enable}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="h-11 w-full"
-                    onClick={() => dispatch({ type: 'next' })}
-                  >
-                    {copy.alerts.notNow}
-                  </Button>
+                  <StepHero icon="redeem" />
+                  <StepTitle titleRef={titleRef} title={copy.welcome.title} emphasis={copy.welcome.emphasis} />
+                  <p className="mt-space-md text-body-lg text-on-surface-variant">{copy.welcome.body}</p>
                 </>
-              ) : (
+              )}
+
+              {state.screen === 'how' && (
+                <>
+                  <StepHero icon="grid_view" />
+                  <StepTitle titleRef={titleRef} title={copy.how.title} emphasis={copy.how.emphasis} />
+                  <ul className="mt-space-lg">
+                    <FeatureRow icon="view_agenda" title={copy.how.feedTitle} body={copy.how.feedBody} />
+                    <FeatureRow icon="map" title={copy.how.mapTitle} body={copy.how.mapBody} />
+                    <FeatureRow icon="tune" title={copy.how.filterTitle} body={copy.how.filterBody} />
+                  </ul>
+                </>
+              )}
+
+              {state.screen === 'city' && (
+                <>
+                  <StepTitle titleRef={titleRef} title={copy.city.title} emphasis={copy.city.emphasis} />
+                  <p className="mt-space-sm text-body-md text-on-surface-variant">{copy.city.body}</p>
+                  <div className="mt-space-lg flex flex-wrap gap-space-sm" role="radiogroup" aria-labelledby={TITLE_ID}>
+                    {CONSUMER_CITY_FILTER_ORDER.map((city) => {
+                      const active = state.city === city;
+                      return (
+                        <Button
+                          key={city}
+                          type="button"
+                          role="radio"
+                          aria-checked={active}
+                          variant={active ? 'chipActive' : 'chip'}
+                          className="h-10 rounded-full px-space-md"
+                          onClick={() => dispatch({ type: 'selectCity', city })}
+                        >
+                          {cityLabels[city]}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  {state.city && (
+                    <section
+                      className="mt-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest p-space-md"
+                      aria-live="polite"
+                      data-testid="onboarding-teaser"
+                    >
+                      <CityTeaserPanel city={state.city} source={teaserSource} messages={messages} />
+                    </section>
+                  )}
+                </>
+              )}
+
+              {state.screen === 'alerts' && (
+                <>
+                  <StepHero icon="notifications_active" />
+                  <StepTitle titleRef={titleRef} title={copy.alerts.title} emphasis={copy.alerts.emphasis} />
+                  <p className="mt-space-md text-body-lg text-on-surface-variant">{copy.alerts.body}</p>
+                  <ul className="mt-space-lg">
+                    <FeatureRow icon="sell" title={copy.alerts.pointKeywords} />
+                    <FeatureRow icon="bedtime" title={copy.alerts.pointQuiet} />
+                  </ul>
+                  {push.status === 'settled' && (
+                    <p
+                      role="status"
+                      className="mt-space-md rounded-lg border border-outline-variant bg-surface-container-lowest p-space-md text-body-md text-on-surface"
+                    >
+                      {pushResultMessage(push.result, copy.alerts)}
+                    </p>
+                  )}
+                </>
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          <footer className="flex shrink-0 flex-col gap-space-sm border-t border-outline-variant px-gutter py-space-md">
+            {state.screen === 'alerts' && push.status !== 'settled' ? (
+              <>
                 <Button
                   type="button"
                   className="h-12 w-full text-label-md"
-                  disabled={!canAdvance(state)}
+                  disabled={push.status === 'pending'}
+                  onClick={() => void enablePush()}
+                >
+                  {push.status === 'pending' ? copy.alerts.enabling : copy.alerts.enable}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-11 w-full"
                   onClick={() => dispatch({ type: 'next' })}
                 >
-                  {copy.continue}
+                  {copy.alerts.notNow}
                 </Button>
-              )}
-            </footer>
-          </>
-        ) : (
-          <PaywallScreen
-            purchase={state.purchase}
-            titleRef={titleRef}
-            titleId={TITLE_ID}
-            onStartPurchase={() => dispatch({ type: 'startPurchase' })}
-            onFinish={() => dispatch({ type: 'finish' })}
-          />
-        )}
-      </div>
-    </div>
+              </>
+            ) : (
+              <Button
+                type="button"
+                className="h-12 w-full text-label-md"
+                disabled={!canAdvance(state)}
+                onClick={() => dispatch({ type: 'next' })}
+              >
+                {copy.continue}
+              </Button>
+            )}
+          </footer>
+        </>
+      ) : (
+        <PaywallScreen
+          purchase={state.purchase}
+          titleRef={titleRef}
+          titleId={TITLE_ID}
+          onStartPurchase={() => dispatch({ type: 'startPurchase' })}
+          onFinish={() => dispatch({ type: 'finish' })}
+        />
+      )}
+    </OverlayShell>
   );
 }

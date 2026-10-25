@@ -1,9 +1,6 @@
 import type { AppLanguage } from '@/lib/settings/preferences';
 
-// TODO: pending Guang's pricing decision. Every price below is a placeholder,
-// not a real offer. Payments are not wired up; the paywall CTA never charges.
-export const PLAN_PRICES_ARE_PLACEHOLDER = true;
-
+// Prices decided by Guang on 2026-10-25. Stripe prices must match these amounts.
 export type PlanId = 'weekly' | 'monthly' | 'yearly';
 
 export type PaywallPlan = {

@@ -24,10 +24,14 @@ export function summarizeCityTeaser(
 ): CityTeaser {
   const inCity = listings.filter((listing) => matchesConsumerCity(listing, city));
   const thumbnails: CityTeaserThumbnail[] = [];
+  const seenPhotos = new Set<string>();
   for (const listing of inCity) {
     if (thumbnails.length >= limit) break;
     const photoUrl = listingPhotoUrls(listing)[0];
-    if (photoUrl) thumbnails.push({ id: listing.id, photoUrl, listing });
+    // Subito reposts reuse one photo across listings; show distinct items.
+    if (!photoUrl || seenPhotos.has(photoUrl)) continue;
+    seenPhotos.add(photoUrl);
+    thumbnails.push({ id: listing.id, photoUrl, listing });
   }
   return { count: inCity.length, thumbnails };
 }
