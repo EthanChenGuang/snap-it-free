@@ -7,7 +7,6 @@ import { PaywallDialog } from '@/components/onboarding/PaywallDialog';
 import { SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { Button } from '@/components/ui/button';
 import { useMessages } from '@/lib/i18n/useMessages';
-import type { LockedPreviewPhoto } from '@/lib/paywall/locked-preview';
 
 function LockedCard({
   title,
@@ -63,7 +62,7 @@ function LockedCard({
 }
 
 /** Home for a non-subscriber: real count and blurred real photos, never the listing payload. */
-export function LockedFeed({ count, photos }: { count: number | null; photos: LockedPreviewPhoto[] }) {
+export function LockedFeed({ count, photos }: { count: number | null; photos: string[] }) {
   const { messages } = useMessages();
   const copy = messages.locked;
 
@@ -73,10 +72,10 @@ export function LockedFeed({ count, photos }: { count: number | null; photos: Lo
         className="pointer-events-none grid select-none grid-cols-2 gap-x-space-md gap-y-space-lg px-gutter pt-space-xs sm:grid-cols-3 lg:grid-cols-4"
         aria-hidden
       >
-        {photos.map((photo) => (
-          <div key={photo.id} className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-surface-container-high">
+        {photos.map((photoUrl) => (
+          <div key={photoUrl} className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-surface-container-high">
             <div className="absolute inset-0 scale-110 blur-[14px]">
-              <ListingPhoto src={photo.photoUrl} alt="" variant="thumbnail" sizes="200px" priority />
+              <ListingPhoto src={photoUrl} alt="" variant="thumbnail" sizes="200px" priority />
             </div>
           </div>
         ))}

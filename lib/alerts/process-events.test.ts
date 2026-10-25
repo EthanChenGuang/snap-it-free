@@ -28,6 +28,7 @@ function createSupabaseMock(config: {
     quiet_start: string;
     quiet_end: string;
   }>;
+  subscriptions?: Array<{ user_id: string; status: string; current_period_end: string | null }>;
 }) {
   const upsert = vi.fn().mockResolvedValue({ error: null });
   const updateEq = vi.fn().mockResolvedValue({ error: null });
@@ -75,6 +76,12 @@ function createSupabaseMock(config: {
               data: config.userNotificationPrefs ?? [],
               error: null,
             }),
+          }),
+        };
+      case 'subscriptions':
+        return {
+          select: vi.fn().mockReturnValue({
+            in: vi.fn().mockResolvedValue({ data: config.subscriptions ?? [], error: null }),
           }),
         };
       default:
@@ -217,5 +224,39 @@ describe('processPendingListingEvents locale fan-out', () => {
         url: `/listing/${listingId}`,
       }),
     );
+  });
+});
+
+describe('processPendingListingEvents with the hard paywall on', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', 'true');
+  });
+
+  it('pushes only to subscribers but still records every match', async () => {
+    const subscriber = '11111111-1111-1111-1111-111111111111';
+    const guest = '55555555-5555-5555-5555-555555555555';
+    const listingId = '22222222-2222-2222-2222-222222222222';
+
+    const { from, alertMatchesUpsert } = createSupabaseMock({
+      events: [{ id: '33333333-3333-3333-3333-333333333333', listing_id: listingId }],
+      alerts: [
+        { id: '44444444-4444-4444-4444-444444444444', user_id: subscriber, keyword: 'Divano', zone: null },
+        { id: '66666666-6666-6666-6666-666666666666', user_id: guest, keyword: 'Divano', zone: null },
+      ],
+      listing: { id: listingId, title: 'Divano gratis', zone: 'mestre_marghera' },
+      profiles: [],
+      subscriptions: [{ user_id: subscriber, status: 'active', current_period_end: '2099-01-01T00:00:00.000Z' }],
+    });
+
+    const { processPendingListingEvents } = await import('./process-events');
+    expect(await processPendingListingEvents({ from } as never)).toBe(1);
+
+    expect(fanOutMatchPush.mock.calls.map((call) => call[1])).toEqual([subscriber]);
+    expect(alertMatchesUpsert.mock.calls[0][0].map((row: { user_id: string }) => row.user_id).sort()).toEqual(
+      [subscriber, guest].sort(),
+    );
+    vi.unstubAllEnvs();
   });
 });

@@ -15,9 +15,10 @@ import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
 import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { fetchActiveListingsClient } from '@/lib/listings/client-queries';
+import { feedLookbackSinceIso } from '@/lib/listings/feed-window';
 import { CONSUMER_CITY_FILTER_ORDER, excludeReportedIds } from '@/lib/listings/filters';
 import type { ListingRow } from '@/lib/listings/types';
-import { markOnboardingCompleted, urlWithoutForceParam } from '@/lib/paywall/gate';
+import { isPaywallFlagEnabled, markOnboardingCompleted, urlWithoutForceParam } from '@/lib/paywall/gate';
 import {
   INITIAL_ONBOARDING_STATE,
   INTRO_STEPS,
@@ -27,16 +28,18 @@ import {
   type OnboardingAction,
   type OnboardingState,
 } from '@/lib/paywall/onboarding-flow';
-import { summarizeCityTeaser } from '@/lib/paywall/teaser';
+import { fetchPaywallTeaser } from '@/lib/paywall/locked-preview';
+import { CITY_TEASER_THUMBNAIL_LIMIT, summarizeCityTeaser } from '@/lib/paywall/teaser';
 import { requestPushPermissionAndSubscribe, type PushSubscribeResult } from '@/lib/pwa/usePushSubscribe';
 import { readReportedIds } from '@/lib/reports/storage';
+import { createAnonClient } from '@/lib/supabase/anon';
 import { getSupabaseEnv } from '@/lib/supabase/env';
 import { cn } from '@/lib/utils';
 import type { Messages } from '@/messages';
 
-type TeaserSource =
+type CityTeaserState =
   | { status: 'loading' }
-  | { status: 'ready'; listings: ListingRow[] }
+  | { status: 'ready'; count: number; photos: { key: string; url: string; alt: string }[] }
   | { status: 'error' };
 
 type PushState = { status: 'idle' } | { status: 'pending' } | { status: 'settled'; result: PushSubscribeResult };
@@ -65,27 +68,61 @@ function useFocusOnChange(key: string) {
   return ref;
 }
 
-function useTeaserSource(): TeaserSource {
-  const [source, setSource] = useState<TeaserSource>({ status: 'loading' });
+/**
+ * Paywall on: the per-city definer function (044), the only listing data a non-subscriber may read.
+ * Paywall off, or before 044: summarize the rows the feed itself loads, prefetched on mount as before.
+ */
+function useCityTeaser(city: ConsumerCityKey | null): CityTeaserState {
+  const { language } = useMessages();
+  const [state, setState] = useState<CityTeaserState>({ status: 'loading' });
+  const rowsRef = useRef<Promise<ListingRow[]> | null>(null);
+  const rows = useCallback(() => {
+    rowsRef.current ??= fetchActiveListingsClient().then((all) => excludeReportedIds(all, readReportedIds()));
+    return rowsRef.current;
+  }, []);
+
   useEffect(() => {
+    if (!isPaywallFlagEnabled() && getSupabaseEnv()) void rows().catch(() => {});
+  }, [rows]);
+
+  useEffect(() => {
+    if (!city) return;
     // Without Supabase the client helper returns [], which would read as a false "0 listings".
     if (!getSupabaseEnv()) {
-      setSource({ status: 'error' });
+      setState({ status: 'error' });
       return;
     }
     let cancelled = false;
-    fetchActiveListingsClient()
-      .then((rows) => {
-        if (!cancelled) setSource({ status: 'ready', listings: excludeReportedIds(rows, readReportedIds()) });
-      })
-      .catch(() => {
-        if (!cancelled) setSource({ status: 'error' });
-      });
+    setState({ status: 'loading' });
+    const load = async (): Promise<CityTeaserState> => {
+      if (isPaywallFlagEnabled()) {
+        const teaser = await fetchPaywallTeaser(createAnonClient(), { city, since: feedLookbackSinceIso() });
+        if (teaser && teaser.count !== null) {
+          const photos = teaser.photoUrls.slice(0, CITY_TEASER_THUMBNAIL_LIMIT);
+          return { status: 'ready', count: teaser.count, photos: photos.map((url) => ({ key: url, url, alt: '' })) };
+        }
+      }
+      const summary = summarizeCityTeaser(await rows(), city);
+      return {
+        status: 'ready',
+        count: summary.count,
+        photos: summary.thumbnails.map((thumb) => ({
+          key: thumb.id,
+          url: thumb.photoUrl,
+          alt: resolveListingTitle(thumb.listing, language),
+        })),
+      };
+    };
+    load().then(
+      (next) => !cancelled && setState(next),
+      () => !cancelled && setState({ status: 'error' }),
+    );
     return () => {
       cancelled = true;
     };
-  }, []);
-  return source;
+  }, [city, language, rows]);
+
+  return state;
 }
 
 function pushResultMessage(result: PushSubscribeResult, copy: Messages['onboarding']['alerts']): string {
@@ -193,25 +230,22 @@ function FeatureRow({ icon, title, body }: { icon: string; title: string; body?:
 
 function CityTeaserPanel({
   city,
-  source,
+  teaser,
   messages,
 }: {
   city: ConsumerCityKey;
-  source: TeaserSource;
+  teaser: CityTeaserState;
   messages: Messages;
 }) {
-  const { language } = useMessages();
   const copy = messages.onboarding.city;
   const cityLabel = consumerCityLabelsFromMessages(messages)[city];
 
-  if (source.status === 'loading') {
+  if (teaser.status === 'loading') {
     return <p className="text-body-md text-on-surface-variant">{copy.teaserLoading}</p>;
   }
-  if (source.status === 'error') {
+  if (teaser.status === 'error') {
     return <p className="text-body-md text-on-surface-variant">{copy.teaserError}</p>;
   }
-
-  const teaser = summarizeCityTeaser(source.listings, city);
   if (teaser.count === 0) {
     return <p className="text-body-md text-on-surface-variant">{copy.teaserEmpty(cityLabel)}</p>;
   }
@@ -221,20 +255,14 @@ function CityTeaserPanel({
       <p className="text-label-md text-on-surface" data-testid="onboarding-teaser-count">
         {copy.teaserCount(teaser.count, cityLabel)}
       </p>
-      {teaser.thumbnails.length > 0 && (
+      {teaser.photos.length > 0 && (
         <ul className="mt-space-md grid grid-cols-4 gap-space-sm" aria-label={copy.teaserPhotosLabel}>
-          {teaser.thumbnails.map((thumb) => (
+          {teaser.photos.map((photo) => (
             <li
-              key={thumb.id}
+              key={photo.key}
               className="relative aspect-square overflow-hidden rounded-lg bg-surface-container-high"
             >
-              <ListingPhoto
-                src={thumb.photoUrl}
-                alt={resolveListingTitle(thumb.listing, language)}
-                variant="thumbnail"
-                sizes="96px"
-                priority
-              />
+              <ListingPhoto src={photo.url} alt={photo.alt} variant="thumbnail" sizes="96px" priority />
             </li>
           ))}
         </ul>
@@ -250,7 +278,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
   const reduceMotion = useReducedMotion();
   const [state, dispatch] = useReducer(onboardingReducer, INITIAL_ONBOARDING_STATE);
   const [push, setPush] = useState<PushState>({ status: 'idle' });
-  const teaserSource = useTeaserSource();
+  const cityTeaser = useCityTeaser(state.screen === 'city' ? state.city : null);
   const titleRef = useFocusOnChange(state.screen);
   const copy = messages.onboarding;
 
@@ -346,7 +374,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                       aria-live="polite"
                       data-testid="onboarding-teaser"
                     >
-                      <CityTeaserPanel city={state.city} source={teaserSource} messages={messages} />
+                      <CityTeaserPanel city={state.city} teaser={cityTeaser} messages={messages} />
                     </section>
                   )}
                 </>
