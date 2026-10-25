@@ -6,7 +6,7 @@ function listing(overrides: Partial<ListingRow> & Pick<ListingRow, 'id'>): Listi
   return {
     source: 'subito',
     title: 'Sedia',
-    photo_url: null,
+    photo_url: '',
     external_url: 'https://subito.it/annunci/1',
     lat: null,
     lng: null,

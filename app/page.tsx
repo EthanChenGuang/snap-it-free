@@ -1,5 +1,6 @@
 import { FeedHomeClient } from '@/components/listings/FeedHomeClient';
 import { FeedImagePreloads } from '@/components/listings/FeedImagePreloads';
+import { OnboardingGate } from '@/components/onboarding/OnboardingGate';
 import {
   FEED_SSR_LISTING_LIMIT,
   getActiveListings,
@@ -25,6 +26,7 @@ export default async function FeedHomePage() {
     <>
       <FeedImagePreloads listings={listings} />
       <FeedHomeClient initialListings={listings} initialTotalCount={totalCount} />
+      <OnboardingGate />
     </>
   );
 }
