@@ -12,6 +12,7 @@ export default defineConfig({
       'app/api/cron/**/*.test.ts',
       'app/api/stripe/**/*.test.ts',
       'app/api/subscription/**/*.test.ts',
+      'components/**/*.test.tsx',
     ],
   },
   resolve: {

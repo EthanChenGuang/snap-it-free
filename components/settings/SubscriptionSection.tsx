@@ -66,7 +66,11 @@ export function SubscriptionSection() {
           <SettingsChevron />
         </button>
       </SettingsGroupCard>
-      {error && <p className="px-4 text-label-sm text-error">{copy.portalError}</p>}
+      {error && (
+        <p role="alert" className="px-4 text-label-sm text-error" data-testid="settings-portal-error">
+          {copy.portalError}
+        </p>
+      )}
     </section>
   );
 }

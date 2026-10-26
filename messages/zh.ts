@@ -492,6 +492,8 @@ export const messages: Messages = {
     seePlans: '查看方案',
     signInHint: '已经订阅？',
     signIn: '登录',
+    refreshStatus: '刷新订阅状态',
+    refreshNothing: '此账号暂无有效订阅。如果刚刚付款，请一分钟后再试。',
     detailTitle: '此信息仅限订阅用户查看',
     detailBody: '订阅后即可查看照片、详情和领取方式。',
     favoritesTitle: '收藏仅限订阅用户查看',

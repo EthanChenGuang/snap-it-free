@@ -515,6 +515,8 @@ export const messages = {
     seePlans: 'Vedi i piani',
     signInHint: 'Sei già abbonato?',
     signIn: 'Accedi',
+    refreshStatus: 'Aggiorna stato',
+    refreshNothing: 'Ancora nessun abbonamento attivo su questo account. Se hai appena pagato, riprova tra un minuto.',
     detailTitle: 'Questo annuncio è per gli abbonati',
     detailBody: 'Abbonati per vedere foto, dettagli e come ritirarlo.',
     favoritesTitle: 'I preferiti sono per gli abbonati',

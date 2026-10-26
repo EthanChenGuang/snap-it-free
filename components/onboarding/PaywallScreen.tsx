@@ -208,7 +208,7 @@ export function PaywallScreen({ titleId, onFinish }: PaywallScreenProps) {
           {purchase === 'pending' ? copy.pending : copy.cta}
         </Button>
         {purchase === 'error' && (
-          <p role="alert" className="mt-space-sm text-center text-label-sm text-error">
+          <p role="alert" className="mt-space-sm text-center text-label-sm text-error" data-testid="paywall-checkout-error">
             {copy.checkoutError}
           </p>
         )}

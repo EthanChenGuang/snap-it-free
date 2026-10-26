@@ -6,7 +6,9 @@ import { ListingPhoto } from '@/components/listings/ListingPhoto';
 import { PaywallDialog } from '@/components/onboarding/PaywallDialog';
 import { SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { Button } from '@/components/ui/button';
+import { useAuthSession } from '@/lib/auth/useAuthSession';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { checkRestore } from '@/lib/paywall/purchase';
 
 function LockedCard({
   title,
@@ -49,15 +51,64 @@ function LockedCard({
       >
         {copy.seePlans}
       </Button>
-      <p className="mt-space-md text-center text-label-sm text-on-surface-variant">
-        {copy.signInHint}{' '}
-        <Link href="/settings" className="text-on-surface underline underline-offset-2">
-          {copy.signIn}
-        </Link>
-      </p>
+      <AccountPrompt />
       {children}
       {paywallOpen && <PaywallDialog onClose={() => setPaywallOpen(false)} />}
     </section>
+  );
+}
+
+/**
+ * "Already subscribed?" Guests get a sign-in link; a signed-in user re-checks the subscription instead,
+ * since signing in again cannot help them. Nothing renders until the session is known, so neither flashes.
+ */
+function AccountPrompt() {
+  const { messages } = useMessages();
+  const copy = messages.locked;
+  const { user, loading } = useAuthSession();
+  const [checking, setChecking] = useState(false);
+  const [nothingActive, setNothingActive] = useState(false);
+
+  if (loading) return null;
+
+  const refreshStatus = async () => {
+    setChecking(true);
+    setNothingActive(false);
+    const outcome = await checkRestore();
+    if (outcome === 'reload') {
+      window.location.reload();
+      return;
+    }
+    setNothingActive(true);
+    setChecking(false);
+  };
+
+  return (
+    <>
+      <p className="mt-space-md text-center text-label-sm text-on-surface-variant" data-testid="locked-account-prompt">
+        {copy.signInHint}{' '}
+        {user ? (
+          <button
+            type="button"
+            className="text-on-surface underline underline-offset-2 disabled:opacity-60"
+            disabled={checking}
+            onClick={() => void refreshStatus()}
+            data-testid="locked-refresh-status"
+          >
+            {copy.refreshStatus}
+          </button>
+        ) : (
+          <Link href="/settings" className="text-on-surface underline underline-offset-2">
+            {copy.signIn}
+          </Link>
+        )}
+      </p>
+      {nothingActive && (
+        <p role="status" className="mt-space-xs text-center text-label-sm text-on-surface-variant">
+          {copy.refreshNothing}
+        </p>
+      )}
+    </>
   );
 }
 

@@ -505,6 +505,8 @@ export const messages: Messages = {
     seePlans: 'See plans',
     signInHint: 'Already subscribed?',
     signIn: 'Sign in',
+    refreshStatus: 'Refresh status',
+    refreshNothing: 'No active subscription on this account yet. If you just paid, try again in a minute.',
     detailTitle: 'This listing is for subscribers',
     detailBody: 'Subscribe to see photos, details and how to collect it.',
     favoritesTitle: 'Favorites are for subscribers',
