@@ -105,6 +105,105 @@ describe('POST /api/stripe/checkout', () => {
   });
 });
 
+describe('Stripe and unexpected failures', () => {
+  // What Stripe throws for a misconfigured price; the message carries the id, never the key.
+  const noSuchPrice = () =>
+    new Stripe.errors.StripeInvalidRequestError({
+      type: 'invalid_request_error',
+      code: 'resource_missing',
+      message: "No such price: 'price_m'",
+    });
+
+  function captureErrorLog() {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    let logged = '';
+    return {
+      text: () => logged,
+      // Read the calls before restoring: mockRestore() clears them.
+      restore: () => {
+        logged = JSON.stringify(spy.mock.calls);
+        spy.mockRestore();
+      },
+    };
+  }
+
+  it('checkout answers 502 stripe_error as JSON and logs the Stripe code, never the key', async () => {
+    stubStripeEnv();
+    requireAuth.mockResolvedValue(USER);
+    getSubscriptionForUser.mockResolvedValue(null);
+    fake.checkout.sessions.create.mockRejectedValue(noSuchPrice());
+    const log = captureErrorLog();
+    const res = await checkout.POST(post('/api/stripe/checkout', { plan: 'monthly' }));
+    log.restore();
+    expect(res.status).toBe(502);
+    const body = await res.text();
+    expect(JSON.parse(body)).toEqual({ error: 'stripe_error' });
+    expect(body).not.toContain('sk_test');
+    expect(log.text()).toContain('resource_missing');
+    expect(log.text()).toContain('No such price');
+    expect(log.text()).not.toContain(ENV.STRIPE_SECRET_KEY);
+  });
+
+  it('redacts a key that appears inside a Stripe error message', async () => {
+    stubStripeEnv();
+    requireAuth.mockResolvedValue(USER);
+    getSubscriptionForUser.mockResolvedValue(null);
+    fake.checkout.sessions.create.mockRejectedValue(
+      new Stripe.errors.StripeAuthenticationError({ type: 'authentication_error', message: `Invalid API Key provided: ${ENV.STRIPE_SECRET_KEY}` }),
+    );
+    const log = captureErrorLog();
+    const res = await checkout.POST(post('/api/stripe/checkout', { plan: 'monthly' }));
+    log.restore();
+    expect(res.status).toBe(502);
+    expect(log.text()).toContain('Invalid API Key provided');
+    expect(log.text()).not.toContain(ENV.STRIPE_SECRET_KEY);
+  });
+
+  it('checkout answers 500 internal_error as JSON when the subscription read throws', async () => {
+    stubStripeEnv();
+    requireAuth.mockResolvedValue(USER);
+    getSubscriptionForUser.mockRejectedValue(new Error('connection reset'));
+    const log = captureErrorLog();
+    const res = await checkout.POST(post('/api/stripe/checkout', { plan: 'monthly' }));
+    log.restore();
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: 'internal_error' });
+  });
+
+  it('portal answers 502 stripe_error as JSON when Stripe rejects the customer', async () => {
+    stubStripeEnv();
+    requireAuth.mockResolvedValue(USER);
+    getSubscriptionForUser.mockResolvedValue({ stripe_customer_id: 'cus_gone', status: 'canceled', current_period_end: null });
+    fake.billingPortal.sessions.create.mockRejectedValue(
+      new Stripe.errors.StripeInvalidRequestError({ type: 'invalid_request_error', code: 'resource_missing', message: "No such customer: 'cus_gone'" }),
+    );
+    const log = captureErrorLog();
+    const res = await portal.POST(post('/api/stripe/portal', {}));
+    log.restore();
+    expect(res.status).toBe(502);
+    expect(await res.json()).toEqual({ error: 'stripe_error' });
+  });
+
+  it('portal answers 500 internal_error as JSON when auth throws', async () => {
+    stubStripeEnv();
+    requireAuth.mockRejectedValue(new Error('auth backend down'));
+    const log = captureErrorLog();
+    const res = await portal.POST(post('/api/stripe/portal', {}));
+    log.restore();
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: 'internal_error' });
+  });
+
+  it('checkout return still redirects to pending when auth throws', async () => {
+    stubStripeEnv();
+    requireAuth.mockRejectedValue(new Error('auth backend down'));
+    const log = captureErrorLog();
+    const res = await checkoutReturn.GET(new Request(`${ORIGIN}/api/stripe/checkout/return?session_id=cs_1`));
+    log.restore();
+    expect(res.headers.get('location')).toBe(`${ORIGIN}/?checkout=pending`);
+  });
+});
+
 describe('GET /api/stripe/checkout/return', () => {
   it('syncs the subscription for the session owner and redirects to success', async () => {
     stubStripeEnv();

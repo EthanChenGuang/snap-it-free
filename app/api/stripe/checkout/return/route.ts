@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { logStripeRouteError } from '@/lib/stripe/route-errors';
 import { getStripe } from '@/lib/stripe/server';
 import { applySubscriptionState } from '@/lib/subscriptions/store';
 import { subscriptionStateFromStripe } from '@/lib/subscriptions/sync';
@@ -12,12 +13,12 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const redirect = (state: 'success' | 'pending') => NextResponse.redirect(new URL(`/?checkout=${state}`, url.origin));
 
-  const stripe = getStripe();
-  const user = await requireAuth();
-  const sessionId = url.searchParams.get('session_id');
-  if (!stripe || !user || !sessionId) return redirect('pending');
-
   try {
+    const stripe = getStripe();
+    const user = await requireAuth();
+    const sessionId = url.searchParams.get('session_id');
+    if (!stripe || !user || !sessionId) return redirect('pending');
+
     const session = await stripe.stripe.checkout.sessions.retrieve(sessionId, { expand: ['subscription'] });
     if (session.client_reference_id !== user.id || typeof session.subscription !== 'object' || !session.subscription) {
       return redirect('pending');
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
     await applySubscriptionState(state);
     return redirect('success');
   } catch (error) {
-    console.error('[stripe] checkout return sync failed:', error instanceof Error ? error.message : error);
+    logStripeRouteError('checkout return sync', error);
     return redirect('pending');
   }
 }
