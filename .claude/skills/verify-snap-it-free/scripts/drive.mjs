@@ -162,9 +162,23 @@ async function onboarding(browser) {
   check(true, 'Restore as a guest asks to sign in (GET /api/subscription → signedIn:false)');
   await shot(page, '08-paywall-weekly-restore');
 
+  // Stripe upstream failure, stubbed at the network edge: the route's 502 JSON must surface as a retryable error.
+  await page.route('**/api/stripe/checkout', (route) =>
+    route.fulfill({ status: 502, contentType: 'application/json', body: JSON.stringify({ error: 'stripe_error' }) }),
+  );
+  await page.getByTestId('paywall-cta').click();
+  await page.getByTestId('paywall-checkout-error').waitFor({ timeout: 10000 });
+  check(
+    (await page.getByTestId('paywall-checkout-error').innerText()).trim() === 'Couldn’t start checkout. Please try again.',
+    'CTA on a Stripe 502 shows the checkout error',
+  );
+  check(await page.getByTestId('paywall-cta').isEnabled(), 'CTA stays enabled after the error so the user can retry');
+  await shot(page, '08b-cta-stripe-error');
+  await page.unroute('**/api/stripe/checkout');
+
   await page.getByTestId('paywall-cta').click();
   await settle(page);
-  check((await page.getByText('Payments aren’t enabled yet').count()) === 1, 'CTA shows payments-not-enabled, no charge');
+  check((await page.getByText('Payments aren’t enabled yet').count()) === 1, 'CTA retry shows payments-not-enabled, no charge');
   await shot(page, '09-cta-coming-soon');
 
   await page.getByTestId('paywall-coming-soon-continue').click();
@@ -179,6 +193,13 @@ async function onboarding(browser) {
   check(prefs.mode === 'city' && typeof prefs.city === 'string' && prefs.city !== 'all', `picked city persisted in filter prefs (${prefs.city})`);
   check(await page.getByTestId('locked-feed').isVisible(), 'non-subscriber lands on the locked feed');
   check((await page.locator('a[href^="/listing/"]').count()) === 0, 'locked feed renders no listing links');
+  const guestPrompt = page.getByTestId('locked-account-prompt');
+  await guestPrompt.waitFor({ timeout: 10000 });
+  check(
+    (await guestPrompt.getByRole('link', { name: 'Sign in' }).getAttribute('href')) === '/settings' &&
+      (await page.getByTestId('locked-refresh-status').count()) === 0,
+    'guest on the locked feed still gets "Already subscribed? Sign in", no refresh button',
+  );
   await shot(page, '10-locked-feed');
 
   await page.getByTestId('locked-see-plans').click();

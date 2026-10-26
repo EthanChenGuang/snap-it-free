@@ -1,8 +1,24 @@
-# HANDOFF: feat/stripe-subscriptions (GSD quick 261025-vwf, then 261025-wba)
+# HANDOFF: feat/stripe-subscriptions (GSD quick 261025-vwf, 261025-wba, then 261026-3w6)
 
 Stripe **test-mode** subscriptions behind the hard paywall, plus the data-layer gate. This branch is stacked on `feat/onboarding-paywall` (PR #7, quick task 261025-s0z).
 
-## Latest: 261025-wba (2026-10-25/26). DB hard paywall, 3-day grace, subscription legal copy
+## Latest: 261026-3w6 (2026-10-26). Stripe route errors, signed-in locked card
+
+- **Checkout and portal no longer throw an empty 500.**
+  - A Stripe SDK error (e.g. "No such price") answers 502 `{"error":"stripe_error"}`. Anything else answers 500 `{"error":"internal_error"}`.
+  - The server log gets one line, `[stripe] checkout failed { type, code, message }`, with keys redacted. Search Vercel logs for `[stripe]`.
+  - 503/401/400/404/409 are unchanged. The checkout return route now also redirects to `?checkout=pending` when auth throws. The webhook was already structured and is untouched.
+- **The paywall and Settings already showed** "Couldn't start checkout" and "Couldn't open the billing portal" (en/it/zh) on any failure, with a retry. Tests now prove it.
+- **Signed-in users no longer see "Already subscribed? Sign in"** on the locked feed, detail or favorites. They see "Already subscribed? **Refresh status**", which re-checks `/api/subscription`: it reloads if active and otherwise says nothing is active yet. Guests are unchanged.
+- Component tests now run in vitest (`components/**/*.test.tsx`, react-dom + jsdom, helper `components/test/render.tsx`).
+- Verification:
+  - `npm test` 128 files, 774 tests.
+  - Builds with the flag off and on: 51/51 pages each.
+  - drive: flag-off 4/4, onboarding 36/36 (adds a stubbed 502 plus retry), desktop-paywall 2/2, compare vs main 2/2 (identical DOM), persist 9/9.
+- Known limit: "Refresh status" shows "no active subscription yet" also when `/api/subscription` itself is unreachable. The paywall's Restore button behaves the same way.
+- Details: `.planning/quick/261026-3w6-stripe-route-errors-paywall-signed-in/`.
+
+## Earlier: 261025-wba (2026-10-25/26). DB hard paywall, 3-day grace, subscription legal copy
 
 Guang confirmed the open items in chat on 2026-10-25 23:14 Rome: "1–6 按推荐做, 同意7,8".
 
