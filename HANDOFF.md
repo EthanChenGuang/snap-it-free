@@ -2,6 +2,13 @@
 
 Stripe **test-mode** subscriptions behind the hard paywall, plus the data-layer gate. This branch is stacked on `feat/onboarding-paywall` (PR #7, quick task 261025-s0z).
 
+## Status check 2026-10-28 (CC snap-it-free, no code change)
+
+- **Preview for phone testing:** https://zerodollar-git-feat-st-7ad3c2-chenguangregis-gmailcoms-projects.vercel.app (Vercel project `zerodollar`, team chenguangregis-gmailcoms-projects). Built from 69a8868 after every Preview env var was set. Vercel Authentication (SSO, `all_except_custom_domains`) is on, so a phone must be signed in to the chenguangregis-2098 Vercel account, or use a share link.
+- **Preview env (names only):** STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_WEEKLY/MONTHLY/YEARLY, NEXT_PUBLIC_PAYWALL_ENABLED=true, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_DB_PASSWORD. Smoke: `/` 200, `/api/subscription` 200 `configured:true`, `POST /api/stripe/checkout` 401 `sign_in_required` (not 503, so Stripe is enabled).
+- **Remote DB (SnapItFree, wnerhajyjjmrtsdmdpzu):** 042 and **043 are applied** (`subscriptions.past_due_since` exists, `apply_subscription_state` uses it). 044 is **not** applied. These were applied by SQL, not through `supabase_migrations.schema_migrations` (history stops at 20260809140322). The go-live step "apply 043" below is therefore already done.
+- The SnapItFree project is under the Supabase CLI profile `~/.supabase-profiles/acct2.yaml`, not the default login.
+
 ## Latest: 261026-3w6 (2026-10-26). Stripe route errors, signed-in locked card
 
 - **Checkout and portal no longer throw an empty 500.**
