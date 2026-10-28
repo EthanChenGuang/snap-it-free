@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, click, flush, jsonResponse, render } from '@/components/test/render';
 import { getMessages, type AppLanguage } from '@/messages';
 import { PaywallScreen } from './PaywallScreen';
@@ -6,6 +6,19 @@ import { PaywallScreen } from './PaywallScreen';
 afterEach(async () => {
   await cleanup();
   vi.unstubAllGlobals();
+});
+
+// jsdom has no IntersectionObserver; ListingPhoto (blurred strip) needs one.
+class NoopIntersectionObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return [];
+  }
+}
+beforeEach(() => {
+  vi.stubGlobal('IntersectionObserver', NoopIntersectionObserver);
 });
 
 const cta = (container: HTMLElement) => container.querySelector<HTMLButtonElement>('[data-testid="paywall-cta"]');
@@ -45,5 +58,37 @@ describe('PaywallScreen checkout failures', () => {
   it('shows no error before the user has tried', async () => {
     const container = await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} />);
     expect(alertText(container)).toBeNull();
+  });
+});
+
+describe('PaywallScreen personalization (honest, real figures)', () => {
+  it('uses the real count + city in the headline, the computed saving, billed line and proof', async () => {
+    const container = await render(
+      <PaywallScreen
+        titleId="paywall-title"
+        onFinish={() => {}}
+        context={{ cityLabel: 'Venezia', count: 23, photos: ['https://x/1.jpg'], proofCount: 42 }}
+      />,
+    );
+    const title = container.querySelector('#paywall-title')?.textContent ?? '';
+    expect(title).toContain('23');
+    expect(title).toContain('Venezia');
+    // Saving is arithmetically true and floored (never overstated): €19.99 vs €4.99×12 → 66%.
+    expect(container.querySelector('[data-testid="paywall-savings"]')?.textContent).toContain('66');
+    expect(container.querySelector('[data-testid="paywall-billed"]')?.textContent).toContain('€19.99');
+    expect(container.querySelector('[data-testid="paywall-proof"]')?.textContent).toContain('42');
+    expect(container.querySelector('[data-testid="paywall-photo-strip"]')).not.toBeNull();
+  });
+
+  it('falls back to a generic headline and hides the proof line when there is no real count', async () => {
+    const container = await render(
+      <PaywallScreen
+        titleId="paywall-title"
+        onFinish={() => {}}
+        context={{ cityLabel: 'Veneto', count: null, photos: [], proofCount: null }}
+      />,
+    );
+    expect(container.querySelector('#paywall-title')?.textContent).toBe(getMessages('en').paywall.titleFallback);
+    expect(container.querySelector('[data-testid="paywall-proof"]')).toBeNull();
   });
 });

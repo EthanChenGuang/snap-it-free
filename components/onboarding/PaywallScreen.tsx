@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { ListingPhoto } from '@/components/listings/ListingPhoto';
 import { SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { Button } from '@/components/ui/button';
 import { useMessages } from '@/lib/i18n/useMessages';
@@ -11,14 +12,24 @@ import {
   formatCents,
   getPlan,
   perWeekCents,
+  savingsVsMonthlyPct,
   type PlanId,
 } from '@/lib/paywall/plans';
 import { checkRestore, startCheckout, type PurchaseState, type RestoreOutcome } from '@/lib/paywall/purchase';
 import { cn } from '@/lib/utils';
 
+/** Real, personalized figures carried from the onboarding preview; absent when opened from a locked view. */
+export type PaywallContext = {
+  cityLabel: string;
+  count: number | null;
+  photos: string[];
+  proofCount: number | null;
+};
+
 type PaywallScreenProps = {
   titleId: string;
   onFinish: () => void;
+  context?: PaywallContext;
 };
 
 type PlanCopyKey = 'planWeekly' | 'planMonthly' | 'planYearly' | 'periodWeekly' | 'periodMonthly' | 'periodYearly';
@@ -29,7 +40,7 @@ const PLAN_COPY: Record<PlanId, { label: PlanCopyKey; period: PlanCopyKey }> = {
   yearly: { label: 'planYearly', period: 'periodYearly' },
 };
 
-export function PaywallScreen({ titleId, onFinish }: PaywallScreenProps) {
+export function PaywallScreen({ titleId, onFinish, context }: PaywallScreenProps) {
   const { messages, language } = useMessages();
   const copy = messages.paywall;
   const [selectedId, setSelectedId] = useState<PlanId>(DEFAULT_PLAN_ID);
@@ -117,37 +128,57 @@ export function PaywallScreen({ titleId, onFinish }: PaywallScreenProps) {
     );
   }
 
+  const hasCount = typeof context?.count === 'number' && context.count > 0;
+  const headline = hasCount && context ? copy.titlePersonalized(context.count as number, context.cityLabel) : copy.titleFallback;
+  const strip = context?.photos.slice(0, 3) ?? [];
+
   return (
     <>
       <header className="flex h-14 shrink-0 items-center justify-end px-space-md">{closeButton}</header>
 
-      <div className="no-scrollbar flex-1 overflow-y-auto px-gutter pb-space-md">
+      <div className="no-scrollbar flex flex-1 flex-col overflow-y-auto px-gutter pb-space-md">
+        <p className="text-label-sm font-medium uppercase tracking-[0.08em] text-on-surface-variant">{copy.title}</p>
         <h1
           id={titleId}
           ref={titleRef}
           tabIndex={-1}
-          className="text-[32px] font-bold leading-[1.2] tracking-[-0.02em] text-on-surface outline-none"
+          className="mt-space-xs text-[28px] font-bold leading-[1.2] tracking-[-0.02em] text-on-surface outline-none"
         >
-          {copy.title}
+          {headline}
         </h1>
-        <p className="mt-space-sm text-body-md text-on-surface-variant">{copy.subtitle}</p>
+
+        {strip.length > 0 && (
+          <ul className="mt-space-md grid grid-cols-3 gap-space-sm" aria-hidden data-testid="paywall-photo-strip">
+            {strip.map((url) => (
+              <li key={url} className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-surface-container-high">
+                <div className="absolute inset-0 scale-110 blur-[12px]">
+                  <ListingPhoto src={url} alt="" variant="thumbnail" sizes="140px" />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
 
         <ul className="mt-space-lg space-y-space-sm">
-          {[copy.benefitListings, copy.benefitMap, copy.benefitAlerts, copy.benefitSupport].map(
-            (benefit) => (
-              <li key={benefit} className="flex items-start gap-space-sm text-body-md text-on-surface">
-                <SymbolIcon name="check" className="mt-0.5 text-[20px]" />
-                <span>{benefit}</span>
-              </li>
-            ),
-          )}
+          {[copy.benefitListings, copy.benefitMap, copy.benefitAlerts, copy.benefitSupport].map((benefit) => (
+            <li key={benefit} className="flex items-start gap-space-sm text-body-md text-on-surface">
+              <SymbolIcon name="check" className="mt-0.5 text-[20px]" />
+              <span>{benefit}</span>
+            </li>
+          ))}
         </ul>
 
+        {typeof context?.proofCount === 'number' && context.proofCount > 0 && (
+          <p className="mt-space-md text-label-md text-on-surface-variant" data-testid="paywall-proof">
+            {copy.proofLine(context.proofCount)}
+          </p>
+        )}
 
         <div className="mt-space-lg flex flex-col gap-space-sm" role="radiogroup" aria-label={copy.plansLabel}>
           {PAYWALL_PLANS.map((plan) => {
             const active = plan.id === selectedId;
             const labels = PLAN_COPY[plan.id];
+            const savings = savingsVsMonthlyPct(plan);
             return (
               <button
                 key={plan.id}
@@ -172,11 +203,11 @@ export function PaywallScreen({ titleId, onFinish }: PaywallScreenProps) {
                 >
                   {active && <span className="h-2.5 w-2.5 rounded-full bg-primary" />}
                 </span>
-                <span className="flex-1">
-                  <span className="flex items-center gap-space-sm text-label-md text-on-surface">
-                    {copy[labels.label]}
+                <span className="min-w-0 flex-1">
+                  <span className="flex flex-wrap items-center gap-x-space-sm gap-y-0.5 text-label-md text-on-surface">
+                    <span>{copy[labels.label]}</span>
                     {plan.highlighted && (
-                      <span className="rounded-full bg-primary px-space-sm py-0.5 text-label-sm text-on-primary">
+                      <span className="whitespace-nowrap rounded-full bg-primary px-space-sm py-0.5 text-label-sm leading-tight text-on-primary">
                         {copy.bestValue}
                       </span>
                     )}
@@ -184,17 +215,32 @@ export function PaywallScreen({ titleId, onFinish }: PaywallScreenProps) {
                   <span className="mt-0.5 block text-label-sm text-on-surface-variant">
                     {formatCents(plan.priceCents, plan.currency, language)} / {copy[labels.period]}
                   </span>
+                  {plan.id === 'yearly' && (
+                    <span className="mt-0.5 block text-label-sm text-on-surface-variant" data-testid="paywall-billed">
+                      {copy.billed(formatCents(plan.priceCents, plan.currency, language))}
+                    </span>
+                  )}
                 </span>
-                {plan.periodWeeks > 1 && (
-                  <span className="shrink-0 text-label-sm text-on-surface">
-                    {copy.perWeek(formatCents(perWeekCents(plan), plan.currency, language))}
-                  </span>
-                )}
+                <span className="flex shrink-0 flex-col items-end gap-0.5 text-right">
+                  {plan.periodWeeks > 1 && (
+                    <span className="text-label-sm text-on-surface">
+                      {copy.perWeek(formatCents(perWeekCents(plan), plan.currency, language))}
+                    </span>
+                  )}
+                  {savings > 0 && (
+                    <span className="whitespace-nowrap text-label-sm text-on-surface-variant" data-testid="paywall-savings">
+                      {copy.savingsVsMonthly(savings)}
+                    </span>
+                  )}
+                </span>
               </button>
             );
           })}
         </div>
 
+        {context && (
+          <p className="mt-space-md text-label-sm text-on-surface-variant">{copy.freeNote}</p>
+        )}
       </div>
 
       <footer className="shrink-0 border-t border-outline-variant px-gutter pt-space-md pb-space-sm">

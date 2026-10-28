@@ -415,45 +415,94 @@ export const messages: Messages = {
     skip: 'Skip',
     back: 'Back',
     continue: 'Continue',
-    welcome: {
-      title: 'Free stuff near you',
+    regionLabel: 'Veneto',
+    hook: {
+      title: 'Free stuff near you, every day',
       emphasis: 'Free',
-      body: 'ZeroDollar gathers free items from Subito and neighbours’ street finds into one feed.',
+      body: 'We gather free items from Subito and neighbours’ street finds into one feed.',
+      liveLine: (count: number) =>
+        count === 1
+          ? '1 free item active in Veneto right now'
+          : `${count.toLocaleString('en-US')} free items active in Veneto right now`,
     },
     how: {
-      title: 'One feed, plus a map',
-      emphasis: 'feed',
-      feedTitle: 'One feed',
-      feedBody: 'Free listings from several sources, newest first.',
-      mapTitle: 'Map when you need it',
-      mapBody: 'Open the map to see what is around a spot.',
-      filterTitle: 'Filter by distance and category',
-      filterBody: 'Narrow down by radius, city or kind of item.',
+      title: 'One feed instead of five apps',
+      emphasis: 'One',
+      rows: [
+        'Subito + street finds, newest first',
+        'Distance and posting time on every card',
+        'Map and favourites when you need them',
+      ],
+    },
+    interests: {
+      title: 'What are you looking for?',
+      emphasis: 'looking',
+      hint: 'Pick as many as you like. We’ll use them for your feed and alerts.',
+      chips: {
+        furniture: 'Furniture',
+        electronics: 'Electronics',
+        clothes: 'Clothes',
+        books: 'Books',
+        home_decor: 'Home & decor',
+        everything: 'Everything',
+      },
+    },
+    mobility: {
+      title: 'How do you get around?',
+      emphasis: 'around',
+      hint: 'This sets your default search distance. You can change it any time.',
+      options: {
+        foot: 'On foot (~1 km)',
+        bike: 'Bike or vaporetto (~5 km)',
+        car: 'Car (~15 km)',
+      },
     },
     city: {
-      title: 'Pick your city',
-      emphasis: 'city',
+      title: 'Where should we look?',
+      emphasis: 'look',
       body: 'Your feed will start here. You can change it any time in filters.',
-      teaserLoading: 'Counting active listings…',
-      teaserCount: (count: number, city: string) =>
+    },
+    preview: {
+      title: 'Your feed is ready',
+      emphasis: 'ready',
+      building: 'Building your feed…',
+      checkCity: (city: string) => `City · ${city}`,
+      checkInterests: 'Your interests',
+      checkRadius: (km: number) => `Within ${km} km`,
+      result: (count: number, city: string) =>
         count === 1
-          ? `1 free listing active in ${city} right now`
-          : `${count.toLocaleString('en-US')} free listings active in ${city} right now`,
-      teaserEmpty: (city: string) =>
-        `No free listings active in ${city} right now. You can still browse every city.`,
-      teaserError: 'Couldn’t load listings right now. You can still continue.',
-      teaserPhotosLabel: 'Recent listings',
+          ? `1 free item in ${city} right now`
+          : `${count.toLocaleString('en-US')} free items in ${city} right now`,
+      lowSupply: (count: number, city: string) =>
+        `Only ${count} right now in ${city}. Try a wider radius or another city.`,
+      cta: 'Save my feed',
+      unavailable: 'We couldn’t load your feed right now. You can still continue.',
+    },
+    account: {
+      title: 'Save your feed and alerts',
+      emphasis: 'Save',
+      body: 'A free account keeps your city, interests and alerts on every device.',
+      google: 'Continue with Google',
+      email: 'Email me a sign-in link',
+      emailSending: 'Sending…',
+      emailSent: 'Check your email for a sign-in link, then come back here.',
+      emailPlaceholder: 'you@email.com',
+      emailError: 'Couldn’t send the link. Check the address and try again.',
+      optIn: 'Send me occasional product emails (optional)',
+      signedIn: 'You’re signed in. Continue to finish setting up.',
+      signedInAs: (email: string) => `Signed in as ${email}.`,
     },
     alerts: {
-      title: 'Hear about new finds first',
+      title: 'Be first to new finds',
       emphasis: 'first',
-      body: 'Set keywords and a city, and we notify you when a matching listing appears.',
-      pointKeywords: 'Keyword alerts, like “sofa” or “bike”',
-      pointQuiet: 'Quiet hours so nothing buzzes at night',
-      enable: 'Turn on notifications',
+      body: 'We’ll notify you when a matching free item appears.',
+      mockLabel: 'Example',
+      mockLine: 'Free bookshelf · Cannaregio',
+      mockLine2: (city: string) => `New free item in ${city}`,
+      enable: 'Turn on alerts',
       enabling: 'Turning on…',
       notNow: 'Not now',
-      enabled: 'Notifications are on.',
+      enabled: 'Alerts are on. We created one from your interests — manage it in Settings.',
       notLoggedIn: 'Alerts need an account. Sign in and turn them on any time in Settings.',
       iosNotReady: 'On iPhone, add ZeroDollar to your Home Screen first. We’ll show you how at the end.',
       unsupported: 'This browser doesn’t support notifications.',
@@ -465,6 +514,16 @@ export const messages: Messages = {
     close: 'Close',
     title: 'ZeroDollar Plus',
     subtitle: 'Subscribe to see every free listing near you.',
+    titlePersonalized: (count: number, city: string) =>
+      count === 1 ? `Unlock 1 free item in ${city}` : `Unlock ${count.toLocaleString('en-US')} free items in ${city}`,
+    titleFallback: 'See every free item near you',
+    proofLine: (count: number) =>
+      count === 1
+        ? '1 new free item in Veneto in the last 7 days'
+        : `${count.toLocaleString('en-US')} new free items in Veneto in the last 7 days`,
+    savingsVsMonthly: (pct: number) => `Save ${pct}% vs monthly`,
+    billed: (price: string) => `Billed ${price} per year`,
+    freeNote: 'The items are free; the subscription pays for finding them all in one place.',
     benefitListings: 'Every active free listing, from all sources',
     benefitMap: 'The full feed, map and filters',
     benefitAlerts: 'Keyword alerts when a match appears',
