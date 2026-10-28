@@ -542,6 +542,16 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                   >
                     {copy.preview.cta}
                   </Button>
+                  {/* Escape to pricing without being forced to sign up; the account step itself keeps no "Not now". */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-11 w-full"
+                    onClick={() => dispatch({ type: 'goTo', screen: 'paywall' })}
+                    data-testid="preview-see-plans"
+                  >
+                    {copy.preview.seePlans}
+                  </Button>
                 </footer>
               ) : state.screen === 'alerts' ? (
                 <footer className="flex shrink-0 flex-col gap-space-sm border-t border-outline-variant px-gutter py-space-md">

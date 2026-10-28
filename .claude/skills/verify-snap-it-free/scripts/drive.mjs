@@ -27,7 +27,7 @@ function check(ok, label) {
   console.log(`${ok ? 'PASS' : 'FAIL'} ${label}`);
 }
 
-async function newPage(browser, viewport = PHONE, language = lang) {
+async function newPage(browser, viewport = PHONE, language = lang, { stubAuth = false } = {}) {
   const context = await browser.newContext({ viewport, deviceScaleFactor: 2, locale: 'en-US' });
   await context.addInitScript((value) => {
     if (!localStorage.getItem('shoumanwu_app_preferences')) {
@@ -37,7 +37,40 @@ async function newPage(browser, viewport = PHONE, language = lang) {
       );
     }
   }, language);
+  // QA stub for the REQUIRED account step: honored only under ?onboarding=1, grants no real access
+  // (the SSR paywall gate is independent). Never creates a real account or signs up remotely.
+  if (stubAuth) {
+    await context.addInitScript(() => {
+      try {
+        localStorage.setItem('shoumanwu_onboarding_stub_auth', '1');
+      } catch {}
+    });
+  }
   return { context, page: await context.newPage() };
+}
+
+/** Walk the five value-prop steps to the personal preview. Picks `city` on the city step. */
+async function walkToPreview(page, city = 'Milan') {
+  await page.getByTestId('onboarding-continue').click(); // hook → how
+  await settle(page, 400);
+  await page.getByTestId('onboarding-continue').click(); // how → interests
+  await settle(page, 400);
+  await page.getByRole('checkbox', { name: 'Books' }).click();
+  await page.getByTestId('onboarding-continue').click(); // interests → mobility
+  await settle(page, 400);
+  await page.getByRole('checkbox', { name: /Bike/ }).click();
+  await page.getByTestId('onboarding-continue').click(); // mobility → city
+  await settle(page, 400);
+  await page.getByRole('radio', { name: city }).click();
+  await page.getByTestId('onboarding-continue').click(); // city → preview
+  await settle(page, 400);
+  await page
+    .waitForFunction(
+      () => document.querySelector('[data-testid="preview-count"]') || document.querySelector('[data-testid="onboarding-preview"]')?.textContent?.includes('couldn'),
+      null,
+      { timeout: 30000 },
+    )
+    .catch(() => {});
 }
 
 async function shot(page, name) {
@@ -77,82 +110,102 @@ async function onboarding(browser) {
   const listingHref = await probe.page.locator('a[href^="/listing/"]').first().getAttribute('href').catch(() => null);
   await probe.context.close();
 
-  const { context, page } = await newPage(browser);
+  const { context, page } = await newPage(browser, PHONE, lang, { stubAuth: true });
   await page.goto(`${url}/?onboarding=1`, { waitUntil: 'networkidle' });
   await overlay(page).waitFor({ timeout: 15000 });
   await settle(page);
-  check(await screenIs(page, 'welcome'), 'step 1 welcome shown with ?onboarding=1');
-  check((await page.getByRole('button', { name: 'Skip' }).count()) === 1, 'Skip visible on step 1');
-  await shot(page, '01-welcome');
 
-  await page.getByRole('button', { name: 'Continue' }).click();
+  // 1 · Hook
+  check(await screenIs(page, 'hook'), 'step 1 hook shown with ?onboarding=1');
+  check((await page.getByRole('button', { name: 'Skip' }).count()) === 1, 'Skip visible on the hook');
+  await shot(page, '01-hook');
+
+  // 2 · How it works
+  await page.getByTestId('onboarding-continue').click();
   await settle(page);
   check(await screenIs(page, 'how'), 'step 2 how-it-works after Continue');
   check((await page.getByRole('button', { name: 'Back' }).count()) === 1, 'Back visible from step 2');
   await shot(page, '02-how-it-works');
 
-  await page.getByRole('button', { name: 'Continue' }).click();
+  // 3 · Interests (quiz, gated)
+  await page.getByTestId('onboarding-continue').click();
   await settle(page);
-  check(await screenIs(page, 'city'), 'step 3 city picker');
-  check(await page.getByRole('button', { name: 'Continue' }).isDisabled(), 'Continue disabled until a city is picked');
+  check(await screenIs(page, 'interests'), 'step 3 interests');
+  check(await page.getByTestId('onboarding-continue').isDisabled(), 'Continue disabled until an interest is picked');
+  await page.getByRole('checkbox', { name: 'Books' }).click();
+  check(!(await page.getByTestId('onboarding-continue').isDisabled()), 'Continue enabled after an interest is picked');
+  await shot(page, '03-interests');
+
+  // 4 · Mobility (quiz, gated)
+  await page.getByTestId('onboarding-continue').click();
+  await settle(page);
+  check(await screenIs(page, 'mobility'), 'step 4 mobility');
+  await page.getByRole('checkbox', { name: /Bike/ }).click();
+  await shot(page, '04-mobility');
+
+  // 5 · City (Venice + Padova lead the list — P1-2 fix)
+  await page.getByTestId('onboarding-continue').click();
+  await settle(page);
+  check(await screenIs(page, 'city'), 'step 5 city picker');
   check((await page.getByRole('radio').count()) === 13, 'city picker lists the 13 supported cities');
-  await shot(page, '03-city-picker');
+  const firstTwo = [
+    (await page.getByRole('radio').nth(0).innerText()).trim(),
+    (await page.getByRole('radio').nth(1).innerText()).trim(),
+  ];
+  check(firstTwo[0] === 'Venice' && firstTwo[1] === 'Padova', `P1-2: Venice + Padova lead the city list (${firstTwo.join(', ')})`);
+  check(await page.getByTestId('onboarding-continue').isDisabled(), 'Continue disabled until a city is picked');
+  await page.getByRole('radio', { name: 'Milan' }).click();
+  await shot(page, '05-city');
 
-  // Pick the city with the most active listings so the teaser shows real photos; record every count.
-  const counts = [];
-  let best = null;
-  let zeroShot = false;
-  for (const radio of await page.getByRole('radio').all()) {
-    const name = (await radio.innerText()).trim();
-    await radio.click();
-    const teaser = page.getByTestId('onboarding-teaser');
-    await teaser.waitFor();
-    await page.waitForFunction(() => !document.querySelector('[data-testid="onboarding-teaser"]')?.textContent?.includes('Counting'), null, { timeout: 30000 });
-    const text = (await teaser.innerText()).trim();
-    const match = text.match(/^([\d,]+) free listing/);
-    const count = match ? Number(match[1].replaceAll(',', '')) : 0;
-    counts.push(`${name}=${count}`);
-    if (!best || count > best.count) best = { name, count };
-    if (count === 0 && !zeroShot) {
-      zeroShot = true;
-      await shot(page, '04b-city-teaser-zero');
-      check(/No free listings active/.test(text), `zero state is honest for ${name}`);
-    }
-  }
-  console.log(`INFO teaser counts: ${counts.join(', ')}`);
-  await page.getByRole('radio', { name: best.name }).click();
-  await settle(page, 1500);
-  const teaserText = (await page.getByTestId('onboarding-teaser').innerText()).trim();
-  check(best.count > 0 && teaserText.includes(best.count.toLocaleString('en-US')), `teaser shows real count for ${best.name}: "${teaserText.split('\n')[0]}"`);
-  const thumbs = await page.getByTestId('onboarding-teaser').locator('img').count();
-  check(thumbs > 0 && thumbs <= 4, `teaser shows ${thumbs} real thumbnails`);
-  await shot(page, '04-city-teaser');
-
-  await page.getByRole('button', { name: 'Continue' }).click();
+  // 6 · Preview (real count + blurred real photos — the honest "N in your area" moment)
+  await page.getByTestId('onboarding-continue').click();
   await settle(page);
-  check(await screenIs(page, 'alerts'), 'step 4 alerts');
-  check((await page.getByRole('button', { name: 'Not now' }).count()) === 1, 'alerts step has a clear Not now');
-  await shot(page, '05-alerts');
+  check(await screenIs(page, 'preview'), 'step 6 preview');
+  await page.getByTestId('preview-count').waitFor({ timeout: 30000 }).catch(() => {});
+  const previewText = (await page.getByTestId('onboarding-preview').innerText()).trim();
+  check(/\d[\d,]* free items? in Milan/.test(previewText), `preview shows a real count for Milan: "${previewText.split('\n').find((l) => /Milan/.test(l)) ?? previewText.split('\n')[0]}"`);
+  check((await page.getByTestId('preview-save').count()) === 1 && (await page.getByTestId('preview-see-plans').count()) === 1, 'preview offers Save my feed + See plans');
+  await shot(page, '06-preview');
 
-  await page.getByRole('button', { name: 'Turn on notifications' }).click();
-  await page.getByRole('status').filter({ hasText: /account|support|blocked|iPhone|on\./ }).waitFor({ timeout: 10000 });
-  const pushMessage = (await page.getByRole('status').filter({ hasText: /account|support|blocked|iPhone|on\./ }).innerText()).trim();
-  check(pushMessage.length > 0, `enable push as a guest gives an honest result: "${pushMessage}"`);
-  await shot(page, '06-alerts-result-guest');
-
-  await page.getByRole('button', { name: 'Continue' }).click();
+  // 7 · Account (REQUIRED — no "Not now"; QA stub stands in for a real session)
+  await page.getByTestId('preview-save').click();
   await settle(page);
-  check(await screenIs(page, 'paywall'), 'paywall after the alerts step');
+  check(await screenIs(page, 'account'), 'step 7 account');
+  check((await page.getByRole('button', { name: 'Not now' }).count()) === 0, 'account step has no "Not now" (sign-up required)');
+  check((await page.getByTestId('account-signed-in').count()) === 1, 'account step recognises the (stubbed) session');
+  await shot(page, '07-account');
+
+  // 8 · Alerts (after the account gate, with a labelled example)
+  await page.getByTestId('account-continue').click();
+  await settle(page);
+  check(await screenIs(page, 'alerts'), 'step 8 alerts');
+  check((await page.getByText('Example').count()) >= 1, 'alerts shows a clearly labelled Example notification');
+  await shot(page, '08-alerts');
+  await page.getByRole('button', { name: 'Turn on alerts' }).click();
+  await page.getByRole('status').filter({ hasText: /account|support|blocked|iPhone|on\.|Settings/ }).waitFor({ timeout: 10000 });
+  const pushMessage = (await page.getByRole('status').filter({ hasText: /account|support|blocked|iPhone|on\.|Settings/ }).innerText()).trim();
+  check(pushMessage.length > 0, `enable alerts gives an honest result: "${pushMessage}"`);
+  await shot(page, '08b-alerts-result');
+
+  // 9 · Paywall (personalized, honest, closeable)
+  await page.getByRole('button', { name: 'Not now' }).click();
+  await settle(page);
+  check(await screenIs(page, 'paywall'), 'step 9 paywall after the alerts step');
   check(await page.getByTestId('paywall-close').isVisible(), 'close button visible immediately on the paywall');
   check((await page.getByText('Continue for free').count()) === 0, 'hard paywall: no "Continue for free" path');
   check((await page.getByRole('radio').count()) === 3, 'three plan cards');
   check((await page.getByTestId('paywall-plan-yearly').getAttribute('aria-checked')) === 'true', 'yearly preselected');
   check((await page.getByTestId('paywall-plan-yearly').innerText()).includes('Best value'), 'yearly highlighted as Best value');
+  const title = (await page.locator('#onboarding-title').innerText()).trim();
+  check(/Unlock [\d,]+ free items? in Milan/.test(title), `paywall headline carries the real count + city: "${title}"`);
+  const savings = (await page.getByTestId('paywall-savings').innerText()).trim();
+  check(savings.includes('66'), `yearly savings tag is the true, floored figure: "${savings}"`);
+  check((await page.getByTestId('paywall-billed').innerText()).includes('€19.99'), 'yearly billed line shows the full annual amount');
   const renewal = (await page.getByTestId('paywall-renewal').innerText()).trim();
   check(renewal.startsWith('€19.99 per year. Renews automatically'), `price + auto-renewal near CTA: "${renewal}"`);
   check((await page.getByRole('link', { name: 'Terms' }).getAttribute('href')) === '/terms', 'Terms links to /terms');
   check((await page.getByRole('link', { name: 'Privacy' }).getAttribute('href')) === '/privacy', 'Privacy links to /privacy');
-  await shot(page, '07-paywall');
+  await shot(page, '09-paywall');
 
   await page.getByTestId('paywall-plan-weekly').click();
   const weekly = (await page.getByTestId('paywall-renewal').innerText()).trim();
@@ -160,9 +213,10 @@ async function onboarding(browser) {
   await page.getByRole('button', { name: 'Restore purchases' }).click();
   await page.getByText('Sign in first to restore').waitFor({ timeout: 10000 });
   check(true, 'Restore as a guest asks to sign in (GET /api/subscription → signedIn:false)');
-  await shot(page, '08-paywall-weekly-restore');
+  await shot(page, '09b-paywall-weekly-restore');
 
   // Stripe upstream failure, stubbed at the network edge: the route's 502 JSON must surface as a retryable error.
+  await page.getByTestId('paywall-plan-yearly').click();
   await page.route('**/api/stripe/checkout', (route) =>
     route.fulfill({ status: 502, contentType: 'application/json', body: JSON.stringify({ error: 'stripe_error' }) }),
   );
@@ -173,33 +227,29 @@ async function onboarding(browser) {
     'CTA on a Stripe 502 shows the checkout error',
   );
   check(await page.getByTestId('paywall-cta').isEnabled(), 'CTA stays enabled after the error so the user can retry');
-  await shot(page, '08b-cta-stripe-error');
+  await shot(page, '09c-cta-stripe-error');
   await page.unroute('**/api/stripe/checkout');
 
   await page.getByTestId('paywall-cta').click();
   await settle(page);
   check((await page.getByText('Payments aren’t enabled yet').count()) === 1, 'CTA retry shows payments-not-enabled, no charge');
-  await shot(page, '09-cta-coming-soon');
+  await shot(page, '09d-cta-coming-soon');
 
   await page.getByTestId('paywall-coming-soon-continue').click();
   await settle(page, 1000);
   check((await overlay(page).count()) === 0, 'overlay closed');
   check(!page.url().includes('onboarding='), `?onboarding stripped from URL (${page.url()})`);
   check(
-    (await page.evaluate(() => localStorage.getItem('shoumanwu_onboarding_completed_v1'))) === '1',
-    'completion stored under the versioned key',
+    (await page.evaluate(() => localStorage.getItem('shoumanwu_onboarding_completed_v2'))) === '1',
+    'completion stored under the versioned key (v2)',
   );
   const prefs = await page.evaluate(() => JSON.parse(localStorage.getItem('shoumanwu_filter_prefs') ?? '{}'));
-  check(prefs.mode === 'city' && typeof prefs.city === 'string' && prefs.city !== 'all', `picked city persisted in filter prefs (${prefs.city})`);
-  check(await page.getByTestId('locked-feed').isVisible(), 'non-subscriber lands on the locked feed');
+  check(prefs.city === 'milano', `picked city persisted in filter prefs (${prefs.city})`);
+  check(Array.isArray(prefs.categories) && prefs.categories.includes('libri-riviste'), `interests persisted as real category slugs (${JSON.stringify(prefs.categories)})`);
+
+  // 10 · After = locked feed for a non-subscriber
+  check(await page.getByTestId('locked-feed').isVisible(), 'step 10: non-subscriber lands on the locked feed');
   check((await page.locator('a[href^="/listing/"]').count()) === 0, 'locked feed renders no listing links');
-  const guestPrompt = page.getByTestId('locked-account-prompt');
-  await guestPrompt.waitFor({ timeout: 10000 });
-  check(
-    (await guestPrompt.getByRole('link', { name: 'Sign in' }).getAttribute('href')) === '/settings' &&
-      (await page.getByTestId('locked-refresh-status').count()) === 0,
-    'guest on the locked feed still gets "Already subscribed? Sign in", no refresh button',
-  );
   await shot(page, '10-locked-feed');
 
   await page.getByTestId('locked-see-plans').click();
@@ -219,12 +269,16 @@ async function onboarding(browser) {
   }
   await context.close();
 
-  const zh = await newPage(browser, PHONE, 'zh');
+  // zh walk to the paywall through the full flow (skip → preview → See plans).
+  const zh = await newPage(browser, PHONE, 'zh', { stubAuth: true });
   await zh.page.goto(`${url}/?onboarding=1`, { waitUntil: 'networkidle' });
   await overlay(zh.page).waitFor();
-  await zh.page.getByRole('button', { name: '跳过' }).click();
+  await zh.page.getByRole('button', { name: '跳过' }).click(); // skip → preview
   await settle(zh.page);
-  check((await zh.page.getByText('零元 Plus').count()) === 1, 'paywall localised in zh');
+  await zh.page.getByTestId('preview-see-plans').click();
+  await settle(zh.page);
+  check(await screenIs(zh.page, 'paywall'), 'zh: See plans reaches the paywall');
+  check((await zh.page.getByText('零元 Plus').count()) === 1, 'paywall brand localised in zh (零元 Plus)');
   await shot(zh.page, '13-paywall-zh');
   await zh.context.close();
 }
@@ -233,9 +287,11 @@ async function desktopPaywall(browser) {
   const { context, page } = await newPage(browser, { width: 1280, height: 800 });
   await page.goto(`${url}/?onboarding=1`, { waitUntil: 'networkidle' });
   await overlay(page).waitFor();
-  await page.getByRole('button', { name: 'Skip' }).click();
+  await page.getByRole('button', { name: 'Skip' }).click(); // skip → preview
   await settle(page);
-  check(await screenIs(page, 'paywall'), 'desktop: Skip goes to the paywall');
+  await page.getByTestId('preview-see-plans').click(); // preview → paywall
+  await settle(page);
+  check(await screenIs(page, 'paywall'), 'desktop: See plans reaches the paywall');
   const box = await overlay(page).locator(':scope > div').boundingBox();
   check(box && box.width <= 440, `desktop: paywall is a centered card (${Math.round(box?.width ?? 0)}px wide)`);
   await shot(page, '14-desktop-paywall');
@@ -248,7 +304,10 @@ async function persist(browser) {
   await overlay(page).waitFor({ timeout: 15000 });
   check(true, 'flag on: onboarding shows on / without any param');
   await shot(page, '15-flag-on-first-visit');
+  // A guest completes onboarding without an account by taking Skip → preview → See plans → paywall → ✕.
   await page.getByRole('button', { name: 'Skip' }).click();
+  await settle(page);
+  await page.getByTestId('preview-see-plans').click();
   await settle(page);
   await page.getByTestId('paywall-close').click();
   await settle(page, 1000);
@@ -280,13 +339,13 @@ async function persist(browser) {
 
   await page.goto(`${url}/?onboarding=1`, { waitUntil: 'networkidle' });
   await overlay(page).waitFor({ timeout: 15000 });
-  await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByRole('radio', { name: 'Rome' }).click();
-  await page.waitForFunction(() => !document.querySelector('[data-testid="onboarding-teaser"]')?.textContent?.includes('Counting'), null, { timeout: 30000 });
-  const teaser = (await page.getByTestId('onboarding-teaser').innerText()).trim();
-  check(/^[\d,]+ free listings active in Rome/.test(teaser), `flag on: city teaser shows a real count for a non-subscriber: "${teaser.split('\n')[0]}"`);
-  await shot(page, '20-flag-on-city-teaser');
+  await walkToPreview(page, 'Rome');
+  const teaser = (await page.getByTestId('onboarding-preview').innerText()).trim();
+  check(
+    /\d[\d,]* free items? in Rome/.test(teaser),
+    `flag on: preview shows a real count for a non-subscriber via the 044 RPC/rows fallback: "${teaser.split('\n').find((l) => /Rome/.test(l)) ?? teaser.split('\n')[0]}"`,
+  );
+  await shot(page, '20-flag-on-preview-count');
   await context.close();
 }
 

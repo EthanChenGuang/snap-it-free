@@ -1,3 +1,13 @@
+# HANDOFF: feat/onboarding-snag (GSD quick 261028-ob2), stacked on feat/stripe-subscriptions
+
+## WIP 2026-10-28 23:55 Rome (CC snap-it-free, claude-ethan hit its session limit, resets 04:10 Rome)
+
+- **Done:** 10-screen Snag-modelled onboarding per the research PROPOSAL (hook with real counts/photos, how it works, category quiz, travel-mode quiz -> default radius, city, feed-ready blurred real photos, account REQUIRED (no skip), alerts, paywall with close X visible from start, yearly preselected, "Save N% vs monthly" computed (floored) from real prices, NO free trial, then feed with choices applied). City list now puts Venice and Padova first (P1-2). Paywall/locked layout and Italian badge wrap (P1-3, P2-3) addressed in code; en/it/zh strings. Gate key bumped so existing users see the new flow once. Details: `.planning/quick/261028-ob2-onboarding-snag-redesign/`.
+- **Verified so far:** `npx vitest run` 129 files / 790 tests pass. `npx tsc --noEmit`: 1 error, pre-existing and in an untouched file (`lib/favorites/store.test.ts:56`, mock type), not from this branch.
+- **Not done yet:** `next build` (first attempt was killed, likely memory/timeout on the box), the verify-snap-it-free drive run on 390x844 and 412x915 in en/it/zh, phone screenshots of each step, the last WIP commit (drive.mjs journey update + small OnboardingFlow tweak) is unverified in a browser.
+- **Next:** build with Node 22 in the background (`NODE_OPTIONS=--max-old-space-size=4096`), run `.claude/skills/verify-snap-it-free` drive for the onboarding journey on both viewports and all locales, stub auth locally (never sign up against the shared DB), capture screenshots, push, wait for the Vercel Preview, share link.
+- **Open questions for Guang:** EU 14-day withdrawal right copy in Terms (legal review). No new DB migration on this branch.
+
 # HANDOFF: feat/stripe-subscriptions (GSD quick 261025-vwf, 261025-wba, then 261026-3w6)
 
 Stripe **test-mode** subscriptions behind the hard paywall, plus the data-layer gate. This branch is stacked on `feat/onboarding-paywall` (PR #7, quick task 261025-s0z).

@@ -486,6 +486,7 @@ export const messages = {
       lowSupply: (count: number, city: string) =>
         `Per ora solo ${count} a ${city}. Prova un raggio più ampio o un’altra città.`,
       cta: 'Salva il mio feed',
+      seePlans: 'Vedi i piani',
       unavailable: 'Non siamo riusciti a caricare il tuo feed ora. Puoi continuare lo stesso.',
     },
     account: {

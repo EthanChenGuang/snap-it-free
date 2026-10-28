@@ -476,6 +476,7 @@ export const messages: Messages = {
       lowSupply: (count: number, city: string) =>
         `Only ${count} right now in ${city}. Try a wider radius or another city.`,
       cta: 'Save my feed',
+      seePlans: 'See plans',
       unavailable: 'We couldn’t load your feed right now. You can still continue.',
     },
     account: {

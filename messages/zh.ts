@@ -460,6 +460,7 @@ export const messages: Messages = {
       result: (count: number, city: string) => `${city} 此刻有 ${count.toLocaleString('zh-CN')} 件免费物品`,
       lowSupply: (count: number, city: string) => `${city} 目前只有 ${count} 件。可以扩大范围或换个城市。`,
       cta: '保存我的信息流',
+      seePlans: '查看方案',
       unavailable: '暂时无法加载你的信息流。你仍然可以继续。',
     },
     account: {
