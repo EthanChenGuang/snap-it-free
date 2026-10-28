@@ -33,6 +33,20 @@ export function perWeekCents(plan: PaywallPlan): number {
   return Math.round(plan.priceCents / plan.periodWeeks);
 }
 
+/**
+ * Honest savings of a plan vs paying monthly for the same span, as a whole percent.
+ * Returns 0 when the plan is not cheaper, so a tag is only ever shown when it is arithmetically true.
+ * Yearly €19.99 vs €4.99×12 = €59.88 → 66%. Floored so the figure never overstates the saving.
+ */
+export function savingsVsMonthlyPct(plan: PaywallPlan): number {
+  const monthly = PAYWALL_PLANS.find((entry) => entry.id === 'monthly');
+  if (!monthly || plan.id === 'monthly' || plan.id === 'weekly') return 0;
+  const monthlyForSpan = perWeekCents(monthly) * plan.periodWeeks;
+  if (monthlyForSpan <= 0) return 0;
+  const pct = Math.floor((1 - plan.priceCents / monthlyForSpan) * 100);
+  return pct > 0 ? pct : 0;
+}
+
 const NUMBER_LOCALE: Record<AppLanguage, string> = {
   zh: 'zh-CN',
   en: 'en-IE',

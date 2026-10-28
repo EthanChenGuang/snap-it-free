@@ -36,6 +36,7 @@ describe('hasOnboardingForceParam', () => {
     expect(hasOnboardingForceParam('')).toBe(false);
     expect(hasOnboardingForceParam('?onboarding=0')).toBe(false);
     expect(hasOnboardingForceParam('?onboarding=true')).toBe(false);
+    expect(hasOnboardingForceParam('?onboarding=resume')).toBe(true);
   });
 });
 
@@ -58,7 +59,7 @@ describe('completion storage', () => {
   it('round-trips through the versioned key', () => {
     expect(readOnboardingCompleted(localStorage)).toBe(false);
     markOnboardingCompleted(localStorage);
-    expect(localStorage.getItem('shoumanwu_onboarding_completed_v1')).toBe('1');
+    expect(localStorage.getItem('shoumanwu_onboarding_completed_v2')).toBe('1');
     expect(readOnboardingCompleted(localStorage)).toBe(true);
   });
 

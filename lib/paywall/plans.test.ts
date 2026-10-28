@@ -7,6 +7,7 @@ import {
   formatCents,
   getPlan,
   perWeekCents,
+  savingsVsMonthlyPct,
 } from './plans';
 
 describe('paywall plan config', () => {
@@ -46,6 +47,18 @@ describe('perWeekCents', () => {
     const [weekly, monthly, yearly] = PAYWALL_PLANS.map(perWeekCents);
     expect(yearly).toBeLessThan(monthly);
     expect(monthly).toBeLessThan(weekly);
+  });
+});
+
+describe('savingsVsMonthlyPct', () => {
+  it('computes the floored, non-overstated yearly saving vs 12 monthly payments', () => {
+    // €19.99 vs €4.99×12 = €59.88 → 66%.
+    expect(savingsVsMonthlyPct(getPlan('yearly'))).toBe(66);
+  });
+
+  it('shows no saving for weekly or monthly', () => {
+    expect(savingsVsMonthlyPct(getPlan('weekly'))).toBe(0);
+    expect(savingsVsMonthlyPct(getPlan('monthly'))).toBe(0);
   });
 });
 
