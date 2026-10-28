@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
 import { PaywallDialog } from '@/components/onboarding/PaywallDialog';
 import { SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { Button } from '@/components/ui/button';
+import { useAuthSession } from '@/lib/auth/useAuthSession';
 import { useMessages } from '@/lib/i18n/useMessages';
-import type { LockedPreviewPhoto } from '@/lib/paywall/locked-preview';
+import { checkRestore } from '@/lib/paywall/purchase';
 
 function LockedCard({
   title,
@@ -21,6 +22,13 @@ function LockedCard({
   const { messages } = useMessages();
   const copy = messages.locked;
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [checkoutReturned, setCheckoutReturned] = useState(false);
+
+  // Back from Stripe but still locked: the webhook has not landed yet.
+  useEffect(() => {
+    const state = new URLSearchParams(window.location.search).get('checkout');
+    setCheckoutReturned(state === 'success' || state === 'pending');
+  }, []);
 
   return (
     <section
@@ -30,6 +38,11 @@ function LockedCard({
       <SymbolIcon name="lock" className="text-[32px] text-on-surface" />
       <h1 className="mt-space-md text-h3 text-on-surface">{title}</h1>
       <p className="mt-space-sm text-body-md text-on-surface-variant">{body}</p>
+      {checkoutReturned && (
+        <p role="status" className="mt-space-md rounded-lg border border-outline-variant p-space-md text-body-md text-on-surface">
+          {copy.checkoutPending}
+        </p>
+      )}
       <Button
         type="button"
         className="mt-space-lg h-12 w-full"
@@ -38,20 +51,69 @@ function LockedCard({
       >
         {copy.seePlans}
       </Button>
-      <p className="mt-space-md text-center text-label-sm text-on-surface-variant">
-        {copy.signInHint}{' '}
-        <Link href="/settings" className="text-on-surface underline underline-offset-2">
-          {copy.signIn}
-        </Link>
-      </p>
+      <AccountPrompt />
       {children}
       {paywallOpen && <PaywallDialog onClose={() => setPaywallOpen(false)} />}
     </section>
   );
 }
 
+/**
+ * "Already subscribed?" Guests get a sign-in link; a signed-in user re-checks the subscription instead,
+ * since signing in again cannot help them. Nothing renders until the session is known, so neither flashes.
+ */
+function AccountPrompt() {
+  const { messages } = useMessages();
+  const copy = messages.locked;
+  const { user, loading } = useAuthSession();
+  const [checking, setChecking] = useState(false);
+  const [nothingActive, setNothingActive] = useState(false);
+
+  if (loading) return null;
+
+  const refreshStatus = async () => {
+    setChecking(true);
+    setNothingActive(false);
+    const outcome = await checkRestore();
+    if (outcome === 'reload') {
+      window.location.reload();
+      return;
+    }
+    setNothingActive(true);
+    setChecking(false);
+  };
+
+  return (
+    <>
+      <p className="mt-space-md text-center text-label-sm text-on-surface-variant" data-testid="locked-account-prompt">
+        {copy.signInHint}{' '}
+        {user ? (
+          <button
+            type="button"
+            className="text-on-surface underline underline-offset-2 disabled:opacity-60"
+            disabled={checking}
+            onClick={() => void refreshStatus()}
+            data-testid="locked-refresh-status"
+          >
+            {copy.refreshStatus}
+          </button>
+        ) : (
+          <Link href="/settings" className="text-on-surface underline underline-offset-2">
+            {copy.signIn}
+          </Link>
+        )}
+      </p>
+      {nothingActive && (
+        <p role="status" className="mt-space-xs text-center text-label-sm text-on-surface-variant">
+          {copy.refreshNothing}
+        </p>
+      )}
+    </>
+  );
+}
+
 /** Home for a non-subscriber: real count and blurred real photos, never the listing payload. */
-export function LockedFeed({ count, photos }: { count: number | null; photos: LockedPreviewPhoto[] }) {
+export function LockedFeed({ count, photos }: { count: number | null; photos: string[] }) {
   const { messages } = useMessages();
   const copy = messages.locked;
 
@@ -61,10 +123,10 @@ export function LockedFeed({ count, photos }: { count: number | null; photos: Lo
         className="pointer-events-none grid select-none grid-cols-2 gap-x-space-md gap-y-space-lg px-gutter pt-space-xs sm:grid-cols-3 lg:grid-cols-4"
         aria-hidden
       >
-        {photos.map((photo) => (
-          <div key={photo.id} className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-surface-container-high">
+        {photos.map((photoUrl) => (
+          <div key={photoUrl} className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-surface-container-high">
             <div className="absolute inset-0 scale-110 blur-[14px]">
-              <ListingPhoto src={photo.photoUrl} alt="" variant="thumbnail" sizes="200px" priority />
+              <ListingPhoto src={photoUrl} alt="" variant="thumbnail" sizes="200px" priority />
             </div>
           </div>
         ))}

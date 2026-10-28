@@ -80,7 +80,11 @@ Hyperlocal free-item discovery for Venice and Padova that combines automated Sub
 - **Payments:** Stripe on the web (Checkout + Customer Portal), built in Stripe test mode first. App Store / Google Play billing deferred while there is no native app.
 - **Entitlement:** a `subscriptions` table written only by Stripe webhooks (service role); users can read their own row.
 - **Rollout:** behind `NEXT_PUBLIC_PAYWALL_ENABLED` (off by default); production eventually, after Stripe test-mode verification.
-- **Known limit:** the gate is enforced in the UI and server rendering; `listings_public` remains readable with the anon key until RLS is tightened.
+- **Data-level gate (decided 2026-10-25 23:14 Rome, "1–6 按推荐做"):** migration `044_listings_paywall_rls.sql` makes `listings_public` and `listings` unreadable to the anon key and to signed-in non-subscribers (authors still read their own listings; the service role is unaffected). The locked teaser comes from `listings_paywall_teaser()` (count + up to 6 photo URLs only). 044 is applied only at go-live, together with `NEXT_PUBLIC_PAYWALL_ENABLED=true`. Until then the gate is UI and server rendering only.
+- **Grace period (same decision):** `past_due` keeps access for 3 days from when the subscription entered past_due (`subscriptions.past_due_since`, migration 043), not from `current_period_end`, because Stripe advances the period on the renewal attempt.
+- **Legal copy (agreed 2026-10-25 23:14, "同意7"):** Terms and Privacy carry subscription, cancellation, Stripe and stored-data sections on paywall-enabled builds only. They need Guang's legal review before production.
+- **Live keys (agreed 2026-10-25 23:14, "同意8"):** `lib/stripe/config.ts` refuses `sk_live_` / `rk_live_` keys by design. Going live requires a dedicated code change to accept them, plus live prices and webhooks.
+- **Ownership:** Stripe test prices, Vercel Preview env and webhook/Portal setup (items 1–3) are handled by other bots; migration 042 was applied to production by the operator (item 4).
 
 ### Technical constraints
 

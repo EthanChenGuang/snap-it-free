@@ -1,11 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { Button } from '@/components/ui/button';
 import { useMessages } from '@/lib/i18n/useMessages';
-import type { OnboardingState } from '@/lib/paywall/onboarding-flow';
 import {
   DEFAULT_PLAN_ID,
   PAYWALL_PLANS,
@@ -14,13 +13,11 @@ import {
   perWeekCents,
   type PlanId,
 } from '@/lib/paywall/plans';
+import { checkRestore, startCheckout, type PurchaseState, type RestoreOutcome } from '@/lib/paywall/purchase';
 import { cn } from '@/lib/utils';
 
 type PaywallScreenProps = {
-  purchase: OnboardingState['purchase'];
-  titleRef: React.Ref<HTMLHeadingElement>;
   titleId: string;
-  onStartPurchase: () => void;
   onFinish: () => void;
 };
 
@@ -32,14 +29,19 @@ const PLAN_COPY: Record<PlanId, { label: PlanCopyKey; period: PlanCopyKey }> = {
   yearly: { label: 'planYearly', period: 'periodYearly' },
 };
 
-
-export function PaywallScreen({ purchase, titleRef, titleId, onStartPurchase, onFinish }: PaywallScreenProps) {
+export function PaywallScreen({ titleId, onFinish }: PaywallScreenProps) {
   const { messages, language } = useMessages();
   const copy = messages.paywall;
   const [selectedId, setSelectedId] = useState<PlanId>(DEFAULT_PLAN_ID);
-  const [restoreChecked, setRestoreChecked] = useState(false);
+  const [purchase, setPurchase] = useState<PurchaseState>('idle');
+  const [restore, setRestore] = useState<RestoreOutcome | null>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const selected = getPlan(selectedId);
   const price = (cents: number) => formatCents(cents, selected.currency, language);
+
+  useEffect(() => {
+    titleRef.current?.focus({ preventScroll: true });
+  }, [purchase]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -48,6 +50,20 @@ export function PaywallScreen({ purchase, titleRef, titleId, onStartPurchase, on
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onFinish]);
+
+  const subscribe = async () => {
+    setPurchase('pending');
+    const outcome = await startCheckout(selectedId);
+    if (outcome.kind === 'redirect') window.location.assign(outcome.url);
+    else if (outcome.kind === 'reload') window.location.reload();
+    else setPurchase(outcome.state);
+  };
+
+  const restorePurchases = async () => {
+    const outcome = await checkRestore();
+    if (outcome === 'reload') window.location.reload();
+    else setRestore(outcome);
+  };
 
   const closeButton = (
     <button
@@ -61,26 +77,39 @@ export function PaywallScreen({ purchase, titleRef, titleId, onStartPurchase, on
     </button>
   );
 
-  if (purchase === 'comingSoon') {
+  const notice =
+    purchase === 'comingSoon'
+      ? { icon: 'schedule', title: copy.comingSoonTitle, body: copy.comingSoonBody }
+      : purchase === 'signInRequired'
+        ? { icon: 'person', title: copy.signInTitle, body: copy.signInBody }
+        : null;
+
+  if (notice) {
     return (
       <>
         <header className="flex h-14 shrink-0 items-center justify-end px-space-md">{closeButton}</header>
-        <div className="flex flex-1 flex-col justify-center px-gutter pb-space-xl" role="status">
+        <div className="flex flex-1 flex-col justify-center px-gutter pb-space-xl" role="status" data-testid={`paywall-${purchase}`}>
           <div className="mb-space-lg flex h-20 w-20 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest">
-            <SymbolIcon name="schedule" className="text-[40px] text-on-surface" />
+            <SymbolIcon name={notice.icon} className="text-[40px] text-on-surface" />
           </div>
-          <h1
-            id={titleId}
-            ref={titleRef}
-            tabIndex={-1}
-            className="text-h3 text-on-surface outline-none"
-          >
-            {copy.comingSoonTitle}
+          <h1 id={titleId} ref={titleRef} tabIndex={-1} className="text-h3 text-on-surface outline-none">
+            {notice.title}
           </h1>
-          <p className="mt-space-sm text-body-lg text-on-surface-variant">{copy.comingSoonBody}</p>
+          <p className="mt-space-sm text-body-lg text-on-surface-variant">{notice.body}</p>
         </div>
-        <footer className="shrink-0 border-t border-outline-variant px-gutter py-space-md">
-          <Button type="button" className="h-12 w-full" onClick={onFinish} data-testid="paywall-coming-soon-continue">
+        <footer className="flex shrink-0 flex-col gap-space-sm border-t border-outline-variant px-gutter py-space-md">
+          {purchase === 'signInRequired' && (
+            <Button asChild className="h-12 w-full">
+              <Link href="/settings">{copy.goToSettings}</Link>
+            </Button>
+          )}
+          <Button
+            type="button"
+            variant={purchase === 'signInRequired' ? 'ghost' : 'default'}
+            className="h-12 w-full"
+            onClick={onFinish}
+            data-testid="paywall-coming-soon-continue"
+          >
             {copy.comingSoonContinue}
           </Button>
         </footer>
@@ -169,9 +198,20 @@ export function PaywallScreen({ purchase, titleRef, titleId, onStartPurchase, on
       </div>
 
       <footer className="shrink-0 border-t border-outline-variant px-gutter pt-space-md pb-space-sm">
-        <Button type="button" className="h-12 w-full" onClick={onStartPurchase} data-testid="paywall-cta">
-          {copy.cta}
+        <Button
+          type="button"
+          className="h-12 w-full"
+          disabled={purchase === 'pending'}
+          onClick={() => void subscribe()}
+          data-testid="paywall-cta"
+        >
+          {purchase === 'pending' ? copy.pending : copy.cta}
         </Button>
+        {purchase === 'error' && (
+          <p role="alert" className="mt-space-sm text-center text-label-sm text-error" data-testid="paywall-checkout-error">
+            {copy.checkoutError}
+          </p>
+        )}
         <p className="mt-space-sm text-center text-label-sm text-on-surface-variant" data-testid="paywall-renewal">
           {copy.renewal(price(selected.priceCents), copy[PLAN_COPY[selected.id].period])}
         </p>
@@ -179,7 +219,7 @@ export function PaywallScreen({ purchase, titleRef, titleId, onStartPurchase, on
           <button
             type="button"
             className="min-h-9 underline-offset-2 hover:underline"
-            onClick={() => setRestoreChecked(true)}
+            onClick={() => void restorePurchases()}
           >
             {copy.restore}
           </button>
@@ -192,9 +232,9 @@ export function PaywallScreen({ purchase, titleRef, titleId, onStartPurchase, on
             {copy.privacy}
           </Link>
         </nav>
-        {restoreChecked && (
+        {restore && (
           <p role="status" className="text-center text-label-sm text-on-surface-variant">
-            {copy.restoreNothing}
+            {restore === 'signIn' ? copy.restoreSignIn : copy.restoreNothing}
           </p>
         )}
       </footer>

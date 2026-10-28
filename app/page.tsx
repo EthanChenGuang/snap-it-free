@@ -6,9 +6,9 @@ import {
   FEED_SSR_LISTING_LIMIT,
   getActiveListings,
   getActiveListingsCount,
+  getLockedTeaser,
 } from '@/lib/listings/queries';
 import type { ListingRow } from '@/lib/listings/types';
-import { lockedPreviewPhotos } from '@/lib/paywall/locked-preview';
 import { getListingAccess } from '@/lib/paywall/server-access';
 
 export const dynamic = 'force-dynamic';
@@ -20,6 +20,16 @@ type FeedHomePageProps = {
 export default async function FeedHomePage({ searchParams }: FeedHomePageProps) {
   const access = await getListingAccess(await searchParams);
 
+  if (access === 'locked') {
+    const teaser = await getLockedTeaser();
+    return (
+      <>
+        <LockedFeed count={teaser.count} photos={teaser.photoUrls} />
+        <OnboardingGate />
+      </>
+    );
+  }
+
   let listings: ListingRow[] = [];
   let totalCount: number | null = null;
   try {
@@ -29,15 +39,6 @@ export default async function FeedHomePage({ searchParams }: FeedHomePageProps) 
     ]);
   } catch (error) {
     console.error('Failed to load listings for feed home:', error);
-  }
-
-  if (access === 'locked') {
-    return (
-      <>
-        <LockedFeed count={totalCount} photos={lockedPreviewPhotos(listings)} />
-        <OnboardingGate />
-      </>
-    );
   }
 
   return (

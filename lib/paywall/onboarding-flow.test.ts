@@ -45,13 +45,6 @@ describe('onboardingReducer', () => {
     expect(run([{ type: 'next' }, { type: 'next' }, { type: 'skip' }]).screen).toBe('paywall');
   });
 
-  it('turns the CTA into the coming-soon state without leaving the paywall', () => {
-    const paywall = run([{ type: 'skip' }]);
-    const after = onboardingReducer(paywall, { type: 'startPurchase' });
-    expect(after).toEqual({ screen: 'paywall', city: null, purchase: 'comingSoon' });
-    expect(onboardingReducer(INITIAL_ONBOARDING_STATE, { type: 'startPurchase' }).purchase).toBe('idle');
-  });
-
   it('finishes from anywhere and stays done', () => {
     const done = run([{ type: 'next' }, { type: 'finish' }]);
     expect(done.screen).toBe('done');

@@ -8,8 +8,6 @@ export type OnboardingScreen = IntroStep | 'paywall' | 'done';
 export type OnboardingState = {
   screen: OnboardingScreen;
   city: ConsumerCityKey | null;
-  /** `comingSoon` replaces the paywall body after the CTA, since payments are not enabled. */
-  purchase: 'idle' | 'comingSoon';
 };
 
 export type OnboardingAction =
@@ -17,13 +15,11 @@ export type OnboardingAction =
   | { type: 'back' }
   | { type: 'skip' }
   | { type: 'selectCity'; city: ConsumerCityKey }
-  | { type: 'startPurchase' }
   | { type: 'finish' };
 
 export const INITIAL_ONBOARDING_STATE: OnboardingState = {
   screen: 'welcome',
   city: null,
-  purchase: 'idle',
 };
 
 const SCREEN_ORDER: readonly OnboardingScreen[] = [...INTRO_STEPS, 'paywall', 'done'];
@@ -58,9 +54,6 @@ export function onboardingReducer(state: OnboardingState, action: OnboardingActi
     case 'selectCity':
       if (state.screen !== 'city') return state;
       return { ...state, city: action.city };
-    case 'startPurchase':
-      if (state.screen !== 'paywall') return state;
-      return { ...state, purchase: 'comingSoon' };
     case 'finish':
       return { ...state, screen: 'done' };
   }

@@ -33,11 +33,18 @@ The surface is the mobile-first web PWA served by `next start`. All helpers live
 
 | Journey | Build | Proves |
 | --- | --- | --- |
-| `flag-off` | off | no overlay, feed open, real listing cards (`00-flag-off.png`) |
+| `flag-off` | off | no overlay, feed open, real listing cards, Terms without subscription text (`00-flag-off.png`) |
 | `onboarding` | off | `?onboarding=1` walk of all steps, real teaser, alerts, hard paywall, coming-soon CTA, locked feed and detail, zh copy (`01`–`13`) |
 | `desktop-paywall` | off | 1280x800 centered paywall card (`14`) |
 | `compare` | off, twice | home DOM identical to the `--base` server once scripts are dropped |
-| `persist` | on | shows without a param, not again after completion + reload, locked feed/favorites, no listing payload in HTML (`15`–`17`) |
+| `persist` | on | shows without a param, not again after completion + reload, locked feed/favorites, no listing payload in HTML, subscription Terms/Privacy, real city teaser (`15`–`20`) |
+
+## Data-layer checks (migrations and RLS)
+
+`supabase/tests/run-local.sh [PORT]` proves the database side without any remote access. It starts a throwaway `supabase/postgres:17` container, applies `supabase/tests/support/hosted-supabase-shim.sql` (test-only stand-ins for `storage.*`, `auth.jwt()`, `auth.uid()` and `auth.role()` as the hosted stack defines them), then every numbered migration in order, then each `supabase/tests/*.check.sql`. The container is removed on exit. Every check prints `PASS ...` lines and ends with `CHECKS PASSED`. A failed assertion stops the script non-zero.
+
+- The runner drops `listings_public` before any migration that uses `create or replace view` on it, because 020 reorders its columns, which Postgres rejects. 021, 035 and 036 recreate it anyway.
+- Never point it at a real project. It never reads `.env*`.
 
 ## Evidence
 
