@@ -1,5 +1,24 @@
 # HANDOFF: feat/onboarding-snag (GSD quick 261028-ob2), stacked on feat/stripe-subscriptions
 
+## WIP 261029 follow-up (CC snap-it-free, claude-ethan) — IMPLEMENT only, not yet browser-verified
+
+Guang-approved 3 changes (PROMPT3). Details in `.planning/quick/261028-ob2-onboarding-snag-redesign/SUMMARY.md` ("Follow-up 261029").
+
+- **zh paywall headline spacing.** `messages/zh.ts` now renders `解锁威尼斯的 355 件免费物品` (no spaces
+  around the Chinese city name; space kept around the Latin number). Same fix applied to the other zh
+  strings that interpolated the city the same way (preview result/low-supply, alerts mock line).
+  `en`/`it` unchanged. New `messages/zh.test.ts` asserts the exact strings.
+- **QA account-skip stub gated to non-production.** New pure `isAccountSkipStubAllowed()` in
+  `lib/paywall/gate.ts` (OFF only when `NEXT_PUBLIC_VERCEL_ENV === 'production'`); `next.config.ts`
+  bakes `VERCEL_ENV` into `NEXT_PUBLIC_VERCEL_ENV` at build time (no Vercel settings changed).
+  `AccountStep` honours it, so production can never skip the required sign-up. Unit test added.
+- **drive.mjs environment-aware.** CTA retry asserts "Payments aren't enabled yet" when payments are
+  off and the sign-in notice when payments are on (detected via `GET /api/subscription` `configured`);
+  locked-detail probe falls back to a real listing id from the onboarding teaser's `listings_public`
+  response when `/` has no link, and SKIPs (never PASS) only if none. Never signs up on the Preview.
+- **Verified locally:** `npm run lint` clean; `npm test` 130 files / 800 tests pass;
+  `node --check` drive.mjs OK. Browser walk (local + Preview) deferred to a fresh run.
+
 ## Update 2026-10-29 06:20 Rome (CC snap-it-free, claude-ethan)
 
 - **Fixed (f781014, a076632, 83ecf73, 2bb4c3a):** paywall fits all 3 plan cards + "Save 66%" above the fixed CTA on 390x844 and 412x915 (en/it/zh); CTA "Unlock my feed" / "Sblocca il mio feed" / "解锁我的推荐"; Italian "Più conveniente" badge inline; tsc error in `lib/favorites/store.test.ts` fixed (test only); drive.mjs takes an optional `VERCEL_SHARE_TOKEN` env var (never committed) and now checks screen 10.
