@@ -13,7 +13,7 @@ Ten screens: **hook → how it works → interests → mobility → city → pre
 - `ob-preview` "building your feed" only while the real teaser is in flight, then the real count + blurred real photos (RPC on flag-on, rows fallback otherwise). "Save my feed" → account; "See plans" → paywall.
 - `ob-account` **required** sign-up (no "Not now"): real Google OAuth + email OTP. Resume across the redirect via `shoumanwu_onboarding_resume_v2`.
 - `ob-alerts` labelled **Example** notifications, then "Turn on alerts" (real push hook). "Not now" → paywall. On success an honest alert is created from the answers.
-- `ob-paywall` personalized headline (real city count), blurred photo strip, real 7-day Veneto proof line, computed+floored savings tag (66%), billed line, always-visible ✕. Fixes P1-3 (empty band) and P2-3 (IT badge wrap).
+- `ob-paywall` personalized headline (real city count), blurred photo strip, real 7-day Veneto proof line, computed+floored savings tag (66%), billed line, always-visible ✕. CTA reads **"Unlock my feed" / "Sblocca il mio feed" / "解锁我的推荐"**. All three plan cards (incl. the yearly savings tag) fit without scrolling on 390×844 and 412×915 in en/it/zh. Fixes P1-3 (empty band) and P2-3 (IT badge wrap) and the first-view clipped-yearly-card snag.
 
 ## QA stub for the required account step
 
@@ -28,7 +28,8 @@ The account step is a hard gate. For verification only, `drive.mjs` sets `localS
 
 Preconditions: doctor OK, `.env.local` present, fresh browser context (the script makes one per journey).
 
-- **Walk.** `node scripts/drive.mjs onboarding --url $URL --out $OUT` walks all ten screens (stubbed account), asserting `data-screen` on `[data-testid=onboarding-overlay]`, the P1-2 city order, the real preview count (`[data-testid=preview-count]`), the personalized paywall headline, the true savings tag, and the completed-`v2` + persisted prefs. Shots `01`–`13`.
+- **Walk.** `node scripts/drive.mjs onboarding --url $URL --out $OUT` walks all ten screens (stubbed account), asserting `data-screen` on `[data-testid=onboarding-overlay]`, the P1-2 city order, the real preview count (`[data-testid=preview-count]`), the personalized paywall headline, the true savings tag, the **"Unlock my feed"** CTA label, that all three plan cards fit without scrolling, screen 10 (the post-paywall locked feed **with the user's city + interest choices applied**), and the completed-`v2` + persisted prefs. Shots `01`–`13`.
+- **Against a protected Vercel Preview.** Set `VERCEL_SHARE_TOKEN=<token>` in the environment; every fresh context first visits `${URL}/?_vercel_share=<token>` to plant the protection-bypass cookie. The token is read from env only — never hardcoded or committed.
 - **Once only.** `persist` (flag-on) completes as a guest via Skip → See plans → Close, reloads, asserts no overlay, and re-checks the real preview count through `walkToPreview`.
 - **Desktop.** `desktop-paywall` reaches the paywall via Skip → See plans and checks the centered ≤440px card.
 

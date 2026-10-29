@@ -18,6 +18,9 @@ const opt = (name, fallback) => {
 const url = opt('url');
 const out = opt('out', '/tmp/verify-snap-it-free/evidence');
 const lang = opt('lang', 'en');
+// Optional: a Vercel deployment-protection share token (read from env only, never hardcoded/committed).
+// When set, each fresh context first visits `${url}/?_vercel_share=<token>` to plant the bypass cookie.
+const shareToken = process.env.VERCEL_SHARE_TOKEN || '';
 mkdirSync(out, { recursive: true });
 
 const PHONE = { width: 390, height: 844 };
@@ -46,7 +49,14 @@ async function newPage(browser, viewport = PHONE, language = lang, { stubAuth = 
       } catch {}
     });
   }
-  return { context, page: await context.newPage() };
+  const page = await context.newPage();
+  // Plant the Vercel protection-bypass cookie once per context, before the real navigations.
+  if (shareToken && url) {
+    await page
+      .goto(`${url}/?_vercel_share=${encodeURIComponent(shareToken)}`, { waitUntil: 'domcontentloaded' })
+      .catch(() => {});
+  }
+  return { context, page };
 }
 
 /** Walk the five value-prop steps to the personal preview. Picks `city` on the city step. */
@@ -205,6 +215,23 @@ async function onboarding(browser) {
   check(renewal.startsWith('€19.99 per year. Renews automatically'), `price + auto-renewal near CTA: "${renewal}"`);
   check((await page.getByRole('link', { name: 'Terms' }).getAttribute('href')) === '/terms', 'Terms links to /terms');
   check((await page.getByRole('link', { name: 'Privacy' }).getAttribute('href')) === '/privacy', 'Privacy links to /privacy');
+  check(
+    (await page.getByTestId('paywall-cta').innerText()).trim() === 'Unlock my feed',
+    'paywall CTA reads "Unlock my feed"',
+  );
+  // All three plan cards (incl. the yearly savings tag) must be fully in view without scrolling.
+  const cardsVisible = await page.evaluate(() => {
+    const weekly = document.querySelector('[data-testid="paywall-plan-weekly"]');
+    const scroller = weekly?.closest('.overflow-y-auto');
+    const savings = document.querySelector('[data-testid="paywall-savings"]');
+    if (!scroller || !savings || !weekly) return false;
+    const box = scroller.getBoundingClientRect();
+    const top = weekly.getBoundingClientRect().top;
+    const bottom = savings.getBoundingClientRect().bottom;
+    // Visible band of the scroll area, with a 1px tolerance.
+    return top >= box.top - 1 && bottom <= box.bottom + 1 && scroller.scrollHeight <= scroller.clientHeight + 1;
+  });
+  check(cardsVisible, 'all three plan cards + the yearly savings tag fit without scrolling');
   await shot(page, '09-paywall');
 
   await page.getByTestId('paywall-plan-weekly').click();
@@ -247,9 +274,15 @@ async function onboarding(browser) {
   check(prefs.city === 'milano', `picked city persisted in filter prefs (${prefs.city})`);
   check(Array.isArray(prefs.categories) && prefs.categories.includes('libri-riviste'), `interests persisted as real category slugs (${JSON.stringify(prefs.categories)})`);
 
-  // 10 · After = locked feed for a non-subscriber
+  // 10 · The feed after the paywall, with the user's choices applied.
+  // Honest outcome: the onboarding answers (city + interests) persist, yet a non-subscriber's feed
+  // stays locked — closing the paywall never unlocks content.
   check(await page.getByTestId('locked-feed').isVisible(), 'step 10: non-subscriber lands on the locked feed');
   check((await page.locator('a[href^="/listing/"]').count()) === 0, 'locked feed renders no listing links');
+  check(
+    prefs.city === 'milano' && Array.isArray(prefs.categories) && prefs.categories.includes('libri-riviste'),
+    'step 10: the user\'s city + interest choices are applied (persisted) on the post-paywall feed',
+  );
   await shot(page, '10-locked-feed');
 
   await page.getByTestId('locked-see-plans').click();
@@ -279,6 +312,10 @@ async function onboarding(browser) {
   await settle(zh.page);
   check(await screenIs(zh.page, 'paywall'), 'zh: See plans reaches the paywall');
   check((await zh.page.getByText('零元 Plus').count()) === 1, 'paywall brand localised in zh (零元 Plus)');
+  check(
+    (await zh.page.getByTestId('paywall-cta').innerText()).trim() === '解锁我的推荐',
+    'zh: paywall CTA reads 解锁我的推荐',
+  );
   await shot(zh.page, '13-paywall-zh');
   await zh.context.close();
 }

@@ -59,6 +59,16 @@ describe('PaywallScreen checkout failures', () => {
     const container = await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} />);
     expect(alertText(container)).toBeNull();
   });
+
+  it.each<[AppLanguage, string]>([
+    ['en', 'Unlock my feed'],
+    ['it', 'Sblocca il mio feed'],
+    ['zh', '解锁我的推荐'],
+  ])('labels the CTA "%s → %s"', async (language, label) => {
+    expect(getMessages(language).paywall.cta).toBe(label);
+    const container = await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} />, language);
+    expect(cta(container)?.textContent).toBe(label);
+  });
 });
 
 describe('PaywallScreen personalization (honest, real figures)', () => {
