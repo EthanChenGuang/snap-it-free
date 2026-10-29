@@ -39,6 +39,7 @@
     "node_modules",
     "scraper",
     "scraper-admin",
-    "src"
+    "src",
+    ".cursor"
   ]
 }
