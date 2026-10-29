@@ -1,6 +1,6 @@
 # HANDOFF: feat/onboarding-snag (GSD quick 261028-ob2), stacked on feat/stripe-subscriptions
 
-## WIP 261029 follow-up (CC snap-it-free, claude-ethan) — IMPLEMENT only, not yet browser-verified
+## 261029 follow-up (CC snap-it-free, claude-ethan) — implemented (63f4a2f, bb6c836, fcd0d7b) and verified on the Preview
 
 Guang-approved 3 changes (PROMPT3). Details in `.planning/quick/261028-ob2-onboarding-snag-redesign/SUMMARY.md` ("Follow-up 261029").
 
@@ -17,7 +17,18 @@ Guang-approved 3 changes (PROMPT3). Details in `.planning/quick/261028-ob2-onboa
   locked-detail probe falls back to a real listing id from the onboarding teaser's `listings_public`
   response when `/` has no link, and SKIPs (never PASS) only if none. Never signs up on the Preview.
 - **Verified locally:** `npm run lint` clean; `npm test` 130 files / 800 tests pass;
-  `node --check` drive.mjs OK. Browser walk (local + Preview) deferred to a fresh run.
+  `node --check` drive.mjs OK.
+- **Verified on the Preview (deployment for b0c5f94, Ready, branch alias
+  zerodollar-git-feat-on-4ecf97-…vercel.app; share token passed via env only):** `drive.mjs onboarding`
+  53/53 pass, 0 FAIL/SKIP (payments-on branch: guest CTA -> checkout 401 sign-in, no charge; locked-detail
+  used a teaser listing id and shows the lock). 6-run Playwright walk (iPhone 390x844 / Android 412x915 x
+  en/it/zh): all reach hook>...>paywall>locked feed, 0 page errors, stub still works on Preview, yearly card
+  bottom 551-595px vs CTA top 711-797px. zh iPhone paywall headline renders `解锁威尼斯的 355 件免费物品`.
+- **Local drive (prod build, payments off):** 50/52 + 1 SKIP. Payments-off CTA branch PASS and stub PASS.
+  The 2 FAILs (real count for Milan, count+city headline) and the locked-detail SKIP happen because the box
+  `.env.local` has no Supabase public vars, so the local build has no listing data. This is a box setup gap,
+  not a product bug. Fix: put the SnapItFree public URL/anon key in `.env.local` (Guang).
+- **Next:** Guang decides merge/go-live. The EU 14-day withdrawal Terms copy is deliberately not written (Guang).
 
 ## Update 2026-10-29 06:20 Rome (CC snap-it-free, claude-ethan)
 
