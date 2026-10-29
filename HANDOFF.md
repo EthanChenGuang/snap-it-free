@@ -1,5 +1,11 @@
 # HANDOFF: feat/onboarding-snag (GSD quick 261028-ob2), stacked on feat/stripe-subscriptions
 
+## Update 2026-10-29 06:20 Rome (CC snap-it-free, claude-ethan)
+
+- **Fixed (f781014, a076632, 83ecf73, 2bb4c3a):** paywall fits all 3 plan cards + "Save 66%" above the fixed CTA on 390x844 and 412x915 (en/it/zh); CTA "Unlock my feed" / "Sblocca il mio feed" / "解锁我的推荐"; Italian "Più conveniente" badge inline; tsc error in `lib/favorites/store.test.ts` fixed (test only); drive.mjs takes an optional `VERCEL_SHARE_TOKEN` env var (never committed) and now checks screen 10.
+- **Verified:** `npm run lint` pass; `npm test` 129 files / 793 tests pass. `drive.mjs onboarding` against the Preview (en): 51/53 pass. The 2 fails are environment, not product: (1) the unstubbed CTA retry expects "Payments aren't enabled yet" (local flag-off Stripe), but the Preview has Stripe test mode on, so a guest gets the sign-in path instead; (2) the locked-detail probe needs a listing link from `/`, which the Preview's paywalled feed does not render. 6-run Playwright walk (iPhone/Android x en/it/zh) on the Preview: all reach hook>...>paywall>feed, no page errors; yearly card bottom 555-595px vs CTA top 711-797px; screen 10 is the locked feed with the chosen city + category chips applied.
+- **Still open:** make drive.mjs's two Preview-only checks environment-aware; zh paywall headline has spaces around the city ("解锁 威尼斯 的 355 件免费物品"); `?onboarding=1` stub-auth skip and EU 14-day withdrawal copy are for Guang.
+
 ## WIP 2026-10-28 23:55 Rome (CC snap-it-free, claude-ethan hit its session limit, resets 04:10 Rome)
 
 - **Done:** 10-screen Snag-modelled onboarding per the research PROPOSAL (hook with real counts/photos, how it works, category quiz, travel-mode quiz -> default radius, city, feed-ready blurred real photos, account REQUIRED (no skip), alerts, paywall with close X visible from start, yearly preselected, "Save N% vs monthly" computed (floored) from real prices, NO free trial, then feed with choices applied). City list now puts Venice and Padova first (P1-2). Paywall/locked layout and Italian badge wrap (P1-3, P2-3) addressed in code; en/it/zh strings. Gate key bumped so existing users see the new flow once. Details: `.planning/quick/261028-ob2-onboarding-snag-redesign/`.
