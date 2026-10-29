@@ -1,6 +1,10 @@
 # Local tooling / agent config (not part of app source)
 .planning/
-.cursor/
+.cursor/*
+!.cursor/environment.json
+!.cursor/mcp.json
+!.cursor/Dockerfile
+!.cursor/cloud-install.sh
 .claude/
 
 # Build / local dev artifacts
