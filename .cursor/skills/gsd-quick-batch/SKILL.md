@@ -63,7 +63,7 @@ instead, or file the tasks individually.
 </objective>
 
 <execution_context>
-@/workspace/.cursor/gsd-core/workflows/quick-batch.md
+@.cursor/gsd-core/workflows/quick-batch.md
 </execution_context>
 
 <context>
@@ -89,9 +89,9 @@ and newlines in the text cannot break out). Paste the exact contents of the
 
 ```bash
 QUICK_BATCH_PARSE_FILE=$(mktemp)
-gsd_run quick-batch parse-args --raw --stdin > "$QUICK_BATCH_PARSE_FILE" 2>&1 <<'GSD_QUICK_BATCH_ARGS_END_e7c5fb225cfe1f88da54cf84831e1fb7'
+gsd_run quick-batch parse-args --raw --stdin > "$QUICK_BATCH_PARSE_FILE" 2>&1 <<'GSD_QUICK_BATCH_ARGS_END_a1e0af3a49b1e6490d22bcc911ba770f'
 <the exact contents of the `<arguments>` block, verbatim>
-GSD_QUICK_BATCH_ARGS_END_e7c5fb225cfe1f88da54cf84831e1fb7
+GSD_QUICK_BATCH_ARGS_END_a1e0af3a49b1e6490d22bcc911ba770f
 QUICK_BATCH_PARSE_RC=$?
 QUICK_BATCH_PARSE=$(cat "$QUICK_BATCH_PARSE_FILE"); rm -f "$QUICK_BATCH_PARSE_FILE"
 ```
