@@ -532,12 +532,12 @@ export const messages = {
       count === 1
         ? '1 nuovo oggetto gratis in Veneto negli ultimi 7 giorni'
         : `${count.toLocaleString('it-IT')} nuovi oggetti gratis in Veneto negli ultimi 7 giorni`,
-    savingsVsMonthly: (pct: number) => `Risparmi il ${pct}% rispetto al mensile`,
+    savingsVsMonthly: (pct: number) => `Risparmi il ${pct}%`,
     billed: (price: string) => `Addebito di ${price} all’anno`,
     freeNote: 'Gli oggetti sono gratis; l’abbonamento paga il servizio che li raccoglie in un unico posto.',
     benefitListings: 'Tutti gli annunci gratis attivi, da tutte le fonti',
     benefitMap: 'Feed completo, mappa e filtri',
-    benefitAlerts: 'Avvisi per parole chiave quando c’è una corrispondenza',
+    benefitAlerts: 'Avvisi per le tue parole chiave',
     benefitSupport: 'Sostieni un progetto indipendente',
     plansLabel: 'Scegli un piano',
     planWeekly: 'Settimanale',
@@ -547,8 +547,8 @@ export const messages = {
     periodMonthly: 'mese',
     periodYearly: 'anno',
     bestValue: 'Più conveniente',
-    perWeek: (price: string) => `${price} / settimana`,
-    cta: 'Continua',
+    perWeek: (price: string) => `${price} / sett.`,
+    cta: 'Sblocca il mio feed',
     renewal: (price: string, period: string) =>
       `${price} ogni ${period}. Si rinnova automaticamente finché non annulli. Puoi annullare quando vuoi.`,
     restore: 'Ripristina acquisti',

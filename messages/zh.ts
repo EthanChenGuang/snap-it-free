@@ -518,7 +518,7 @@ export const messages: Messages = {
     periodYearly: '年',
     bestValue: '最划算',
     perWeek: (price: string) => `${price} / 周`,
-    cta: '继续',
+    cta: '解锁我的推荐',
     renewal: (price: string, period: string) =>
       `每${period} ${price}。到期自动续订，直到你取消。可随时取消。`,
     restore: '恢复购买',

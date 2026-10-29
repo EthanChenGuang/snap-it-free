@@ -522,7 +522,7 @@ export const messages: Messages = {
       count === 1
         ? '1 new free item in Veneto in the last 7 days'
         : `${count.toLocaleString('en-US')} new free items in Veneto in the last 7 days`,
-    savingsVsMonthly: (pct: number) => `Save ${pct}% vs monthly`,
+    savingsVsMonthly: (pct: number) => `Save ${pct}%`,
     billed: (price: string) => `Billed ${price} per year`,
     freeNote: 'The items are free; the subscription pays for finding them all in one place.',
     benefitListings: 'Every active free listing, from all sources',
@@ -537,8 +537,8 @@ export const messages: Messages = {
     periodMonthly: 'month',
     periodYearly: 'year',
     bestValue: 'Best value',
-    perWeek: (price: string) => `${price} / week`,
-    cta: 'Continue',
+    perWeek: (price: string) => `${price} / wk`,
+    cta: 'Unlock my feed',
     renewal: (price: string, period: string) =>
       `${price} per ${period}. Renews automatically until you cancel. Cancel anytime.`,
     restore: 'Restore purchases',

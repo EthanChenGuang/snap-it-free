@@ -136,21 +136,21 @@ export function PaywallScreen({ titleId, onFinish, context }: PaywallScreenProps
     <>
       <header className="flex h-14 shrink-0 items-center justify-end px-space-md">{closeButton}</header>
 
-      <div className="no-scrollbar flex flex-1 flex-col overflow-y-auto px-gutter pb-space-md">
+      <div className="no-scrollbar flex flex-1 flex-col overflow-y-auto px-gutter pb-space-sm">
         <p className="text-label-sm font-medium uppercase tracking-[0.08em] text-on-surface-variant">{copy.title}</p>
         <h1
           id={titleId}
           ref={titleRef}
           tabIndex={-1}
-          className="mt-space-xs text-[28px] font-bold leading-[1.2] tracking-[-0.02em] text-on-surface outline-none"
+          className="mt-space-xs text-[26px] font-bold leading-[1.15] tracking-[-0.02em] text-on-surface outline-none"
         >
           {headline}
         </h1>
 
         {strip.length > 0 && (
-          <ul className="mt-space-md grid grid-cols-3 gap-space-sm" aria-hidden data-testid="paywall-photo-strip">
+          <ul className="mt-space-sm grid grid-cols-3 gap-space-sm" aria-hidden data-testid="paywall-photo-strip">
             {strip.map((url) => (
-              <li key={url} className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-surface-container-high">
+              <li key={url} className="relative aspect-[16/10] overflow-hidden rounded-xl bg-surface-container-high">
                 <div className="absolute inset-0 scale-110 blur-[12px]">
                   <ListingPhoto src={url} alt="" variant="thumbnail" sizes="140px" />
                 </div>
@@ -159,22 +159,22 @@ export function PaywallScreen({ titleId, onFinish, context }: PaywallScreenProps
           </ul>
         )}
 
-        <ul className="mt-space-lg space-y-space-sm">
+        <ul className="mt-space-md space-y-1.5">
           {[copy.benefitListings, copy.benefitMap, copy.benefitAlerts, copy.benefitSupport].map((benefit) => (
-            <li key={benefit} className="flex items-start gap-space-sm text-body-md text-on-surface">
-              <SymbolIcon name="check" className="mt-0.5 text-[20px]" />
+            <li key={benefit} className="flex items-start gap-space-sm text-body-md leading-snug text-on-surface">
+              <SymbolIcon name="check" className="mt-0.5 text-[18px]" />
               <span>{benefit}</span>
             </li>
           ))}
         </ul>
 
         {typeof context?.proofCount === 'number' && context.proofCount > 0 && (
-          <p className="mt-space-md text-label-md text-on-surface-variant" data-testid="paywall-proof">
+          <p className="mt-space-sm text-label-sm text-on-surface-variant" data-testid="paywall-proof">
             {copy.proofLine(context.proofCount)}
           </p>
         )}
 
-        <div className="mt-space-lg flex flex-col gap-space-sm" role="radiogroup" aria-label={copy.plansLabel}>
+        <div className="mt-space-md flex flex-col gap-space-sm" role="radiogroup" aria-label={copy.plansLabel}>
           {PAYWALL_PLANS.map((plan) => {
             const active = plan.id === selectedId;
             const labels = PLAN_COPY[plan.id];
@@ -188,7 +188,7 @@ export function PaywallScreen({ titleId, onFinish, context }: PaywallScreenProps
                 data-testid={`paywall-plan-${plan.id}`}
                 onClick={() => setSelectedId(plan.id)}
                 className={cn(
-                  'flex min-h-16 w-full items-center gap-space-md rounded-lg border px-space-md py-space-sm text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline',
+                  'flex w-full items-center gap-space-md rounded-lg border px-space-md py-space-sm text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline',
                   active
                     ? 'border-primary bg-surface-container-lowest'
                     : 'border-outline-variant bg-background hover:bg-surface-container-low',
@@ -204,10 +204,10 @@ export function PaywallScreen({ titleId, onFinish, context }: PaywallScreenProps
                   {active && <span className="h-2.5 w-2.5 rounded-full bg-primary" />}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="flex flex-wrap items-center gap-x-space-sm gap-y-0.5 text-label-md text-on-surface">
-                    <span>{copy[labels.label]}</span>
+                  <span className="flex items-center gap-x-space-sm text-label-md text-on-surface">
+                    <span className="shrink-0">{copy[labels.label]}</span>
                     {plan.highlighted && (
-                      <span className="whitespace-nowrap rounded-full bg-primary px-space-sm py-0.5 text-label-sm leading-tight text-on-primary">
+                      <span className="shrink-0 whitespace-nowrap rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium leading-tight text-on-primary">
                         {copy.bestValue}
                       </span>
                     )}
@@ -239,7 +239,7 @@ export function PaywallScreen({ titleId, onFinish, context }: PaywallScreenProps
         </div>
 
         {context && (
-          <p className="mt-space-md text-label-sm text-on-surface-variant">{copy.freeNote}</p>
+          <p className="mt-space-sm text-label-sm text-on-surface-variant">{copy.freeNote}</p>
         )}
       </div>
 
