@@ -541,6 +541,10 @@ export const messages: Messages = {
       count > 0
         ? `所有城市目前共有 ${count.toLocaleString('zh-CN')} 条有效的免费信息。订阅后即可查看全部内容，包括照片、详情和地图。`
         : '订阅后即可查看所有免费信息，包括照片、详情和地图。',
+    bodyFiltered: (count: number) =>
+      count > 0
+        ? `有 ${count.toLocaleString('zh-CN')} 条免费信息符合你的搜索和筛选。订阅后即可查看全部内容，包括照片、详情和地图。`
+        : '没有符合搜索和筛选的免费信息。订阅后即可查看全部内容，包括照片、详情和地图。',
     previewLabel: '当前信息的模糊预览',
     seePlans: '查看方案',
     signInHint: '已经订阅？',
@@ -553,6 +557,7 @@ export const messages: Messages = {
     favoritesBody: '订阅后即可查看你收藏的信息。',
     backHome: '返回首页',
     checkoutPending: '已经付款？激活可能需要一分钟，请稍后刷新此页面。',
+    checkoutSuccess: '已开通',
   },
   subscription: {
     sectionTitle: '订阅',

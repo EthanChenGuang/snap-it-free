@@ -571,6 +571,10 @@ export const messages = {
       count > 0
         ? `${count.toLocaleString('it-IT')} annunci gratis sono attivi ora in tutte le città. Abbonati per vederli tutti, con foto, dettagli e mappa.`
         : 'Abbonati per vedere tutti gli annunci gratis, con foto, dettagli e mappa.',
+    bodyFiltered: (count: number) =>
+      count > 0
+        ? `${count.toLocaleString('it-IT')} annunci gratis corrispondono a ricerca e filtri. Abbonati per vederli tutti, con foto, dettagli e mappa.`
+        : 'Nessun annuncio gratis corrisponde a ricerca e filtri. Abbonati per vedere tutti gli annunci, con foto, dettagli e mappa.',
     previewLabel: 'Anteprima sfocata degli annunci attuali',
     seePlans: 'Vedi i piani',
     signInHint: 'Sei già abbonato?',
@@ -583,6 +587,7 @@ export const messages = {
     favoritesBody: 'Abbonati per vedere gli annunci che hai salvato.',
     backHome: 'Torna alla home',
     checkoutPending: 'Pagamento effettuato? L’attivazione può richiedere un minuto. Ricarica la pagina tra poco.',
+    checkoutSuccess: 'Ci sei',
   },
   subscription: {
     sectionTitle: 'Abbonamento',

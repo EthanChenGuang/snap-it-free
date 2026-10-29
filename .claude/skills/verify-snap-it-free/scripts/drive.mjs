@@ -321,6 +321,7 @@ async function onboarding(browser) {
   const prefs = await page.evaluate(() => JSON.parse(localStorage.getItem('shoumanwu_filter_prefs') ?? '{}'));
   check(prefs.city === 'milano', `picked city persisted in filter prefs (${prefs.city})`);
   check(Array.isArray(prefs.categories) && prefs.categories.includes('libri-riviste'), `interests persisted as real category slugs (${JSON.stringify(prefs.categories)})`);
+  check(prefs.radiusKm === 5, `mobility radius persisted as 5 km from Bike (${prefs.radiusKm})`);
 
   // 10 · The feed after the paywall, with the user's choices applied.
   // Honest outcome: the onboarding answers (city + interests) persist, yet a non-subscriber's feed
@@ -328,9 +329,35 @@ async function onboarding(browser) {
   check(await page.getByTestId('locked-feed').isVisible(), 'step 10: non-subscriber lands on the locked feed');
   check((await page.locator('a[href^="/listing/"]').count()) === 0, 'locked feed renders no listing links');
   check(
-    prefs.city === 'milano' && Array.isArray(prefs.categories) && prefs.categories.includes('libri-riviste'),
-    'step 10: the user\'s city + interest choices are applied (persisted) on the post-paywall feed',
+    prefs.city === 'milano' && Array.isArray(prefs.categories) && prefs.categories.includes('libri-riviste') && prefs.radiusKm === 5,
+    'step 10: the user\'s city + interest + radius choices are applied (persisted) on the post-paywall feed',
   );
+
+  // P10: search and filters stay usable on the locked feed (lock only detail + favorites).
+  const searchBox = page.locator('header input[type="search"]');
+  check((await searchBox.count()) === 1 && (await searchBox.isEnabled()), 'locked feed: search field is enabled');
+  const countBeforeSearch = (await page.getByTestId('locked-count').innerText().catch(() => '')).trim();
+  const photosBeforeSearch = await page.getByTestId('locked-photos').locator('img').count();
+  await searchBox.fill('zzzz-no-such-item');
+  await settle(page, 800);
+  check((await page.getByTestId('paywall-dialog').count()) === 0, 'locked feed: typing search does not open the paywall');
+  const countAfterSearch = (await page.getByTestId('locked-count').innerText().catch(() => '')).trim();
+  const photosAfterSearch = await page.getByTestId('locked-photos').locator('img').count();
+  if (photosBeforeSearch > 0 || /\d/.test(countBeforeSearch)) {
+    check(
+      countAfterSearch !== countBeforeSearch || photosAfterSearch !== photosBeforeSearch,
+      'locked feed: a real search changes the count or the blurred photos',
+    );
+  } else {
+    console.log('SKIP locked-feed search count: no teaser data in this environment');
+  }
+  await searchBox.fill('');
+  await page.getByRole('button', { name: 'Filters' }).click();
+  await settle(page);
+  check((await page.getByText('City', { exact: true }).count()) >= 1, 'locked feed: filter sheet opens');
+  check((await page.getByTestId('paywall-dialog').count()) === 0, 'locked feed: opening filters does not open the paywall');
+  await page.getByRole('button', { name: 'Apply' }).click();
+  await settle(page);
   await shot(page, '10-locked-feed');
 
   await page.getByTestId('locked-see-plans').click();
@@ -339,6 +366,38 @@ async function onboarding(browser) {
   await shot(page, '11-locked-see-plans');
   await page.getByTestId('paywall-close').click();
   check((await page.getByTestId('paywall-dialog').count()) === 0, 'paywall dialog closes back to the locked feed');
+
+  // P10: Stripe return. Flag-off local → unlocked feed + "You're in". Flag-on Preview → still locked + pending notice.
+  await page.goto(`${url}/?checkout=success`, { waitUntil: 'networkidle' });
+  await settle(page, 1000);
+  const checkoutLocked = (await page.getByTestId('locked-feed').count()) > 0;
+  if (checkoutLocked) {
+    check((await page.getByTestId('checkout-pending').count()) === 1, 'locked + checkout=success: activation can take a minute');
+    check((await page.getByTestId('checkout-success').count()) === 0, "locked + checkout=success: no You're in toast");
+  } else {
+    check(
+      (await page.getByTestId('checkout-success').count()) >= 1 || (await page.getByText("You're in").count()) >= 1,
+      "unlocked + checkout=success: You're in toast",
+    );
+    const unlockedPrefs = await page.evaluate(() => JSON.parse(localStorage.getItem('shoumanwu_filter_prefs') ?? '{}'));
+    check(unlockedPrefs.city === 'milano', `unlocked feed applies onboarding city (${unlockedPrefs.city})`);
+    check(
+      Array.isArray(unlockedPrefs.categories) && unlockedPrefs.categories.includes('libri-riviste'),
+      'unlocked feed applies onboarding interests as category slugs',
+    );
+    check(unlockedPrefs.radiusKm === 5, `unlocked feed applies mobility radius (${unlockedPrefs.radiusKm})`);
+  }
+  await shot(page, '10b-checkout-return');
+
+  await page.goto(`${url}/favorites?onboarding=1`, { waitUntil: 'networkidle' });
+  await settle(page);
+  // Flag-on (Preview / persist): /favorites is locked. Flag-off local: this page ignores
+  // ?onboarding=1 on purpose so it can stay static — SKIP, never PASS.
+  if ((await page.getByTestId('locked-favorites').count()) > 0) {
+    check(true, 'favorites stay locked for a non-subscriber');
+  } else {
+    console.log('SKIP locked-favorites: flag-off build does not preview-lock /favorites (persist journey covers flag-on)');
+  }
 
   // Locked-detail probe. Prefer a listing link from `/` (present when the feed is open, e.g. local
   // flag-off). When the paywalled feed renders no links (e.g. the Preview), fall back to a real id

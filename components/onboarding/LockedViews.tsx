@@ -1,14 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useReducedMotion } from 'motion/react';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
 import { PaywallDialog } from '@/components/onboarding/PaywallDialog';
 import { SymbolIcon } from '@/components/onboarding/SymbolIcon';
+import { useLockedFeedTeaser } from '@/components/onboarding/useLockedFeedTeaser';
 import { Button } from '@/components/ui/button';
 import { useAuthSession } from '@/lib/auth/useAuthSession';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { checkoutReturnNotice, parseCheckoutParam, urlWithoutCheckoutParam } from '@/lib/paywall/checkout-return';
 import { checkRestore } from '@/lib/paywall/purchase';
+import { cn } from '@/lib/utils';
 
 function LockedCard({
   title,
@@ -26,8 +30,11 @@ function LockedCard({
 
   // Back from Stripe but still locked: the webhook has not landed yet.
   useEffect(() => {
-    const state = new URLSearchParams(window.location.search).get('checkout');
-    setCheckoutReturned(state === 'success' || state === 'pending');
+    const notice = checkoutReturnNotice('locked', parseCheckoutParam(window.location.search));
+    setCheckoutReturned(notice === 'pending');
+    if (notice === 'pending') {
+      window.history.replaceState(window.history.state, '', urlWithoutCheckoutParam(window.location.href));
+    }
   }, []);
 
   return (
@@ -37,9 +44,15 @@ function LockedCard({
     >
       <SymbolIcon name="lock" className="text-[32px] text-on-surface" />
       <h1 className="mt-space-md text-h3 text-on-surface">{title}</h1>
-      <p className="mt-space-sm text-body-md text-on-surface-variant">{body}</p>
+      <p className="mt-space-sm text-body-md text-on-surface-variant" data-testid="locked-count">
+        {body}
+      </p>
       {checkoutReturned && (
-        <p role="status" className="mt-space-md rounded-lg border border-outline-variant p-space-md text-body-md text-on-surface">
+        <p
+          role="status"
+          data-testid="checkout-pending"
+          className="mt-space-md rounded-lg border border-outline-variant p-space-md text-body-md text-on-surface"
+        >
           {copy.checkoutPending}
         </p>
       )}
@@ -116,14 +129,22 @@ function AccountPrompt() {
 export function LockedFeed({ count, photos }: { count: number | null; photos: string[] }) {
   const { messages } = useMessages();
   const copy = messages.locked;
+  const reduceMotion = useReducedMotion();
+  const fallback = useMemo(() => ({ count, photoUrls: photos }), [count, photos]);
+  const { teaser, filtered } = useLockedFeedTeaser(fallback);
+  const countCopy = filtered ? copy.bodyFiltered(teaser.count ?? 0) : copy.body(teaser.count ?? 0);
 
   return (
     <main className="feed-home relative flex h-full min-h-0 flex-col overflow-hidden" data-testid="locked-feed">
       <div
-        className="pointer-events-none grid select-none grid-cols-2 gap-x-space-md gap-y-space-lg px-gutter pt-space-xs sm:grid-cols-3 lg:grid-cols-4"
+        className={cn(
+          'pointer-events-none grid select-none grid-cols-2 gap-x-space-md gap-y-space-lg px-gutter pt-space-xs sm:grid-cols-3 lg:grid-cols-4',
+          reduceMotion ? 'transition-opacity duration-150' : 'transition-opacity duration-[240ms]',
+        )}
         aria-hidden
+        data-testid="locked-photos"
       >
-        {photos.map((photoUrl) => (
+        {teaser.photoUrls.map((photoUrl) => (
           <div key={photoUrl} className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-surface-container-high">
             <div className="absolute inset-0 scale-110 blur-[14px]">
               <ListingPhoto src={photoUrl} alt="" variant="thumbnail" sizes="200px" priority />
@@ -133,7 +154,7 @@ export function LockedFeed({ count, photos }: { count: number | null; photos: st
       </div>
       <div className="absolute inset-x-0 bottom-0 top-0 flex items-end justify-center bg-gradient-to-t from-background via-background/90 to-background/10 px-gutter pb-[calc(6rem+env(safe-area-inset-bottom,0px))]">
         <div className="w-full max-w-[440px]">
-          <LockedCard title={copy.title} body={copy.body(count ?? 0)} />
+          <LockedCard title={copy.title} body={countCopy} />
         </div>
       </div>
       <span className="sr-only">{copy.previewLabel}</span>

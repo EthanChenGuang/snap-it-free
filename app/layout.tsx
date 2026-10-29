@@ -10,6 +10,7 @@ import { PwaOnboardingProvider } from '@/components/providers/PwaOnboardingProvi
 import { AppChrome } from '@/components/shell/AppChrome';
 import { DocumentLang } from '@/components/shell/DocumentLang';
 import { AuthErrorFromUrl } from '@/components/auth/AuthErrorFromUrl';
+import { CheckoutReturnFromUrl } from '@/components/onboarding/CheckoutReturnFromUrl';
 import { Toaster } from '@/components/ui/toaster';
 import { APPEARANCE_INIT_SCRIPT } from '@/lib/settings/resolve-appearance';
 import { SUPPRESS_REACT_DEVTOOLS_SUSPENSE_WARNING_SCRIPT } from '@/lib/dev/suppress-react-devtools-suspense-warning-script';
@@ -68,6 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     {children}
                   </AppChrome>
                   <AuthErrorFromUrl />
+                  <CheckoutReturnFromUrl />
                   <Toaster />
                 </PwaOnboardingProvider>
               </FavoritesMergeProvider>

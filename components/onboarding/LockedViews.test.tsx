@@ -18,6 +18,26 @@ afterEach(async () => {
 const signInLink = (container: HTMLElement, language: AppLanguage = 'en') =>
   byText(container, 'a', getMessages(language).locked.signIn);
 
+describe('checkout return on a locked view', () => {
+  afterEach(() => {
+    window.history.replaceState(null, '', '/');
+  });
+
+  it('keeps the activation-can-take-a-minute notice when Stripe returns but the feed is still locked', async () => {
+    window.history.replaceState(null, '', '/?checkout=success');
+    const copy = getMessages('en').locked;
+    const container = await render(<LockedFeed count={12} photos={[]} />);
+    expect(container.querySelector('[data-testid="checkout-pending"]')?.textContent).toBe(copy.checkoutPending);
+    expect(container.textContent).not.toContain(copy.checkoutSuccess);
+  });
+
+  it('does not treat a cancelled Checkout as a pending activation', async () => {
+    window.history.replaceState(null, '', '/?checkout=cancel');
+    const container = await render(<LockedFeed count={12} photos={[]} />);
+    expect(container.querySelector('[data-testid="checkout-pending"]')).toBeNull();
+  });
+});
+
 describe('Locked card account prompt', () => {
   it('asks a signed-out visitor to sign in, linking to Settings', async () => {
     const container = await render(<LockedFeed count={12} photos={[]} />);

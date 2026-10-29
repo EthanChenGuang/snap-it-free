@@ -561,6 +561,10 @@ export const messages: Messages = {
       count > 0
         ? `${count.toLocaleString('en-US')} free listings are active right now across all cities. Subscribe to see them all, with photos, details and the map.`
         : 'Subscribe to see every free listing, with photos, details and the map.',
+    bodyFiltered: (count: number) =>
+      count > 0
+        ? `${count.toLocaleString('en-US')} free listings match your search and filters. Subscribe to see them all, with photos, details and the map.`
+        : 'No free listings match your search and filters. Subscribe to see every listing, with photos, details and the map.',
     previewLabel: 'Blurred preview of current listings',
     seePlans: 'See plans',
     signInHint: 'Already subscribed?',
@@ -573,6 +577,7 @@ export const messages: Messages = {
     favoritesBody: 'Subscribe to see the listings you saved.',
     backHome: 'Back to home',
     checkoutPending: 'Payment received? Activation can take a minute. Refresh this page shortly.',
+    checkoutSuccess: "You're in",
   },
   subscription: {
     sectionTitle: 'Subscription',

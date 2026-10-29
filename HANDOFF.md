@@ -1,41 +1,19 @@
 # HANDOFF: feat/onboarding-snag → Cursor snap-it-free
 
-Handed over 2026-10-29 by CC snap-it-free (Claude Code on the box), because Guang's Claude quota is used up. From now on **Cursor snap-it-free owns this branch**; CC will not push to it unless Guang hands it back.
+Handed over 2026-10-29 by CC snap-it-free (Claude Code on the box). **Cursor snap-it-free owns this branch.**
 
 ## 1. Context
 
-- **Branch:** `feat/onboarding-snag`. It is based on `feat/stripe-subscriptions` @ `ecff082`, which is PR #8 (base `feat/onboarding-paywall`, PR #7, base `main`). There is no PR for this branch yet.
+- **Branch:** `feat/onboarding-snag`. It is based on `feat/stripe-subscriptions` @ `ecff082`, which is PR #8 (base `feat/onboarding-paywall`, PR #7, base `main`). There is no PR for this branch yet. **Do not open one unless Guang asks.**
 - **Goal:** replace the bare 4-step intro with a 10-screen, Snag-modelled onboarding that drives sign-up and paid conversion, honestly. The flow is `hook → how → interests → mobility → city → preview → account → alerts → paywall → feed`.
 - **Design docs (in the repo):**
   - `.planning/onboarding-snag/PROPOSAL.md`: flow, techniques (adopt/adapt/reject), en/it/zh copy, implementation map.
   - `.planning/onboarding-snag/SPEC.md`: public-source teardown of "Snag – Zero Dollar Items".
-  - `.planning/quick/261028-ob2-onboarding-snag-redesign/{PLAN,SUMMARY}.md`: what was built.
-- **Key design decisions (from PROPOSAL):**
-  - Real data only: real counts from the DB/teaser, real listing photos, blurred on the locked screens. Low supply is shown honestly.
-  - The quiz answers are used. Interests set the feed categories, mobility sets the default radius (1/5/15 km), and city sets the city filter. One alert is created after push is enabled.
-  - "Building your feed" runs only while the real request is in flight. There is no fake delay.
-  - Paywall:
-    - The ✕ close is visible from the first frame.
-    - Yearly is preselected, but all 3 plans are visible.
-    - "Save N%" is computed from the real prices and floored (66%). The per-week price sits next to an equally visible billed total.
-    - The CTA reads "Unlock my feed".
-    - The note "the items are free; the subscription pays for finding them" defuses the UCPD "free" risk.
-  - Rejected: unverifiable volume claims, testimonials, ratings and "Top 10" badges, a rating prompt, mock local items, low-contrast Skip, countdowns and false savings.
-  - The zh strings put no spaces around the city: `解锁{city}的 {n} 件免费物品`. This supersedes the copy table in PROPOSAL §4.
-- **Guang's decisions:**
-  - The account step is **sign-up REQUIRED**. There is no "Not now".
-  - **No free trial at launch.** A 7-day trial A/B test comes later, after launch.
-  - **Do NOT write the EU 14-day withdrawal clause in the Terms.** Leave the Terms as they are.
-  - **Keep the QA account-skip stub** (`?onboarding=1` + localStorage `shoumanwu_onboarding_stub_auth=1`), but only in non-production builds. That is done in bb6c836.
-- **Infra:**
-  - **Vercel:** project `zerodollar`, team `chenguangregis-gmailcoms-projects`.
-    - The branch alias is https://zerodollar-git-feat-on-4ecf97-chenguangregis-gmailcoms-projects.vercel.app.
-    - Vercel Authentication is on, so a phone needs a share link. Guang has one; it is never stored in the repo.
-    - The Preview has Stripe **test** mode and `NEXT_PUBLIC_PAYWALL_ENABLED=true`.
-  - **Supabase:** the Preview and production share one Supabase DB (SnapItFree).
-    - Migrations 042 and 043 are applied remotely. 044 (the listings RLS paywall gate) is **not** applied; it is for go-live only.
-    - The app falls back to a row-based teaser before 044, so the teaser RPC 404 on the Preview is expected.
-  - **Production** is https://zerodollar-blond.vercel.app. It is untouched; do not test against it.
+  - `.planning/quick/261028-ob2-onboarding-snag-redesign/{PLAN,SUMMARY}.md`: what was built for the 10-screen flow.
+  - `.planning/phases/02-youre-in-after-purchase/` and `.planning/phases/03-locked-feed-search-filters/`: this run (items 2–3).
+- **Key design decisions (from PROPOSAL):** unchanged. Real data only. Quiz answers used. Paywall ✕ from first frame, yearly preselected, "Unlock my feed", UCPD "free" note. zh: no spaces around the city name.
+- **Guang's decisions:** account step sign-up REQUIRED; no free trial at launch; do **not** write the EU 14-day withdrawal clause; keep the QA account-skip stub in non-production only.
+- **Infra:** unchanged. Preview `zerodollar` / team `chenguangregis-gmailcoms-projects`. Branch alias https://zerodollar-git-feat-on-4ecf97-chenguangregis-gmailcoms-projects.vercel.app. Preview and production share one Supabase DB. Production https://zerodollar-blond.vercel.app is untouched.
 
 ## 2. Done so far (ecff082..HEAD)
 
@@ -55,22 +33,29 @@ Handed over 2026-10-29 by CC snap-it-free (Claude Code on the box), because Guan
 | fcd0d7b | drive.mjs environment-aware: CTA retry checks payments off ("Payments aren't enabled yet") vs on (guest sign-in, checkout 401); locked-detail falls back to a teaser listing id, SKIP never PASS |
 | b0c5f94 | GSD summary + handoff for the 261029 follow-up |
 | 5a9618e | Handoff: 261029 follow-up verified on the Preview |
-| (this commit) | Handover to Cursor: this file, design docs into `.planning/onboarding-snag/`, STATE.md |
+| feb3b96 | Handover to Cursor: this file, design docs into `.planning/onboarding-snag/`, STATE.md |
+| (this commit) | **P10 items 2+3:** "You're in" after Checkout return; locked feed search/filters change real count + blurred photos; unit tests; drive.mjs coverage |
 
 No DB migration on this branch.
 
-**Verification evidence (2026-10-29, at b0c5f94):**
+**Verification evidence (2026-10-29, Cursor snap-it-free, items 2+3):**
+
+- Took over at `feb3b96` (matches expected head; no extra commits beyond it).
 - `npm run lint` (tsc --noEmit): clean.
-- `npm test`: **Test Files 130 passed (130), Tests 800 passed (800)**.
-- **drive.mjs on the Preview:** `onboarding: 53/53 checks passed`, with 0 FAIL and 0 SKIP.
-  - Payments-on branch: a guest tapping the CTA gets the sign-in prompt (checkout 401), no charge.
-  - Locked detail: `/listing/<id>` shows the lock for a non-subscriber.
-- **6-run Playwright walk on the Preview** (iPhone 390x844 and Android 412x915, en/it/zh):
-  - All 6 runs reach hook>…>paywall>locked feed with **0 page errors**.
-  - The yearly card bottom is at 551–595px and the CTA top at 711–797px, so no scroll is needed.
-  - The CTA labels are correct, and the zh headline renders `解锁威尼斯的 355 件免费物品`.
-  - The stub still works on the Preview.
-- The Vercel status for 5a9618e is success (GitHub commit status).
+- `npm test`: **Test Files 132 passed (132), Tests 824 passed (824)** (baseline was 130 / 800).
+- **drive.mjs local** (Node 22, payments off, dummy public env so next can prerender, no real Supabase data):
+  - `RESULT onboarding: 59/61 checks passed`
+  - 2 FAIL (same as the old 50/52 baseline, no listing data):
+    1. `preview shows a real count for Milan: "Your feed is ready"`
+    2. `paywall headline carries the real count + city: "See every free item near you"`
+  - 3 SKIP (never PASS):
+    1. `locked-feed search count: no teaser data in this environment` (new; needs real rows)
+    2. `locked-favorites: flag-off build does not preview-lock /favorites` (new; `/favorites` ignores `?onboarding=1` so it can stay static; persist/Preview cover flag-on)
+    3. `locked-detail: no real listing id` (same as baseline)
+  - New checks that passed: search enabled on locked feed; typing search does not open paywall; filter sheet opens without paywall; You're in on unlocked `/?checkout=success`; city/interests/radius applied (milano, libri-riviste, 5 km).
+- **Viewport screenshots** (local): iPhone 390×844 and Android 412×915 × en/it/zh for locked feed (search header visible) and checkout success (You're in / Ci sei / 已开通). Saved under `/opt/cursor/artifacts/`.
+- **Vercel Preview drive.mjs:** pending a `VERCEL_SHARE_TOKEN` (not in this environment). After push, confirm the newest commit's GitHub commit status is Ready.
+- No sign-ups, no remote migrations, no Vercel settings changes, no production deploys.
 
 ## 3. What's next
 
@@ -80,21 +65,20 @@ Unbuilt or deferred from PROPOSAL/SPEC/PLAN. Each needs Guang's go-ahead where m
    - Events: step_view, step_complete, skip, paywall_view, checkout_start and purchase.
    - The events must be consent-gated. Put them in a new `lib/analytics/onboarding.ts`.
    - The provider choice and the cookie-consent banner are a decision for Guang.
-2. **"You're in" after purchase** (PROPOSAL P10) is not built: no success toast after Stripe Checkout returns.
-   - Only the existing "activation can take a minute" notice exists.
-   - Check that the city, interests and radius are applied when the feed opens unlocked.
-3. **Locked feed: search and filters stay usable** (PROPOSAL P10, "soften paywall on every tap"). Check the current behaviour on the Preview. Lock only the detail and favorites, and let search/filters change the count and the blurred photos.
+2. **"You're in" after purchase** (PROPOSAL P10) — **done this run.** Success toast/banner when the feed is unlocked; pending notice kept when still locked; city, interests and radius applied from onboarding prefs.
+3. **Locked feed: search and filters stay usable** (PROPOSAL P10) — **done this run.** Header search/filters already existed; they now change the real count and blurred photos. Detail and favorites stay locked. Real data only.
 4. **Marketing email opt-in is stored in localStorage only** (`shoumanwu_marketing_optin` in `AccountStep.tsx`).
    - It is not saved to the user's profile, so win-back email (PROPOSAL §3) is impossible.
    - Doing it needs a DB column and a migration. **Ask Guang; no remote migration without him.**
 5. **Teaser migration 045** (category-filtered teaser count + a server-side "new in Veneto in the last 7 days" count) is deferred.
-   - Today these numbers are derived client-side from already-fetched rows.
+   - Today these numbers are derived client-side from already-fetched rows. After 044, locked search/filters cannot change the count without 045 (honest fallback: keep the SSR teaser).
    - Needs Guang's approval, and it must never be applied to the shared DB without him.
 6. **Real end-to-end Stripe test purchase is unverified:** sign-in → Checkout → webhook → unlocked feed → Portal → cancel → locked. It needs a real test account, which is **not allowed on the shared Preview DB** without Guang's explicit OK.
 7. **After launch, not now:** a 7-day free-trial A/B on yearly (Stripe `trial_period_days`, a reminder email, legal copy), and price A/B tests.
 8. **Open environment items:**
-   - The box `.env.local` lacks the Supabase public vars, so the local `drive.mjs onboarding` run scores 50/52 + 1 SKIP. The failures are the Milan count, the count+city headline, and the locked-detail SKIP, all because the local build has no data. Cursor cloud agents need their own env (ask Guang for the public URL/anon key as a cloud-agent secret).
+   - The box `.env.local` lacks the real Supabase public vars, so local `drive.mjs onboarding` is 59/61 + 3 SKIP (see §2). Cursor cloud agents need their own env (ask Guang for the public URL/anon key as a cloud-agent secret).
    - After pushing, always confirm the Vercel Preview for the newest commit is **Ready** before testing it.
+   - Preview `drive.mjs` needs `VERCEL_SHARE_TOKEN` via env (never in a file).
 9. **Before the PR is ready:**
    - How the PR stack lands (rebase or retarget onto main) is Guang's decision.
    - Remove HANDOFF.md in the last commit.
@@ -102,31 +86,28 @@ Unbuilt or deferred from PROPOSAL/SPEC/PLAN. Each needs Guang's go-ahead where m
 
 ## 4. How to work
 
-- Use GSD **`/gsd-autonomous`** for the remaining phases. Turn items 1–4 of §3 into phases; items 5–7 need Guang's answer first.
-- Use **`/clear` at every natural checkpoint**: between phases, between tasks, after a verification run, before starting a new sub-task.
-- **Any UI design work must use the stitch design skills.** This is mandatory. Stick to the stitch tokens in `DESIGN.md`:
-  - black primary CTA, `outline-variant` borders, Inter, Material Symbols;
-  - no red theme and no shadows;
-  - photos `rounded-2xl`;
-  - the existing 240 ms motion, with reduced motion respected.
-- **Verification is mandatory before calling anything done.** Use the repo's verify skill `.claude/skills/verify-snap-it-free/` (`SKILL.md`, `scripts/drive.mjs`, `features/`), then lint and the unit tests. Every claim in a summary needs a command output behind it.
-- Keep GSD artifacts in `.planning/` (it is gitignored, so commit with `git add -f`) and update `.planning/STATE.md`.
+- Use GSD **`/gsd-autonomous`** for remaining phases. Items 1 and 4 of §3 still need Guang; 5–7 need his answer first.
+- Use **`/clear` at every natural checkpoint**.
+- **Any UI design work must use the stitch design skills.** Stick to the stitch tokens in `DESIGN.md`: black primary CTA, `outline-variant` borders, Inter, Material Symbols; no red theme and no shadows; photos `rounded-2xl`; existing 240 ms motion, reduced-motion respected. There is no `STITCH_API_KEY`; do not call the Google Stitch API.
+- **Verification is mandatory before calling anything done.** Use `.claude/skills/verify-snap-it-free/` (`SKILL.md`, `scripts/drive.mjs`, `features/`), then lint and the unit tests.
+- Keep GSD artifacts in `.planning/` (gitignored, commit with `git add -f`) and update `.planning/STATE.md`.
 
 ## 5. How to verify
 
 ```bash
 npm ci
 npm run lint                     # tsc --noEmit, must be clean
-npm test                         # vitest run; baseline 130 files / 800 tests
+npm test                         # vitest run; now 132 files / 824 tests
 node --check .claude/skills/verify-snap-it-free/scripts/drive.mjs
 
 # Local (build/start per .claude/skills/verify-snap-it-free/SKILL.md, Node 22, payments off):
 node .claude/skills/verify-snap-it-free/scripts/drive.mjs onboarding --url http://127.0.0.1:PORT --out /tmp/ev-local
+# Known local baseline without real Supabase data: 59/61 + 3 SKIP (2 FAIL = Milan count + paywall headline).
 
 # Vercel Preview (payments on). Share token via env ONLY, never in a file or commit:
 VERCEL_SHARE_TOKEN=<token from Guang> node .claude/skills/verify-snap-it-free/scripts/drive.mjs onboarding \
   --url https://zerodollar-git-feat-on-4ecf97-chenguangregis-gmailcoms-projects.vercel.app --out /tmp/ev-preview
-# Expect: "RESULT onboarding: 53/53 checks passed".
+# Expect: "RESULT onboarding: …" with the new P10 checks; previously 53/53 before this run.
 ```
 
 - To walk past the required account step without a real account, use `?onboarding=1` + localStorage `shoumanwu_onboarding_stub_auth=1`. This works on Preview/local only, never in production.
@@ -152,3 +133,4 @@ VERCEL_SHARE_TOKEN=<token from Guang> node .claude/skills/verify-snap-it-free/sc
 4. How should the PR stack land? This branch sits on #8 → #7 → main, and #7/#8 must not be merged without him.
 5. Legal review of the subscription Terms/Privacy copy is still pending (the 14-day clause stays unwritten by his decision).
 6. Supabase public URL/anon key for Cursor cloud agents' env, so local drive.mjs can pass fully.
+7. `VERCEL_SHARE_TOKEN` for the Preview drive.mjs run of this commit (env only, never in the repo).

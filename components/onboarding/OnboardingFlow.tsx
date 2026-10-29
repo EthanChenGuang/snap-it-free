@@ -236,6 +236,21 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
     titleRef.current?.focus({ preventScroll: true });
   }, [state.screen]);
 
+  // Paywall (and Stripe redirect): write city / interests / radius so the feed opens with them applied
+  // even if the user never hits `done` (they left for Checkout). Resume lets the return path re-apply.
+  useEffect(() => {
+    if (state.screen !== 'paywall') return;
+    persistResumeState(window.sessionStorage, state);
+    writeFilterPrefs(
+      onboardingFilterPrefs(readFilterPrefs(), {
+        city: state.city,
+        interests: state.interests,
+        radiusKm: state.radiusKm,
+        locationGranted: state.locationGranted,
+      }),
+    );
+  }, [state]);
+
   // Finish: persist answers to filter prefs, mark done, clean URL.
   useEffect(() => {
     if (state.screen !== 'done') return;
