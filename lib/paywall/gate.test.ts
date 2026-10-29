@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   ONBOARDING_COMPLETED_STORAGE_KEY,
   hasOnboardingForceParam,
+  isAccountSkipStubAllowed,
   isForceParamValue,
   isPaywallFlagEnabled,
   markOnboardingCompleted,
@@ -12,6 +13,27 @@ import {
   shouldShowOnboarding,
   urlWithoutForceParam,
 } from './gate';
+
+describe('isAccountSkipStubAllowed', () => {
+  it('is OFF only in a production build', () => {
+    expect(isAccountSkipStubAllowed('production')).toBe(false);
+  });
+
+  it('is ON for Vercel Preview, local dev and an undefined-local build', () => {
+    expect(isAccountSkipStubAllowed('preview')).toBe(true);
+    expect(isAccountSkipStubAllowed('development')).toBe(true);
+    expect(isAccountSkipStubAllowed('')).toBe(true);
+    expect(isAccountSkipStubAllowed(undefined)).toBe(true);
+  });
+
+  it('reads NEXT_PUBLIC_VERCEL_ENV by default so production can never skip sign-up', () => {
+    vi.stubEnv('NEXT_PUBLIC_VERCEL_ENV', 'production');
+    expect(isAccountSkipStubAllowed()).toBe(false);
+    vi.stubEnv('NEXT_PUBLIC_VERCEL_ENV', 'preview');
+    expect(isAccountSkipStubAllowed()).toBe(true);
+    vi.unstubAllEnvs();
+  });
+});
 
 describe('isPaywallFlagEnabled', () => {
   it('is on only for the exact string "true"', () => {

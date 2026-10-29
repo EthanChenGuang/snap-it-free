@@ -4,6 +4,19 @@ export const ONBOARDING_COMPLETED_STORAGE_KEY = 'shoumanwu_onboarding_completed_
 /** QA / preview override: `?onboarding=1` shows the flow even after completion. */
 export const ONBOARDING_FORCE_PARAM = 'onboarding';
 
+/**
+ * The `?onboarding=1` + localStorage QA stub that walks past the required account step
+ * without real auth must never work in a production build. Vercel exposes `VERCEL_ENV`
+ * at build time; `next.config.ts` bakes it into `NEXT_PUBLIC_VERCEL_ENV` as a literal so
+ * this reads a constant in the client bundle. Anything other than 'production' (Preview,
+ * local dev, undefined-local build) allows the stub; production never does.
+ */
+export function isAccountSkipStubAllowed(
+  vercelEnv: string | undefined = process.env.NEXT_PUBLIC_VERCEL_ENV,
+): boolean {
+  return vercelEnv !== 'production';
+}
+
 export type OnboardingGateInput = {
   flagEnabled: boolean;
   forced: boolean;

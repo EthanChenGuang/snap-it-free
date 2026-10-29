@@ -6,7 +6,7 @@ import { SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { useAuthSession } from '@/lib/auth/useAuthSession';
 import { useOAuthSignIn } from '@/lib/auth/use-oauth-sign-in';
 import { useMessages } from '@/lib/i18n/useMessages';
-import { hasOnboardingForceParam } from '@/lib/paywall/gate';
+import { hasOnboardingForceParam, isAccountSkipStubAllowed } from '@/lib/paywall/gate';
 import { createClient } from '@/lib/supabase/client';
 import { getSupabaseEnv } from '@/lib/supabase/env';
 import type { Messages } from '@/messages';
@@ -17,6 +17,8 @@ const MARKETING_OPTIN_KEY = 'shoumanwu_marketing_optin';
 
 function readStubSignedIn(): boolean {
   if (typeof window === 'undefined') return false;
+  // Never allow the stub to skip the required account step in a production build.
+  if (!isAccountSkipStubAllowed()) return false;
   try {
     return hasOnboardingForceParam(window.location.search) && window.localStorage.getItem(STUB_AUTH_KEY) === '1';
   } catch {
