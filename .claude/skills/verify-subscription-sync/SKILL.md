@@ -22,10 +22,14 @@ Bounded exhaustive exploration in vitest (no extra install). For each scenario i
   `event.created` = that change's second, and the first activation also emits `checkout.session.completed`.
 - One delivery of every webhook in any order after it is emitted, plus at most one duplicate delivery (Stripe retry)
   of any one subscription event.
-- `checkout.session.completed`: the handler's `retrieveSubscription` (reads Stripe's state at that moment) and its write
-  as two separate steps, because they are two awaits in `handleStripeEvent`.
-- The success_url route `app/api/stripe/checkout/return/route.ts`: never, or once after activation, as retrieve then
-  write stamped with server time.
+- Every handler that retrieves (`checkout.session.completed`, `customer.subscription.created/updated`) as two steps:
+  retrieve (reads Stripe's state at that moment) then write, because they are separate awaits in `handleStripeEvent`.
+  The handler's `now()` returns the server-clock reading of whichever step it is called in, so the order of
+  `now()` and `retrieveSubscription` in the real code is what gets checked. `customer.subscription.deleted` writes
+  its payload in one step.
+- The success_url route `app/api/stripe/checkout/return/route.ts`: never, or once after activation, as stamp + retrieve
+  then write. This route is mirrored (stamp, then `subscriptionStateFromStripe`), not executed.
+- Server-clock readings strictly increase in real order and are never earlier than the latest Stripe change.
 
 Real code exercised: `handleStripeEvent` and `subscriptionStateFromStripe` (`lib/subscriptions/sync.ts`). The database
 write is mirrored in `check/subscription-sync.check.ts` (`applyRow`), but its guard is **parsed from the newest
@@ -38,7 +42,9 @@ Scenarios (the bound), in `check/subscription-sync.check.ts`:
 | Group | Scenarios | Expected |
 |---|---|---|
 | distinct seconds | `incomplete@10 → active@11`; `active@10 → past_due@12 → active@14`; `active@10 → canceled@12` | must pass |
-| same second | `incomplete@10 → active@10`; `active@10 → past_due@12 → canceled@12` | **known finding F1** (fails today) |
+| same second | `incomplete@10 → active@10`; `active@10 → past_due@12 → canceled@12` | must pass (F1 regression) |
+
+Identical states reached by different orders are explored once (`stateKey`), about 170k distinct states in total.
 
 ## Run it
 
@@ -46,9 +52,7 @@ Scenarios (the bound), in `check/subscription-sync.check.ts`:
 .claude/skills/verify-subscription-sync/run.sh
 ```
 
-About 15 s (≈450k interleavings). Exit 0 means every scenario converges. Today it exits 1 because of F1: the
-expected output is **3 passed, 2 failed**, and both failures are the same-second scenarios with the counterexamples
-below. Anything else is new.
+About 15 s. Exit 0 means every scenario converges; the expected output is **5 passed**.
 
 Reading a failure: each counterexample prints as numbered steps ("Stripe: …", "webhook … delivered", "return route …")
 ending in "Stripe ends X, but the subscriptions row stores Y". Map each step to the code: deliveries are
@@ -58,37 +62,42 @@ ending in "Stripe ends X, but the subscriptions row stores Y". Map each step to 
 - **Modeling error**: a step the real system cannot take (e.g. a delivery before its event exists, a return-route
   write before activation). Fix the checker, not the property.
 
-## Known finding F1 (open, 2026-10-30)
+## Finding F1 (fixed 2026-10-30)
 
-Stripe's `event.created` has one-second resolution, and the guard keeps "newer **or equal** wins", so two changes in
-the same second are applied in delivery order, not in the order they happened.
+Found by this check, fixed in `lib/subscriptions/sync.ts` and `app/api/stripe/checkout/return/route.ts`.
 
-1. Checkout, same second — Stripe ends `active`, row stores `incomplete` (user paid, stays locked):
-   1. subscription becomes incomplete at second 10; 2. becomes active at second 10;
-   3. `customer.subscription.updated` (active@10) delivered; 4–5. `checkout.session.completed` retrieves and writes
-   active stamped 10; 6. `customer.subscription.created` (incomplete@10) delivered last → overwrites;
-   7. the return route never runs (tab closed, or not signed in on that browser).
-2. Renewal fails then cancels in one second — Stripe ends `canceled`, row stores `past_due` (canceled user keeps
-   access for the 3-day past_due grace, and longer if `past_due_since` is old).
+Before: subscription webhooks stored the event payload stamped with Stripe's `event.created` (one-second
+resolution), and the guard keeps "newer **or equal** wins". Two changes in the same second were applied in delivery
+order, not in the order they happened:
 
-Changing `<=` to `<` does not fix it (first write wins instead; the other order breaks). A real fix makes the stored
-state independent of delivery order, e.g. every subscription webhook re-retrieves the subscription from Stripe and
-stores it stamped with processing time, as `checkout.session.completed` already does. Product code was not changed;
-that decision is Guang's. When F1 is fixed, both same-second scenarios must pass; then delete this section and the
-"known finding" note in the test, and move the sync commit.
+1. Checkout, same second — Stripe ends `active`, row stored `incomplete` (user paid, stayed locked): `updated`
+   (active@10) and `checkout.session.completed` delivered, then `created` (incomplete@10) delivered last and
+   overwrote; the return route never ran.
+2. Renewal fails then cancels in one second — Stripe ends `canceled`, row stored `past_due` (grace access).
+
+`<` instead of `<=` does not fix it (first write wins; the other order breaks). The fix: `created`/`updated`
+re-retrieve the subscription and every write is stamped with the server clock read **before** the retrieve (so a
+later stamp always carries a state at least as new); `deleted` writes its terminal payload stamped with the server
+clock; the return route also stamps before retrieving.
+
+Proven both ways: the pre-fix `sync.ts` (`git show 7fbb00d:lib/subscriptions/sync.ts`) reproduces both
+counterexamples; moving `now()` after `retrieveSubscription` fails all five scenarios.
 
 ## Not covered
 
-- Clock skew between Vercel and Stripe (the server clock is assumed to be just after the latest Stripe change).
+- Clock skew between Vercel instances, and rows written before the fix (stamped with Stripe seconds; a new write
+  stamped with server time always wins over them).
 - Two subscriptions for one user, `stripe_customer_id` changes, deleting the row, `past_due_since` bookkeeping, and
   `current_period_end` (entitlement time checks are covered by `lib/subscriptions/entitlement.test.ts` and the
   SQL parity tests, not here).
 - Retries of `checkout.session.completed`, more than one duplicate delivery, and histories longer than three changes.
+- The return route's code itself (it is mirrored); a stamp moved after its `sessions.retrieve` would not be caught.
+- Stripe's retrieve failing (the webhook returns 500 and Stripe retries; that is just another delivery here).
 - RLS and the listings gate itself (migration 044).
 
 ## Coverage record
 
-Last confirmed in step with the code at commit **7fbb00d** (branch `preview/recent-changes`):
+Last confirmed in step with the code at commit **SYNC_COMMIT** (branch `preview/recent-changes`):
 
 - `lib/subscriptions/sync.ts` — `handleStripeEvent`, `subscriptionStateFromStripe`
 - `app/api/stripe/webhook/route.ts` — `POST`
@@ -96,7 +105,7 @@ Last confirmed in step with the code at commit **7fbb00d** (branch `preview/rece
 - `lib/subscriptions/store.ts` — `applySubscriptionState` (calls the RPC)
 - `supabase/migrations/043_subscriptions_past_due_since.sql` — `public.apply_subscription_state` (guard parsed)
 
-To see whether the verification needs another look: `git log --oneline 7fbb00d..HEAD -- <the files above> supabase/migrations`.
+To see whether the verification needs another look: `git log --oneline SYNC_COMMIT..HEAD -- <the files above> supabase/migrations`.
 Move the sync commit only after you confirm the model still describes the code at the new commit (new event types,
 a new writer, a changed stamp, or a new migration redefining the function all need the checker updated first).
 
@@ -106,6 +115,7 @@ a new writer, a changed stamp, or a new migration redefining the function all ne
   between them.
 - Intended behaviour change: update the scenarios' expected group and this file; never relax `Converges` to make a run
   pass.
-- Prove the check can still fail after any change to it: break the real code on a scratch branch (for example delete
-  the `where s.last_event_at <= excluded.last_event_at` line from the newest migration) and confirm the
-  distinct-second scenarios fail, then restore.
+- Prove the check can still fail after any change to it: break the real code on a scratch branch and confirm it
+  fails, then restore. Known-good breaks: delete the `where s.last_event_at <= excluded.last_event_at` line from the
+  newest migration (all five fail); move `const at = now()` below `retrieveSubscription` in `handleStripeEvent`
+  (all five fail); restore the pre-fix `sync.ts` from commit 7fbb00d (the two same-second scenarios fail).

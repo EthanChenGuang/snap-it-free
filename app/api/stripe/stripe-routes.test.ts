@@ -266,9 +266,11 @@ describe('POST /api/stripe/webhook', () => {
     expect(applySubscriptionState.mock.calls).toEqual([]);
   });
 
-  it('applies a correctly signed subscription update', async () => {
+  it('applies a correctly signed subscription update with Stripe\'s current state, stamped at processing time', async () => {
     stubStripeEnv();
     applySubscriptionState.mockResolvedValue(true);
+    fake.subscriptions.retrieve.mockResolvedValue(subscriptionPayload);
+    const before = Date.now();
     const res = await webhook.POST(post('/api/stripe/webhook', payload, { 'stripe-signature': sign(payload) }));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ received: true, outcome: 'applied' });
@@ -281,12 +283,15 @@ describe('POST /api/stripe/webhook', () => {
       p_price_id: 'price_m',
       p_current_period_end: '2027-10-20T02:40:00.000Z',
       p_cancel_at_period_end: false,
-      p_last_event_at: '2026-10-14T17:46:40.000Z',
+      p_last_event_at: expect.any(String),
     });
+    expect(fake.subscriptions.retrieve.mock.calls[0][0]).toBe('sub_1');
+    expect(Date.parse(applySubscriptionState.mock.calls[0][0].p_last_event_at)).toBeGreaterThanOrEqual(before);
   });
 
   it('returns 500 so Stripe retries when the write fails', async () => {
     stubStripeEnv();
+    fake.subscriptions.retrieve.mockResolvedValue(subscriptionPayload);
     applySubscriptionState.mockRejectedValue(new Error('db down'));
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const res = await webhook.POST(post('/api/stripe/webhook', payload, { 'stripe-signature': sign(payload) }));

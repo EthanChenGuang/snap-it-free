@@ -19,11 +19,13 @@ export async function GET(request: Request) {
     const sessionId = url.searchParams.get('session_id');
     if (!stripe || !user || !sessionId) return redirect('pending');
 
+    // Stamp before reading, as the webhook does: a later stamp must never carry an older state.
+    const at = new Date();
     const session = await stripe.stripe.checkout.sessions.retrieve(sessionId, { expand: ['subscription'] });
     if (session.client_reference_id !== user.id || typeof session.subscription !== 'object' || !session.subscription) {
       return redirect('pending');
     }
-    const state = subscriptionStateFromStripe(session.subscription, stripe.config.prices, new Date(), user.id);
+    const state = subscriptionStateFromStripe(session.subscription, stripe.config.prices, at, user.id);
     if (!state) return redirect('pending');
     await applySubscriptionState(state);
     return redirect('success');

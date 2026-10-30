@@ -13,7 +13,8 @@
  * of every webhook event in any order after it is emitted, plus optionally one duplicate delivery of any one
  * event, (c) the checkout.session.completed handler's retrieve and its write as two separate steps, and
  * (d) the success_url return route (app/api/stripe/checkout/return/route.ts) running zero or one time after
- * activation, also as retrieve then write.
+ * activation, also as retrieve then write. Handlers that retrieve (created, updated, checkout, return route) read the
+ * server clock and Stripe's current state in one step and write in a later one; `deleted` writes in one step.
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
@@ -107,7 +108,8 @@ function eventsFor(changes: Change[], k: number): Emitted[] {
 
 // ---------------------------------------------------------------- exploration
 
-type Pending = { id: string; event: Stripe.Event; kind: Emitted['kind']; fetched?: StripeStatus };
+/** A delivery being handled. Handlers that retrieve take two steps: stamp + retrieve, then write. */
+type Pending = { id: string; event: Stripe.Event; kind: Emitted['kind']; fetched?: StripeStatus; stamp?: number };
 
 type World = {
   changesDone: number;
@@ -116,22 +118,40 @@ type World = {
   retryLeft: boolean;
   emittedLog: Emitted[];
   returnRoute: 'notYet' | { fetched: StripeStatus; stamp: number } | 'done' | 'never';
+  /** Last server-clock reading (ms). Readings strictly increase in real order; skew vs Stripe is out of scope. */
+  clock: number;
   trace: string[];
 };
 
 const trueStatus = (scenario: Scenario, world: World): StripeStatus | null =>
   world.changesDone === 0 ? null : scenario.changes[world.changesDone - 1].status;
 
-/** Server wall clock: just after the latest Stripe change (server clock in step with Stripe; skew is out of scope). */
-const wallClockMs = (scenario: Scenario, world: World): number =>
-  (scenario.changes[Math.max(0, world.changesDone - 1)].sec + 0.5) * 1000;
+/** Reads the server clock (`now()` in handleStripeEvent, `new Date()` in the return route). */
+const readClock = (scenario: Scenario, world: World): number =>
+  Math.max(world.clock, scenario.changes[Math.max(0, world.changesDone - 1)].sec * 1000) + 1;
 
-async function deliverSubscriptionEvent(world: World, event: Stripe.Event, guard: ApplyGuard): Promise<Row> {
+/**
+ * Runs the real handler at its write step. `retrieveStamp` is the clock reading at the earlier retrieve step and
+ * `writeStamp` the reading now; `now()` returns whichever matches where the code calls it (before or after the
+ * retrieve), so moving the stamp after the retrieve in the code changes what is checked.
+ */
+async function runHandler(
+  world: World,
+  event: Stripe.Event,
+  fetched: StripeStatus | undefined,
+  retrieveStamp: number,
+  writeStamp: number,
+  guard: ApplyGuard,
+): Promise<Row> {
   let row = world.row;
+  let retrieved = false;
   await handleStripeEvent(event, {
     prices: PRICES,
+    now: () => new Date(retrieved ? writeStamp : retrieveStamp),
     retrieveSubscription: async () => {
-      throw new Error('subscription events must not refetch');
+      if (fetched === undefined) throw new Error(`${event.type} retrieved but the model gave it no retrieve step`);
+      retrieved = true;
+      return subscriptionObject(fetched);
     },
     applyState: async (state) => {
       row = applyRow(row, state, guard);
@@ -141,36 +161,42 @@ async function deliverSubscriptionEvent(world: World, event: Stripe.Event, guard
   return row;
 }
 
-async function writeCheckout(world: World, pending: Pending, guard: ApplyGuard): Promise<Row> {
-  let row = world.row;
-  await handleStripeEvent(pending.event, {
-    prices: PRICES,
-    retrieveSubscription: async () => subscriptionObject(pending.fetched as StripeStatus),
-    applyState: async (state) => {
-      row = applyRow(row, state, guard);
-      return true;
-    },
-  });
-  return row;
-}
+/** `customer.subscription.deleted` writes its payload without retrieving (canceled is terminal). */
+const retrievesFirst = (event: Stripe.Event): boolean => event.type !== 'customer.subscription.deleted';
 
 function writeReturnRoute(world: World, fetched: StripeStatus, stamp: number, guard: ApplyGuard): Row {
-  // Same mapping the route uses: subscriptionStateFromStripe(session.subscription, prices, new Date(), user.id).
+  // Same mapping the route uses: stamp = new Date() taken before sessions.retrieve, then subscriptionStateFromStripe.
   const state = subscriptionStateFromStripe(subscriptionObject(fetched), PRICES, new Date(stamp), USER);
   if (!state) throw new Error('return route state should map');
   return applyRow(world.row, state, guard);
 }
 
 export type Counterexample = { scenario: string; finalStripe: StripeStatus; stored: string | null; steps: string[] };
-export type ScenarioResult = { scenario: string; interleavings: number; counterexample: Counterexample | null };
+export type ScenarioResult = { scenario: string; states: number; counterexample: Counterexample | null };
+
+/** Everything that decides what can happen next and what gets stored (the trace is history only). */
+function stateKey(world: World): string {
+  return JSON.stringify([
+    world.changesDone,
+    world.row,
+    world.queue.map((pending) => [pending.id, pending.fetched ?? null, pending.stamp ?? null]).sort(),
+    world.retryLeft,
+    world.returnRoute,
+    world.clock,
+    world.emittedLog.length,
+  ]);
+}
 
 export async function checkScenario(scenario: Scenario, guard = loadApplyGuard()): Promise<ScenarioResult> {
-  let interleavings = 0;
+  const seen = new Set<string>();
   let counterexample: Counterexample | null = null;
   const activation = scenario.changes.findIndex((change) => change.status === 'active');
 
   const explore = async (world: World): Promise<void> => {
     if (counterexample && counterexample.steps.length <= world.trace.length) return; // only a shorter one can replace it
+    const key = stateKey(world);
+    if (seen.has(key)) return;
+    seen.add(key);
 
     const moves: Array<() => Promise<World>> = [];
 
@@ -190,29 +216,39 @@ export async function checkScenario(scenario: Scenario, guard = loadApplyGuard()
 
     world.queue.forEach((pending, index) => {
       const rest = world.queue.filter((_, at) => at !== index);
-      if (pending.kind === 'subscription') {
-        moves.push(async () => ({
-          ...world,
-          row: await deliverSubscriptionEvent(world, pending.event, guard),
-          queue: rest,
-          trace: [...world.trace, `webhook ${pending.id} delivered`],
-        }));
-      } else if (pending.fetched === undefined) {
+      if (!retrievesFirst(pending.event)) {
         moves.push(async () => {
-          const now = trueStatus(scenario, world) as StripeStatus;
+          const stamp = readClock(scenario, world);
           return {
             ...world,
-            queue: world.queue.map((entry, at) => (at === index ? { ...entry, fetched: now } : entry)),
-            trace: [...world.trace, `webhook ${pending.id}: handler retrieves the subscription (${now})`],
+            clock: stamp,
+            row: await runHandler(world, pending.event, undefined, stamp, stamp, guard),
+            queue: rest,
+            trace: [...world.trace, `webhook ${pending.id} delivered, written stamped ${stamp}ms`],
+          };
+        });
+      } else if (pending.fetched === undefined) {
+        moves.push(async () => {
+          const fetched = trueStatus(scenario, world) as StripeStatus;
+          const stamp = readClock(scenario, world);
+          return {
+            ...world,
+            clock: stamp,
+            queue: world.queue.map((entry, at) => (at === index ? { ...entry, fetched, stamp } : entry)),
+            trace: [...world.trace, `webhook ${pending.id}: handler stamps ${stamp}ms and retrieves the subscription (${fetched})`],
           };
         });
       } else {
-        moves.push(async () => ({
-          ...world,
-          row: await writeCheckout(world, pending, guard),
-          queue: rest,
-          trace: [...world.trace, `webhook ${pending.id}: handler writes ${pending.fetched} stamped second ${pending.event.created}`],
-        }));
+        moves.push(async () => {
+          const writeStamp = readClock(scenario, world);
+          return {
+            ...world,
+            clock: writeStamp,
+            row: await runHandler(world, pending.event, pending.fetched, pending.stamp as number, writeStamp, guard),
+            queue: rest,
+            trace: [...world.trace, `webhook ${pending.id}: handler writes ${pending.fetched}`],
+          };
+        });
       }
     });
 
@@ -233,9 +269,10 @@ export async function checkScenario(scenario: Scenario, guard = loadApplyGuard()
     if (world.returnRoute === 'notYet' && activation >= 0 && world.changesDone > activation) {
       moves.push(async () => {
         const fetched = trueStatus(scenario, world) as StripeStatus;
-        const stamp = wallClockMs(scenario, world);
+        const stamp = readClock(scenario, world);
         return {
           ...world,
+          clock: stamp,
           returnRoute: { fetched, stamp },
           trace: [...world.trace, `return route: user lands on success_url, route retrieves the subscription (${fetched})`],
         };
@@ -247,7 +284,7 @@ export async function checkScenario(scenario: Scenario, guard = loadApplyGuard()
         ...world,
         row: writeReturnRoute(world, fetched, stamp, guard),
         returnRoute: 'done',
-        trace: [...world.trace, `return route writes ${fetched} stamped ${stamp / 1000}s`],
+        trace: [...world.trace, `return route writes ${fetched} stamped ${stamp}ms`],
       }));
     }
 
@@ -256,7 +293,6 @@ export async function checkScenario(scenario: Scenario, guard = loadApplyGuard()
     const settled =
       world.changesDone === scenario.changes.length && world.queue.length === 0 && typeof world.returnRoute !== 'object';
     if (settled) {
-      interleavings += 1;
       const finalStripe = scenario.changes[scenario.changes.length - 1].status;
       const stored = world.row?.status ?? null;
       if (stored !== finalStripe) {
@@ -276,9 +312,10 @@ export async function checkScenario(scenario: Scenario, guard = loadApplyGuard()
     retryLeft: true,
     emittedLog: [],
     returnRoute: activation >= 0 ? 'notYet' : 'never',
+    clock: 0,
     trace: [],
   });
-  return { scenario: scenario.name, interleavings, counterexample };
+  return { scenario: scenario.name, states: seen.size, counterexample };
 }
 
 // ---------------------------------------------------------------- scenarios (the bound)

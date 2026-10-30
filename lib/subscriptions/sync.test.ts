@@ -24,14 +24,16 @@ function event(type: string, object: unknown, created = 1_792_000_000): Stripe.E
   return { id: 'evt_1', object: 'event', type, created, data: { object } } as unknown as Stripe.Event;
 }
 
+const PROCESSED_AT = new Date('2026-10-30T12:00:00.123Z');
+
 function deps(sub = subscription(), applied = true) {
   const applyState = vi.fn<(state: SubscriptionState) => Promise<boolean>>().mockResolvedValue(applied);
   const retrieveSubscription = vi.fn().mockResolvedValue(sub);
-  return { prices, applyState, retrieveSubscription };
+  return { prices, applyState, retrieveSubscription, now: () => PROCESSED_AT };
 }
 
 describe('handleStripeEvent', () => {
-  it('stores the retrieved subscription after checkout, stamped with the event time', async () => {
+  it('stores the retrieved subscription after checkout, stamped with the processing time', async () => {
     const d = deps(subscription({ metadata: {} }));
     const outcome = await handleStripeEvent(
       event('checkout.session.completed', {
@@ -51,12 +53,12 @@ describe('handleStripeEvent', () => {
       p_price_id: 'price_y',
       p_current_period_end: '2027-10-20T02:40:00.000Z',
       p_cancel_at_period_end: false,
-      p_last_event_at: '2026-10-14T17:46:40.000Z',
+      p_last_event_at: PROCESSED_AT.toISOString(),
     });
     expect(outcome).toEqual({ kind: 'applied', userId: 'user-from-checkout', status: 'active' });
   });
 
-  it('records a deletion as canceled from the event payload', async () => {
+  it('records a deletion as canceled from the event payload, stamped with the processing time', async () => {
     const d = deps();
     const outcome = await handleStripeEvent(
       event('customer.subscription.deleted', subscription({ status: 'canceled' })),
@@ -64,7 +66,19 @@ describe('handleStripeEvent', () => {
     );
     expect(d.retrieveSubscription.mock.calls).toEqual([]);
     expect(d.applyState.mock.calls[0][0].p_status).toBe('canceled');
+    expect(d.applyState.mock.calls[0][0].p_last_event_at).toBe(PROCESSED_AT.toISOString());
     expect(outcome).toEqual({ kind: 'applied', userId: 'user-1', status: 'canceled' });
+  });
+
+  it('stores Stripe\'s current state for created/updated, not the possibly stale payload (F1)', async () => {
+    const d = deps(subscription({ status: 'active' }));
+    const outcome = await handleStripeEvent(
+      event('customer.subscription.created', subscription({ status: 'incomplete' })),
+      d,
+    );
+    expect(d.retrieveSubscription.mock.calls).toEqual([['sub_1']]);
+    expect(d.applyState.mock.calls[0][0]).toMatchObject({ p_status: 'active', p_last_event_at: PROCESSED_AT.toISOString() });
+    expect(outcome).toEqual({ kind: 'applied', userId: 'user-1', status: 'active' });
   });
 
   it('reports a stale event when the database keeps a newer state', async () => {
@@ -79,6 +93,7 @@ describe('handleStripeEvent', () => {
       kind: 'ignored',
       reason: 'not a subscription checkout',
     });
+    d.retrieveSubscription.mockResolvedValue(subscription({ metadata: {} }));
     expect(await handleStripeEvent(event('customer.subscription.updated', subscription({ metadata: {} })), d)).toEqual({
       kind: 'ignored',
       reason: 'missing user_id or customer',
