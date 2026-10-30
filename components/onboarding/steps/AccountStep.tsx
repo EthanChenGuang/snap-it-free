@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { EmailCodeSignIn } from '@/components/onboarding/EmailCodeSignIn';
+import { GoogleMark } from '@/components/onboarding/GoogleMark';
 import { Button } from '@/components/ui/button';
 import { PASTELS, pop } from '@/components/onboarding/pop-theme';
 import { Sparkle } from '@/components/onboarding/steps/PhotoCollage';
 import { ArrowRight, SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { useAuthSession } from '@/lib/auth/useAuthSession';
+import { isInAppBrowser } from '@/lib/auth/in-app-browser';
 import { useOAuthSignIn } from '@/lib/auth/use-oauth-sign-in';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { hasOnboardingForceParam, isAccountSkipStubAllowed } from '@/lib/paywall/gate';
-import { createClient } from '@/lib/supabase/client';
-import { getSupabaseEnv } from '@/lib/supabase/env';
 import { cn } from '@/lib/utils';
 import type { Messages } from '@/messages';
 
@@ -41,19 +42,23 @@ type AccountStepProps = {
 
 /**
  * Required free account (Guang, 2026-10-28: no "Not now"). Placed after the personal preview so the
- * reason to sign up is to keep the feed/alerts the user just built. Real Google + email-link auth,
- * reused from the app. Signed-in users (or the QA stub) see a confirmation and Continue.
+ * reason to sign up is to keep the feed/alerts the user just built. Real Google + email code/link
+ * auth (the code works when the emailed link opens in another browser). Signed-in users (or the QA stub) see a confirmation and Continue.
  */
 export function AccountStep({ copy, summary = [], onBeforeRedirect, onContinue }: AccountStepProps) {
   const { messages } = useMessages();
   const { user, email, loading } = useAuthSession();
   const { signIn, isBusy } = useOAuthSignIn('/?onboarding=resume');
   const [stub, setStub] = useState(false);
-  const [emailValue, setEmailValue] = useState('');
-  const [emailState, setEmailState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [optIn, setOptIn] = useState(false);
+  const [origin, setOrigin] = useState('');
+  const [inApp, setInApp] = useState(false);
 
-  useEffect(() => setStub(readStubSignedIn()), []);
+  useEffect(() => {
+    setStub(readStubSignedIn());
+    setOrigin(window.location.origin);
+    setInApp(isInAppBrowser(window.navigator.userAgent));
+  }, []);
 
   const signedIn = Boolean(user) || stub;
   const displayEmail = email ?? (stub ? 'preview@zerodollar.local' : null);
@@ -70,28 +75,6 @@ export function AccountStep({ copy, summary = [], onBeforeRedirect, onContinue }
     persistOptIn();
     onBeforeRedirect();
     void signIn('google');
-  };
-
-  const withEmail = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const trimmed = emailValue.trim();
-    if (!trimmed || !getSupabaseEnv()) {
-      setEmailState('error');
-      return;
-    }
-    persistOptIn();
-    onBeforeRedirect();
-    setEmailState('sending');
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithOtp({
-        email: trimmed,
-        options: { emailRedirectTo: `${window.location.origin}/?onboarding=resume` },
-      });
-      setEmailState(error ? 'error' : 'sent');
-    } catch {
-      setEmailState('error');
-    }
   };
 
   const emphasis = copy.emphasis;
@@ -155,11 +138,6 @@ export function AccountStep({ copy, summary = [], onBeforeRedirect, onContinue }
           </p>
         )}
 
-        {!signedIn && emailState === 'sent' && (
-          <p role="status" className={cn('mt-space-md p-space-md text-body-md text-[#1A1A2E]', pop.card, 'rounded-2xl bg-[#FFF2B8]')}>
-            {copy.emailSent}
-          </p>
-        )}
       </div>
 
       <footer className="flex shrink-0 flex-col gap-space-sm px-gutter pb-space-md pt-space-sm">
@@ -170,6 +148,11 @@ export function AccountStep({ copy, summary = [], onBeforeRedirect, onContinue }
           </Button>
         ) : (
           <>
+            {inApp && (
+              <p className="rounded-2xl bg-[#FFF2B8] px-space-md py-space-sm text-label-sm text-[#1A1A2E]" data-testid="account-in-app-hint">
+                {messages.emailCode.inAppBrowser}
+              </p>
+            )}
             <Button
               type="button"
               variant="secondary"
@@ -181,32 +164,15 @@ export function AccountStep({ copy, summary = [], onBeforeRedirect, onContinue }
               <GoogleMark />
               {copy.google}
             </Button>
-            <form onSubmit={withEmail} className="flex flex-col gap-space-sm">
-              <input
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                required
-                value={emailValue}
-                onChange={(event) => setEmailValue(event.target.value)}
-                placeholder={copy.emailPlaceholder}
-                aria-label={copy.emailPlaceholder}
-                className="h-12 w-full rounded-full border-2 border-[#1A1A2E] bg-white px-space-lg text-body-md text-[#1A1A2E] outline-none placeholder:text-[#4A4A5E]/70 focus-visible:ring-2 focus-visible:ring-[#00A6A6]"
-              />
-              <Button
-                type="submit"
-                className={cn(pop.primaryButton, 'h-12 text-label-md')}
-                disabled={emailState === 'sending'}
-                data-testid="account-email"
-              >
-                {emailState === 'sending' ? copy.emailSending : copy.email}
-              </Button>
-              {emailState === 'error' && (
-                <p role="alert" className="text-center text-label-sm text-error">
-                  {copy.emailError}
-                </p>
-              )}
-            </form>
+            <EmailCodeSignIn
+              emailRedirectTo={`${origin}/?onboarding=resume`}
+              onBeforeSend={() => {
+                persistOptIn();
+                onBeforeRedirect();
+              }}
+              onSignedIn={() => {}}
+              testIdPrefix="account-email"
+            />
             <label className="mt-space-xs flex items-start gap-space-sm text-label-sm text-[#4A4A5E]">
               <input
                 type="checkbox"
@@ -221,16 +187,5 @@ export function AccountStep({ copy, summary = [], onBeforeRedirect, onContinue }
         )}
       </footer>
     </>
-  );
-}
-
-function GoogleMark() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
-      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1Z" />
-      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23Z" />
-      <path fill="#FBBC05" d="M5.84 14.09A6.6 6.6 0 0 1 5.5 12c0-.73.13-1.43.34-2.09V7.07H2.18A11 11 0 0 0 1 12c0 1.77.43 3.45 1.18 4.93l3.66-2.84Z" />
-      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15A10.96 10.96 0 0 0 12 1 11 11 0 0 0 2.18 7.07l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38Z" />
-    </svg>
   );
 }

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useAuthSession } from '@/lib/auth/useAuthSession';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { checkoutReturnNotice, parseCheckoutParam, urlWithoutCheckoutParam } from '@/lib/paywall/checkout-return';
+import { hasPendingCheckout } from '@/lib/paywall/pending-checkout';
 import { checkRestore } from '@/lib/paywall/purchase';
 import { cn } from '@/lib/utils';
 
@@ -35,6 +36,8 @@ function LockedCard({
     if (notice === 'pending') {
       window.history.replaceState(window.history.state, '', urlWithoutCheckoutParam(window.location.href));
     }
+    // Back from a Google sign-in started on the paywall: reopen it so checkout continues.
+    if (hasPendingCheckout(window.sessionStorage, 'locked')) setPaywallOpen(true);
   }, []);
 
   return (

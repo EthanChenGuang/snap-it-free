@@ -703,7 +703,13 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
           )}
         </>
       ) : (
-        <PaywallScreen titleId={TITLE_ID} onFinish={() => dispatch({ type: 'finish' })} context={paywallContext} />
+        <PaywallScreen
+          titleId={TITLE_ID}
+          onFinish={() => dispatch({ type: 'finish' })}
+          context={paywallContext}
+          source="onboarding"
+          returnPath="/?onboarding=resume"
+        />
       )}
     </OverlayShell>
   );

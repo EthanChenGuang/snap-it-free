@@ -3,10 +3,15 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
+import { EmailCodeSignIn } from '@/components/onboarding/EmailCodeSignIn';
 import { pop } from '@/components/onboarding/pop-theme';
+import { GoogleMark } from '@/components/onboarding/GoogleMark';
 import { ArrowRight, SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { Button } from '@/components/ui/button';
+import { isInAppBrowser } from '@/lib/auth/in-app-browser';
+import { useOAuthSignIn } from '@/lib/auth/use-oauth-sign-in';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { savePendingCheckout, takePendingCheckout, type CheckoutSource } from '@/lib/paywall/pending-checkout';
 import {
   DEFAULT_PLAN_ID,
   PAYWALL_PLANS,
@@ -31,6 +36,10 @@ type PaywallScreenProps = {
   titleId: string;
   onFinish: () => void;
   context?: PaywallContext;
+  /** Which surface opened the paywall; scopes the post-Google-redirect checkout resume. */
+  source?: CheckoutSource;
+  /** Where Google sign-in returns to (the onboarding resumes itself; locked views reopen the paywall). */
+  returnPath?: string;
 };
 
 type PlanCopyKey = 'planWeekly' | 'planMonthly' | 'planYearly' | 'periodWeekly' | 'periodMonthly' | 'periodYearly';
@@ -63,14 +72,18 @@ function HighlightNumber({ text }: { text: string }) {
   );
 }
 
-export function PaywallScreen({ titleId, onFinish, context }: PaywallScreenProps) {
+export function PaywallScreen({ titleId, onFinish, context, source = 'locked', returnPath }: PaywallScreenProps) {
   const { messages, language } = useMessages();
   const copy = messages.paywall;
   const [selectedId, setSelectedId] = useState<PlanId>(DEFAULT_PLAN_ID);
   const [purchase, setPurchase] = useState<PurchaseState>('idle');
   const [restore, setRestore] = useState<RestoreOutcome | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const [origin, setOrigin] = useState('');
+  const [inApp, setInApp] = useState(false);
   const selected = getPlan(selectedId);
+  const googleReturn = returnPath ?? '/';
+  const { signIn: signInWithGoogle, isBusy: googleBusy } = useOAuthSignIn(googleReturn);
   const price = (cents: number) => formatCents(cents, selected.currency, language);
 
   useEffect(() => {
@@ -85,9 +98,27 @@ export function PaywallScreen({ titleId, onFinish, context }: PaywallScreenProps
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onFinish]);
 
-  const subscribe = async () => {
+  // Back from a Google sign-in started on this paywall: continue straight to checkout with that plan.
+  useEffect(() => {
+    setOrigin(window.location.origin);
+    setInApp(isInAppBrowser(window.navigator.userAgent));
+    const pending = takePendingCheckout(window.sessionStorage, source);
+    if (pending) {
+      setSelectedId(pending);
+      void subscribe(pending);
+    }
+    // Mount-only: resuming twice would open two checkouts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const continueWithGoogle = () => {
+    savePendingCheckout(window.sessionStorage, selectedId, source);
+    void signInWithGoogle('google');
+  };
+
+  const subscribe = async (plan: PlanId = selectedId) => {
     setPurchase('pending');
-    const outcome = await startCheckout(selectedId);
+    const outcome = await startCheckout(plan);
     if (outcome.kind === 'redirect') window.location.assign(outcome.url);
     else if (outcome.kind === 'reload') window.location.reload();
     else setPurchase(outcome.state);
@@ -126,7 +157,7 @@ export function PaywallScreen({ titleId, onFinish, context }: PaywallScreenProps
     return (
       <>
         <header className="flex h-14 shrink-0 items-center justify-end px-space-md">{closeButton}</header>
-        <div className="flex flex-1 flex-col justify-center px-gutter pb-space-xl" role="status" data-testid={`paywall-${purchase}`}>
+        <div className="no-scrollbar flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-gutter pb-space-lg" role="status" data-testid={`paywall-${purchase}`}>
           <div className={cn('mb-space-lg flex h-20 w-20 -rotate-3 items-center justify-center rounded-3xl bg-[#FFC83D]', pop.outline, pop.shadow)}>
             <SymbolIcon name={notice.icon} className="text-[40px] text-[#1A1A2E]" />
           </div>
@@ -137,9 +168,29 @@ export function PaywallScreen({ titleId, onFinish, context }: PaywallScreenProps
         </div>
         <footer className="flex shrink-0 flex-col gap-space-sm px-gutter py-space-md">
           {purchase === 'signInRequired' && (
-            <Button asChild className={pop.primaryButton}>
-              <Link href="/settings">{copy.goToSettings}</Link>
-            </Button>
+            <div className="flex flex-col gap-space-sm" data-testid="paywall-sign-in">
+              {inApp && (
+                <p className="rounded-2xl bg-[#FFF2B8] px-space-md py-space-sm text-label-sm text-[#1A1A2E]">
+                  {messages.emailCode.inAppBrowser}
+                </p>
+              )}
+              <Button
+                type="button"
+                variant="secondary"
+                className={cn(pop.secondaryButton, 'h-12 shadow-[0_3px_0_#1A1A2E]')}
+                disabled={googleBusy}
+                onClick={continueWithGoogle}
+                data-testid="paywall-google"
+              >
+                <GoogleMark />
+                {messages.onboarding.account.google}
+              </Button>
+              <EmailCodeSignIn
+                emailRedirectTo={`${origin}/auth/callback?next=${encodeURIComponent(googleReturn)}`}
+                onSignedIn={() => void subscribe()}
+                testIdPrefix="paywall-email"
+              />
+            </div>
           )}
           <Button
             type="button"

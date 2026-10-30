@@ -102,3 +102,49 @@ describe('PaywallScreen personalization (honest, real figures)', () => {
     expect(container.querySelector('[data-testid="paywall-proof"]')).toBeNull();
   });
 });
+
+describe('PaywallScreen inline sign-in', () => {
+  beforeEach(() => window.sessionStorage.clear());
+
+  it('offers Google and an email code right on the paywall when checkout needs sign-in', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(401, { error: 'sign_in_required' })));
+    const container = await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} />);
+
+    await click(cta(container));
+    await flush();
+
+    expect(container.textContent).toContain(getMessages('en').paywall.signInTitle);
+    expect(container.querySelector('[data-testid="paywall-google"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="paywall-email-send"]')?.textContent).toBe(
+      getMessages('en').emailCode.send,
+    );
+    expect(container.textContent).not.toContain(getMessages('en').paywall.goToSettings);
+  });
+
+  it('resumes checkout with the remembered plan after a Google round-trip', async () => {
+    window.sessionStorage.setItem(
+      'shoumanwu_pending_checkout_v1',
+      JSON.stringify({ plan: 'monthly', source: 'locked', at: Date.now() }),
+    );
+    const fetchMock = vi.fn(async () => jsonResponse(503, { error: 'payments_disabled' }));
+    vi.stubGlobal('fetch', fetchMock);
+    await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} source="locked" />);
+    await flush();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(JSON.parse((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string)).toEqual({ plan: 'monthly' });
+    expect(window.sessionStorage.getItem('shoumanwu_pending_checkout_v1')).toBeNull();
+  });
+
+  it('does not resume a checkout that belongs to the onboarding paywall', async () => {
+    window.sessionStorage.setItem(
+      'shoumanwu_pending_checkout_v1',
+      JSON.stringify({ plan: 'monthly', source: 'onboarding', at: Date.now() }),
+    );
+    const fetchMock = vi.fn(async () => jsonResponse(503, {}));
+    vi.stubGlobal('fetch', fetchMock);
+    await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} source="locked" />);
+    await flush();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
