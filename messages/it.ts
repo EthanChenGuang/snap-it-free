@@ -448,6 +448,7 @@ export const messages = {
       title: 'Cosa stai cercando?',
       emphasis: 'cercando',
       hint: 'Scegline quante vuoi. Le useremo per il tuo feed e gli avvisi.',
+      selected: (count: number) => (count === 1 ? '1 selezionato' : `${count} selezionati`),
       chips: {
         furniture: 'Mobili',
         electronics: 'Elettronica',

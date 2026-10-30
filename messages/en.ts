@@ -438,6 +438,7 @@ export const messages: Messages = {
       title: 'What are you looking for?',
       emphasis: 'looking',
       hint: 'Pick as many as you like. We’ll use them for your feed and alerts.',
+      selected: (count: number) => `${count} selected`,
       chips: {
         furniture: 'Furniture',
         electronics: 'Electronics',

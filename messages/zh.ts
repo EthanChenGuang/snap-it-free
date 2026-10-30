@@ -426,6 +426,7 @@ export const messages: Messages = {
       title: '你在找什么？',
       emphasis: '找',
       hint: '可多选，我们会用它们设置你的信息流和提醒。',
+      selected: (count: number) => `已选 ${count} 项`,
       chips: {
         furniture: '家具',
         electronics: '电子产品',
