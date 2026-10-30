@@ -9,7 +9,7 @@ describe('checkoutOutcome', () => {
     });
     expect(checkoutOutcome(503, { error: 'payments_disabled' })).toEqual({ kind: 'show', state: 'comingSoon' });
     expect(checkoutOutcome(401, { error: 'sign_in_required' })).toEqual({ kind: 'show', state: 'signInRequired' });
-    expect(checkoutOutcome(409, { error: 'already_subscribed' })).toEqual({ kind: 'reload' });
+    expect(checkoutOutcome(409, { error: 'already_subscribed' })).toEqual({ kind: 'show', state: 'alreadySubscribed' });
     expect(checkoutOutcome(500, null)).toEqual({ kind: 'show', state: 'error' });
   });
 

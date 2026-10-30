@@ -21,12 +21,24 @@ beforeEach(() => {
   vi.stubGlobal('IntersectionObserver', NoopIntersectionObserver);
 });
 
+/** Signed-out status for the mount-time subscription check; `checkout` answers everything else in order. */
+function routedFetch(...checkout: Array<Response | (() => Response)>) {
+  const calls: Array<[string, RequestInit | undefined]> = [];
+  const fn = vi.fn(async (url: string, init?: RequestInit) => {
+    if (String(url).includes('/api/subscription')) return jsonResponse(200, { signedIn: false, active: false });
+    calls.push([url, init]);
+    const next = checkout.length > 1 ? checkout.shift()! : checkout[0];
+    return typeof next === 'function' ? next() : next.clone();
+  });
+  return { fn, calls };
+}
+
 const cta = (container: HTMLElement) => container.querySelector<HTMLButtonElement>('[data-testid="paywall-cta"]');
 const alertText = (container: HTMLElement) => container.querySelector('[role="alert"]')?.textContent ?? null;
 
 describe('PaywallScreen checkout failures', () => {
   it.each<AppLanguage>(['en', 'it', 'zh'])('shows the localized checkout error when Stripe fails upstream (%s)', async (language) => {
-    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(502, { error: 'stripe_error' })));
+    vi.stubGlobal('fetch', routedFetch(jsonResponse(502, { error: 'stripe_error' })).fn);
     const container = await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} />, language);
 
     await click(cta(container));
@@ -37,11 +49,8 @@ describe('PaywallScreen checkout failures', () => {
   });
 
   it('treats an empty 500 the same way and lets the user retry', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce(new Response('', { status: 500 }))
-      .mockResolvedValueOnce(jsonResponse(503, { error: 'payments_disabled' }));
-    vi.stubGlobal('fetch', fetchMock);
+    const routed = routedFetch(new Response('', { status: 500 }), jsonResponse(503, { error: 'payments_disabled' }));
+    vi.stubGlobal('fetch', routed.fn);
     const container = await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} />);
 
     await click(cta(container));
@@ -50,7 +59,7 @@ describe('PaywallScreen checkout failures', () => {
 
     await click(cta(container));
     await flush();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(routed.calls).toHaveLength(2);
     expect(container.textContent).toContain(getMessages('en').paywall.comingSoonTitle);
     expect(alertText(container)).toBeNull();
   });
@@ -107,7 +116,7 @@ describe('PaywallScreen inline sign-in', () => {
   beforeEach(() => window.sessionStorage.clear());
 
   it('offers Google and an email code right on the paywall when checkout needs sign-in', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(401, { error: 'sign_in_required' })));
+    vi.stubGlobal('fetch', routedFetch(jsonResponse(401, { error: 'sign_in_required' })).fn);
     const container = await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} />);
 
     await click(cta(container));
@@ -126,13 +135,13 @@ describe('PaywallScreen inline sign-in', () => {
       'shoumanwu_pending_checkout_v1',
       JSON.stringify({ plan: 'monthly', source: 'locked', at: Date.now() }),
     );
-    const fetchMock = vi.fn(async () => jsonResponse(503, { error: 'payments_disabled' }));
-    vi.stubGlobal('fetch', fetchMock);
+    const routed = routedFetch(jsonResponse(503, { error: 'payments_disabled' }));
+    vi.stubGlobal('fetch', routed.fn);
     await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} source="locked" />);
     await flush();
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(JSON.parse((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string)).toEqual({ plan: 'monthly' });
+    expect(routed.calls).toHaveLength(1);
+    expect(JSON.parse(routed.calls[0][1]?.body as string)).toEqual({ plan: 'monthly' });
     expect(window.sessionStorage.getItem('shoumanwu_pending_checkout_v1')).toBeNull();
   });
 
@@ -141,10 +150,36 @@ describe('PaywallScreen inline sign-in', () => {
       'shoumanwu_pending_checkout_v1',
       JSON.stringify({ plan: 'monthly', source: 'onboarding', at: Date.now() }),
     );
-    const fetchMock = vi.fn(async () => jsonResponse(503, {}));
-    vi.stubGlobal('fetch', fetchMock);
+    const routed = routedFetch(jsonResponse(503, {}));
+    vi.stubGlobal('fetch', routed.fn);
     await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} source="locked" />);
     await flush();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(routed.calls).toHaveLength(0);
+  });
+});
+
+describe('PaywallScreen for an existing subscriber', () => {
+  it('says so on open instead of asking for payment', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse(200, { signedIn: true, active: true }));
+    vi.stubGlobal('fetch', fetchMock);
+    const container = await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} />);
+    await flush();
+
+    expect(container.textContent).toContain(getMessages('en').paywall.alreadySubscribedTitle);
+    expect(container.querySelector('[data-testid="paywall-open-feed"]')).not.toBeNull();
+    expect(cta(container)).toBeNull();
+  });
+
+  it('shows the same notice instead of reloading when checkout answers 409', async () => {
+    const reload = vi.fn();
+    vi.stubGlobal('location', { ...window.location, reload });
+    vi.stubGlobal('fetch', routedFetch(jsonResponse(409, { error: 'already_subscribed' })).fn);
+    const container = await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} />);
+
+    await click(cta(container));
+    await flush();
+
+    expect(reload).not.toHaveBeenCalled();
+    expect(container.textContent).toContain(getMessages('en').paywall.alreadySubscribedTitle);
   });
 });

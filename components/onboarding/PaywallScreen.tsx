@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { isInAppBrowser } from '@/lib/auth/in-app-browser';
 import { useOAuthSignIn } from '@/lib/auth/use-oauth-sign-in';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { markOnboardingCompleted, urlWithoutForceParam } from '@/lib/paywall/gate';
+import { clearResumeState } from '@/lib/paywall/onboarding-flow';
 import { savePendingCheckout, takePendingCheckout, type CheckoutSource } from '@/lib/paywall/pending-checkout';
 import {
   DEFAULT_PLAN_ID,
@@ -103,13 +105,27 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
     setOrigin(window.location.origin);
     setInApp(isInAppBrowser(window.navigator.userAgent));
     const pending = takePendingCheckout(window.sessionStorage, source);
-    if (pending) {
-      setSelectedId(pending);
-      void subscribe(pending);
-    }
+    if (pending) setSelectedId(pending);
+    let cancelled = false;
+    // A subscriber should never be asked to pay (e.g. onboarding forced with ?onboarding=1).
+    void checkRestore().then((status) => {
+      if (cancelled) return;
+      if (status === 'reload') setPurchase('alreadySubscribed');
+      else if (pending) void subscribe(pending);
+    });
+    return () => {
+      cancelled = true;
+    };
     // Mount-only: resuming twice would open two checkouts.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Leave onboarding for good and load the feed without the force param, so the server gate opens it.
+  const openFeed = () => {
+    markOnboardingCompleted(window.localStorage);
+    clearResumeState(window.sessionStorage);
+    window.location.assign(urlWithoutForceParam(window.location.href));
+  };
 
   const continueWithGoogle = () => {
     savePendingCheckout(window.sessionStorage, selectedId, source);
@@ -120,13 +136,12 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
     setPurchase('pending');
     const outcome = await startCheckout(plan);
     if (outcome.kind === 'redirect') window.location.assign(outcome.url);
-    else if (outcome.kind === 'reload') window.location.reload();
     else setPurchase(outcome.state);
   };
 
   const restorePurchases = async () => {
     const outcome = await checkRestore();
-    if (outcome === 'reload') window.location.reload();
+    if (outcome === 'reload') setPurchase('alreadySubscribed');
     else setRestore(outcome);
   };
 
@@ -151,7 +166,9 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
       ? { icon: 'schedule', title: copy.comingSoonTitle, body: copy.comingSoonBody }
       : purchase === 'signInRequired'
         ? { icon: 'person', title: copy.signInTitle, body: copy.signInBody }
-        : null;
+        : purchase === 'alreadySubscribed'
+          ? { icon: 'verified', title: copy.alreadySubscribedTitle, body: copy.alreadySubscribedBody }
+          : null;
 
   if (notice) {
     return (
@@ -192,10 +209,16 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
               />
             </div>
           )}
+          {purchase === 'alreadySubscribed' && (
+            <Button type="button" className={pop.primaryButton} onClick={openFeed} data-testid="paywall-open-feed">
+              {copy.openFeed}
+              <ArrowRight />
+            </Button>
+          )}
           <Button
             type="button"
-            variant={purchase === 'signInRequired' ? 'ghost' : 'default'}
-            className={purchase === 'signInRequired' ? pop.ghostButton : pop.primaryButton}
+            variant={purchase === 'signInRequired' || purchase === 'alreadySubscribed' ? 'ghost' : 'default'}
+            className={purchase === 'signInRequired' || purchase === 'alreadySubscribed' ? pop.ghostButton : pop.primaryButton}
             onClick={onFinish}
             data-testid="paywall-coming-soon-continue"
           >

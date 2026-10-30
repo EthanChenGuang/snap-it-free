@@ -1,11 +1,10 @@
 import type { PlanId } from './plans';
 
 /** What the paywall shows after the CTA. `comingSoon` is the no-Stripe-env state. */
-export type PurchaseState = 'idle' | 'pending' | 'comingSoon' | 'signInRequired' | 'error';
+export type PurchaseState = 'idle' | 'pending' | 'comingSoon' | 'signInRequired' | 'alreadySubscribed' | 'error';
 
 export type CheckoutOutcome =
   | { kind: 'redirect'; url: string }
-  | { kind: 'reload' }
   | { kind: 'show'; state: Exclude<PurchaseState, 'idle' | 'pending'> };
 
 export function checkoutOutcome(status: number, body: unknown): CheckoutOutcome {
@@ -13,8 +12,8 @@ export function checkoutOutcome(status: number, body: unknown): CheckoutOutcome 
   if (status === 200 && typeof url === 'string' && url.startsWith('https://')) return { kind: 'redirect', url };
   if (status === 503) return { kind: 'show', state: 'comingSoon' };
   if (status === 401) return { kind: 'show', state: 'signInRequired' };
-  // Already subscribed: a reload lets the server gate open the feed.
-  if (status === 409) return { kind: 'reload' };
+  // Already subscribed: say so and offer the feed. (A bare reload looped inside a forced onboarding.)
+  if (status === 409) return { kind: 'show', state: 'alreadySubscribed' };
   return { kind: 'show', state: 'error' };
 }
 
