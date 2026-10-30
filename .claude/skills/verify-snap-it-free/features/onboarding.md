@@ -1,14 +1,23 @@
-# Pre-browse onboarding
+# Pre-browse onboarding (Snag-modelled, quick 261028-ob2)
 
-Four intro steps (welcome, how it works, city pick with a real-data teaser, alerts), then the paywall. Shown once when `NEXT_PUBLIC_PAYWALL_ENABLED=true`, or always with `?onboarding=1`.
+Ten screens: **hook → how it works → interests → mobility → city → preview → account → alerts → paywall → (after = locked feed)**. Shown once when `NEXT_PUBLIC_PAYWALL_ENABLED=true`, or always with `?onboarding=1`. The progress bar covers the 8 intro steps; the paywall is the climax.
 
 ## Sub-features
 
-- `ob-gate` shows only with the flag or param, once per browser (`shoumanwu_onboarding_completed_v1`).
-- `ob-nav` Continue, Back, Skip (to paywall), progress bar.
-- `ob-city` 13 cities. Continue stays disabled until one is picked. The pick is written to `shoumanwu_filter_prefs`.
-- `ob-teaser` real count and up to 4 real thumbnails from `listings_public`, with honest zero and error states.
-- `ob-alerts` "Turn on notifications" calls the real push hook. A guest gets the sign-in message. "Not now" moves on.
+- `ob-gate` shows only with the flag or param, once per browser (`shoumanwu_onboarding_completed_v2`).
+- `ob-nav` Continue, Back, Skip (to the **preview**, never past the account gate), 8-segment progress bar.
+- `ob-hook` real-photo collage + a live "N free items active in Veneto" line (hidden at 0 or on error).
+- `ob-interests` multi-select quiz; Continue gated until ≥1; "Everything" is exclusive. Written to `shoumanwu_filter_prefs.categories` as real Subito slugs.
+- `ob-mobility` single-select; sets the default `radiusKm`.
+- `ob-city` 13 cities, **Venice + Padova lead** (P1-2 fix). Continue gated until one is picked; written to `shoumanwu_filter_prefs.city`.
+- `ob-preview` "building your feed" only while the real teaser is in flight, then the real count + blurred real photos (RPC on flag-on, rows fallback otherwise). "Save my feed" → account; "See plans" → paywall.
+- `ob-account` **required** sign-up (no "Not now"): real Google OAuth + email OTP. Resume across the redirect via `shoumanwu_onboarding_resume_v2`.
+- `ob-alerts` labelled **Example** notifications, then "Turn on alerts" (real push hook). "Not now" → paywall. On success an honest alert is created from the answers.
+- `ob-paywall` personalized headline (real city count), blurred photo strip, real 7-day Veneto proof line, computed+floored savings tag (66%), billed line, always-visible ✕. CTA reads **"Unlock my feed" / "Sblocca il mio feed" / "解锁我的推荐"**. All three plan cards (incl. the yearly savings tag) fit without scrolling on 390×844 and 412×915 in en/it/zh. Fixes P1-3 (empty band) and P2-3 (IT badge wrap) and the first-view clipped-yearly-card snag.
+
+## QA stub for the required account step
+
+The account step is a hard gate. For verification only, `drive.mjs` sets `localStorage['shoumanwu_onboarding_stub_auth']='1'`, which the account step honors **only under `?onboarding=1`**. It lets the walk pass the step without creating a real account; it grants no listing access (the SSR gate is independent). Never signs up against the shared Supabase DB.
 
 ## How to get to it (user POV)
 
@@ -19,12 +28,13 @@ Four intro steps (welcome, how it works, city pick with a real-data teaser, aler
 
 Preconditions: doctor OK, `.env.local` present, fresh browser context (the script makes one per journey).
 
-- **Walk.** `node scripts/drive.mjs onboarding --url $URL --out $OUT` clicks through by accessible names (`Continue`, `Back`, `Skip`, city radios, `Turn on notifications`, `Not now`) and asserts `data-screen` on `[data-testid=onboarding-overlay]`.
-- **Teaser.** Clicks every city, logs `INFO teaser counts`, keeps the largest and asserts the count text and 1–4 `img` in `[data-testid=onboarding-teaser]`.
-- **Once only.** `persist` on a flag-on build completes via Skip then Close, reloads, and asserts no overlay.
+- **Walk.** `node scripts/drive.mjs onboarding --url $URL --out $OUT` walks all ten screens (stubbed account), asserting `data-screen` on `[data-testid=onboarding-overlay]`, the P1-2 city order, the real preview count (`[data-testid=preview-count]`), the personalized paywall headline, the true savings tag, the **"Unlock my feed"** CTA label, that all three plan cards fit without scrolling, screen 10 (the post-paywall locked feed **with the user's city + interest + radius choices applied**, search/filters usable without opening the paywall), `/?checkout=success` (You're in toast if unlocked, pending notice if locked), locked favorites, and the completed-`v2` + persisted prefs. Shots `01`–`13` plus `10b-checkout-return`.
+- **Against a protected Vercel Preview.** Set `VERCEL_SHARE_TOKEN=<token>` in the environment; every fresh context first visits `${URL}/?_vercel_share=<token>` to plant the protection-bypass cookie. The token is read from env only — never hardcoded or committed.
+- **Once only.** `persist` (flag-on) completes as a guest via Skip → See plans → Close, reloads, asserts no overlay, and re-checks the real preview count through `walkToPreview`.
+- **Desktop.** `desktop-paywall` reaches the paywall via Skip → See plans and checks the centered ≤440px card.
 
 ## Gotchas
 
 - Counts move with the scraper. Assert format and presence, not fixed numbers.
-- With every city non-empty, the zero-state screenshot is skipped. The zero copy is covered by `lib/paywall/teaser.test.ts`.
-- One seller often lists the same kind of item several times, so near-identical thumbnails can be real, distinct listings.
+- The hook/preview/paywall figures are derived from real rows; with no Supabase env they are hidden, not faked.
+- The alerts "Example" cards are decorative and labelled; they are never presented as real matches.

@@ -53,15 +53,17 @@ describe('removeFavorite', () => {
   });
 
   it('removes locally for guest users without calling DELETE', async () => {
-    vi.mocked(await import('@/lib/supabase/client')).createClient = () =>
-      ({
-        auth: {
-          getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
-          onAuthStateChange: vi.fn().mockReturnValue({
-            data: { subscription: { unsubscribe: vi.fn() } },
-          }),
-        },
-      }) as never;
+    vi.mocked(await import('@/lib/supabase/client')).createClient = vi.fn(
+      () =>
+        ({
+          auth: {
+            getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
+            onAuthStateChange: vi.fn().mockReturnValue({
+              data: { subscription: { unsubscribe: vi.fn() } },
+            }),
+          },
+        }) as never,
+    );
 
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);

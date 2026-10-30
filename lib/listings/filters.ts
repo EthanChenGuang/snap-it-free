@@ -28,6 +28,17 @@ export const CONSUMER_CITY_FILTER_OPTIONS: readonly ConsumerCity[] = [
   'other',
 ];
 
+/**
+ * City order for the first-run onboarding step only. The product is "Venice Free Finds" (PRODUCT.md),
+ * so its two home markets lead here, then the rest keep the population ranking. The app-wide feed
+ * filter keeps `CONSUMER_CITY_FILTER_ORDER` (ranked by Chinese-resident population).
+ */
+export const ONBOARDING_CITY_ORDER: readonly ConsumerCityKey[] = [
+  'venice',
+  'padova',
+  ...CONSUMER_CITY_FILTER_ORDER.filter((city) => city !== 'venice' && city !== 'padova'),
+];
+
 export function filterByZone(listings: ListingRow[], zoneChip: ZoneChip): ListingRow[] {
   if (zoneChip === 'All') {
     return listings.filter(

@@ -1,51 +1,61 @@
 'use client';
 
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
 import { OverlayShell } from '@/components/onboarding/OverlayShell';
 import { PaywallScreen } from '@/components/onboarding/PaywallScreen';
+import { AccountStep } from '@/components/onboarding/steps/AccountStep';
+import { AlertsMock } from '@/components/onboarding/steps/AlertsMock';
+import { BuildingFeed } from '@/components/onboarding/steps/BuildingFeed';
+import { MiniFeedCard } from '@/components/onboarding/steps/MiniFeedCard';
+import { PhotoCollage } from '@/components/onboarding/steps/PhotoCollage';
+import { useCityTeaser, useRegionTeaser } from '@/components/onboarding/useOnboardingData';
 import { usePwaOnboarding } from '@/components/providers/PwaOnboardingProvider';
 import { CompactLocaleChip } from '@/components/shell/CompactLocaleChip';
-import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import { SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { Button } from '@/components/ui/button';
-import type { ConsumerCityKey } from '@/lib/geo/italian-cities';
 import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
-import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { fetchActiveListingsClient } from '@/lib/listings/client-queries';
-import { feedLookbackSinceIso } from '@/lib/listings/feed-window';
-import { CONSUMER_CITY_FILTER_ORDER, excludeReportedIds } from '@/lib/listings/filters';
+import { ONBOARDING_CITY_ORDER } from '@/lib/listings/filters';
 import type { ListingRow } from '@/lib/listings/types';
-import { isPaywallFlagEnabled, markOnboardingCompleted, urlWithoutForceParam } from '@/lib/paywall/gate';
+import {
+  isOnboardingResumeParam,
+  isPaywallFlagEnabled,
+  markOnboardingCompleted,
+  urlWithoutForceParam,
+} from '@/lib/paywall/gate';
 import {
   INITIAL_ONBOARDING_STATE,
   INTRO_STEPS,
   canAdvance,
+  canGoBack,
+  clearResumeState,
   introStepIndex,
+  isSkippable,
   onboardingReducer,
+  persistResumeState,
+  readResumeState,
   type OnboardingAction,
   type OnboardingState,
 } from '@/lib/paywall/onboarding-flow';
-import { fetchPaywallTeaser } from '@/lib/paywall/locked-preview';
-import { CITY_TEASER_THUMBNAIL_LIMIT, summarizeCityTeaser } from '@/lib/paywall/teaser';
-import { requestPushPermissionAndSubscribe, type PushSubscribeResult } from '@/lib/pwa/usePushSubscribe';
-import { readReportedIds } from '@/lib/reports/storage';
-import { createAnonClient } from '@/lib/supabase/anon';
+import {
+  ONBOARDING_INTERESTS,
+  interestsToAlertKeyword,
+  onboardingFilterPrefs,
+} from '@/lib/paywall/onboarding-interests';
+import { readFilterPrefs, writeFilterPrefs } from '@/lib/filter-prefs/storage';
+import { insertAlert } from '@/lib/alerts/db';
+import { createClient } from '@/lib/supabase/client';
 import { getSupabaseEnv } from '@/lib/supabase/env';
+import { requestPushPermissionAndSubscribe, type PushSubscribeResult } from '@/lib/pwa/usePushSubscribe';
 import { cn } from '@/lib/utils';
 import type { Messages } from '@/messages';
-
-type CityTeaserState =
-  | { status: 'loading' }
-  | { status: 'ready'; count: number; photos: { key: string; url: string; alt: string }[] }
-  | { status: 'error' };
 
 type PushState = { status: 'idle' } | { status: 'pending' } | { status: 'settled'; result: PushSubscribeResult };
 
 const TITLE_ID = 'onboarding-title';
-
 
 /** Headline with one underlined word; falls back to plain text if the word is absent. */
 function EmphasisTitle({ title, emphasis }: { title: string; emphasis: string }) {
@@ -60,69 +70,16 @@ function EmphasisTitle({ title, emphasis }: { title: string; emphasis: string })
   );
 }
 
-function useFocusOnChange(key: string) {
-  const ref = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    ref.current?.focus({ preventScroll: true });
-  }, [key]);
-  return ref;
-}
-
-/**
- * Paywall on: the per-city definer function (044), the only listing data a non-subscriber may read.
- * Paywall off, or before 044: summarize the rows the feed itself loads, prefetched on mount as before.
- */
-function useCityTeaser(city: ConsumerCityKey | null): CityTeaserState {
-  const { language } = useMessages();
-  const [state, setState] = useState<CityTeaserState>({ status: 'loading' });
-  const rowsRef = useRef<Promise<ListingRow[]> | null>(null);
-  const rows = useCallback(() => {
-    rowsRef.current ??= fetchActiveListingsClient().then((all) => excludeReportedIds(all, readReportedIds()));
-    return rowsRef.current;
-  }, []);
-
-  useEffect(() => {
-    if (!isPaywallFlagEnabled() && getSupabaseEnv()) void rows().catch(() => {});
-  }, [rows]);
-
-  useEffect(() => {
-    if (!city) return;
-    // Without Supabase the client helper returns [], which would read as a false "0 listings".
-    if (!getSupabaseEnv()) {
-      setState({ status: 'error' });
-      return;
-    }
-    let cancelled = false;
-    setState({ status: 'loading' });
-    const load = async (): Promise<CityTeaserState> => {
-      if (isPaywallFlagEnabled()) {
-        const teaser = await fetchPaywallTeaser(createAnonClient(), { city, since: feedLookbackSinceIso() });
-        if (teaser && teaser.count !== null) {
-          const photos = teaser.photoUrls.slice(0, CITY_TEASER_THUMBNAIL_LIMIT);
-          return { status: 'ready', count: teaser.count, photos: photos.map((url) => ({ key: url, url, alt: '' })) };
-        }
-      }
-      const summary = summarizeCityTeaser(await rows(), city);
-      return {
-        status: 'ready',
-        count: summary.count,
-        photos: summary.thumbnails.map((thumb) => ({
-          key: thumb.id,
-          url: thumb.photoUrl,
-          alt: resolveListingTitle(thumb.listing, language),
-        })),
-      };
-    };
-    load().then(
-      (next) => !cancelled && setState(next),
-      () => !cancelled && setState({ status: 'error' }),
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [city, language, rows]);
-
-  return state;
+function StepTitle({ title, emphasis }: { title: string; emphasis: string }) {
+  return (
+    <h1
+      id={TITLE_ID}
+      tabIndex={-1}
+      className="text-[32px] font-bold leading-[1.2] tracking-[-0.02em] text-on-surface outline-none"
+    >
+      <EmphasisTitle title={title} emphasis={emphasis} />
+    </h1>
+  );
 }
 
 function pushResultMessage(result: PushSubscribeResult, copy: Messages['onboarding']['alerts']): string {
@@ -155,9 +112,7 @@ function IntroHeader({
   return (
     <header className="flex h-14 shrink-0 items-center gap-space-md px-space-md">
       <div className="flex w-16 justify-start">
-        {index === 0 ? (
-          <CompactLocaleChip />
-        ) : (
+        {canGoBack(state.screen) ? (
           <button
             type="button"
             onClick={() => dispatch({ type: 'back' })}
@@ -166,6 +121,8 @@ function IntroHeader({
           >
             <SymbolIcon name="arrow_back" />
           </button>
+        ) : (
+          <CompactLocaleChip />
         )}
       </div>
       <div className="flex flex-1 items-center gap-space-xs" aria-hidden>
@@ -183,123 +140,172 @@ function IntroHeader({
         {messages.onboarding.progress(index + 1, INTRO_STEPS.length)}
       </p>
       <div className="flex w-16 justify-end">
-        <button
-          type="button"
-          onClick={() => dispatch({ type: 'skip' })}
-          className="h-11 rounded px-space-sm text-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline"
-        >
-          {messages.onboarding.skip}
-        </button>
+        {isSkippable(state.screen) ? (
+          <button
+            type="button"
+            onClick={() => dispatch({ type: 'skip' })}
+            className="h-11 rounded px-space-sm text-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline"
+          >
+            {messages.onboarding.skip}
+          </button>
+        ) : null}
       </div>
     </header>
   );
 }
 
-function StepHero({ icon }: { icon: string }) {
-  return (
-    <div className="mb-space-lg flex h-20 w-20 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest">
-      <SymbolIcon name={icon} className="text-[40px] text-on-surface" />
-    </div>
-  );
-}
-
-function StepTitle({ titleRef, title, emphasis }: { titleRef: React.Ref<HTMLHeadingElement>; title: string; emphasis: string }) {
-  return (
-    <h1
-      id={TITLE_ID}
-      ref={titleRef}
-      tabIndex={-1}
-      className="text-[32px] font-bold leading-[1.2] tracking-[-0.02em] text-on-surface outline-none"
-    >
-      <EmphasisTitle title={title} emphasis={emphasis} />
-    </h1>
-  );
-}
-
-function FeatureRow({ icon, title, body }: { icon: string; title: string; body?: string }) {
-  return (
-    <li className="flex gap-space-md border-t border-outline-variant py-space-md first:border-t-0">
-      <SymbolIcon name={icon} className="mt-0.5 text-[24px] text-on-surface" />
-      <div>
-        <p className="text-label-md text-on-surface">{title}</p>
-        {body && <p className="mt-0.5 text-body-md text-on-surface-variant">{body}</p>}
-      </div>
-    </li>
-  );
-}
-
-function CityTeaserPanel({
-  city,
-  teaser,
-  messages,
+function ChipRow<T extends string>({
+  options,
+  isActive,
+  onToggle,
+  labelFor,
+  columns,
 }: {
-  city: ConsumerCityKey;
-  teaser: CityTeaserState;
-  messages: Messages;
+  options: readonly T[];
+  isActive: (value: T) => boolean;
+  onToggle: (value: T) => void;
+  labelFor: (value: T) => string;
+  columns?: boolean;
 }) {
-  const copy = messages.onboarding.city;
-  const cityLabel = consumerCityLabelsFromMessages(messages)[city];
-
-  if (teaser.status === 'loading') {
-    return <p className="text-body-md text-on-surface-variant">{copy.teaserLoading}</p>;
-  }
-  if (teaser.status === 'error') {
-    return <p className="text-body-md text-on-surface-variant">{copy.teaserError}</p>;
-  }
-  if (teaser.count === 0) {
-    return <p className="text-body-md text-on-surface-variant">{copy.teaserEmpty(cityLabel)}</p>;
-  }
-
   return (
-    <div>
-      <p className="text-label-md text-on-surface" data-testid="onboarding-teaser-count">
-        {copy.teaserCount(teaser.count, cityLabel)}
-      </p>
-      {teaser.photos.length > 0 && (
-        <ul className="mt-space-md grid grid-cols-4 gap-space-sm" aria-label={copy.teaserPhotosLabel}>
-          {teaser.photos.map((photo) => (
-            <li
-              key={photo.key}
-              className="relative aspect-square overflow-hidden rounded-lg bg-surface-container-high"
-            >
-              <ListingPhoto src={photo.url} alt={photo.alt} variant="thumbnail" sizes="96px" priority />
-            </li>
-          ))}
-        </ul>
-      )}
+    <div
+      className={cn('mt-space-lg flex flex-wrap gap-space-sm', columns && 'flex-col')}
+      role="group"
+      aria-labelledby={TITLE_ID}
+    >
+      {options.map((value) => {
+        const active = isActive(value);
+        return (
+          <Button
+            key={value}
+            type="button"
+            role="checkbox"
+            aria-checked={active}
+            variant={active ? 'chipActive' : 'chip'}
+            className={cn('h-10 rounded-full px-space-md', columns && 'w-full justify-start')}
+            onClick={() => onToggle(value)}
+          >
+            {labelFor(value)}
+          </Button>
+        );
+      })}
     </div>
   );
 }
 
 export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
   const { messages } = useMessages();
-  const { setCity } = useFeedFilter();
   const { openInstallGuide } = usePwaOnboarding();
   const reduceMotion = useReducedMotion();
   const [state, dispatch] = useReducer(onboardingReducer, INITIAL_ONBOARDING_STATE);
   const [push, setPush] = useState<PushState>({ status: 'idle' });
-  const cityTeaser = useCityTeaser(state.screen === 'city' ? state.city : null);
-  const titleRef = useFocusOnChange(state.screen);
   const copy = messages.onboarding;
+  const cityLabels = consumerCityLabelsFromMessages(messages);
 
+  // Resume after the account step's auth redirect (?onboarding=resume) or any stored in-flight state.
+  useEffect(() => {
+    const resume = readResumeState(window.sessionStorage);
+    const isResume = isOnboardingResumeParam(window.location.search);
+    if (resume && (isResume || resume.screen === 'account' || resume.screen === 'alerts')) {
+      dispatch({ type: 'resume', state: resume });
+      clearResumeState(window.sessionStorage);
+    }
+  }, []);
+
+  // Teaser data: region-wide (hook collage + Veneto counts) and per picked city.
+  const region = useRegionTeaser();
+  const cityTeaser = useCityTeaser(state.city);
+
+  // One real listing for the "how it works" mini-cards.
+  const [sampleListings, setSampleListings] = useState<ListingRow[]>([]);
+  useEffect(() => {
+    if (!getSupabaseEnv()) return;
+    let cancelled = false;
+    fetchActiveListingsClient().then(
+      (rows) => !cancelled && setSampleListings(rows.slice(0, 3)),
+      () => {},
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    titleRef.current = document.getElementById(TITLE_ID) as HTMLHeadingElement | null;
+    titleRef.current?.focus({ preventScroll: true });
+  }, [state.screen]);
+
+  // Paywall (and Stripe redirect): write city / interests / radius so the feed opens with them applied
+  // even if the user never hits `done` (they left for Checkout). Resume lets the return path re-apply.
+  useEffect(() => {
+    if (state.screen !== 'paywall') return;
+    persistResumeState(window.sessionStorage, state);
+    writeFilterPrefs(
+      onboardingFilterPrefs(readFilterPrefs(), {
+        city: state.city,
+        interests: state.interests,
+        radiusKm: state.radiusKm,
+        locationGranted: state.locationGranted,
+      }),
+    );
+  }, [state]);
+
+  // Finish: persist answers to filter prefs, mark done, clean URL.
   useEffect(() => {
     if (state.screen !== 'done') return;
     markOnboardingCompleted(window.localStorage);
-    if (state.city) setCity(state.city);
+    writeFilterPrefs(
+      onboardingFilterPrefs(readFilterPrefs(), {
+        city: state.city,
+        interests: state.interests,
+        radiusKm: state.radiusKm,
+        locationGranted: state.locationGranted,
+      }),
+    );
+    clearResumeState(window.sessionStorage);
     window.history.replaceState(window.history.state, '', urlWithoutForceParam(window.location.href));
     onFinish();
     const pendingInstallGuide =
       push.status === 'settled' && !push.result.ok && push.result.reason === 'ios_not_ready';
     if (pendingInstallGuide) openInstallGuide();
-  }, [state.screen, state.city, setCity, onFinish, openInstallGuide, push]);
+  }, [state.screen, state.city, state.interests, state.radiusKm, state.locationGranted, onFinish, openInstallGuide, push]);
+
+  // Best-effort: once push is enabled (so the user is signed in), create one honest alert from answers.
+  const createAlertFromAnswers = useCallback(async () => {
+    if (!getSupabaseEnv()) return;
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+      const keyword = interestsToAlertKeyword(state.interests);
+      if (!keyword && !state.city) return;
+      await insertAlert(supabase, {
+        user_id: user.id,
+        keyword,
+        zone: null,
+        city: state.city,
+        enabled: true,
+      });
+    } catch {
+      // Non-blocking: the user can always create alerts in Settings.
+    }
+  }, [state.city, state.interests]);
 
   const enablePush = useCallback(async () => {
     setPush({ status: 'pending' });
     const result = await requestPushPermissionAndSubscribe().catch(
       (): PushSubscribeResult => ({ ok: false, reason: 'subscribe_error' }),
     );
+    if (result.ok) void createAlertFromAnswers();
     setPush({ status: 'settled', result });
-  }, []);
+  }, [createAlertFromAnswers]);
+
+  const persistForRedirect = useCallback(() => {
+    persistResumeState(window.sessionStorage, state);
+  }, [state]);
 
   const motionProps = reduceMotion
     ? { initial: false, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.12 } }
@@ -310,132 +316,287 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
         transition: { duration: 0.24, ease: [0.16, 1, 0.3, 1] as const },
       };
 
+  // Personalized preview/paywall figures from real data.
+  const previewCityLabel = state.city ? cityLabels[state.city] : null;
+  const previewCount =
+    state.city
+      ? cityTeaser.status === 'ready'
+        ? cityTeaser.count
+        : null
+      : region.status === 'ready'
+        ? region.venetoCount
+        : null;
+  const previewPhotos =
+    state.city && cityTeaser.status === 'ready' && cityTeaser.photos.length > 0
+      ? cityTeaser.photos
+      : region.status === 'ready'
+        ? region.collage
+        : [];
+  const previewLoading = state.city ? cityTeaser.status === 'loading' : region.status === 'loading';
+  const proofCount = region.status === 'ready' && region.venetoNew7d > 0 ? region.venetoNew7d : null;
+
+  const paywallContext = useMemo(
+    () => ({
+      cityLabel: previewCityLabel ?? copy.regionLabel,
+      count: previewCount,
+      photos: previewPhotos.slice(0, 3).map((photo) => photo.url),
+      proofCount,
+    }),
+    [previewCityLabel, previewCount, previewPhotos, proofCount, copy.regionLabel],
+  );
+
   if (state.screen === 'done') return null;
 
-  const cityLabels = consumerCityLabelsFromMessages(messages);
   const isIntro = state.screen !== 'paywall';
+
+  const footerContinue = (
+    <footer className="flex shrink-0 flex-col gap-space-sm border-t border-outline-variant px-gutter py-space-md">
+      <Button
+        type="button"
+        className="h-12 w-full text-label-md"
+        disabled={!canAdvance(state)}
+        onClick={() => dispatch({ type: 'next' })}
+        data-testid="onboarding-continue"
+      >
+        {copy.continue}
+      </Button>
+    </footer>
+  );
 
   return (
     <OverlayShell labelledBy={TITLE_ID} testId="onboarding-overlay" screen={state.screen}>
       {isIntro ? (
         <>
           <IntroHeader state={state} dispatch={dispatch} messages={messages} />
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={state.screen}
-              className="no-scrollbar flex-1 overflow-y-auto px-gutter pt-space-lg pb-space-md"
-              {...motionProps}
-            >
-              {state.screen === 'welcome' && (
-                <>
-                  <StepHero icon="redeem" />
-                  <StepTitle titleRef={titleRef} title={copy.welcome.title} emphasis={copy.welcome.emphasis} />
-                  <p className="mt-space-md text-body-lg text-on-surface-variant">{copy.welcome.body}</p>
-                </>
-              )}
 
-              {state.screen === 'how' && (
-                <>
-                  <StepHero icon="grid_view" />
-                  <StepTitle titleRef={titleRef} title={copy.how.title} emphasis={copy.how.emphasis} />
-                  <ul className="mt-space-lg">
-                    <FeatureRow icon="view_agenda" title={copy.how.feedTitle} body={copy.how.feedBody} />
-                    <FeatureRow icon="map" title={copy.how.mapTitle} body={copy.how.mapBody} />
-                    <FeatureRow icon="tune" title={copy.how.filterTitle} body={copy.how.filterBody} />
-                  </ul>
-                </>
-              )}
+          {state.screen === 'account' ? (
+            <AccountStep
+              copy={copy.account}
+              onBeforeRedirect={persistForRedirect}
+              onContinue={() => dispatch({ type: 'next' })}
+            />
+          ) : (
+            <>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={state.screen}
+                  className="no-scrollbar flex-1 overflow-y-auto px-gutter pt-space-lg pb-space-md"
+                  {...motionProps}
+                >
+                  {state.screen === 'hook' && (
+                    <>
+                      <StepTitle title={copy.hook.title} emphasis={copy.hook.emphasis} />
+                      <p className="mt-space-sm text-body-lg text-on-surface-variant">{copy.hook.body}</p>
+                      {region.status === 'ready' && region.venetoCount > 0 && (
+                        <p className="mt-space-sm text-label-md text-on-surface" data-testid="hook-live-line">
+                          {copy.hook.liveLine(region.venetoCount)}
+                        </p>
+                      )}
+                      <div className="mt-space-lg">
+                        <PhotoCollage photos={region.status === 'ready' ? region.collage : []} />
+                      </div>
+                    </>
+                  )}
 
-              {state.screen === 'city' && (
-                <>
-                  <StepTitle titleRef={titleRef} title={copy.city.title} emphasis={copy.city.emphasis} />
-                  <p className="mt-space-sm text-body-md text-on-surface-variant">{copy.city.body}</p>
-                  <div className="mt-space-lg flex flex-wrap gap-space-sm" role="radiogroup" aria-labelledby={TITLE_ID}>
-                    {CONSUMER_CITY_FILTER_ORDER.map((city) => {
-                      const active = state.city === city;
-                      return (
-                        <Button
-                          key={city}
-                          type="button"
-                          role="radio"
-                          aria-checked={active}
-                          variant={active ? 'chipActive' : 'chip'}
-                          className="h-10 rounded-full px-space-md"
-                          onClick={() => dispatch({ type: 'selectCity', city })}
+                  {state.screen === 'how' && (
+                    <>
+                      <StepTitle title={copy.how.title} emphasis={copy.how.emphasis} />
+                      <div className="mt-space-lg flex gap-space-md overflow-x-auto no-scrollbar pb-space-xs">
+                        {sampleListings.map((listing) => (
+                          <MiniFeedCard key={listing.id} listing={listing} />
+                        ))}
+                      </div>
+                      <ul className="mt-space-lg">
+                        {copy.how.rows.map((row) => (
+                          <li
+                            key={row}
+                            className="flex gap-space-md border-t border-outline-variant py-space-md first:border-t-0"
+                          >
+                            <SymbolIcon name="check" className="mt-0.5 text-[20px] text-on-surface" />
+                            <p className="text-body-md text-on-surface">{row}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+
+                  {state.screen === 'interests' && (
+                    <>
+                      <StepTitle title={copy.interests.title} emphasis={copy.interests.emphasis} />
+                      <p className="mt-space-sm text-body-md text-on-surface-variant">{copy.interests.hint}</p>
+                      <ChipRow
+                        options={ONBOARDING_INTERESTS.map((interest) => interest.key)}
+                        isActive={(key) => state.interests.includes(key)}
+                        onToggle={(key) => dispatch({ type: 'toggleInterest', interest: key })}
+                        labelFor={(key) => copy.interests.chips[key as keyof typeof copy.interests.chips]}
+                      />
+                    </>
+                  )}
+
+                  {state.screen === 'mobility' && (
+                    <>
+                      <StepTitle title={copy.mobility.title} emphasis={copy.mobility.emphasis} />
+                      <p className="mt-space-sm text-body-md text-on-surface-variant">{copy.mobility.hint}</p>
+                      <ChipRow
+                        options={['foot', 'bike', 'car'] as const}
+                        isActive={(key) => state.mobility === key}
+                        onToggle={(key) => dispatch({ type: 'selectMobility', mobility: key })}
+                        labelFor={(key) => copy.mobility.options[key]}
+                        columns
+                      />
+                    </>
+                  )}
+
+                  {state.screen === 'city' && (
+                    <>
+                      <StepTitle title={copy.city.title} emphasis={copy.city.emphasis} />
+                      <p className="mt-space-sm text-body-md text-on-surface-variant">{copy.city.body}</p>
+                      <div
+                        className="mt-space-lg flex flex-wrap gap-space-sm"
+                        role="radiogroup"
+                        aria-labelledby={TITLE_ID}
+                      >
+                        {ONBOARDING_CITY_ORDER.map((city) => {
+                          const active = state.city === city;
+                          return (
+                            <Button
+                              key={city}
+                              type="button"
+                              role="radio"
+                              aria-checked={active}
+                              variant={active ? 'chipActive' : 'chip'}
+                              className="h-10 rounded-full px-space-md"
+                              onClick={() => dispatch({ type: 'selectCity', city })}
+                            >
+                              {cityLabels[city]}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+
+                  {state.screen === 'preview' && (
+                    <div data-testid="onboarding-preview">
+                      <StepTitle title={copy.preview.title} emphasis={copy.preview.emphasis} />
+                      {previewLoading ? (
+                        <BuildingFeed
+                          title={copy.preview.building}
+                          items={[
+                            copy.preview.checkCity(previewCityLabel ?? copy.regionLabel),
+                            copy.preview.checkInterests,
+                            copy.preview.checkRadius(state.radiusKm),
+                          ]}
+                        />
+                      ) : previewCount !== null ? (
+                        <>
+                          <p className="mt-space-sm text-label-lg font-semibold text-on-surface" data-testid="preview-count">
+                            {copy.preview.result(previewCount, previewCityLabel ?? copy.regionLabel)}
+                          </p>
+                          {previewCount <= 3 && (
+                            <p className="mt-space-xs text-body-md text-on-surface-variant">
+                              {copy.preview.lowSupply(previewCount, previewCityLabel ?? copy.regionLabel)}
+                            </p>
+                          )}
+                          <div
+                            className="pointer-events-none mt-space-lg grid grid-cols-2 gap-space-sm sm:grid-cols-3"
+                            aria-hidden
+                          >
+                            {previewPhotos.slice(0, 6).map((photo) => (
+                              <div
+                                key={photo.key}
+                                className="relative aspect-square overflow-hidden rounded-2xl bg-surface-container-high"
+                              >
+                                <div className="absolute inset-0 scale-110 blur-[12px]">
+                                  <ListingPhoto src={photo.url} alt="" variant="thumbnail" sizes="180px" />
+                                </div>
+                                <span className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-background/80">
+                                  <SymbolIcon name="lock" className="text-[14px] text-on-surface" />
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <p className="mt-space-md text-body-md text-on-surface-variant">{copy.preview.unavailable}</p>
+                      )}
+                    </div>
+                  )}
+
+                  {state.screen === 'alerts' && (
+                    <>
+                      <StepTitle title={copy.alerts.title} emphasis={copy.alerts.emphasis} />
+                      <p className="mt-space-md text-body-lg text-on-surface-variant">{copy.alerts.body}</p>
+                      <AlertsMock
+                        label={copy.alerts.mockLabel}
+                        lines={[
+                          copy.alerts.mockLine,
+                          copy.alerts.mockLine2(previewCityLabel ?? copy.regionLabel),
+                        ]}
+                      />
+                      {push.status === 'settled' && (
+                        <p
+                          role="status"
+                          className="mt-space-md rounded-lg border border-outline-variant bg-surface-container-lowest p-space-md text-body-md text-on-surface"
                         >
-                          {cityLabels[city]}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                  {state.city && (
-                    <section
-                      className="mt-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest p-space-md"
-                      aria-live="polite"
-                      data-testid="onboarding-teaser"
-                    >
-                      <CityTeaserPanel city={state.city} teaser={cityTeaser} messages={messages} />
-                    </section>
+                          {pushResultMessage(push.result, copy.alerts)}
+                        </p>
+                      )}
+                    </>
                   )}
-                </>
-              )}
+                </motion.div>
+              </AnimatePresence>
 
-              {state.screen === 'alerts' && (
-                <>
-                  <StepHero icon="notifications_active" />
-                  <StepTitle titleRef={titleRef} title={copy.alerts.title} emphasis={copy.alerts.emphasis} />
-                  <p className="mt-space-md text-body-lg text-on-surface-variant">{copy.alerts.body}</p>
-                  <ul className="mt-space-lg">
-                    <FeatureRow icon="sell" title={copy.alerts.pointKeywords} />
-                    <FeatureRow icon="bedtime" title={copy.alerts.pointQuiet} />
-                  </ul>
-                  {push.status === 'settled' && (
-                    <p
-                      role="status"
-                      className="mt-space-md rounded-lg border border-outline-variant bg-surface-container-lowest p-space-md text-body-md text-on-surface"
+              {state.screen === 'preview' ? (
+                <footer className="flex shrink-0 flex-col gap-space-sm border-t border-outline-variant px-gutter py-space-md">
+                  <Button
+                    type="button"
+                    className="h-12 w-full text-label-md"
+                    onClick={() => dispatch({ type: 'next' })}
+                    data-testid="preview-save"
+                  >
+                    {copy.preview.cta}
+                  </Button>
+                  {/* Escape to pricing without being forced to sign up; the account step itself keeps no "Not now". */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-11 w-full"
+                    onClick={() => dispatch({ type: 'goTo', screen: 'paywall' })}
+                    data-testid="preview-see-plans"
+                  >
+                    {copy.preview.seePlans}
+                  </Button>
+                </footer>
+              ) : state.screen === 'alerts' ? (
+                <footer className="flex shrink-0 flex-col gap-space-sm border-t border-outline-variant px-gutter py-space-md">
+                  {push.status !== 'settled' || !push.result.ok ? (
+                    <Button
+                      type="button"
+                      className="h-12 w-full text-label-md"
+                      disabled={push.status === 'pending'}
+                      onClick={() => void enablePush()}
                     >
-                      {pushResultMessage(push.result, copy.alerts)}
-                    </p>
-                  )}
-                </>
+                      {push.status === 'pending' ? copy.alerts.enabling : copy.alerts.enable}
+                    </Button>
+                  ) : null}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-11 w-full"
+                    onClick={() => dispatch({ type: 'next' })}
+                  >
+                    {push.status === 'settled' && push.result.ok ? copy.continue : copy.alerts.notNow}
+                  </Button>
+                </footer>
+              ) : (
+                footerContinue
               )}
-            </motion.div>
-          </AnimatePresence>
-
-          <footer className="flex shrink-0 flex-col gap-space-sm border-t border-outline-variant px-gutter py-space-md">
-            {state.screen === 'alerts' && push.status !== 'settled' ? (
-              <>
-                <Button
-                  type="button"
-                  className="h-12 w-full text-label-md"
-                  disabled={push.status === 'pending'}
-                  onClick={() => void enablePush()}
-                >
-                  {push.status === 'pending' ? copy.alerts.enabling : copy.alerts.enable}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="h-11 w-full"
-                  onClick={() => dispatch({ type: 'next' })}
-                >
-                  {copy.alerts.notNow}
-                </Button>
-              </>
-            ) : (
-              <Button
-                type="button"
-                className="h-12 w-full text-label-md"
-                disabled={!canAdvance(state)}
-                onClick={() => dispatch({ type: 'next' })}
-              >
-                {copy.continue}
-              </Button>
-            )}
-          </footer>
+            </>
+          )}
         </>
       ) : (
-        <PaywallScreen titleId={TITLE_ID} onFinish={() => dispatch({ type: 'finish' })} />
+        <PaywallScreen titleId={TITLE_ID} onFinish={() => dispatch({ type: 'finish' })} context={paywallContext} />
       )}
     </OverlayShell>
   );

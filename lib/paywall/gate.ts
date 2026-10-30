@@ -1,8 +1,21 @@
-/** Versioned so a redesigned flow can be shown again by bumping the suffix. */
-export const ONBOARDING_COMPLETED_STORAGE_KEY = 'shoumanwu_onboarding_completed_v1';
+/** Versioned so a redesigned flow can be shown again by bumping the suffix (v2 = Snag-modelled flow). */
+export const ONBOARDING_COMPLETED_STORAGE_KEY = 'shoumanwu_onboarding_completed_v2';
 
 /** QA / preview override: `?onboarding=1` shows the flow even after completion. */
 export const ONBOARDING_FORCE_PARAM = 'onboarding';
+
+/**
+ * The `?onboarding=1` + localStorage QA stub that walks past the required account step
+ * without real auth must never work in a production build. Vercel exposes `VERCEL_ENV`
+ * at build time; `next.config.ts` bakes it into `NEXT_PUBLIC_VERCEL_ENV` as a literal so
+ * this reads a constant in the client bundle. Anything other than 'production' (Preview,
+ * local dev, undefined-local build) allows the stub; production never does.
+ */
+export function isAccountSkipStubAllowed(
+  vercelEnv: string | undefined = process.env.NEXT_PUBLIC_VERCEL_ENV,
+): boolean {
+  return vercelEnv !== 'production';
+}
 
 export type OnboardingGateInput = {
   flagEnabled: boolean;
@@ -20,8 +33,15 @@ export function isPaywallFlagEnabled(
   return value === 'true';
 }
 
+/** `?onboarding=1` forces the flow for QA; `?onboarding=resume` is our own return URL after the
+ * account step's auth redirect, so the flow re-opens to finish. Both re-open onboarding. */
 export function hasOnboardingForceParam(search: string): boolean {
-  return new URLSearchParams(search).get(ONBOARDING_FORCE_PARAM) === '1';
+  const value = new URLSearchParams(search).get(ONBOARDING_FORCE_PARAM);
+  return value === '1' || value === 'resume';
+}
+
+export function isOnboardingResumeParam(search: string): boolean {
+  return new URLSearchParams(search).get(ONBOARDING_FORCE_PARAM) === 'resume';
 }
 
 export function readOnboardingCompleted(storage: ReadableStorage | undefined): boolean {

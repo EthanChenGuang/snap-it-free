@@ -425,45 +425,95 @@ export const messages = {
     skip: 'Salta',
     back: 'Indietro',
     continue: 'Continua',
-    welcome: {
-      title: 'Cose gratis vicino a te',
+    regionLabel: 'Veneto',
+    hook: {
+      title: 'Cose gratis vicino a te, ogni giorno',
       emphasis: 'gratis',
-      body: 'ZeroEuro raccoglie in un unico feed gli oggetti in regalo su Subito e quelli trovati per strada dai vicini.',
+      body: 'Raccogliamo in un unico feed gli oggetti in regalo su Subito e quelli trovati per strada dai vicini.',
+      liveLine: (count: number) =>
+        count === 1
+          ? '1 oggetto gratis disponibile in Veneto in questo momento'
+          : `${count.toLocaleString('it-IT')} oggetti gratis disponibili in Veneto in questo momento`,
     },
     how: {
-      title: 'Un feed, più la mappa',
-      emphasis: 'feed',
-      feedTitle: 'Un unico feed',
-      feedBody: 'Annunci di regalo da più fonti, ordinati dal più recente.',
-      mapTitle: 'Mappa quando serve',
-      mapBody: 'Apri la mappa per vedere cosa c’è intorno a un punto.',
-      filterTitle: 'Filtri per distanza e categoria',
-      filterBody: 'Restringi per raggio, città o tipo di oggetto.',
+      title: 'Un solo feed invece di cinque app',
+      emphasis: 'Un',
+      rows: [
+        'Subito + ritrovamenti in strada, dai più recenti',
+        'Distanza e ora di pubblicazione su ogni scheda',
+        'Mappa e preferiti quando servono',
+      ],
+    },
+    interests: {
+      title: 'Cosa stai cercando?',
+      emphasis: 'cercando',
+      hint: 'Scegline quante vuoi. Le useremo per il tuo feed e gli avvisi.',
+      chips: {
+        furniture: 'Mobili',
+        electronics: 'Elettronica',
+        clothes: 'Abbigliamento',
+        books: 'Libri',
+        home_decor: 'Casa e decorazioni',
+        everything: 'Tutto',
+      },
+    },
+    mobility: {
+      title: 'Come ti muovi?',
+      emphasis: 'muovi',
+      hint: 'Imposta la distanza di ricerca predefinita. Puoi cambiarla quando vuoi.',
+      options: {
+        foot: 'A piedi (~1 km)',
+        bike: 'Bici o vaporetto (~5 km)',
+        car: 'Auto (~15 km)',
+      },
     },
     city: {
-      title: 'Scegli la tua città',
-      emphasis: 'città',
+      title: 'Dove cerchiamo?',
+      emphasis: 'cerchiamo',
       body: 'Il feed partirà da qui. Puoi cambiarla quando vuoi dai filtri.',
-      teaserLoading: 'Conto gli annunci attivi…',
-      teaserCount: (count: number, city: string) =>
+    },
+    preview: {
+      title: 'Il tuo feed è pronto',
+      emphasis: 'pronto',
+      building: 'Stiamo preparando il tuo feed…',
+      checkCity: (city: string) => `Città · ${city}`,
+      checkInterests: 'I tuoi interessi',
+      checkRadius: (km: number) => `Entro ${km} km`,
+      result: (count: number, city: string) =>
         count === 1
-          ? `1 annuncio gratis attivo a ${city} in questo momento`
-          : `${count.toLocaleString('it-IT')} annunci gratis attivi a ${city} in questo momento`,
-      teaserEmpty: (city: string) =>
-        `Nessun annuncio gratis attivo a ${city} in questo momento. Puoi comunque sfogliare tutte le città.`,
-      teaserError: 'Impossibile caricare gli annunci ora. Puoi continuare lo stesso.',
-      teaserPhotosLabel: 'Annunci recenti',
+          ? `1 oggetto gratis a ${city} in questo momento`
+          : `${count.toLocaleString('it-IT')} oggetti gratis a ${city} in questo momento`,
+      lowSupply: (count: number, city: string) =>
+        `Per ora solo ${count} a ${city}. Prova un raggio più ampio o un’altra città.`,
+      cta: 'Salva il mio feed',
+      seePlans: 'Vedi i piani',
+      unavailable: 'Non siamo riusciti a caricare il tuo feed ora. Puoi continuare lo stesso.',
+    },
+    account: {
+      title: 'Salva feed e avvisi',
+      emphasis: 'Salva',
+      body: 'Un account gratuito conserva città, interessi e avvisi su tutti i dispositivi.',
+      google: 'Continua con Google',
+      email: 'Inviami un link di accesso',
+      emailSending: 'Invio…',
+      emailSent: 'Controlla la tua email per il link di accesso, poi torna qui.',
+      emailPlaceholder: 'tu@email.com',
+      emailError: 'Impossibile inviare il link. Controlla l’indirizzo e riprova.',
+      optIn: 'Inviami email occasionali sul servizio (facoltativo)',
+      signedIn: 'Hai effettuato l’accesso. Continua per completare la configurazione.',
+      signedInAs: (email: string) => `Accesso come ${email}.`,
     },
     alerts: {
-      title: 'Scopri per primo i nuovi regali',
-      emphasis: 'primo',
-      body: 'Imposta parole chiave e una città: ti avvisiamo quando compare un annuncio corrispondente.',
-      pointKeywords: 'Avvisi per parole chiave, ad esempio “divano” o “bici”',
-      pointQuiet: 'Ore di silenzio per non essere disturbato di notte',
-      enable: 'Attiva le notifiche',
+      title: 'Arriva prima sulle novità',
+      emphasis: 'prima',
+      body: 'Ti avvisiamo quando compare un oggetto gratis corrispondente.',
+      mockLabel: 'Esempio',
+      mockLine: 'Libreria in regalo · Cannaregio',
+      mockLine2: (city: string) => `Nuovo oggetto gratis a ${city}`,
+      enable: 'Attiva gli avvisi',
       enabling: 'Attivazione…',
       notNow: 'Non ora',
-      enabled: 'Notifiche attive.',
+      enabled: 'Avvisi attivi. Ne abbiamo creato uno dai tuoi interessi — gestiscilo in Impostazioni.',
       notLoggedIn: 'Gli avvisi richiedono un account. Puoi accedere e attivarli quando vuoi da Impostazioni.',
       iosNotReady: 'Su iPhone aggiungi prima ZeroEuro alla schermata Home. Ti mostriamo come alla fine.',
       unsupported: 'Questo browser non supporta le notifiche.',
@@ -475,9 +525,19 @@ export const messages = {
     close: 'Chiudi',
     title: 'ZeroEuro Plus',
     subtitle: 'Abbonati per vedere tutti gli annunci gratis vicino a te.',
+    titlePersonalized: (count: number, city: string) =>
+      count === 1 ? `Sblocca 1 oggetto gratis a ${city}` : `Sblocca ${count.toLocaleString('it-IT')} oggetti gratis a ${city}`,
+    titleFallback: 'Vedi tutti gli oggetti gratis vicino a te',
+    proofLine: (count: number) =>
+      count === 1
+        ? '1 nuovo oggetto gratis in Veneto negli ultimi 7 giorni'
+        : `${count.toLocaleString('it-IT')} nuovi oggetti gratis in Veneto negli ultimi 7 giorni`,
+    savingsVsMonthly: (pct: number) => `Risparmi il ${pct}%`,
+    billed: (price: string) => `Addebito di ${price} all’anno`,
+    freeNote: 'Gli oggetti sono gratis; l’abbonamento paga il servizio che li raccoglie in un unico posto.',
     benefitListings: 'Tutti gli annunci gratis attivi, da tutte le fonti',
     benefitMap: 'Feed completo, mappa e filtri',
-    benefitAlerts: 'Avvisi per parole chiave quando c’è una corrispondenza',
+    benefitAlerts: 'Avvisi per le tue parole chiave',
     benefitSupport: 'Sostieni un progetto indipendente',
     plansLabel: 'Scegli un piano',
     planWeekly: 'Settimanale',
@@ -487,8 +547,8 @@ export const messages = {
     periodMonthly: 'mese',
     periodYearly: 'anno',
     bestValue: 'Più conveniente',
-    perWeek: (price: string) => `${price} / settimana`,
-    cta: 'Continua',
+    perWeek: (price: string) => `${price} / sett.`,
+    cta: 'Sblocca il mio feed',
     renewal: (price: string, period: string) =>
       `${price} ogni ${period}. Si rinnova automaticamente finché non annulli. Puoi annullare quando vuoi.`,
     restore: 'Ripristina acquisti',
@@ -511,6 +571,10 @@ export const messages = {
       count > 0
         ? `${count.toLocaleString('it-IT')} annunci gratis sono attivi ora in tutte le città. Abbonati per vederli tutti, con foto, dettagli e mappa.`
         : 'Abbonati per vedere tutti gli annunci gratis, con foto, dettagli e mappa.',
+    bodyFiltered: (count: number) =>
+      count > 0
+        ? `${count.toLocaleString('it-IT')} annunci gratis corrispondono a ricerca e filtri. Abbonati per vederli tutti, con foto, dettagli e mappa.`
+        : 'Nessun annuncio gratis corrisponde a ricerca e filtri. Abbonati per vedere tutti gli annunci, con foto, dettagli e mappa.',
     previewLabel: 'Anteprima sfocata degli annunci attuali',
     seePlans: 'Vedi i piani',
     signInHint: 'Sei già abbonato?',
@@ -523,6 +587,7 @@ export const messages = {
     favoritesBody: 'Abbonati per vedere gli annunci che hai salvato.',
     backHome: 'Torna alla home',
     checkoutPending: 'Pagamento effettuato? L’attivazione può richiedere un minuto. Ricarica la pagina tra poco.',
+    checkoutSuccess: 'Ci sei',
   },
   subscription: {
     sectionTitle: 'Abbonamento',

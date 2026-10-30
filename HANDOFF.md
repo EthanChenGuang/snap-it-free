@@ -1,150 +1,136 @@
-# HANDOFF: feat/stripe-subscriptions (GSD quick 261025-vwf, 261025-wba, then 261026-3w6)
+# HANDOFF: feat/onboarding-snag → Cursor snap-it-free
 
-Stripe **test-mode** subscriptions behind the hard paywall, plus the data-layer gate. This branch is stacked on `feat/onboarding-paywall` (PR #7, quick task 261025-s0z).
+Handed over 2026-10-29 by CC snap-it-free (Claude Code on the box). **Cursor snap-it-free owns this branch.**
 
-## Status check 2026-10-28 (CC snap-it-free, no code change)
+## 1. Context
 
-- **Preview for phone testing:** https://zerodollar-git-feat-st-7ad3c2-chenguangregis-gmailcoms-projects.vercel.app (Vercel project `zerodollar`, team chenguangregis-gmailcoms-projects). Built from 69a8868 after every Preview env var was set. Vercel Authentication (SSO, `all_except_custom_domains`) is on, so a phone must be signed in to the chenguangregis-2098 Vercel account, or use a share link.
-- **Preview env (names only):** STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_WEEKLY/MONTHLY/YEARLY, NEXT_PUBLIC_PAYWALL_ENABLED=true, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_DB_PASSWORD. Smoke: `/` 200, `/api/subscription` 200 `configured:true`, `POST /api/stripe/checkout` 401 `sign_in_required` (not 503, so Stripe is enabled).
-- **Remote DB (SnapItFree, wnerhajyjjmrtsdmdpzu):** 042 and **043 are applied** (`subscriptions.past_due_since` exists, `apply_subscription_state` uses it). 044 is **not** applied. These were applied by SQL, not through `supabase_migrations.schema_migrations` (history stops at 20260809140322). The go-live step "apply 043" below is therefore already done.
-- The SnapItFree project is under the Supabase CLI profile `~/.supabase-profiles/acct2.yaml`, not the default login.
+- **Branch:** `feat/onboarding-snag`. It is based on `feat/stripe-subscriptions` @ `ecff082`, which is PR #8 (base `feat/onboarding-paywall`, PR #7, base `main`). There is no PR for this branch yet. **Do not open one unless Guang asks.**
+- **Goal:** replace the bare 4-step intro with a 10-screen, Snag-modelled onboarding that drives sign-up and paid conversion, honestly. The flow is `hook → how → interests → mobility → city → preview → account → alerts → paywall → feed`.
+- **Design docs (in the repo):**
+  - `.planning/onboarding-snag/PROPOSAL.md`: flow, techniques (adopt/adapt/reject), en/it/zh copy, implementation map.
+  - `.planning/onboarding-snag/SPEC.md`: public-source teardown of "Snag – Zero Dollar Items".
+  - `.planning/quick/261028-ob2-onboarding-snag-redesign/{PLAN,SUMMARY}.md`: what was built for the 10-screen flow.
+  - `.planning/phases/02-youre-in-after-purchase/` and `.planning/phases/03-locked-feed-search-filters/`: this run (items 2–3).
+- **Key design decisions (from PROPOSAL):** unchanged. Real data only. Quiz answers used. Paywall ✕ from first frame, yearly preselected, "Unlock my feed", UCPD "free" note. zh: no spaces around the city name.
+- **Guang's decisions:** account step sign-up REQUIRED; no free trial at launch; do **not** write the EU 14-day withdrawal clause; keep the QA account-skip stub in non-production only.
+- **Infra:** unchanged. Preview `zerodollar` / team `chenguangregis-gmailcoms-projects`. Branch alias https://zerodollar-git-feat-on-4ecf97-chenguangregis-gmailcoms-projects.vercel.app. Preview and production share one Supabase DB. Production https://zerodollar-blond.vercel.app is untouched.
 
-## Latest: 261026-3w6 (2026-10-26). Stripe route errors, signed-in locked card
+## 2. Done so far (ecff082..HEAD)
 
-- **Checkout and portal no longer throw an empty 500.**
-  - A Stripe SDK error (e.g. "No such price") answers 502 `{"error":"stripe_error"}`. Anything else answers 500 `{"error":"internal_error"}`.
-  - The server log gets one line, `[stripe] checkout failed { type, code, message }`, with keys redacted. Search Vercel logs for `[stripe]`.
-  - 503/401/400/404/409 are unchanged. The checkout return route now also redirects to `?checkout=pending` when auth throws. The webhook was already structured and is untouched.
-- **The paywall and Settings already showed** "Couldn't start checkout" and "Couldn't open the billing portal" (en/it/zh) on any failure, with a retry. Tests now prove it.
-- **Signed-in users no longer see "Already subscribed? Sign in"** on the locked feed, detail or favorites. They see "Already subscribed? **Refresh status**", which re-checks `/api/subscription`: it reloads if active and otherwise says nothing is active yet. Guests are unchanged.
-- Component tests now run in vitest (`components/**/*.test.tsx`, react-dom + jsdom, helper `components/test/render.tsx`).
-- Verification:
-  - `npm test` 128 files, 774 tests.
-  - Builds with the flag off and on: 51/51 pages each.
-  - drive: flag-off 4/4, onboarding 36/36 (adds a stubbed 502 plus retry), desktop-paywall 2/2, compare vs main 2/2 (identical DOM), persist 9/9.
-- Known limit: "Refresh status" shows "no active subscription yet" also when `/api/subscription` itself is unreachable. The paywall's Restore button behaves the same way.
-- Details: `.planning/quick/261026-3w6-stripe-route-errors-paywall-signed-in/`.
+| Commit | What |
+| --- | --- |
+| 1c24140 | Onboarding state machine (10 screens + sessionStorage resume), interests→categories mapping, `savingsVsMonthlyPct()`, Venice/Padova-first onboarding city order |
+| b73e638 | Onboarding UI rebuilt (per-step components: PhotoCollage, MiniFeedCard, BuildingFeed, AccountStep, AlertsMock) + personalized honest paywall, en/it/zh |
+| 222b11f | WIP: drive.mjs journey for the new onboarding, handoff |
+| 730b6d9 | Handoff: first Preview walk results |
+| f781014 | Paywall fits all 3 plan cards + "Save 66%" without scrolling on 390x844/412x915; CTA "Unlock my feed"/"Sblocca il mio feed"/"解锁我的推荐"; Italian badge inline |
+| a076632 | tsc fix in `lib/favorites/store.test.ts` (vi.fn mock), test only |
+| 83ecf73 | drive.mjs: CTA label + no-scroll assertions, optional `VERCEL_SHARE_TOKEN`, screen 10 check |
+| 2bb4c3a | GSD summary of the Preview follow-up fixes |
+| 024138e | Handoff update |
+| 63f4a2f | zh strings: no spaces around the city name (paywall title, preview result/low supply, alerts mock); `messages/zh.test.ts` |
+| bb6c836 | `isAccountSkipStubAllowed()` in `lib/paywall/gate.ts` + `next.config.ts` bakes `VERCEL_ENV` into `NEXT_PUBLIC_VERCEL_ENV`; the stub is OFF in production builds; unit tests |
+| fcd0d7b | drive.mjs environment-aware: CTA retry checks payments off ("Payments aren't enabled yet") vs on (guest sign-in, checkout 401); locked-detail falls back to a teaser listing id, SKIP never PASS |
+| b0c5f94 | GSD summary + handoff for the 261029 follow-up |
+| 5a9618e | Handoff: 261029 follow-up verified on the Preview |
+| feb3b96 | Handover to Cursor: this file, design docs into `.planning/onboarding-snag/`, STATE.md |
+| (this commit) | **P10 items 2+3:** "You're in" after Checkout return; locked feed search/filters change real count + blurred photos; unit tests; drive.mjs coverage |
 
-## Earlier: 261025-wba (2026-10-25/26). DB hard paywall, 3-day grace, subscription legal copy
+No DB migration on this branch.
 
-Guang confirmed the open items in chat on 2026-10-25 23:14 Rome: "1–6 按推荐做, 同意7,8".
+**Verification evidence (2026-10-29, Cursor snap-it-free, items 2+3):**
 
-| # | Decision | Owner / status |
-| --- | --- | --- |
-| 1 | Stripe test prices (€1.99 / €4.99 / €19.99) | Other bot. Not touched here. |
-| 2 | Vercel Preview env | Other bot. Not touched here. |
-| 3 | Webhook endpoint + Customer Portal | Other bot. Not touched here. |
-| 4 | Apply 042 to production | Operator. Applied as committed at bb5c090. 042 is frozen and unchanged. |
-| 5 | Data-level RLS gate | Done here: `044_listings_paywall_rls.sql` (go-live only). |
-| 6 | 3-day `past_due` grace | Done here: `043_subscriptions_past_due_since.sql` + app rule. |
-| 7 | Legal copy | Done here: needs **Guang's legal review** before production. |
-| 8 | Live keys need a dedicated code change | Recorded. No code change. `lib/stripe/config.ts` still refuses live keys. |
+- Took over at `feb3b96` (matches expected head; no extra commits beyond it).
+- `npm run lint` (tsc --noEmit): clean.
+- `npm test`: **Test Files 132 passed (132), Tests 824 passed (824)** (baseline was 130 / 800).
+- **drive.mjs local** (Node 22, payments off, dummy public env so next can prerender, no real Supabase data):
+  - `RESULT onboarding: 59/61 checks passed`
+  - 2 FAIL (same as the old 50/52 baseline, no listing data):
+    1. `preview shows a real count for Milan: "Your feed is ready"`
+    2. `paywall headline carries the real count + city: "See every free item near you"`
+  - 3 SKIP (never PASS):
+    1. `locked-feed search count: no teaser data in this environment` (new; needs real rows)
+    2. `locked-favorites: flag-off build does not preview-lock /favorites` (new; `/favorites` ignores `?onboarding=1` so it can stay static; persist/Preview cover flag-on)
+    3. `locked-detail: no real listing id` (same as baseline)
+  - New checks that passed: search enabled on locked feed; typing search does not open paywall; filter sheet opens without paywall; You're in on unlocked `/?checkout=success`; city/interests/radius applied (milano, libri-riviste, 5 km).
+- **Viewport screenshots** (local): iPhone 390×844 and Android 412×915 × en/it/zh for locked feed (search header visible) and checkout success (You're in / Ci sei / 已开通). Saved under `/opt/cursor/artifacts/`.
+- **Vercel Preview drive.mjs:** pending a `VERCEL_SHARE_TOKEN` (not in this environment). After push, confirm the newest commit's GitHub commit status is Ready.
+- No sign-ups, no remote migrations, no Vercel settings changes, no production deploys.
 
-### Migrations (nothing applied remotely)
+## 3. What's next
 
-- **043_subscriptions_past_due_since.sql (additive, apply any time after 042).** It adds `subscriptions.past_due_since` and re-creates `apply_subscription_state` with the **same signature**, so the webhook code is identical before and after. The function stamps `past_due_since` from the event time on entering `past_due`, keeps it while the subscription stays `past_due`, and clears it on any other status. Before 043, the app reads subscriptions with `select('*')`, so nothing breaks; `past_due` simply gets no grace.
-- **044_listings_paywall_rls.sql (GO-LIVE ONLY, together with `NEXT_PUBLIC_PAYWALL_ENABLED=true`).**
-  - `has_active_subscription()` takes no argument and answers only for `auth.uid()`, so nobody can probe another user. It is STABLE and SECURITY DEFINER, with `search_path = ''`.
-  - The base-table policy `public_read_active_non_expired` is replaced by `subscriber_read_active_non_expired`. `ugc_select_own` stays, so authors keep reading their own rows.
-  - `listings_public` is recreated with the same 036 columns, adds `security_barrier`, and gates rows on subscriber OR author OR `auth.role() = 'service_role'`. The gate has to live in the view because the view runs as its owner (010) and so ignores table RLS.
-  - `listings_paywall_teaser(p_city, p_since, p_limit)` returns only `(listing_count, photo_urls)`, capped at 6 distinct photos. Its city table must match `lib/geo/italian-cities.ts`, enforced by `lib/paywall/teaser-sql-parity.test.ts`.
-  - Requires 043.
+Unbuilt or deferred from PROPOSAL/SPEC/PLAN. Each needs Guang's go-ahead where marked.
 
-### Why grace starts at `past_due_since`
+1. **Onboarding funnel analytics** (PROPOSAL §3/§5) is not built; no events exist.
+   - Events: step_view, step_complete, skip, paywall_view, checkout_start and purchase.
+   - The events must be consent-gated. Put them in a new `lib/analytics/onboarding.ts`.
+   - The provider choice and the cookie-consent banner are a decision for Guang.
+2. **"You're in" after purchase** (PROPOSAL P10) — **done this run.** Success toast/banner when the feed is unlocked; pending notice kept when still locked; city, interests and radius applied from onboarding prefs.
+3. **Locked feed: search and filters stay usable** (PROPOSAL P10) — **done this run.** Header search/filters already existed; they now change the real count and blurred photos. Detail and favorites stay locked. Real data only.
+4. **Marketing email opt-in is stored in localStorage only** (`shoumanwu_marketing_optin` in `AccountStep.tsx`).
+   - It is not saved to the user's profile, so win-back email (PROPOSAL §3) is impossible.
+   - Doing it needs a DB column and a migration. **Ask Guang; no remote migration without him.**
+5. **Teaser migration 045** (category-filtered teaser count + a server-side "new in Veneto in the last 7 days" count) is deferred.
+   - Today these numbers are derived client-side from already-fetched rows. After 044, locked search/filters cannot change the count without 045 (honest fallback: keep the SSR teaser).
+   - Needs Guang's approval, and it must never be applied to the shared DB without him.
+6. **Real end-to-end Stripe test purchase is unverified:** sign-in → Checkout → webhook → unlocked feed → Portal → cancel → locked. It needs a real test account, which is **not allowed on the shared Preview DB** without Guang's explicit OK.
+7. **After launch, not now:** a 7-day free-trial A/B on yearly (Stripe `trial_period_days`, a reminder email, legal copy), and price A/B tests.
+8. **Open environment items:**
+   - The box `.env.local` lacks the real Supabase public vars, so local `drive.mjs onboarding` is 59/61 + 3 SKIP (see §2). Cursor cloud agents need their own env (ask Guang for the public URL/anon key as a cloud-agent secret).
+   - After pushing, always confirm the Vercel Preview for the newest commit is **Ready** before testing it.
+   - Preview `drive.mjs` needs `VERCEL_SHARE_TOKEN` via env (never in a file).
+9. **Before the PR is ready:**
+   - How the PR stack lands (rebase or retarget onto main) is Guang's decision.
+   - Remove HANDOFF.md in the last commit.
+   - Go-live order (from feat/stripe-subscriptions): 044 + `NEXT_PUBLIC_PAYWALL_ENABLED=true` in the same release, then operator scripts to the service role. **Guang only.**
 
-Stripe advances `current_period_end` when it attempts the renewal, so a failed renewal already carries the next period's end. "Period end + 3 days" would therefore grant most of another period. The grace window is `now < past_due_since + 3 days`, in both `lib/subscriptions/entitlement.ts` (`PAST_DUE_GRACE_MS`) and the SQL helper; the parity test checks the two match. The Stripe behaviour is inferred from its renewal model, not measured against Stripe.
+## 4. How to work
 
-### App changes (all paths that read listings)
+- Use GSD **`/gsd-autonomous`** for remaining phases. Items 1 and 4 of §3 still need Guang; 5–7 need his answer first.
+- Use **`/clear` at every natural checkpoint**.
+- **Any UI design work must use the stitch design skills.** Stick to the stitch tokens in `DESIGN.md`: black primary CTA, `outline-variant` borders, Inter, Material Symbols; no red theme and no shadows; photos `rounded-2xl`; existing 240 ms motion, reduced-motion respected. There is no `STITCH_API_KEY`; do not call the Google Stitch API.
+- **Verification is mandatory before calling anything done.** Use `.claude/skills/verify-snap-it-free/` (`SKILL.md`, `scripts/drive.mjs`, `features/`), then lint and the unit tests.
+- Keep GSD artifacts in `.planning/` (gitignored, commit with `git add -f`) and update `.planning/STATE.md`.
 
-- **Read client.** With the flag on, server reads (`lib/listings/queries.ts`: home, detail, similar, by-ids) and browser reads (`lib/listings/client-queries.ts`: feed poll, favorites, onboarding fallback) use the user's session client, so the 044 gate sees subscribers. With the flag off they stay session-free; the home DOM is identical to `main`.
-- **Locked home teaser.** `getLockedTeaser()` calls the teaser function; if it is missing (before 044) or fails, it falls back to building the teaser from rows.
-- **Onboarding city teaser.** With the flag on it uses the per-city teaser function, with the same fallback. With the flag off it is unchanged.
-- **Detail page.** It checks access first. When locked, only the author's own listing renders; everything else shows the lock, so it never 404s and never fetches the row.
-- **Alert pushes.** With the flag on, pushes go only to entitled users, because a push carries the listing title. Matches are still recorded. The Settings matches list already drops rows whose listing is hidden.
-- **Unaffected:** owner reads, UGC status patches and rate limits (author policy), the cron and admin (service role). There is no sitemap or OG-image route.
-- **Operator scripts** (`scripts/*uat*.mjs`, `scraper/scripts/check-visible-*.mjs`) read `listings_public` with the anon key and will see 0 rows after 044 unless switched to the service role.
+## 5. How to verify
 
-### Verification (this task)
+```bash
+npm ci
+npm run lint                     # tsc --noEmit, must be clean
+npm test                         # vitest run; now 132 files / 824 tests
+node --check .claude/skills/verify-snap-it-free/scripts/drive.mjs
 
-```
-supabase/tests/run-local.sh   # throwaway supabase/postgres:17, applies 47 migrations in order, runs both *.check.sql
-                              # -> 042 CHECKS PASSED; 044: 17 PASS lines + CHECKS PASSED 044
-npm run lint / npx tsc --noEmit   # 1 error, pre-existing on main: lib/favorites/store.test.ts:56
-npm test                          # Test Files 125 passed (125), Tests 754 passed (754)
-npm run build (Node 22)           # Compiled successfully, 51/51 static pages (flag off and flag on)
-drive.mjs flag-off 4/4, onboarding 33/33, desktop-paywall 2/2, compare 2/2 (home DOM identical to main, pixel diff empty), persist (flag on) 9/9
-```
+# Local (build/start per .claude/skills/verify-snap-it-free/SKILL.md, Node 22, payments off):
+node .claude/skills/verify-snap-it-free/scripts/drive.mjs onboarding --url http://127.0.0.1:PORT --out /tmp/ev-local
+# Known local baseline without real Supabase data: 59/61 + 3 SKIP (2 FAIL = Milan count + paywall headline).
 
-- The browser journeys run against the remote database, which does not have 044, so with the flag on they exercise the **pre-044 fallback** for the teaser. The 044 function path is proven by the SQL checks and by unit tests with a mocked RPC.
-- The test shim (`supabase/tests/support/hosted-supabase-shim.sql`) stubs `storage.*`, `auth.jwt()`, and hosted-style `auth.uid()` and `auth.role()` for the bare image. The runner drops `listings_public` before migrations that `create or replace` it, because 020 reorders its columns.
-
-### Go-live checklist (order matters)
-
-1. Apply 043 (safe now).
-2. Confirm Stripe test purchases unlock and lock correctly with the flag on a Preview.
-3. Apply 044 **and** set `NEXT_PUBLIC_PAYWALL_ENABLED=true` in the same release.
-4. Switch the operator diagnostic scripts to the service role.
-
-### Open questions for Guang
-
-- **Legal review** of the new Terms and Privacy sections (en/it/zh). In particular: the EU 14-day right of withdrawal for digital subscriptions is not addressed, there are no refund promises, and "cancelling does not refund the current period" matches what the code does.
-- **Session expiry.** After 044, a subscriber whose session JWT expired sees an empty feed until the session refreshes. PostgREST also sporadically rejects fresh JWTs here (PGRST303). If this shows up in Preview, the fix is to serve listings through a server route that checks entitlement and reads with the service role.
-- **Report filters.** The locked teaser count cannot subtract listings the viewer reported locally, so it may differ from the open feed by a few.
-
----
-
-## Earlier: 261025-vwf. Stripe test-mode subscriptions
-
-Stripe **test-mode** subscriptions behind the hard paywall. 
-Nothing here was applied or created remotely. No migration was run against Supabase, no Stripe products or prices were created, and no keys or Vercel settings were touched.
-
-### Done
-
-- **Migration file `supabase/migrations/042_subscriptions.sql`.** Not applied anywhere remote.
-  - It creates `public.subscriptions` with one row per user.
-  - RLS: `authenticated` can select its own row. There are no write policies, and anon/authenticated have insert, update and delete revoked.
-  - `apply_subscription_state(...)` is a security-definer upsert that only `service_role` can execute. It ignores writes older than `last_event_at`, so webhook retries and reordering converge.
-  - Checked against a throwaway local `supabase/postgres:17` container: it applies twice idempotently, and `supabase/tests/042_subscriptions.check.sql` prints `CHECKS PASSED` (stale skip, own-row RLS, denied writes, anon sees nothing).
-- **Library code:**
-  - `lib/stripe/config.ts` enables payments only when all five Stripe vars are set and refuses `sk_live_` keys.
-  - `lib/subscriptions/entitlement.ts`: only `active` and `trialing` with an unexpired period unlock. `past_due` stays locked.
-  - `lib/subscriptions/sync.ts` maps Stripe events to rows.
-  - `lib/subscriptions/store.ts` does service-role reads and RPC writes.
-- **Routes:**
-  - `POST /api/stripe/checkout` needs sign-in and creates a subscription Checkout with `client_reference_id` and `subscription_data.metadata.user_id`. It returns 503 `payments_disabled` without env and 409 if already subscribed.
-  - `GET /api/stripe/checkout/return` is the success_url. It syncs immediately so the user isn't stuck locked while the webhook is in flight, and it verifies the session belongs to the user.
-  - `POST /api/stripe/portal` opens the Customer Portal.
-  - `POST /api/stripe/webhook` verifies the signature against the raw body and handles `checkout.session.completed` and `customer.subscription.created/updated/deleted`. It returns 500 on write failure so Stripe retries.
-  - `GET /api/subscription` reports status for the paywall Restore button and Settings.
-- **Gate.** `getSubscriptionActive()` now reads the table for the signed-in user and fails closed.
-- **UI:**
-  - The paywall CTA posts to Checkout. A 503 shows "Payments aren't enabled yet" (the current state everywhere), 401 asks the user to sign in, and 200 redirects to Stripe.
-  - Restore asks guests to sign in and reloads for subscribers.
-  - Settings has a "Manage subscription" entry (flag-on builds and Stripe customers only).
-  - The locked view shows "activation can take a minute" after returning from Checkout.
-- **Account deletion** cancels a live Stripe subscription first, and refuses (502) if Stripe can't cancel. This prevents billing a deleted user.
-
-### How to verify
-
-```
-npm test           # 124 files, 745 tests passed (route tests sign payloads with stripe.webhooks.generateTestHeaderString)
-npm run lint       # 1 error, pre-existing on main: lib/favorites/store.test.ts:56
-npx tsc --noEmit   # same single error
-# Node 22 build + app checks via .claude/skills/verify-snap-it-free (see SKILL.md):
-#   flag-off 3/3, onboarding 33/33 (CTA -> 503 -> coming soon), compare vs main 2/2 (DOM identical),
-#   flag-on persist 6/6; curl: checkout/portal/webhook -> 503 payments_disabled without env.
-psql <throwaway db> -f supabase/migrations/042_subscriptions.sql -f supabase/tests/042_subscriptions.check.sql
+# Vercel Preview (payments on). Share token via env ONLY, never in a file or commit:
+VERCEL_SHARE_TOKEN=<token from Guang> node .claude/skills/verify-snap-it-free/scripts/drive.mjs onboarding \
+  --url https://zerodollar-git-feat-on-4ecf97-chenguangregis-gmailcoms-projects.vercel.app --out /tmp/ev-preview
+# Expect: "RESULT onboarding: …" with the new P10 checks; previously 53/53 before this run.
 ```
 
-### Not verified (needs Guang's setup)
+- To walk past the required account step without a real account, use `?onboarding=1` + localStorage `shoumanwu_onboarding_stub_auth=1`. This works on Preview/local only, never in production.
+- Phone viewports to check: iPhone 390x844 and Android 412x915, each in en, it and zh.
 
-A real end-to-end purchase is unverified. That means signed-in user → Stripe test Checkout → webhook → unlocked feed → Portal → cancel → locked again. It needs everything in the list below.
+## 6. Hard constraints
 
-### Decisions (superseded)
+- Never push to `main`, force-push, merge, deploy to production, run remote migrations, change Vercel settings, or delete data without Guang's confirmation.
+- **Never merge PR #7 or PR #8.**
+- **No sign-ups on the Preview.** It shares the Supabase DB with production. Use the QA stub instead.
+- No fake reviews, counts, scarcity or discounts. Every number shown must come from real data or real prices.
+- Never commit secrets or share tokens. Pass `VERCEL_SHARE_TOKEN` via env only.
+- Don't touch or test production (https://zerodollar-blond.vercel.app).
+- Keep all work on `feat/onboarding-snag`.
+- Remove HANDOFF.md in the last commit before the PR is marked ready.
+- Don't write the EU 14-day withdrawal clause in the Terms (Guang's decision).
 
-The nine open items listed here were answered on 2026-10-25 23:14; see the table at the top.
+## 7. Open questions for Guang
 
-### Notes for the next engineer
-
-- Checkout success and cancel URLs use the request origin (`new URL(request.url).origin`). On Vercel that's the public host. Behind another proxy, check it.
-- `checkout.session.completed` refetches the subscription. `customer.subscription.*` events use the payload as-is. Both are stamped with `event.created` for ordering.
+1. Analytics provider and the cookie-consent approach for the onboarding funnel events (§3.1).
+2. Approve a migration to store the marketing opt-in server-side (§3.4), and/or teaser migration 045 (§3.5)? Applying either to the shared DB needs his explicit OK.
+3. Allow one throwaway test account on the shared DB for a real Stripe test-mode purchase end to end (§3.6)?
+4. How should the PR stack land? This branch sits on #8 → #7 → main, and #7/#8 must not be merged without him.
+5. Legal review of the subscription Terms/Privacy copy is still pending (the 14-day clause stays unwritten by his decision).
+6. Supabase public URL/anon key for Cursor cloud agents' env, so local drive.mjs can pass fully.
+7. `VERCEL_SHARE_TOKEN` for the Preview drive.mjs run of this commit (env only, never in the repo).
