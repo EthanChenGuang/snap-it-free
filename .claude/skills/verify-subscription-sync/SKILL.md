@@ -97,7 +97,7 @@ counterexamples; moving `now()` after `retrieveSubscription` fails all five scen
 
 ## Coverage record
 
-Last confirmed in step with the code at commit **SYNC_COMMIT** (branch `preview/recent-changes`):
+Last confirmed in step with the code at commit **8dfc2dc** (branch `preview/recent-changes`):
 
 - `lib/subscriptions/sync.ts` — `handleStripeEvent`, `subscriptionStateFromStripe`
 - `app/api/stripe/webhook/route.ts` — `POST`
@@ -105,7 +105,7 @@ Last confirmed in step with the code at commit **SYNC_COMMIT** (branch `preview/
 - `lib/subscriptions/store.ts` — `applySubscriptionState` (calls the RPC)
 - `supabase/migrations/043_subscriptions_past_due_since.sql` — `public.apply_subscription_state` (guard parsed)
 
-To see whether the verification needs another look: `git log --oneline SYNC_COMMIT..HEAD -- <the files above> supabase/migrations`.
+To see whether the verification needs another look: `git log --oneline 8dfc2dc..HEAD -- <the files above> supabase/migrations`.
 Move the sync commit only after you confirm the model still describes the code at the new commit (new event types,
 a new writer, a changed stamp, or a new migration redefining the function all need the checker updated first).
 
