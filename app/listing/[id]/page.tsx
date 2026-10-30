@@ -5,12 +5,15 @@ import { ListingDetailSkeleton } from '@/components/detail/ListingDetailSkeleton
 import { z } from 'zod';
 import { ScrapedListingShell } from '@/components/detail/ScrapedListingShell';
 import { UgcListingShell } from '@/components/detail/UgcListingShell';
+import { LockedPanel } from '@/components/onboarding/LockedViews';
 import { buildListingMetadata } from '@/lib/listings/listing-metadata';
 import {
   getListingById,
   getListingForDetail,
+  getOwnerListingById,
   getSimilarListings,
 } from '@/lib/listings/queries';
+import { getListingAccess } from '@/lib/paywall/server-access';
 import { getMessages } from '@/messages';
 
 const listingIdSchema = z.string().uuid();
@@ -59,7 +62,17 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
     notFound();
   }
 
-  const result = await getListingForDetail(parsed.data);
+  // Locked: only the author's own listing renders. Under the 044 RLS gate a non-subscriber cannot read
+  // other rows at all, so asking first shows the lock instead of a 404 and never fetches the listing.
+  const locked = (await getListingAccess(resolvedSearchParams)) === 'locked';
+  const ownListing = locked ? await getOwnerListingById(parsed.data) : null;
+  if (locked && !ownListing) {
+    return <LockedPanel variant="detail" />;
+  }
+
+  const result = ownListing
+    ? { listing: ownListing, isOwnerView: true }
+    : await getListingForDetail(parsed.data);
   if (!result) {
     notFound();
   }

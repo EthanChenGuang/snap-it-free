@@ -10,6 +10,9 @@ export default defineConfig({
       'messages/**/*.test.ts',
       'hooks/**/*.test.ts',
       'app/api/cron/**/*.test.ts',
+      'app/api/stripe/**/*.test.ts',
+      'app/api/subscription/**/*.test.ts',
+      'components/**/*.test.tsx',
     ],
   },
   resolve: {

@@ -357,6 +357,7 @@ export const messages = {
   privacy: {
     title: 'Informativa sulla privacy',
     lastUpdated: 'Ultimo aggiornamento: 7 settembre 2025',
+    lastUpdatedPaid: 'Ultimo aggiornamento: 25 ottobre 2026',
     intro:
       'ZeroDollar («noi») aiuta le persone a trovare e condividere oggetti gratis a Venezia. Questa informativa descrive quali dati personali raccogliamo e come li usiamo.',
     collectTitle: 'Informazioni che raccogliamo',
@@ -371,9 +372,16 @@ export const messages = {
     sharingTitle: 'Fornitori di servizi',
     sharingBody:
       'Usiamo Supabase per autenticazione e archiviazione dati e Vercel per l\'hosting. Non vendiamo i tuoi dati personali a terzi.',
+    sharingBodyPaid:
+      'Usiamo Supabase per autenticazione e archiviazione dati, Vercel per l\'hosting e Stripe per i pagamenti degli abbonamenti. Non vendiamo i tuoi dati personali a terzi.',
     retentionTitle: 'Le tue scelte',
     retentionBody:
       'Puoi eliminare il tuo account in qualsiasi momento in Impostazioni. L\'eliminazione rimuove annunci, messaggi, preferiti e altri dati dell\'account che conserviamo.',
+    retentionBodyPaid:
+      'Puoi eliminare il tuo account in qualsiasi momento in Impostazioni. L\'eliminazione annulla prima un abbonamento attivo, poi rimuove annunci, messaggi, preferiti, dati dell\'abbonamento e altri dati dell\'account che conserviamo. Stripe conserva i propri registri dei pagamenti passati secondo la sua informativa sulla privacy.',
+    paymentsTitle: 'Pagamenti e abbonamenti',
+    paymentsBody:
+      'Se ti abboni, il pagamento è elaborato da Stripe (Stripe Payments Europe, Limited). Inserisci i dati della carta e di pagamento sulle pagine di Stripe, che li tratta secondo la propria informativa sulla privacy. Noi non li vediamo né li conserviamo. Conserviamo gli identificativi cliente e abbonamento di Stripe, il piano, lo stato dell’abbonamento e la fine del periodo in corso, insieme all’indirizzo email del tuo account, per sbloccare gli annunci.',
     contactTitle: 'Contatti',
     contactBody:
       'Per domande sulla privacy, usa il link Contatti nel footer dell\'app o il tuo canale di supporto abituale per ZeroDollar.',
@@ -382,6 +390,7 @@ export const messages = {
   terms: {
     title: 'Termini di servizio',
     lastUpdated: 'Ultimo aggiornamento: 8 settembre 2025',
+    lastUpdatedPaid: 'Ultimo aggiornamento: 25 ottobre 2026',
     intro:
       'Questi termini regolano l\'uso di ZeroDollar, un marketplace comunitario per oggetti gratis. Accedendo o usando il servizio, accetti questi termini.',
     serviceTitle: 'Il servizio',
@@ -396,10 +405,132 @@ export const messages = {
     liabilityTitle: 'Esclusione di responsabilità',
     liabilityBody:
       'ZeroDollar è fornito così com\'è. Ritiro e consegna avvengono direttamente tra utenti. Non siamo responsabili per dispute, danni o perdite derivanti da scambi di persona.',
+    subscriptionTitle: 'Abbonamenti',
+    subscriptionBody:
+      'Per vedere gli annunci serve un abbonamento ZeroEuro Plus. I piani costano 1,99 € a settimana, 4,99 € al mese o 19,99 € all’anno. Prezzo e periodo di fatturazione sono indicati prima del pagamento. L’abbonamento si rinnova automaticamente alla fine di ogni periodo e viene addebitato sul tuo metodo di pagamento finché non lo annulli.',
+    cancelTitle: 'Annullamento',
+    cancelBody:
+      'Puoi annullare in qualsiasi momento da Impostazioni → Gestisci abbonamento, che apre il portale clienti di Stripe. L’annullamento interrompe i rinnovi futuri. Mantieni l’accesso fino alla fine del periodo già pagato. L’annullamento non rimborsa quel periodo.',
+    paymentsTitle: 'Pagamenti',
+    paymentsBody:
+      'I pagamenti sono elaborati da Stripe (Stripe Payments Europe, Limited). Se un pagamento di rinnovo non va a buon fine, mantieni l’accesso fino a 3 giorni mentre Stripe ritenta il pagamento. Dopo, gli annunci restano bloccati finché il pagamento non riesce o non ti abboni di nuovo.',
     contactTitle: 'Contatti',
     contactBody:
       'Per domande su questi termini, usa il link Contatti nel footer dell\'app o il tuo canale di supporto abituale per ZeroDollar.',
     backHome: 'Torna alla home',
+  },
+  onboarding: {
+    dialogLabel: 'Benvenuto su ZeroEuro',
+    progress: (current: number, total: number) => `Passo ${current} di ${total}`,
+    skip: 'Salta',
+    back: 'Indietro',
+    continue: 'Continua',
+    welcome: {
+      title: 'Cose gratis vicino a te',
+      emphasis: 'gratis',
+      body: 'ZeroEuro raccoglie in un unico feed gli oggetti in regalo su Subito e quelli trovati per strada dai vicini.',
+    },
+    how: {
+      title: 'Un feed, più la mappa',
+      emphasis: 'feed',
+      feedTitle: 'Un unico feed',
+      feedBody: 'Annunci di regalo da più fonti, ordinati dal più recente.',
+      mapTitle: 'Mappa quando serve',
+      mapBody: 'Apri la mappa per vedere cosa c’è intorno a un punto.',
+      filterTitle: 'Filtri per distanza e categoria',
+      filterBody: 'Restringi per raggio, città o tipo di oggetto.',
+    },
+    city: {
+      title: 'Scegli la tua città',
+      emphasis: 'città',
+      body: 'Il feed partirà da qui. Puoi cambiarla quando vuoi dai filtri.',
+      teaserLoading: 'Conto gli annunci attivi…',
+      teaserCount: (count: number, city: string) =>
+        count === 1
+          ? `1 annuncio gratis attivo a ${city} in questo momento`
+          : `${count.toLocaleString('it-IT')} annunci gratis attivi a ${city} in questo momento`,
+      teaserEmpty: (city: string) =>
+        `Nessun annuncio gratis attivo a ${city} in questo momento. Puoi comunque sfogliare tutte le città.`,
+      teaserError: 'Impossibile caricare gli annunci ora. Puoi continuare lo stesso.',
+      teaserPhotosLabel: 'Annunci recenti',
+    },
+    alerts: {
+      title: 'Scopri per primo i nuovi regali',
+      emphasis: 'primo',
+      body: 'Imposta parole chiave e una città: ti avvisiamo quando compare un annuncio corrispondente.',
+      pointKeywords: 'Avvisi per parole chiave, ad esempio “divano” o “bici”',
+      pointQuiet: 'Ore di silenzio per non essere disturbato di notte',
+      enable: 'Attiva le notifiche',
+      enabling: 'Attivazione…',
+      notNow: 'Non ora',
+      enabled: 'Notifiche attive.',
+      notLoggedIn: 'Gli avvisi richiedono un account. Puoi accedere e attivarli quando vuoi da Impostazioni.',
+      iosNotReady: 'Su iPhone aggiungi prima ZeroEuro alla schermata Home. Ti mostriamo come alla fine.',
+      unsupported: 'Questo browser non supporta le notifiche.',
+      permissionDenied: 'Le notifiche sono bloccate nelle impostazioni del browser.',
+      failed: 'Impossibile attivare le notifiche ora. Riprova più tardi da Impostazioni.',
+    },
+  },
+  paywall: {
+    close: 'Chiudi',
+    title: 'ZeroEuro Plus',
+    subtitle: 'Abbonati per vedere tutti gli annunci gratis vicino a te.',
+    benefitListings: 'Tutti gli annunci gratis attivi, da tutte le fonti',
+    benefitMap: 'Feed completo, mappa e filtri',
+    benefitAlerts: 'Avvisi per parole chiave quando c’è una corrispondenza',
+    benefitSupport: 'Sostieni un progetto indipendente',
+    plansLabel: 'Scegli un piano',
+    planWeekly: 'Settimanale',
+    planMonthly: 'Mensile',
+    planYearly: 'Annuale',
+    periodWeekly: 'settimana',
+    periodMonthly: 'mese',
+    periodYearly: 'anno',
+    bestValue: 'Più conveniente',
+    perWeek: (price: string) => `${price} / settimana`,
+    cta: 'Continua',
+    renewal: (price: string, period: string) =>
+      `${price} ogni ${period}. Si rinnova automaticamente finché non annulli. Puoi annullare quando vuoi.`,
+    restore: 'Ripristina acquisti',
+    restoreNothing: 'Niente da ripristinare: non è ancora stato effettuato alcun acquisto.',
+    terms: 'Termini',
+    privacy: 'Privacy',
+    comingSoonTitle: 'I pagamenti non sono ancora attivi',
+    comingSoonBody: 'Non ti è stato addebitato nulla. Gli abbonamenti apriranno a breve.',
+    comingSoonContinue: 'Chiudi',
+    pending: 'Apertura del pagamento…',
+    checkoutError: 'Impossibile avviare il pagamento. Riprova.',
+    signInTitle: 'Accedi per abbonarti',
+    signInBody: 'L’abbonamento è legato al tuo account, così puoi usarlo su ogni dispositivo. Accedi da Impostazioni, poi scegli un piano.',
+    goToSettings: 'Vai a Impostazioni',
+    restoreSignIn: 'Accedi prima per ripristinare un abbonamento.',
+  },
+  locked: {
+    title: 'Abbonati per vedere gli annunci',
+    body: (count: number) =>
+      count > 0
+        ? `${count.toLocaleString('it-IT')} annunci gratis sono attivi ora in tutte le città. Abbonati per vederli tutti, con foto, dettagli e mappa.`
+        : 'Abbonati per vedere tutti gli annunci gratis, con foto, dettagli e mappa.',
+    previewLabel: 'Anteprima sfocata degli annunci attuali',
+    seePlans: 'Vedi i piani',
+    signInHint: 'Sei già abbonato?',
+    signIn: 'Accedi',
+    refreshStatus: 'Aggiorna stato',
+    refreshNothing: 'Ancora nessun abbonamento attivo su questo account. Se hai appena pagato, riprova tra un minuto.',
+    detailTitle: 'Questo annuncio è per gli abbonati',
+    detailBody: 'Abbonati per vedere foto, dettagli e come ritirarlo.',
+    favoritesTitle: 'I preferiti sono per gli abbonati',
+    favoritesBody: 'Abbonati per vedere gli annunci che hai salvato.',
+    backHome: 'Torna alla home',
+    checkoutPending: 'Pagamento effettuato? L’attivazione può richiedere un minuto. Ricarica la pagina tra poco.',
+  },
+  subscription: {
+    sectionTitle: 'Abbonamento',
+    manage: 'Gestisci abbonamento',
+    active: (plan: string) => `Piano attivo: ${plan}`,
+    inactive: 'Nessun abbonamento attivo',
+    endsAtPeriodEnd: 'Si annulla alla fine del periodo in corso',
+    portalError: 'Impossibile aprire il portale di fatturazione. Riprova.',
   },
   pwa: {
     install: {

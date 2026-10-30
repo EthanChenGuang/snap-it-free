@@ -24,6 +24,8 @@ type PwaOnboardingContextValue = {
   openInstallGuide: () => void;
   isDismissed: boolean;
   needsInstall: boolean;
+  /** Pre-browse onboarding holds the iOS guide auto-open until it closes. */
+  setAutoOpenSuspended: (suspended: boolean) => void;
 };
 
 const PwaOnboardingContext = createContext<PwaOnboardingContextValue | null>(null);
@@ -39,6 +41,7 @@ export function usePwaOnboarding(): PwaOnboardingContextValue {
 export function PwaOnboardingProvider({ children }: { children: React.ReactNode }) {
   const [guideOpen, setGuideOpen] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [autoOpenSuspended, setAutoOpenSuspended] = useState(false);
 
   const needsInstall = needsIosInstallGuide();
 
@@ -65,6 +68,7 @@ export function PwaOnboardingProvider({ children }: { children: React.ReactNode 
       openInstallGuide,
       isDismissed: dismissed,
       needsInstall,
+      setAutoOpenSuspended,
     }),
     [openInstallGuide, dismissed, needsInstall],
   );
@@ -73,7 +77,7 @@ export function PwaOnboardingProvider({ children }: { children: React.ReactNode 
     <PwaOnboardingContext.Provider value={value}>
       {children}
       <Suspense fallback={null}>
-        <IosGuideAutoOpen onOpen={handleAutoOpen} />
+        <IosGuideAutoOpen onOpen={handleAutoOpen} suspended={autoOpenSuspended} />
         <IosInstallGuide
           open={guideOpen}
           onOpenChange={setGuideOpen}
