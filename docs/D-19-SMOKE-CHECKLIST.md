@@ -37,7 +37,7 @@ Cross-reference scenarios 1–12 from `scripts/phase19-uat-automation.mjs` and `
 | 10 | Inline guest auth on the preview heart / login CTA works (`DetailPreviewWall` + `AuthPromptForm`) | Blocker | ☑ pass (2026-09-06 — Plan 07-05: phase19 scenarios 3/9, `#guest-gate-email` gate card) |
 | 11 | Favorites bottom-nav tab requires login (AUTH-03) | Blocker | ☑ pass (2026-09-06 — Plan 07-05: phase19 scenario 4, auth modal without navigation) |
 | 12 | `/post` enforces a page-level gate on entry for guests (AUTH-04) | Blocker | ☑ pass (2026-09-06 — Plan 07-05: phase19 scenarios 6/7) |
-| 13 | Shared listing link Open Graph tags remain public (no auth required to render OG preview) | Blocker | ☒ **fail** (2026-09-06 — Plan 07-05: listing URL public (200) but SSR HTML has no `og:*` meta tags; only root layout title/description) |
+| 13 | Shared listing link Open Graph tags remain public (no auth required to render OG preview) | Blocker | ☒ **fail** (2026-09-06 — Plan 07-05: listing URL public (200) but SSR HTML has no `og:*` meta tags; only root layout title/description) → **fixed in code 2026-10-30** (`generateMetadata` on `/listing/[id]` from the anon `listings_public` row; absolute URLs via `metadataBase`); re-verify on production after deploy |
 
 ## Browse / Feed / Post (D-07-45)
 

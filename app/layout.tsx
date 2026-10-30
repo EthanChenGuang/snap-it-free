@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { InlineScript } from '@/components/InlineScript';
 import { getMessages } from '@/messages';
+import { getSiteUrl } from '@/lib/listings/listing-metadata';
 import { BrowseCenterProvider } from '@/lib/browse-center/context';
 import { AppThemeProvider } from '@/components/providers/AppThemeProvider';
 import { AppSerwistProvider } from '@/components/providers/SerwistProvider';
@@ -27,6 +28,7 @@ const inter = Inter({
 const defaultMessages = getMessages('zh');
 
 export const metadata: Metadata = {
+  metadataBase: getSiteUrl(),
   title: defaultMessages.app.title,
   description: defaultMessages.app.description,
 };

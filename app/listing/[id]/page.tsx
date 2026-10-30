@@ -1,10 +1,17 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { ListingDetailSkeleton } from '@/components/detail/ListingDetailSkeleton';
 import { z } from 'zod';
 import { ScrapedListingShell } from '@/components/detail/ScrapedListingShell';
 import { UgcListingShell } from '@/components/detail/UgcListingShell';
-import { getListingForDetail, getSimilarListings } from '@/lib/listings/queries';
+import { buildListingMetadata } from '@/lib/listings/listing-metadata';
+import {
+  getListingById,
+  getListingForDetail,
+  getSimilarListings,
+} from '@/lib/listings/queries';
+import { getMessages } from '@/messages';
 
 const listingIdSchema = z.string().uuid();
 
@@ -26,6 +33,21 @@ function serializeSearchParams(
     }
   }
   return sp.toString();
+}
+
+/** Public OG/Twitter tags for share previews — anon read only, no auth (D-19 #13). */
+export async function generateMetadata({
+  params,
+}: Pick<ListingPageProps, 'params'>): Promise<Metadata> {
+  const { id } = await params;
+  const parsed = listingIdSchema.safeParse(id);
+  if (!parsed.success) return {};
+
+  const listing = await getListingById(parsed.data);
+  if (!listing) return {};
+
+  const { app } = getMessages('zh');
+  return buildListingMetadata(listing, { name: app.title, description: app.description });
 }
 
 export default async function ListingPage({ params, searchParams }: ListingPageProps) {
