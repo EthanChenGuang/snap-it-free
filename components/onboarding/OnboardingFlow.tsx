@@ -10,6 +10,8 @@ import { AccountStep } from '@/components/onboarding/steps/AccountStep';
 import { AlertsMock } from '@/components/onboarding/steps/AlertsMock';
 import { BuildingFeed } from '@/components/onboarding/steps/BuildingFeed';
 import { MiniFeedCard } from '@/components/onboarding/steps/MiniFeedCard';
+import { FavoritesDemo, NearbyMap, WeeklyVolume } from '@/components/onboarding/steps/SnagGapSteps';
+import { FeedSearching } from '@/components/listings/FeedSearching';
 import { PhotoCollage, Sparkle } from '@/components/onboarding/steps/PhotoCollage';
 import { useCityTeaser, useRegionTeaser } from '@/components/onboarding/useOnboardingData';
 import { usePwaOnboarding } from '@/components/providers/PwaOnboardingProvider';
@@ -95,6 +97,7 @@ const MOBILITY_EMOJI = { foot: '🚶', bike: '🚲', car: '🚗' } as const;
 const HOW_ICONS = ['bolt', 'schedule', 'map'] as const;
 const HOW_FILLS = ['bg-[#EAE2FF]', 'bg-[#FFF2B8]', 'bg-[#D6F5E6]'] as const;
 const HOW_DOTS = ['bg-[#B69CFF]', 'bg-[#FFC83D]', 'bg-[#7FE0B0]'] as const;
+const MAP_ICONS = ['location_on', 'near_me', 'touch_app'] as const;
 
 /** "Bike or vaporetto (~5 km)" → ["Bike or vaporetto", "~5 km"]; works for （） too. */
 function splitDistance(label: string): [string, string | null] {
@@ -422,6 +425,60 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                           </li>
                         ))}
                       </ul>
+                    </>
+                  )}
+
+                  {state.screen === 'weekly' && (
+                    <>
+                      <StepTitle title={copy.weekly.title} emphasis={copy.weekly.emphasis} />
+                      <p className="mt-space-sm text-body-md text-[#4A4A5E]">{copy.weekly.body}</p>
+                      {region.status === 'ready' && region.venetoNew7d > 0 ? (
+                        <WeeklyVolume
+                          total={region.venetoNew7d}
+                          daily={region.daily}
+                          newestIso={region.newestMs !== null ? new Date(region.newestMs).toISOString() : null}
+                          cityCount={region.cityCount}
+                        />
+                      ) : region.status === 'loading' ? (
+                        <FeedSearching label={copy.weekly.unavailable} />
+                      ) : (
+                        <p className="mt-space-md text-body-md text-[#4A4A5E]">{copy.weekly.unavailable}</p>
+                      )}
+                    </>
+                  )}
+
+                  {state.screen === 'map' && (
+                    <>
+                      <StepTitle title={copy.map.title} emphasis={copy.map.emphasis} />
+                      <p className="mt-space-sm text-body-md text-[#4A4A5E]">{copy.map.body}</p>
+                      {region.status === 'ready' && region.map ? (
+                        <NearbyMap teaser={region.map} cityLabel={cityLabels[region.map.city]} />
+                      ) : null}
+                      <ul className="mt-space-md flex flex-col gap-space-sm">
+                        {copy.map.rows.map((row, index) => (
+                          <li
+                            key={row}
+                            className={cn('flex items-center gap-space-md rounded-2xl px-space-md py-space-sm', pop.outline, pop.shadowSm, HOW_FILLS[index % 3])}
+                          >
+                            <span
+                              className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#1A1A2E]', pop.outline, HOW_DOTS[index % 3])}
+                            >
+                              <SymbolIcon name={MAP_ICONS[index % 3]} className="text-[20px]" />
+                            </span>
+                            <p className="text-body-md font-semibold text-[#1A1A2E]">{row}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+
+                  {state.screen === 'favorites' && (
+                    <>
+                      <StepTitle title={copy.favorites.title} emphasis={copy.favorites.emphasis} />
+                      <p className="mt-space-sm text-body-md text-[#4A4A5E]">{copy.favorites.body}</p>
+                      <FavoritesDemo
+                        listings={region.status === 'ready' && region.favorites.length > 0 ? region.favorites : sampleListings}
+                      />
                     </>
                   )}
 

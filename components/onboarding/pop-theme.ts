@@ -51,6 +51,9 @@ export const POP_TOKENS = {
 export const SCREEN_TINT: Record<string, string> = {
   hook: 'bg-[#FFF1E6]',
   how: 'bg-[#EAF8F2]',
+  weekly: 'bg-[#FFF8DD]',
+  map: 'bg-[#E8F4FB]',
+  favorites: 'bg-[#FFEFF3]',
   interests: 'bg-[#F3EEFF]',
   mobility: 'bg-[#E8F4FB]',
   city: 'bg-[#FFF8DD]',

@@ -11,6 +11,14 @@ import { excludeReportedIds, listingConsumerCity } from '@/lib/listings/filters'
 import { listingPhotoUrls } from '@/lib/listings/listing-photos';
 import type { ListingRow } from '@/lib/listings/types';
 import { isPaywallFlagEnabled } from '@/lib/paywall/gate';
+import {
+  activeCityCount,
+  buildMapTeaser,
+  dailyCountsLast7,
+  newestPostedMs,
+  type DailyCount,
+  type MapTeaser,
+} from '@/lib/paywall/onboarding-stats';
 import { fetchPaywallTeaser, TEASER_PHOTO_LIMIT } from '@/lib/paywall/locked-preview';
 import { CITY_TEASER_THUMBNAIL_LIMIT, summarizeCityTeaser } from '@/lib/paywall/teaser';
 import { readReportedIds } from '@/lib/reports/storage';
@@ -26,7 +34,20 @@ export type CityTeaserState =
 
 export type RegionTeaserState =
   | { status: 'loading' }
-  | { status: 'ready'; venetoCount: number; venetoNew7d: number; collage: TeaserPhoto[] }
+  | {
+      status: 'ready';
+      venetoCount: number;
+      venetoNew7d: number;
+      collage: TeaserPhoto[];
+      /** Weekly-volume screen: items posted per local day, last 7 days (Veneto). */
+      daily: DailyCount[];
+      newestMs: number | null;
+      cityCount: number;
+      /** Map screen: the busiest city's newest located items. */
+      map: MapTeaser | null;
+      /** Favourites screen: newest items with a photo. */
+      favorites: ListingRow[];
+    }
   | { status: 'error' };
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -62,6 +83,19 @@ function distinctPhotos(listings: readonly ListingRow[], limit: number, language
   return out;
 }
 
+function newestWithPhoto(rows: readonly ListingRow[], limit: number): ListingRow[] {
+  const seen = new Set<string>();
+  return [...rows]
+    .sort((a, b) => new Date(b.posted_at).getTime() - new Date(a.posted_at).getTime())
+    .filter((row) => {
+      const url = listingPhotoUrls(row)[0];
+      if (!url || seen.has(url)) return false;
+      seen.add(url);
+      return true;
+    })
+    .slice(0, limit);
+}
+
 /** Region-wide collage + honest Veneto counts for the hook and the paywall proof line, from real rows. */
 export function useRegionTeaser(): RegionTeaserState {
   const { language } = useMessages();
@@ -77,7 +111,9 @@ export function useRegionTeaser(): RegionTeaserState {
       (rows) => {
         if (cancelled) return;
         const veneto = rows.filter(isVeneto);
-        const cutoff = Date.now() - SEVEN_DAYS_MS;
+        const now = Date.now();
+        const cutoff = now - SEVEN_DAYS_MS;
+        const scope = veneto.length > 0 ? veneto : rows;
         const venetoNew7d = veneto.filter((row) => {
           const posted = new Date(row.posted_at).getTime();
           return Number.isFinite(posted) && posted >= cutoff;
@@ -86,7 +122,12 @@ export function useRegionTeaser(): RegionTeaserState {
           status: 'ready',
           venetoCount: veneto.length,
           venetoNew7d,
-          collage: distinctPhotos(veneto.length > 0 ? veneto : rows, TEASER_PHOTO_LIMIT, language),
+          collage: distinctPhotos(scope, TEASER_PHOTO_LIMIT, language),
+          daily: dailyCountsLast7(scope, now),
+          newestMs: newestPostedMs(scope, now),
+          cityCount: activeCityCount(scope),
+          map: buildMapTeaser(scope),
+          favorites: newestWithPhoto(scope, 3),
         });
       },
       () => !cancelled && setState({ status: 'error' }),

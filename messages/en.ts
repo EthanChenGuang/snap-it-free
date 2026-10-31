@@ -421,20 +421,47 @@ export const messages: Messages = {
     hook: {
       title: 'Free stuff near you, every day',
       emphasis: 'Free',
-      body: 'We gather free items from Subito and neighbours’ street finds into one feed.',
+      body: 'Giveaways near you, gathered in one colourful feed and updated all day.',
       liveLine: (count: number) =>
         count === 1
           ? '1 free item active in Veneto right now'
           : `${count.toLocaleString('en-US')} free items active in Veneto right now`,
     },
     how: {
-      title: 'One feed instead of five apps',
-      emphasis: 'One',
+      title: 'Every free find in one feed',
+      emphasis: 'one',
       rows: [
-        'Subito + street finds, newest first',
+        'Fresh giveaways, newest first',
         'Distance and posting time on every card',
         'Map and favourites when you need them',
       ],
+    },
+    weekly: {
+      title: 'New free stuff every single day',
+      emphasis: 'every',
+      body: 'Live numbers from the feed, not estimates.',
+      statCaption: (count: number) =>
+        count === 1 ? 'new free item in Veneto in the last 7 days' : 'new free items in Veneto in the last 7 days',
+      chartTitle: 'Added per day',
+      today: (count: number) => `Today: ${count.toLocaleString('en-US')}`,
+      newest: (when: string) => `Newest ${when}`,
+      cities: (count: number) => (count === 1 ? '1 city' : `${count} cities`),
+      unavailable: 'Live numbers are loading. You can keep going.',
+    },
+    map: {
+      title: 'See what’s free around you',
+      emphasis: 'around you',
+      body: 'Items with a location show up as pins on the map.',
+      pinsLine: (count: number, city: string) =>
+        count === 1 ? `1 item on the map in ${city} right now` : `${count.toLocaleString('en-US')} items on the map in ${city} right now`,
+      rows: ['Every item pinned on the map', 'Distance on every card', 'Tap a pin to see the photo'],
+    },
+    favorites: {
+      title: 'Save your favourite finds for later',
+      emphasis: 'favourite',
+      body: 'Tap the heart on any item to keep it for later.',
+      toast: 'Added to favourites',
+      tabTitle: 'Find them anytime in the ♥ Favorites tab',
     },
     interests: {
       title: 'What are you looking for?',
@@ -545,7 +572,7 @@ export const messages: Messages = {
     savingsVsMonthly: (pct: number) => `Save ${pct}%`,
     billed: (price: string) => `Billed ${price} per year`,
     freeNote: 'The items are free; the subscription pays for finding them all in one place.',
-    benefitListings: 'Every active free listing, from all sources',
+    benefitListings: 'Every active free listing near you',
     benefitMap: 'The full feed, map and filters',
     benefitAlerts: 'Keyword alerts when a match appears',
     benefitSupport: 'Support an independent project',

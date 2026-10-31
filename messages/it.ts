@@ -431,20 +431,47 @@ export const messages = {
     hook: {
       title: 'Cose gratis vicino a te, ogni giorno',
       emphasis: 'gratis',
-      body: 'Raccogliamo in un unico feed gli oggetti in regalo su Subito e quelli trovati per strada dai vicini.',
+      body: 'Gli oggetti in regalo vicino a te, raccolti in un unico feed aggiornato tutto il giorno.',
       liveLine: (count: number) =>
         count === 1
           ? '1 oggetto gratis disponibile in Veneto in questo momento'
           : `${count.toLocaleString('it-IT')} oggetti gratis disponibili in Veneto in questo momento`,
     },
     how: {
-      title: 'Un solo feed invece di cinque app',
-      emphasis: 'Un',
+      title: 'Tutto il gratis in un solo feed',
+      emphasis: 'un solo',
       rows: [
-        'Subito + ritrovamenti in strada, dai più recenti',
+        'Regali appena pubblicati, dai più recenti',
         'Distanza e ora di pubblicazione su ogni scheda',
         'Mappa e preferiti quando servono',
       ],
+    },
+    weekly: {
+      title: 'Cose gratis nuove ogni giorno',
+      emphasis: 'ogni',
+      body: 'Numeri reali dal feed, non stime.',
+      statCaption: (count: number): string =>
+        count === 1 ? 'nuovo oggetto gratis in Veneto negli ultimi 7 giorni' : 'nuovi oggetti gratis in Veneto negli ultimi 7 giorni',
+      chartTitle: 'Aggiunti al giorno',
+      today: (count: number) => `Oggi: ${count.toLocaleString('it-IT')}`,
+      newest: (when: string) => `Il più recente ${when}`,
+      cities: (count: number) => (count === 1 ? '1 città' : `${count} città`),
+      unavailable: 'Stiamo caricando i numeri. Puoi continuare.',
+    },
+    map: {
+      title: 'Scopri cosa c’è di gratis intorno a te',
+      emphasis: 'intorno a te',
+      body: 'Gli oggetti con una posizione compaiono come puntine sulla mappa.',
+      pinsLine: (count: number, city: string) =>
+        count === 1 ? `1 oggetto sulla mappa a ${city} adesso` : `${count.toLocaleString('it-IT')} oggetti sulla mappa a ${city} adesso`,
+      rows: ['Ogni oggetto ha la sua puntina', 'Distanza su ogni scheda', 'Tocca una puntina per vedere la foto'],
+    },
+    favorites: {
+      title: 'Salva i tuoi preferiti per dopo',
+      emphasis: 'preferiti',
+      body: 'Tocca il cuore su un oggetto per ritrovarlo dopo.',
+      toast: 'Aggiunto ai preferiti',
+      tabTitle: 'Li ritrovi sempre nella scheda ♥ Preferiti',
     },
     interests: {
       title: 'Cosa stai cercando?',
@@ -555,7 +582,7 @@ export const messages = {
     savingsVsMonthly: (pct: number) => `Risparmi il ${pct}%`,
     billed: (price: string) => `Addebito di ${price} all’anno`,
     freeNote: 'Gli oggetti sono gratis; l’abbonamento paga il servizio che li raccoglie in un unico posto.',
-    benefitListings: 'Tutti gli annunci gratis attivi, da tutte le fonti',
+    benefitListings: 'Tutti gli annunci gratis attivi vicino a te',
     benefitMap: 'Feed completo, mappa e filtri',
     benefitAlerts: 'Avvisi per le tue parole chiave',
     benefitSupport: 'Sostieni un progetto indipendente',

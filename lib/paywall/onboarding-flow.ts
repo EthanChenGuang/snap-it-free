@@ -2,7 +2,8 @@ import type { ConsumerCityKey } from '@/lib/geo/italian-cities';
 import { reconcileInterestSelection } from '@/lib/paywall/onboarding-interests';
 
 /**
- * Snag-modelled onboarding (quick 261028-ob2): hook → how → interests → mobility → city →
+ * Snag-modelled onboarding (quick 261028-ob2; weekly/map/favorites added in 261031-ob4 to match
+ * Snag's screen set): hook → how → weekly → map → favorites → interests → mobility → city →
  * preview → account → alerts → paywall. The account step is a required sign-up (Guang,
  * 2026-10-28), so there is no path to the paywall that skips it. Skip only short-circuits the
  * value-prop run and lands on the personal preview, never past the account gate.
@@ -10,6 +11,9 @@ import { reconcileInterestSelection } from '@/lib/paywall/onboarding-interests';
 export const INTRO_STEPS = [
   'hook',
   'how',
+  'weekly',
+  'map',
+  'favorites',
   'interests',
   'mobility',
   'city',

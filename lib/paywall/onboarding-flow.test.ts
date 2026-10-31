@@ -26,7 +26,10 @@ describe('onboardingReducer', () => {
     let state = INITIAL_ONBOARDING_STATE;
     const steps: OnboardingAction[] = [
       { type: 'next' }, // hook → how
-      { type: 'next' }, // how → interests
+      { type: 'next' }, // how → weekly
+      { type: 'next' }, // weekly → map
+      { type: 'next' }, // map → favorites
+      { type: 'next' }, // favorites → interests
       { type: 'toggleInterest', interest: 'books' },
       { type: 'next' }, // interests → mobility
       { type: 'selectMobility', mobility: 'bike' },
@@ -43,6 +46,9 @@ describe('onboardingReducer', () => {
     }
     expect(screens).toEqual([
       'how',
+      'weekly',
+      'map',
+      'favorites',
       'interests',
       'interests',
       'mobility',
@@ -112,12 +118,12 @@ describe('onboardingReducer', () => {
 });
 
 describe('introStepIndex', () => {
-  it('numbers the eight intro steps and excludes the paywall', () => {
+  it('numbers the eleven intro steps and excludes the paywall', () => {
     expect(
-      ['hook', 'how', 'interests', 'mobility', 'city', 'preview', 'account', 'alerts', 'paywall'].map((s) =>
+      ['hook', 'how', 'weekly', 'map', 'favorites', 'interests', 'mobility', 'city', 'preview', 'account', 'alerts', 'paywall'].map((s) =>
         introStepIndex(s as never),
       ),
-    ).toEqual([0, 1, 2, 3, 4, 5, 6, 7, -1]);
+    ).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -1]);
   });
 });
 

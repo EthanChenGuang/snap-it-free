@@ -63,8 +63,10 @@ async function newPage(browser, viewport = PHONE, language = lang, { stubAuth = 
 async function walkToPreview(page, city = 'Milan') {
   await page.getByTestId('onboarding-continue').click(); // hook → how
   await settle(page, 400);
-  await page.getByTestId('onboarding-continue').click(); // how → interests
-  await settle(page, 400);
+  for (let i = 0; i < 4; i += 1) {
+    await page.getByTestId('onboarding-continue').click(); // how → weekly → map → favorites → interests
+    await settle(page, 400);
+  }
   await page.getByRole('checkbox', { name: 'Books' }).click();
   await page.getByTestId('onboarding-continue').click(); // interests → mobility
   await settle(page, 400);
@@ -160,6 +162,7 @@ async function onboarding(browser) {
   // 1 · Hook
   check(await screenIs(page, 'hook'), 'step 1 hook shown with ?onboarding=1');
   check((await page.getByRole('button', { name: 'Skip' }).count()) === 1, 'Skip visible on the hook');
+  check(!/subito|vinted|wallapop|facebook/i.test(await overlay(page).innerText()), 'hook names no listing source');
   await shot(page, '01-hook');
 
   // 2 · How it works
@@ -169,7 +172,26 @@ async function onboarding(browser) {
   check((await page.getByRole('button', { name: 'Back' }).count()) === 1, 'Back visible from step 2');
   await shot(page, '02-how-it-works');
 
-  // 3 · Interests (quiz, gated)
+  // 2b–2d · Snag-shaped screens (quick 261031-ob4): weekly volume, map, favourites — real data, no source names.
+  const SOURCE_NAMES = /subito|vinted|wallapop|facebook|five apps/i;
+  check(!SOURCE_NAMES.test(await overlay(page).innerText()), 'how-it-works names no listing source');
+  await page.getByTestId('onboarding-continue').click();
+  await settle(page, 1500);
+  check(await screenIs(page, 'weekly'), 'step 3 weekly volume');
+  check((await page.getByTestId('weekly-total').count()) === 1, 'weekly volume shows a real 7-day total');
+  await shot(page, '02b-weekly');
+  await page.getByTestId('onboarding-continue').click();
+  await settle(page, 1500);
+  check(await screenIs(page, 'map'), 'step 4 map');
+  check((await page.getByTestId('onboarding-map').count()) === 1, 'map shows real pins');
+  await shot(page, '02c-map');
+  await page.getByTestId('onboarding-continue').click();
+  await settle(page, 1200);
+  check(await screenIs(page, 'favorites'), 'step 5 favourites');
+  check((await page.getByTestId('onboarding-favorites').count()) === 1, 'favourites demo renders');
+  await shot(page, '02d-favorites');
+
+  // 6 · Interests (quiz, gated)
   await page.getByTestId('onboarding-continue').click();
   await settle(page);
   check(await screenIs(page, 'interests'), 'step 3 interests');
