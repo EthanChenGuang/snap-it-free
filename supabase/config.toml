@@ -1,0 +1,20 @@
+# Local and preview-branch Supabase config. Only the auth email settings are set here.
+# Do NOT run `supabase config push` against production (wnerhajyjjmrtsdmdpzu): this file is not a full
+# copy of the production config, and pushing it would reset every setting it leaves out.
+project_id = "snap-it-free"
+
+[auth]
+site_url = "https://zerodollar-blond.vercel.app"
+
+[auth.email]
+# Matches production: 8-digit code, valid for one hour. EmailCodeSignIn accepts 6-10 digits.
+otp_length = 8
+otp_expiry = 3600
+
+[auth.email.template.confirmation]
+subject = "Confirm your email address"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.magic_link]
+subject = "Your sign-in link"
+content_path = "./supabase/templates/magic_link.html"
