@@ -453,7 +453,7 @@ export const messages = {
       statCaption: (count: number): string =>
         count === 1 ? 'nuovo oggetto gratis in Veneto negli ultimi 7 giorni' : 'nuovi oggetti gratis in Veneto negli ultimi 7 giorni',
       chartTitle: 'Aggiunti al giorno',
-      today: (count: number) => `Oggi: ${count.toLocaleString('it-IT')}`,
+      perDay: (count: number) => `≈ ${count.toLocaleString('it-IT')} al giorno`,
       newest: (when: string) => `Il più recente ${when}`,
       cities: (count: number) => (count === 1 ? '1 città' : `${count} città`),
       unavailable: 'Stiamo caricando i numeri. Puoi continuare.',

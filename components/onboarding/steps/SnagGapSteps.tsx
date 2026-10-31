@@ -39,7 +39,7 @@ export function WeeklyVolume({
   const copy = messages.onboarding.weekly;
   const reduceMotion = useReducedMotion();
   const max = Math.max(1, ...daily.map((day) => day.count));
-  const today = daily[daily.length - 1]?.count ?? 0;
+  const perDay = Math.round(daily.reduce((sum, day) => sum + day.count, 0) / Math.max(1, daily.length));
   const weekday = new Intl.DateTimeFormat(localeTag(language), { weekday: 'narrow' });
 
   return (
@@ -58,27 +58,27 @@ export function WeeklyVolume({
         <div className="flex items-center justify-between gap-space-sm">
           <p className="text-label-sm font-black uppercase tracking-wide text-[#1A1A2E]">{copy.chartTitle}</p>
           <span className="rounded-full border-2 border-[#1A1A2E] bg-[#F2512D] px-2.5 py-0.5 text-label-sm font-bold text-white">
-            {copy.today(today)}
+            {copy.perDay(perDay)}
           </span>
         </div>
         <div className="mt-space-md flex h-32 items-end gap-1.5">
           {daily.map((day, index) => {
-            const isToday = index === daily.length - 1;
+            const isPeak = day.count === max;
             const height = Math.max(8, Math.round((day.count / max) * 100));
             return (
               <div key={day.dayStart} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
-                <span className={cn('text-[11px] font-bold', isToday ? 'text-[#F2512D]' : 'text-[#4A4A5E]')}>{day.count}</span>
+                <span className={cn('text-[11px] font-bold', isPeak ? 'text-[#F2512D]' : 'text-[#4A4A5E]')}>{day.count}</span>
                 <motion.div
                   className={cn(
                     'w-full rounded-t-xl border-2 border-[#1A1A2E]',
-                    isToday ? 'bg-[#F2512D]' : BAR_FILLS[index % BAR_FILLS.length],
+                    isPeak ? 'bg-[#F2512D]' : BAR_FILLS[index % BAR_FILLS.length],
                   )}
                   style={{ height: `${height}%`, transformOrigin: 'bottom' }}
                   initial={reduceMotion ? false : { scaleY: 0 }}
                   animate={{ scaleY: 1 }}
                   transition={{ duration: 0.45, delay: reduceMotion ? 0 : index * 0.05, ease: [0.16, 1, 0.3, 1] }}
                 />
-                <span className={cn('text-[11px] font-black', isToday ? 'text-[#F2512D]' : 'text-[#1A1A2E]')}>
+                <span className={cn('text-[11px] font-black', isPeak ? 'text-[#F2512D]' : 'text-[#1A1A2E]')}>
                   {weekday.format(new Date(day.dayStart))}
                 </span>
               </div>

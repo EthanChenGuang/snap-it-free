@@ -430,7 +430,7 @@ export const messages: Messages = {
       body: '来自信息流的实时数字，不是估算。',
       statCaption: (_count: number) => '件新免费物品，威尼托大区过去 7 天',
       chartTitle: '每天新增',
-      today: (count: number) => `今天：${count.toLocaleString('zh-CN')}`,
+      perDay: (count: number) => `平均每天 ${count.toLocaleString('zh-CN')} 件`,
       newest: (when: string) => `最新：${when}`,
       cities: (count: number) => `${count} 个城市`,
       unavailable: '实时数字加载中，你可以先继续。',

@@ -443,7 +443,7 @@ export const messages: Messages = {
       statCaption: (count: number) =>
         count === 1 ? 'new free item in Veneto in the last 7 days' : 'new free items in Veneto in the last 7 days',
       chartTitle: 'Added per day',
-      today: (count: number) => `Today: ${count.toLocaleString('en-US')}`,
+      perDay: (count: number) => `≈ ${count.toLocaleString('en-US')} a day`,
       newest: (when: string) => `Newest ${when}`,
       cities: (count: number) => (count === 1 ? '1 city' : `${count} cities`),
       unavailable: 'Live numbers are loading. You can keep going.',

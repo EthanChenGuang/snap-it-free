@@ -85,8 +85,8 @@ function hasCoords(row: ListingRow): row is ListingRow & { lat: number; lng: num
 }
 
 /**
- * The map screen: the city with the most located rows, and up to `limit` of its newest rows with a
- * photo, placed by their real relative position (equirectangular, longitude scaled by cos(lat), fitted
+ * The map screen: the city with the most distinct item locations, and up to `limit` of its newest
+ * rows with a photo at distinct spots, placed by their real relative position (equirectangular, longitude scaled by cos(lat), fitted
  * into a padded box). `total` is every located row in that city, not just the pins drawn.
  */
 export function buildMapTeaser(rows: readonly ListingRow[], limit = 12, padding = 10): MapTeaser | null {
@@ -99,21 +99,33 @@ export function buildMapTeaser(rows: readonly ListingRow[], limit = 12, padding 
     list.push(row);
     byCity.set(key, list);
   }
+  // Many rows are geocoded to a city centroid, so pins would stack on one spot. Keep one row per
+  // ~100 m cell (the newest with a photo) and pick the city with the most distinct cells.
+  const cellKey = (row: { lat: number; lng: number }) => `${row.lat.toFixed(3)},${row.lng.toFixed(3)}`;
+  const distinctNewest = (list: Array<ListingRow & { lat: number; lng: number }>) => {
+    const seen = new Set<string>();
+    return [...list]
+      .sort((a, b) => (postedMs(b) ?? 0) - (postedMs(a) ?? 0))
+      .flatMap((row) => {
+        const photoUrl = listingPhotoUrls(row)[0];
+        const cell = cellKey(row);
+        if (!photoUrl || seen.has(cell)) return [];
+        seen.add(cell);
+        return [{ row, photoUrl }];
+      });
+  };
   let best: ConsumerCityKey | null = null;
+  let bestPins: ReturnType<typeof distinctNewest> = [];
   for (const [key, list] of byCity) {
-    if (best === null || list.length > (byCity.get(best)?.length ?? 0)) best = key;
+    const candidates = distinctNewest(list);
+    if (candidates.length > bestPins.length) {
+      best = key;
+      bestPins = candidates;
+    }
   }
-  if (best === null) return null;
+  if (best === null || bestPins.length === 0) return null;
   const located = byCity.get(best) ?? [];
-
-  const newest = [...located]
-    .sort((a, b) => (postedMs(b) ?? 0) - (postedMs(a) ?? 0))
-    .flatMap((row) => {
-      const photoUrl = listingPhotoUrls(row)[0];
-      return photoUrl ? [{ row, photoUrl }] : [];
-    })
-    .slice(0, limit);
-  if (newest.length === 0) return null;
+  const newest = bestPins.slice(0, limit);
 
   const meanLat = newest.reduce((sum, { row }) => sum + row.lat, 0) / newest.length;
   const kx = Math.cos((meanLat * Math.PI) / 180);

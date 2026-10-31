@@ -76,6 +76,18 @@ describe('buildMapTeaser', () => {
     expect(a.x).toBeLessThan(b.x); // a is further west
   });
 
+  it('keeps one pin per spot and prefers the city with more distinct spots', () => {
+    const stacked = Array.from({ length: 30 }, (_, i) =>
+      row({ city: 'padova', lat: 45.4064, lng: 11.8768, posted_at: new Date(NOW - i * 1000).toISOString() }),
+    );
+    const spread = Array.from({ length: 4 }, (_, i) =>
+      row({ zone: 'centro_storico', lat: 45.43 + i * 0.01, lng: 12.33, posted_at: new Date(NOW - i * 1000).toISOString() }),
+    );
+    const teaser = buildMapTeaser([...stacked, ...spread]);
+    expect(teaser?.city).toBe('venice');
+    expect(teaser?.pins).toHaveLength(4);
+  });
+
   it('respects the pin limit', () => {
     const rows = Array.from({ length: 20 }, (_, i) =>
       row({ zone: 'centro_storico', lat: 45.43 + i * 0.001, lng: 12.33, posted_at: new Date(NOW - i * 1000).toISOString() }),
