@@ -367,18 +367,15 @@ async function onboarding(browser) {
   await page.getByTestId('paywall-close').click();
   check((await page.getByTestId('paywall-dialog').count()) === 0, 'paywall dialog closes back to the locked feed');
 
-  // P10: Stripe return. Flag-off local → unlocked feed + "You're in". Flag-on Preview → still locked + pending notice.
+  // P10: Stripe return. Flag-off local → unlocked feed, no banner (removed 2026-10-31). Flag-on Preview → still locked + pending notice.
   await page.goto(`${url}/?checkout=success`, { waitUntil: 'networkidle' });
   await settle(page, 1000);
   const checkoutLocked = (await page.getByTestId('locked-feed').count()) > 0;
   if (checkoutLocked) {
     check((await page.getByTestId('checkout-pending').count()) === 1, 'locked + checkout=success: activation can take a minute');
-    check((await page.getByTestId('checkout-success').count()) === 0, "locked + checkout=success: no You're in toast");
   } else {
-    check(
-      (await page.getByTestId('checkout-success').count()) >= 1 || (await page.getByText("You're in").count()) >= 1,
-      "unlocked + checkout=success: You're in toast",
-    );
+    check((await page.getByText("You're in").count()) === 0, 'unlocked + checkout=success: no "You\'re in" banner or toast');
+    check(!page.url().includes('checkout='), 'unlocked + checkout=success: ?checkout param removed from the URL');
     const unlockedPrefs = await page.evaluate(() => JSON.parse(localStorage.getItem('shoumanwu_filter_prefs') ?? '{}'));
     check(unlockedPrefs.city === 'milano', `unlocked feed applies onboarding city (${unlockedPrefs.city})`);
     check(

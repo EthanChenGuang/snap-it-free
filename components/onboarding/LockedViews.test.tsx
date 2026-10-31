@@ -28,7 +28,6 @@ describe('checkout return on a locked view', () => {
     const copy = getMessages('en').locked;
     const container = await render(<LockedFeed count={12} photos={[]} />);
     expect(container.querySelector('[data-testid="checkout-pending"]')?.textContent).toBe(copy.checkoutPending);
-    expect(container.textContent).not.toContain(copy.checkoutSuccess);
   });
 
   it('does not treat a cancelled Checkout as a pending activation', async () => {

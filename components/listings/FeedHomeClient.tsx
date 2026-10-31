@@ -13,10 +13,7 @@ import { useListingsPoll } from '@/lib/listings/useListingsPoll';
 import { readReportedIds, REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
 import type { ListingRow } from '@/lib/listings/types';
 import { useMessages } from '@/lib/i18n/useMessages';
-import { getMessages } from '@/messages';
 import { checkoutReturnNotice, parseCheckoutParam, urlWithoutCheckoutParam } from '@/lib/paywall/checkout-return';
-import { readAppPreferences } from '@/lib/settings/preferences';
-import { toast } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 
 type FeedHomeClientProps = {
@@ -56,7 +53,6 @@ export function FeedHomeClient({
   });
   const [reportedIds, setReportedIds] = useState<string[]>([]);
   const [countPulse, setCountPulse] = useState(false);
-  const [checkoutWelcome, setCheckoutWelcome] = useState<string | null>(null);
   const prevCountRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -72,12 +68,9 @@ export function FeedHomeClient({
   }, [registerScrollContainer]);
 
   useEffect(() => {
+    // Back from a paid Checkout: the unlocked feed says it all, so just drop the ?checkout param.
     const notice = checkoutReturnNotice('open', parseCheckoutParam(window.location.search));
     if (notice !== 'success') return;
-    // Read language from storage at effect time so hydration's zh server snapshot cannot toast 已开通 on an EN page.
-    const copy = getMessages(readAppPreferences().language).locked.checkoutSuccess;
-    setCheckoutWelcome(copy);
-    toast(copy, 'checkout-success');
     window.history.replaceState(window.history.state, '', urlWithoutCheckoutParam(window.location.href));
   }, []);
 
@@ -188,15 +181,6 @@ export function FeedHomeClient({
         ref={scrollRef}
         className="feed-home-scroll no-scrollbar h-full flex-1 px-gutter pt-space-xs pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]"
       >
-        {checkoutWelcome && (
-          <p
-            role="status"
-            data-testid="checkout-success"
-            className="mb-space-md rounded-lg border border-outline-variant bg-surface-container-lowest px-space-md py-space-sm text-label-md text-on-surface"
-          >
-            {checkoutWelcome}
-          </p>
-        )}
         <AnimatePresence mode="wait" initial={false}>
           {viewState === 'loading' && (
             <motion.div

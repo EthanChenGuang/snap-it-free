@@ -577,7 +577,6 @@ export const messages: Messages = {
     favoritesBody: '订阅后即可查看你收藏的信息。',
     backHome: '返回首页',
     checkoutPending: '已经付款？激活可能需要一分钟，请稍后刷新此页面。',
-    checkoutSuccess: '已开通',
   },
   subscription: {
     sectionTitle: '订阅',

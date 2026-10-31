@@ -608,7 +608,6 @@ export const messages = {
     favoritesBody: 'Abbonati per vedere gli annunci che hai salvato.',
     backHome: 'Torna alla home',
     checkoutPending: 'Pagamento effettuato? L’attivazione può richiedere un minuto. Ricarica la pagina tra poco.',
-    checkoutSuccess: 'Ci sei',
   },
   subscription: {
     sectionTitle: 'Abbonamento',

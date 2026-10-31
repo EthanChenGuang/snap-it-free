@@ -598,7 +598,6 @@ export const messages: Messages = {
     favoritesBody: 'Subscribe to see the listings you saved.',
     backHome: 'Back to home',
     checkoutPending: 'Payment received? Activation can take a minute. Refresh this page shortly.',
-    checkoutSuccess: "You're in",
   },
   subscription: {
     sectionTitle: 'Subscription',
