@@ -503,6 +503,9 @@ export const messages = {
       optIn: 'Inviami email occasionali sul servizio (facoltativo)',
       signedIn: 'Hai effettuato l’accesso. Continua per completare la configurazione.',
       signedInAs: (email: string) => `Accesso come ${email}.`,
+      switchAccount: 'Non sei tu? Usa un altro account',
+      switchingAccount: 'Disconnessione…',
+      payingAs: (email: string) => `Paghi come ${email}`,
     },
     alerts: {
       title: 'Arriva prima sulle novità',

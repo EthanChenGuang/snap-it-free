@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { EmailCodeSignIn } from '@/components/onboarding/EmailCodeSignIn';
 import { GoogleMark } from '@/components/onboarding/GoogleMark';
+import { SwitchAccountButton } from '@/components/onboarding/SwitchAccountButton';
 import { Button } from '@/components/ui/button';
 import { PASTELS, pop } from '@/components/onboarding/pop-theme';
 import { Sparkle } from '@/components/onboarding/steps/PhotoCollage';
@@ -62,6 +63,16 @@ export function AccountStep({ copy, summary = [], onBeforeRedirect, onContinue }
 
   const signedIn = Boolean(user) || stub;
   const displayEmail = email ?? (stub ? 'preview@zerodollar.local' : null);
+
+  // The answers above stay in this step's state; only the session goes, so the sign-in options come back.
+  const clearStub = () => {
+    try {
+      window.localStorage.removeItem(STUB_AUTH_KEY);
+    } catch {
+      // ignore
+    }
+    setStub(false);
+  };
 
   const persistOptIn = () => {
     try {
@@ -137,6 +148,7 @@ export function AccountStep({ copy, summary = [], onBeforeRedirect, onContinue }
             {displayEmail ? copy.signedInAs(displayEmail) : copy.signedIn}
           </p>
         )}
+        {signedIn && <SwitchAccountButton onSignedOut={clearStub} className="mt-space-sm" testId="account-switch" />}
 
       </div>
 

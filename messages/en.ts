@@ -493,6 +493,9 @@ export const messages: Messages = {
       optIn: 'Send me occasional product emails (optional)',
       signedIn: 'You’re signed in. Continue to finish setting up.',
       signedInAs: (email: string) => `Signed in as ${email}.`,
+      switchAccount: 'Not you? Use another account',
+      switchingAccount: 'Signing out…',
+      payingAs: (email: string) => `Paying as ${email}`,
     },
     alerts: {
       title: 'Be first to new finds',

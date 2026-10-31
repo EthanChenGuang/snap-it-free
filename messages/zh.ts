@@ -477,6 +477,9 @@ export const messages: Messages = {
       optIn: '偶尔给我发送产品邮件（可选）',
       signedIn: '你已登录。继续以完成设置。',
       signedInAs: (email: string) => `已登录：${email}。`,
+      switchAccount: '不是你？换一个账号',
+      switchingAccount: '正在退出…',
+      payingAs: (email: string) => `付款账号：${email}`,
     },
     alerts: {
       title: '第一时间知道新好物',

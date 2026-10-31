@@ -6,9 +6,11 @@ import { ListingPhoto } from '@/components/listings/ListingPhoto';
 import { EmailCodeSignIn } from '@/components/onboarding/EmailCodeSignIn';
 import { pop } from '@/components/onboarding/pop-theme';
 import { GoogleMark } from '@/components/onboarding/GoogleMark';
+import { SwitchAccountButton } from '@/components/onboarding/SwitchAccountButton';
 import { ArrowRight, SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { Button } from '@/components/ui/button';
 import { isInAppBrowser } from '@/lib/auth/in-app-browser';
+import { useAuthSession } from '@/lib/auth/useAuthSession';
 import { useOAuthSignIn } from '@/lib/auth/use-oauth-sign-in';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { markOnboardingCompleted, urlWithoutForceParam } from '@/lib/paywall/gate';
@@ -83,6 +85,7 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [origin, setOrigin] = useState('');
   const [inApp, setInApp] = useState(false);
+  const { email } = useAuthSession();
   const selected = getPlan(selectedId);
   const googleReturn = returnPath ?? '/';
   const { signIn: signInWithGoogle, isBusy: googleBusy } = useOAuthSignIn(googleReturn);
@@ -145,6 +148,12 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
     else setRestore(outcome);
   };
 
+  // Signed out on this device: show the sign-in options; signing in again continues to checkout.
+  const afterSwitch = () => {
+    setRestore(null);
+    setPurchase('signInRequired');
+  };
+
   const closeButton = (
     <button
       type="button"
@@ -182,6 +191,12 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
             {notice.title}
           </h1>
           <p className="mt-space-sm text-body-lg text-on-surface-variant">{notice.body}</p>
+          {purchase === 'alreadySubscribed' && email && (
+            <p className="mt-space-md text-label-sm text-on-surface-variant" data-testid="paywall-subscribed-account">
+              {messages.onboarding.account.signedInAs(email)}{' '}
+              <SwitchAccountButton onSignedOut={afterSwitch} testId="paywall-switch-account" />
+            </p>
+          )}
         </div>
         <footer className="flex shrink-0 flex-col gap-space-sm px-gutter py-space-md">
           {purchase === 'signInRequired' && (
@@ -368,6 +383,12 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
       </div>
 
       <footer className="shrink-0 border-t-2 border-[#1A1A2E]/10 bg-[#FFF8EE]/90 px-gutter pt-space-md pb-space-sm backdrop-blur">
+        {email && (
+          <p className="mb-space-xs text-center text-label-sm text-on-surface-variant" data-testid="paywall-paying-as">
+            {messages.onboarding.account.payingAs(email)} ·{' '}
+            <SwitchAccountButton onSignedOut={afterSwitch} testId="paywall-switch-account" />
+          </p>
+        )}
         <Button
           type="button"
           className={pop.primaryButton}
