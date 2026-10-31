@@ -47,6 +47,8 @@ export const messages: Messages = {
     refreshing: 'Refreshing…',
   },
   feed: {
+    searching: 'Searching for free items…',
+    searchingIn: (city: string) => `Searching for free items in ${city}…`,
     searchPlaceholder: 'Search items…',
     openFilters: 'Filters',
     openSelectLocation: 'Choose browse location',

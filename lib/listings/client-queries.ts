@@ -2,7 +2,7 @@ import { isPaywallFlagEnabled } from '@/lib/paywall/gate';
 import { createAnonClient } from '@/lib/supabase/anon';
 import { createClient } from '@/lib/supabase/client';
 import { getSupabaseEnv } from '@/lib/supabase/env';
-import { feedLookbackSinceIso, fetchPagedRows } from './feed-window';
+import { feedLookbackSinceIso, fetchPagedRowsParallel } from './feed-window';
 import type { ListingRow } from './types';
 
 const PUBLIC_LISTINGS = 'listings_public';
@@ -22,13 +22,17 @@ export async function fetchActiveListingsClient(): Promise<ListingRow[]> {
 
   const supabase = listingsReadClient();
   const since = feedLookbackSinceIso();
-  const { data, error } = await fetchPagedRows<ListingRow>(async (from, to) =>
-    supabase
-      .from(PUBLIC_LISTINGS)
-      .select(ACTIVE_LISTING_COLUMNS)
-      .gte('posted_at', since)
-      .order('posted_at', { ascending: false })
-      .range(from, to),
+  // Order by posted_at then id so concurrent page reads see one stable ordering.
+  const { data, error } = await fetchPagedRowsParallel<ListingRow>(
+    async (from, to) =>
+      supabase
+        .from(PUBLIC_LISTINGS)
+        .select(ACTIVE_LISTING_COLUMNS)
+        .gte('posted_at', since)
+        .order('posted_at', { ascending: false })
+        .order('id', { ascending: false })
+        .range(from, to),
+    () => fetchActiveListingsCountClient(),
   );
 
   if (error) {

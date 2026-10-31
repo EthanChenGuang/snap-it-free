@@ -47,6 +47,8 @@ export const messages: Messages = {
     refreshing: '刷新中…',
   },
   feed: {
+    searching: '正在搜索免费物品…',
+    searchingIn: (city: string) => `正在搜索${city}的免费物品…`,
     searchPlaceholder: '搜索物品…',
     openFilters: '筛选',
     openSelectLocation: '选择浏览位置',

@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { FeedSearching } from '@/components/listings/FeedSearching';
 import { ListListingCard } from '@/components/listings/ListListingCard';
 import { RubberbandScroll } from '@/components/ui/RubberbandScroll';
 import { useFeedFilter } from '@/components/shell/FeedFilterContext';
@@ -48,7 +49,7 @@ export function FeedHomeClient({
   const reduceMotion = useReducedMotion();
   const [renderLimit, setRenderLimit] = useState(INITIAL_RENDER_COUNT);
 
-  const { listings, totalCount, isRefreshing } = useListingsPoll(initialListings, {
+  const { listings, totalCount, isRefreshing, hasLoaded } = useListingsPoll(initialListings, {
     initialTotalCount,
   });
   const [reportedIds, setReportedIds] = useState<string[]>([]);
@@ -168,8 +169,16 @@ export function FeedHomeClient({
     ? { initial: false, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.15 } }
     : CONTENT_MOTION;
 
+  // The SSR batch holds only the newest rows, so a filtered count is partial until the full feed loads:
+  // say "searching" instead of showing a number that is about to jump.
+  const firstLoadPending = !hasLoaded;
+  const searchingLabel =
+    hasCityFilter && applied.city in cityLabels
+      ? messages.feed.searchingIn(cityLabels[applied.city as keyof typeof cityLabels])
+      : messages.feed.searching;
+
   const viewState =
-    filteredListings.length === 0 && isRefreshing
+    filteredListings.length === 0 && (isRefreshing || firstLoadPending)
       ? 'loading'
       : filteredListings.length === 0
         ? 'empty'
@@ -183,13 +192,8 @@ export function FeedHomeClient({
       >
         <AnimatePresence mode="wait" initial={false}>
           {viewState === 'loading' && (
-            <motion.div
-              key="loading"
-              role="status"
-              className="flex items-center justify-center p-space-xl text-label-sm text-on-surface-variant"
-              {...contentMotion}
-            >
-              {messages.list.refreshing}
+            <motion.div key="loading" {...contentMotion}>
+              <FeedSearching label={searchingLabel} />
             </motion.div>
           )}
 
@@ -216,7 +220,7 @@ export function FeedHomeClient({
 
           {viewState === 'grid' && (
             <motion.div key={`grid-${filterKey}`} {...contentMotion}>
-              {isRefreshing && (
+              {isRefreshing && !(firstLoadPending && hasActiveFilter) && (
                 <div className="feed-refresh-hint" aria-live="polite">
                   <span
                     className="material-symbols-outlined feed-refresh-icon"
@@ -235,7 +239,14 @@ export function FeedHomeClient({
                   countPulse && 'is-updating',
                 )}
               >
-                {messages.sheet.itemsInArea(displayCount)}
+                {firstLoadPending && hasActiveFilter ? (
+                  <span className="inline-flex items-center gap-1.5" role="status">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-on-surface-variant motion-reduce:animate-none" aria-hidden />
+                    {searchingLabel}
+                  </span>
+                ) : (
+                  messages.sheet.itemsInArea(displayCount)
+                )}
               </p>
 
               <section className="grid grid-cols-2 gap-x-space-md gap-y-space-lg sm:grid-cols-3 lg:grid-cols-4">

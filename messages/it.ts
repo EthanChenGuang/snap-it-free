@@ -49,6 +49,8 @@ export const messages = {
     refreshing: 'Aggiornamento…',
   },
   feed: {
+    searching: 'Ricerca di oggetti gratis…',
+    searchingIn: (city: string) => `Ricerca di oggetti gratis a ${city}…`,
     searchPlaceholder: 'Cerca oggetti…',
     openFilters: 'Filtri',
     openSelectLocation: 'Scegli posizione di navigazione',

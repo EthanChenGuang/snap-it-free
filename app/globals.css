@@ -3050,3 +3050,58 @@ body {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+/* Feed "searching" state (components/listings/FeedSearching.tsx) */
+.feed-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface-container-high);
+}
+.feed-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
+  animation: feed-skeleton-sweep 1.4s ease-in-out infinite;
+}
+.dark .feed-skeleton::after {
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.08), transparent);
+}
+@keyframes feed-skeleton-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+.feed-searching-lens .material-symbols-outlined {
+  animation: feed-searching-lens 1.6s ease-in-out infinite;
+}
+@keyframes feed-searching-lens {
+  0%,
+  100% {
+    transform: translate(-1px, 0) rotate(-8deg);
+  }
+  50% {
+    transform: translate(2px, -1px) rotate(8deg);
+  }
+}
+.feed-searching-ring {
+  animation: feed-searching-ring 1.6s ease-out infinite;
+}
+@keyframes feed-searching-ring {
+  from {
+    transform: scale(0.7);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .feed-skeleton::after,
+  .feed-searching-lens .material-symbols-outlined,
+  .feed-searching-ring {
+    animation: none;
+  }
+}
