@@ -46,3 +46,18 @@ Typography: bold sans + italic serif accent word; light blue-grey background wit
 - Blurred bait feed whose items vanish after payment.
 - Ambiguous trial / plan framing; price and auto-renewal terms must be stated next to the CTA.
 - Red theme + floating capsule nav (PRODUCT.md: Snag informs interaction only).
+
+## 5. Re-check 2026-11-04 (Claude Code)
+
+- **Binary not obtained.** APK mirrors (APKPure, APKCombo, APKFab, etc.) sit behind Cloudflare bot checks or are
+  unreachable from the cloud session; bypassing bot checks is not allowed. APKMirror has no listing. iOS binaries are
+  encrypted. So no decompile was done. To go deeper, Guang can screen-record Snag's onboarding on his phone, or pull
+  the APK from his own device (`adb shell pm path com.improvement.snag` + `adb pull`) for a jadx pass here.
+- **Public material unchanged in substance.** App Store 1.0.44 (2026-08-24) now shows 4 frames (intro, discover,
+  favourites, alerts); Google Play (updated 2026-07-10) shows the same 6 frames as §1. Description unchanged.
+- **Coverage vs our flow** (`lib/paywall/onboarding-flow.ts`): intro → hook; discover → how; 80,000+/week → weekly;
+  map pins → map (city-level, ob5); favourites → favorites; alerts → alerts (lock-screen mock); location/teaser →
+  city + preview; paywall → paywall. **Only gap: "Trusted by people just like you" (testimonial wall).** We have no
+  real reviews, so fake ones stay out (EU UCPD/Omnibus). Proposed honest stand-in: a "why you can trust it" screen
+  built from real facts, pending Guang's OK and a Stitch design (Stitch MCP not connected in this session).
+- Rating prompt before use stays rejected.
