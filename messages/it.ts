@@ -555,18 +555,18 @@ export const messages = {
     },
   },
   emailCode: {
-    send: 'Inviami un codice di accesso',
+    send: 'Inviami un link di accesso',
     sending: 'Invio…',
-    sent: (email: string) => `Abbiamo inviato un’email a ${email}. Inserisci qui il codice: funziona in qualsiasi browser.`,
-    codeLabel: 'Codice dell’email',
+    sent: (email: string) => `Abbiamo inviato un’email a ${email}. Tocca il link nell’email per accedere. Se l’email mostra un codice, puoi inserirlo qui.`,
+    codeLabel: 'Codice dell’email (se presente)',
     verify: 'Accedi',
     verifying: 'Accesso…',
     sendError: 'Impossibile inviare l’email. Controlla l’indirizzo e riprova.',
     codeError: 'Codice non valido. Controllalo o richiedine uno nuovo.',
     changeEmail: 'Usa un’altra email',
-    resend: 'Invia un nuovo codice',
+    resend: 'Invia una nuova email',
     inAppBrowser:
-      'Sei nel browser interno di un’app, dove l’accesso con Google potrebbe non funzionare. Usa il codice via email o apri la pagina in Safari o Chrome.',
+      'Sei nel browser interno di un’app, dove l’accesso con Google potrebbe non funzionare. Usa il link via email o apri la pagina in Safari o Chrome.',
   },
   paywall: {
     close: 'Chiudi',

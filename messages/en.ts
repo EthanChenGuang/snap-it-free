@@ -545,18 +545,18 @@ export const messages: Messages = {
     },
   },
   emailCode: {
-    send: 'Email me a sign-in code',
+    send: 'Email me a sign-in link',
     sending: 'Sending…',
-    sent: (email: string) => `We sent an email to ${email}. Enter the code from it below — this works in any browser.`,
-    codeLabel: 'Code from the email',
+    sent: (email: string) => `We sent an email to ${email}. Tap the link in it to sign in. If the email shows a code, you can enter it below instead.`,
+    codeLabel: 'Code from the email (if it has one)',
     verify: 'Sign in',
     verifying: 'Signing in…',
     sendError: 'Couldn’t send the email. Check the address and try again.',
     codeError: 'That code didn’t work. Check it, or request a new one.',
     changeEmail: 'Use a different email',
-    resend: 'Send a new code',
+    resend: 'Send a new email',
     inAppBrowser:
-      'You’re in an app’s built-in browser, where Google sign-in may not work. Use the email code, or open this page in Safari or Chrome.',
+      'You’re in an app’s built-in browser, where Google sign-in may not work. Use the email link, or open this page in Safari or Chrome.',
   },
   paywall: {
     close: 'Close',

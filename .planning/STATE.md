@@ -51,7 +51,7 @@ None in `.planning/todos/pending/`.
 - Onboarding downloads the full active set (~41k row objects seen across its fetches) on a phone; worth a count/sample RPC later.
 - Preview `drive.mjs` needs `VERCEL_SHARE_TOKEN` (env only, never a file) and `PLAYWRIGHT_CORE=/opt/node-tools/node_modules/playwright` in cloud sessions.
 - Preview shares production Supabase (`wnerhajyjjmrtsdmdpzu`): no sign-ups, no remote migrations without Guang.
-- Supabase **production** email-template OTP (`{{ .Token }}` on Magic Link / Confirm): **authorized by Guang 2026-11-04**, not yet applied — the cloud session has no Supabase access token. Needs `SUPABASE_ACCESS_TOKEN` in the environment, or Guang adds the line in the dashboard.
+- Supabase production emails carry only the link (no code); body is not editable without custom SMTP. Pre-launch decision (HANDOFF §3.3). App copy no longer promises a code.
 - Local `.env.local` historically lacked real Supabase public vars (older local drive 59/61 + 3 SKIP). Post-ob4 local baseline was not re-recorded.
 
 ## Deferred Items
