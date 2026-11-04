@@ -6,8 +6,10 @@ Phases 2 and 3 are **complete and verified** on Preview @ 73ca623 (`UAT.md` in e
 | # | Phase | Status | Notes |
 |---|-------|--------|-------|
 | 1 | Consent-gated onboarding funnel analytics | deferred | Needs Guang: provider + cookie-consent. Out of this run. |
-| 2 | Post-purchase "You're in" + choices applied | complete | PROPOSAL P10. Banner/toast later removed in d79b531 (confirm Guang's intent). Verified (UAT.md). Guang made one annual Stripe test purchase on 2026-10-31 (return page + webhooks). Webhook-only unlock still unverified. |
+| 2 | Post-purchase "You're in" + choices applied | complete | PROPOSAL P10. Banner/toast later removed in d79b531 (Guang's intent, confirmed 2026-11-04). Verified (UAT.md). Guang made one annual Stripe test purchase on 2026-10-31 (return page + webhooks). Webhook-only unlock still unverified. |
 | 3 | Locked feed: search and filters stay usable | complete | PROPOSAL P10 soften. Lock only detail + favorites. Verified (UAT.md). |
 | 4 | Server-side marketing opt-in | deferred | Needs DB column + remote migration. Ask Guang. |
 
-Open (not phases here): onboarding map screen has only city-centre coordinates (Guang to choose city-level map or drop it); webhook-only unlock test (new test account, Guang's OK); Supabase production email OTP (status unknown, needs Guang); teaser migration 045; 7-day trial A/B; landing this branch on `main` (Guang's call). Migration 044 + `NEXT_PUBLIC_PAYWALL_ENABLED=true` ship together — **Guang only**.
+Done outside phases: quick 261104-ob5 — city-level onboarding map (Guang chose it 2026-11-04) and onboarding every visit for non-subscribers on Preview. Phase 2 note: removing the banner was Guang's intent (confirmed 2026-11-04).
+
+Open (not phases here): webhook-only unlock test (new test account, Guang's OK); Supabase production email OTP (authorized 2026-11-04; needs a Supabase access token in the session); teaser migration 045; 7-day trial A/B; landing this branch on `main` (Guang's call). Migration 044 + `NEXT_PUBLIC_PAYWALL_ENABLED=true` ship together — **Guang only**.

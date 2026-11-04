@@ -134,7 +134,7 @@ export function CityMapView({ map, cityLabels }: { map: CityMap; cityLabels: Rec
   // Label the busiest cities; flip a label below its bubble when it would sit on an earlier one.
   const labels: Array<{ city: ConsumerCityKey; x: number; y: number; below: boolean; count: number }> = [];
   for (const bubble of bubbles.slice(0, LABELLED_CITIES)) {
-    const clash = labels.some((label) => Math.abs(label.x - bubble.x) < 120 && Math.abs(label.y - bubble.y) < 50);
+    const clash = labels.some((label) => Math.abs(label.x - bubble.x) < 120 && Math.abs(label.y - bubble.y) < 26);
     labels.push({ city: bubble.city, x: bubble.x, y: bubble.y + (clash ? bubble.r : -bubble.r), below: clash, count: bubble.count });
   }
 

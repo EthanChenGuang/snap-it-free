@@ -1,13 +1,13 @@
-# HANDOFF: `preview/recent-changes` (refreshed 2026-11-03)
+# HANDOFF: `preview/recent-changes` (refreshed 2026-11-04)
 
 Canonical with `.planning/STATE.md` and `.planning/ROADMAP.md`. `.planning/.continue-here.md` is the resume checkpoint; if it disagrees, trust this file and STATE.
 
 ## 1. Context
 
-- **Working branch:** `preview/recent-changes` (newer rule from `.planning/.continue-here.md`). Do not treat `feat/onboarding-snag` as current.
+- **Working branch:** `preview/recent-changes` — **the only working branch** (Guang, 2026-11-04). Do not create or push other branches, even if a session is assigned one.
 - **History already in this branch:** `feat/onboarding-snag`, PR #7 (`feat/onboarding-paywall`), PR #8 (`feat/stripe-subscriptions`). They are merged here; they are **not** landed on `main`. How (or whether) this stack reaches `main` is Guang's call.
-- **Expected git head at last code session:** `068753c` (Claude Code, 2026-10-31). Docs refresh sits on top of that.
-- **Live Preview = 73ca623** (`dpl_2ZA6x7HWrP4SDSYoK8dSefciCyW3`, auto-deployed on push; includes f8d5589). Any push to this branch deploys a Preview — mind the Hobby cap of 100/day.
+- **Latest code:** quick 261104-ob5 (`87ac2ca` + label fix), Claude Code 2026-11-04.
+- **Live Preview = branch head** (auto-deployed on push). Any push to this branch deploys a Preview — mind the Hobby cap of 100/day.
 - **Goal:** Snag-modelled onboarding that drives sign-up and paid conversion, honestly. Flow now includes weekly / map / favorites (quick 261031-ob4) plus the earlier 10-screen spine.
 - **Design docs:** `.planning/onboarding-snag/{PROPOSAL,SPEC}.md`; `.planning/quick/261028-ob2-*`, `261030-ob3-*`, `261031-ob4-*`; `.planning/phases/02-youre-in-after-purchase/` and `03-locked-feed-search-filters/` (PLAN + SUMMARY only; **no UAT/VERIFICATION**).
 - **Stitch:** project `9058658661756179433` was used (Lagoon Pop + Snag gap screens). Stitch design work is in-scope; do not claim there is no Stitch project or that Stitch must not be called.
@@ -20,21 +20,22 @@ On `preview/recent-changes` (on top of `main` @ 2373352), including history from
 
 - Flagged onboarding + hard paywall, Stripe test-mode Checkout/Portal/webhook, subscriptions table, 3-day `past_due` grace, migration **044** (not applied to the shared DB without Guang), subscription Terms/Privacy (flag-on builds).
 - Snag-modelled onboarding UI (ob2), Lagoon Pop redesign from Stitch (ob3), Snag weekly/map/favorites + listing sources hidden (ob4, **ef22e5f**, on Preview).
-- **f8d5589** map pin spread (~100 m cells) + weekly **per-day average** / busiest-day highlight: **pushed, not on Preview**.
+- **f8d5589** weekly **per-day average** / busiest-day highlight (live). Its pin spread was replaced by ob5.
+- **Quick 261104-ob5:** onboarding map is **city-level** (one bubble per city, real active counts; only Subito is enabled and it has no per-item coordinates). Copy no longer claims per-item pins or distance on every card. On non-production builds a **non-subscriber sees onboarding on every visit** (production keeps once per browser).
 - Inline paywall sign-in (Google + email code), "already subscribed" loop fix, switch-account ("Not you?"), fast first feed load + searching state (ca0464d).
 - Stripe webhook endpoint retargeted from the old `feat/stripe-subscriptions` alias to this Preview alias (automation bypass already on). **One successful test-mode delivery** 2026-10-31. Signing secret unchanged; no webhook redeploy needed for the URL retarget.
 - Guang made **one real annual Stripe test purchase** on 2026-10-31. Unlock went through the **return page and the webhooks**. The **webhook-only** path (pay, close tab, never hit `success_url`) is still unverified.
-- **d79b531** dropped the post-checkout "You're in" banner and toast; `?checkout=` is still stripped. Confirm this was Guang's intent (open question).
+- **d79b531** dropped the post-checkout "You're in" banner and toast; `?checkout=` is still stripped. **Guang's intent** (confirmed 2026-11-04).
 - Repo email templates with sign-in code (`c6b410b`, `supabase/templates/*`) for local/preview-branch config. **Production dashboard OTP line status unknown.**
-- Phases **2** and **3** marked complete in ROADMAP/SUMMARYs. **No** `VERIFICATION.md` or `UAT.md`. Last recorded Preview `drive.mjs onboarding` at ef22e5f: **69/69**.
+- Phases **2** and **3** complete and verified (`UAT.md`). Last Preview `drive.mjs` (2026-11-04, ob5): onboarding **70/70**, persist **9/9**.
 
 No remote migration, no production deploy, no `main` push from this work.
 
 ## 3. Next (ordered)
 
-1. ~~Redeploy + verify phases 2–3~~ **Done 2026-11-04**: drive.mjs 69/69 on 73ca623, `UAT.md` in both phases. The share token comes from Vercel MCP `get_access_to_vercel_url` (agents can mint it; env only, never committed). **New:** the onboarding map screen shows one pin because every listing carries its city-centre coordinate — Guang to choose a city-level map (bubbles per city, real counts) or dropping the screen; also reword "Distance on every card".
-2. **Webhook-only unlock test** (Stripe test card `4242 4242 4242 4242`) on a **new never-subscribed test account**. Close the tab on Stripe's success screen; reopen Preview; feed must unlock from the webhook alone. **Needs Guang's OK** (shared DB — no sign-ups without him).
-3. **Supabase email OTP** (Dashboard → Authentication → Email Templates → Magic Link / Confirm): additive `<p>Or enter this code in the app: <strong>{{ .Token }}</strong></p>` under the existing link. Affects **production** emails. Status of the live templates is **unknown**; **needs Guang** (or a session he authorizes to PATCH project `wnerhajyjjmrtsdmdpzu` and nothing else).
+1. ~~Redeploy + verify phases 2–3~~ **Done 2026-11-04** (`UAT.md`). ~~Map screen~~ **Done 2026-11-04** (ob5, city-level; Guang's choice).
+2. **Webhook-only unlock test** (Stripe test card `4242 4242 4242 4242`). Recommended: **Guang runs it himself** with a fresh `+alias` of his own Gmail (sign-up needs the emailed code, which a cloud session cannot read). Sign up on the Preview, pay with 4242, **close the tab on Stripe's success screen**, reopen the Preview: the feed must unlock from the webhook alone. Then an agent checks the Stripe test-mode event + webhook delivery, and Guang deletes the test account in Settings. One extra user row in the shared DB, removed afterwards.
+3. **Supabase email OTP** (Dashboard → Authentication → Email Templates → Magic Link / Confirm): additive `<p>Or enter this code in the app: <strong>{{ .Token }}</strong></p>` under the existing link. **Authorized by Guang 2026-11-04.** Not applied yet: the session needs a Supabase personal access token (`SUPABASE_ACCESS_TOKEN`, env only) to PATCH project `wnerhajyjjmrtsdmdpzu` auth config — read the current templates first, append only. Or Guang adds it at https://supabase.com/dashboard/project/wnerhajyjjmrtsdmdpzu/auth/templates.
 4. **Deferred product work needs Guang's decision before any plan/execute:** phase 1 (consent-gated onboarding analytics), phase 4 (server-side marketing opt-in), teaser **migration 045**, 7-day trial A/B (post-launch only).
 5. **Merge strategy to `main` is Guang's call.** Do not merge this branch, PR #7, or PR #8 onto `main` unless he says so. Do not open a landing PR unless he asks.
 6. **Go-live (Guang only):** migration **044** and `NEXT_PUBLIC_PAYWALL_ENABLED=true` ship **together**. Then operator scripts with the service role. Never apply 044 or flip the flag from an agent session.
@@ -52,9 +53,10 @@ node .claude/skills/verify-snap-it-free/scripts/drive.mjs onboarding --url http:
 
 # Vercel Preview (payments on). Share token via env ONLY, never in a file or commit.
 # After HEAD is actually deployed (not before — live alias may still be ef22e5f):
+# Cloud sessions: also set PLAYWRIGHT_CORE=/opt/node-tools/node_modules/playwright
 VERCEL_SHARE_TOKEN=<token from Guang> node .claude/skills/verify-snap-it-free/scripts/drive.mjs onboarding \
   --url https://zerodollar-git-preview-2efe87-chenguangregis-gmailcoms-projects.vercel.app --out /tmp/ev-preview
-# Last recorded at ef22e5f: RESULT onboarding 69/69. Re-run after f8d5589 is live; check weekly average + spread map pins.
+# Last recorded 2026-11-04 (ob5): onboarding 70/70, persist 9/9.
 ```
 
 Then `/gsd-verify-work` for phases 2 and 3 so `UAT.md` exists. Preview is Vercel-auth protected; regenerate a share link with Vercel MCP `get_access_to_vercel_url` if the old one expired.
@@ -79,13 +81,13 @@ Then `/gsd-verify-work` for phases 2 and 3 so `UAT.md` exists. Preview is Vercel
 
 ## 6. Open questions for Guang
 
-1. **Was removing the "You're in" banner/toast in d79b531 Guang's intent?** The commit message says he found the banner annoying; confirm that still stands (phase 2 SUMMARY still describes the old toast).
-2. **Confirm `preview/recent-changes` as the single working branch** (replacing `feat/onboarding-snag` as the place new work goes).
+1. ~~Banner removal intent~~ — yes (2026-11-04).
+2. ~~Single working branch~~ — yes, `preview/recent-changes` only (2026-11-04).
 3. Analytics provider and cookie-consent approach for onboarding funnel events (deferred phase 1).
 4. Approve a migration to store marketing opt-in server-side (deferred phase 4) and/or teaser migration 045? Applying either to the shared DB needs his explicit OK.
-5. Allow one new throwaway test account on the shared DB for the **webhook-only** Stripe test-mode purchase (close tab after 4242)?
+5. Webhook-only test: Guang asked for a recommendation (2026-11-04) — he runs it himself with a +alias account; see §3.2. Awaiting his go.
 6. How should this stack land on `main`? Preview already contains #8 → #7 → onboarding-snag.
 7. Legal review of the subscription Terms/Privacy copy is still pending (the 14-day clause stays unwritten).
 8. `VERCEL_SHARE_TOKEN` for Preview `drive.mjs` (env only, never in the repo).
-9. Production Supabase Magic Link / Confirm templates: is the OTP `{{ .Token }}` line live? (Affects production emails; additive only if missing.)
+9. ~~OTP line in production templates~~ — authorized 2026-11-04; needs a Supabase access token in the session (§3.3).
 10. Revoke the leaked Playwright session refresh token (PR #6 follow-up); decide on history purge.
