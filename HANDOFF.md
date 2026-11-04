@@ -7,7 +7,7 @@ Canonical with `.planning/STATE.md` and `.planning/ROADMAP.md`. `.planning/.cont
 - **Working branch:** `preview/recent-changes` (newer rule from `.planning/.continue-here.md`). Do not treat `feat/onboarding-snag` as current.
 - **History already in this branch:** `feat/onboarding-snag`, PR #7 (`feat/onboarding-paywall`), PR #8 (`feat/stripe-subscriptions`). They are merged here; they are **not** landed on `main`. How (or whether) this stack reaches `main` is Guang's call.
 - **Expected git head at last code session:** `068753c` (Claude Code, 2026-10-31). Docs refresh sits on top of that.
-- **Live Preview is behind HEAD.** Latest READY deploy is **ef22e5f** (`dpl_Ar2RNFmuPnJVkN6gtYTiaBZPpbw9`). **f8d5589** and **068753c** have no Vercel deployments — Hobby returned `Deployment rate limited — retry in 24 hours`.
+- **Live Preview = 73ca623** (`dpl_2ZA6x7HWrP4SDSYoK8dSefciCyW3`, auto-deployed on push; includes f8d5589). Any push to this branch deploys a Preview — mind the Hobby cap of 100/day.
 - **Goal:** Snag-modelled onboarding that drives sign-up and paid conversion, honestly. Flow now includes weekly / map / favorites (quick 261031-ob4) plus the earlier 10-screen spine.
 - **Design docs:** `.planning/onboarding-snag/{PROPOSAL,SPEC}.md`; `.planning/quick/261028-ob2-*`, `261030-ob3-*`, `261031-ob4-*`; `.planning/phases/02-youre-in-after-purchase/` and `03-locked-feed-search-filters/` (PLAN + SUMMARY only; **no UAT/VERIFICATION**).
 - **Stitch:** project `9058658661756179433` was used (Lagoon Pop + Snag gap screens). Stitch design work is in-scope; do not claim there is no Stitch project or that Stitch must not be called.
@@ -32,7 +32,7 @@ No remote migration, no production deploy, no `main` push from this work.
 
 ## 3. Next (ordered)
 
-1. **Redeploy latest + `/gsd-verify-work` on Preview** with `.claude/skills/verify-snap-it-free/scripts/drive.mjs`. Needs `VERCEL_SHARE_TOKEN` from Guang (env only). After the Hobby 24h cap, `create_deployment` for `preview/recent-changes` at HEAD (include f8d5589). Confirm GitHub/Vercel status Ready, then verify map pins + weekly daily average. Do **not** deploy production.
+1. ~~Redeploy + verify phases 2–3~~ **Done 2026-11-04**: drive.mjs 69/69 on 73ca623, `UAT.md` in both phases. The share token comes from Vercel MCP `get_access_to_vercel_url` (agents can mint it; env only, never committed). **New:** the onboarding map screen shows one pin because every listing carries its city-centre coordinate — Guang to choose a city-level map (bubbles per city, real counts) or dropping the screen; also reword "Distance on every card".
 2. **Webhook-only unlock test** (Stripe test card `4242 4242 4242 4242`) on a **new never-subscribed test account**. Close the tab on Stripe's success screen; reopen Preview; feed must unlock from the webhook alone. **Needs Guang's OK** (shared DB — no sign-ups without him).
 3. **Supabase email OTP** (Dashboard → Authentication → Email Templates → Magic Link / Confirm): additive `<p>Or enter this code in the app: <strong>{{ .Token }}</strong></p>` under the existing link. Affects **production** emails. Status of the live templates is **unknown**; **needs Guang** (or a session he authorizes to PATCH project `wnerhajyjjmrtsdmdpzu` and nothing else).
 4. **Deferred product work needs Guang's decision before any plan/execute:** phase 1 (consent-gated onboarding analytics), phase 4 (server-side marketing opt-in), teaser **migration 045**, 7-day trial A/B (post-launch only).

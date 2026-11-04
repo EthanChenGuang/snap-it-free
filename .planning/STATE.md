@@ -1,6 +1,6 @@
 ---
 gsd_state_version: '1.0'
-status: verifying
+status: in_progress
 milestone: Snag-modelled onboarding follow-ups
 milestone_name: Snag-modelled onboarding follow-ups
 progress:
@@ -18,14 +18,14 @@ progress:
 See: `.planning/ROADMAP.md`, `.planning/onboarding-snag/`, `HANDOFF.md` (no `PROJECT.md` in this repo).
 
 **Core value:** Honest Snag-modelled onboarding that drives sign-up and paid conversion for Snap-it-free (zerodollar), with every number from real data.
-**Current focus:** Redeploy HEAD to Preview, then `/gsd-verify-work` for phases 2–3 (no UAT files yet).
+**Current focus:** Phases 2–3 verified on Preview (UAT.md, 2026-11-04). Open: onboarding map screen has no real per-item locations (see Blockers).
 
 ## Current Position
 
-Phase: 2–3 of 4 complete in code; **verify pending** (no `VERIFICATION.md` / `UAT.md` under `.planning/phases/02-*` or `03-*`)
+Phase: 2–3 of 4 complete **and verified** (`02-*/UAT.md`, `03-*/UAT.md`)
 Plan: 1 of 1 in each completed phase
-Status: verifying
-Last activity: 2026-11-03 — planning docs refreshed to `preview/recent-changes` @ 068753c
+Status: in_progress (phases 1 and 4 deferred; follow-ups below)
+Last activity: 2026-11-04 — Preview @ 73ca623 (includes f8d5589) deployed automatically; drive.mjs 69/69
 
 Progress: [█████░░░░░] 50% (phases 1 and 4 deferred)
 
@@ -45,7 +45,9 @@ None in `.planning/todos/pending/`.
 
 ### Blockers/Concerns
 
-- **f8d5589** (map pin spread, weekly per-day average) and **068753c** are pushed but **not deployed**. Vercel returned `Deployment rate limited — retry in 24 hours` (Hobby daily cap). Latest READY Preview is **ef22e5f** (`dpl_Ar2RNFmuPnJVkN6gtYTiaBZPpbw9`).
+- Resolved 2026-11-04: Preview now runs **73ca623** (`dpl_2ZA6x7HWrP4SDSYoK8dSefciCyW3`), which includes f8d5589. Weekly per-day average is live.
+- **Map screen (ob4) shows one pin.** Probe 2026-11-04: all 41k active rows carry their **city-centre** coordinate (one distinct point per city), so there are no per-item positions to spread. "Every item pinned on the map" / "Distance on every card" overstate what the data has. Needs Guang's choice: city-level map (one bubble per city, real counts) or drop the map screen. Same caveat applies to distance on feed cards.
+- Onboarding downloads the full active set (~41k row objects seen across its fetches) on a phone; worth a count/sample RPC later.
 - Preview `drive.mjs` needs `VERCEL_SHARE_TOKEN` (env only, never a file).
 - Preview shares production Supabase (`wnerhajyjjmrtsdmdpzu`): no sign-ups, no remote migrations without Guang.
 - Supabase **production** email-template OTP (`{{ .Token }}` on Magic Link / Confirm) status **unknown**. Repo templates exist (`c6b410b`, local/preview). Affects production emails; needs Guang.
