@@ -183,7 +183,8 @@ async function onboarding(browser) {
   await page.getByTestId('onboarding-continue').click();
   await settle(page, 1500);
   check(await screenIs(page, 'map'), 'step 4 map');
-  check((await page.getByTestId('onboarding-map').count()) === 1, 'map shows real pins');
+  check((await page.getByTestId('onboarding-map').count()) === 1, 'map shows the city-level map');
+  check((await page.getByTestId('map-city-bubble').count()) >= 1, 'map draws one bubble per city with real counts');
   await shot(page, '02c-map');
   await page.getByTestId('onboarding-continue').click();
   await settle(page, 1200);
@@ -480,7 +481,14 @@ async function persist(browser) {
   await settle(page, 1000);
   await page.reload({ waitUntil: 'networkidle' });
   await settle(page, 2500);
-  check((await overlay(page).count()) === 0, 'flag on: onboarding not shown again after completion + reload');
+  // Non-production rule (2026-11-04): a non-subscriber sees onboarding on every visit. Production keeps once-per-browser (unit-tested).
+  check((await overlay(page).count()) === 1, 'flag on (Preview): onboarding shows again on reload for a non-subscriber');
+  await page.getByRole('button', { name: 'Skip' }).click();
+  await settle(page);
+  await page.getByTestId('preview-see-plans').click();
+  await settle(page);
+  await page.getByTestId('paywall-close').click();
+  await settle(page, 1000);
   check(await page.getByTestId('locked-feed').isVisible(), 'flag on: non-subscriber still sees the locked feed after reload');
   check((await page.locator('a[href^="/listing/"]').count()) === 0, 'flag on: no listing links for a non-subscriber');
   const html = await (await page.request.get(`${url}/`)).text();

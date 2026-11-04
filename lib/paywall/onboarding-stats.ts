@@ -1,6 +1,5 @@
-import type { ConsumerCityKey } from '@/lib/geo/italian-cities';
+import { getCityByConsumerKey, type ConsumerCityKey } from '@/lib/geo/italian-cities';
 import { listingConsumerCity } from '@/lib/listings/filters';
-import { listingPhotoUrls } from '@/lib/listings/listing-photos';
 import type { ListingRow } from '@/lib/listings/types';
 
 /**
@@ -68,82 +67,35 @@ export function activeCityCount(rows: readonly ListingRow[]): number {
   return cities.size;
 }
 
-export type MapPin = {
-  id: string;
-  /** 0–100, left to right. */
-  x: number;
-  /** 0–100, top to bottom (north up). */
-  y: number;
-  photoUrl: string;
-  listing: ListingRow;
+export type CityBubble = {
+  city: ConsumerCityKey;
+  /** Active rows whose city is this one. */
+  count: number;
+  /** The catalog city centre (bbox centre), [lng, lat]. */
+  lngLat: readonly [number, number];
 };
 
-export type MapTeaser = { city: ConsumerCityKey; total: number; pins: MapPin[] };
-
-function hasCoords(row: ListingRow): row is ListingRow & { lat: number; lng: number } {
-  return typeof row.lat === 'number' && typeof row.lng === 'number' && Number.isFinite(row.lat) && Number.isFinite(row.lng);
-}
+export type CityMap = { total: number; cities: CityBubble[] };
 
 /**
- * The map screen: the city with the most distinct item locations, and up to `limit` of its newest
- * rows with a photo at distinct spots, placed by their real relative position (equirectangular, longitude scaled by cos(lat), fitted
- * into a padded box). `total` is every located row in that city, not just the pins drawn.
+ * The map screen at city level: every row sits at its city centre (Subito has no per-item
+ * coordinates), so we show one bubble per city sized by its real active count, busiest first.
+ * `total` is the sum of the counted rows.
  */
-export function buildMapTeaser(rows: readonly ListingRow[], limit = 12, padding = 10): MapTeaser | null {
-  const byCity = new Map<ConsumerCityKey, Array<ListingRow & { lat: number; lng: number }>>();
+export function buildCityMap(rows: readonly ListingRow[]): CityMap | null {
+  const counts = new Map<ConsumerCityKey, number>();
   for (const row of rows) {
-    if (!hasCoords(row)) continue;
     const key = listingConsumerCity(row);
-    if (!key) continue;
-    const list = byCity.get(key) ?? [];
-    list.push(row);
-    byCity.set(key, list);
+    if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
   }
-  // Many rows are geocoded to a city centroid, so pins would stack on one spot. Keep one row per
-  // ~100 m cell (the newest with a photo) and pick the city with the most distinct cells.
-  const cellKey = (row: { lat: number; lng: number }) => `${row.lat.toFixed(3)},${row.lng.toFixed(3)}`;
-  const distinctNewest = (list: Array<ListingRow & { lat: number; lng: number }>) => {
-    const seen = new Set<string>();
-    return [...list]
-      .sort((a, b) => (postedMs(b) ?? 0) - (postedMs(a) ?? 0))
-      .flatMap((row) => {
-        const photoUrl = listingPhotoUrls(row)[0];
-        const cell = cellKey(row);
-        if (!photoUrl || seen.has(cell)) return [];
-        seen.add(cell);
-        return [{ row, photoUrl }];
-      });
-  };
-  let best: ConsumerCityKey | null = null;
-  let bestPins: ReturnType<typeof distinctNewest> = [];
-  for (const [key, list] of byCity) {
-    const candidates = distinctNewest(list);
-    if (candidates.length > bestPins.length) {
-      best = key;
-      bestPins = candidates;
-    }
+  const cities: CityBubble[] = [];
+  for (const [city, count] of counts) {
+    const entry = getCityByConsumerKey(city);
+    if (!entry) continue;
+    const { latMin, latMax, lngMin, lngMax } = entry.bbox;
+    cities.push({ city, count, lngLat: [(lngMin + lngMax) / 2, (latMin + latMax) / 2] });
   }
-  if (best === null || bestPins.length === 0) return null;
-  const located = byCity.get(best) ?? [];
-  const newest = bestPins.slice(0, limit);
-
-  const meanLat = newest.reduce((sum, { row }) => sum + row.lat, 0) / newest.length;
-  const kx = Math.cos((meanLat * Math.PI) / 180);
-  const xs = newest.map(({ row }) => row.lng * kx);
-  const ys = newest.map(({ row }) => row.lat);
-  const [minX, maxX, minY, maxY] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
-  const span = Math.max(maxX - minX, maxY - minY) || 1;
-  const inner = 100 - 2 * padding;
-  // Keep the aspect: centre the shorter axis.
-  const offX = (inner - ((maxX - minX) / span) * inner) / 2;
-  const offY = (inner - ((maxY - minY) / span) * inner) / 2;
-
-  const pins = newest.map(({ row, photoUrl }, index) => ({
-    id: row.id,
-    x: padding + offX + ((xs[index] - minX) / span) * inner,
-    y: padding + offY + ((maxY - ys[index]) / span) * inner,
-    photoUrl,
-    listing: row,
-  }));
-  return { city: best, total: located.length, pins };
+  if (cities.length === 0) return null;
+  cities.sort((a, b) => b.count - a.count || a.city.localeCompare(b.city));
+  return { total: cities.reduce((sum, bubble) => sum + bubble.count, 0), cities };
 }

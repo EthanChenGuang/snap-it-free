@@ -442,7 +442,7 @@ export const messages = {
       emphasis: 'un solo',
       rows: [
         'Regali appena pubblicati, dai più recenti',
-        'Distanza e ora di pubblicazione su ogni scheda',
+        'Città e ora di pubblicazione su ogni scheda',
         'Mappa e preferiti quando servono',
       ],
     },
@@ -459,12 +459,12 @@ export const messages = {
       unavailable: 'Stiamo caricando i numeri. Puoi continuare.',
     },
     map: {
-      title: 'Scopri cosa c’è di gratis intorno a te',
-      emphasis: 'intorno a te',
-      body: 'Gli oggetti con una posizione compaiono come puntine sulla mappa.',
-      pinsLine: (count: number, city: string) =>
-        count === 1 ? `1 oggetto sulla mappa a ${city} adesso` : `${count.toLocaleString('it-IT')} oggetti sulla mappa a ${city} adesso`,
-      rows: ['Ogni oggetto ha la sua puntina', 'Distanza su ogni scheda', 'Tocca una puntina per vedere la foto'],
+      title: 'Scopri dove sono le cose gratis',
+      emphasis: 'cose gratis',
+      body: 'Tutte le città che copriamo, in base a quanti oggetti gratis ci sono adesso.',
+      pinsLine: (count: number, cities: number) =>
+        `${count.toLocaleString('it-IT')} ${count === 1 ? 'oggetto gratis' : 'oggetti gratis'} in ${cities === 1 ? '1 città' : `${cities} città`} adesso`,
+      rows: ['Vedi quali città ne hanno di più', 'Filtra il feed per città con un tocco', 'Tocca un gruppo sulla mappa per vedere le foto'],
     },
     favorites: {
       title: 'Salva i tuoi preferiti per dopo',

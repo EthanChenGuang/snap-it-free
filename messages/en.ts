@@ -432,7 +432,7 @@ export const messages: Messages = {
       emphasis: 'one',
       rows: [
         'Fresh giveaways, newest first',
-        'Distance and posting time on every card',
+        'City and posting time on every card',
         'Map and favourites when you need them',
       ],
     },
@@ -449,12 +449,12 @@ export const messages: Messages = {
       unavailable: 'Live numbers are loading. You can keep going.',
     },
     map: {
-      title: 'See what’s free around you',
-      emphasis: 'around you',
-      body: 'Items with a location show up as pins on the map.',
-      pinsLine: (count: number, city: string) =>
-        count === 1 ? `1 item on the map in ${city} right now` : `${count.toLocaleString('en-US')} items on the map in ${city} right now`,
-      rows: ['Every item pinned on the map', 'Distance on every card', 'Tap a pin to see the photo'],
+      title: 'See where the free stuff is',
+      emphasis: 'free stuff',
+      body: 'Every city we cover, sized by how many free items it has right now.',
+      pinsLine: (count: number, cities: number) =>
+        `${count.toLocaleString('en-US')} free ${count === 1 ? 'item' : 'items'} in ${cities === 1 ? '1 city' : `${cities} cities`} right now`,
+      rows: ['See which cities have the most', 'Filter the feed by city in one tap', 'Tap a cluster on the map to see the photos'],
     },
     favorites: {
       title: 'Save your favourite finds for later',

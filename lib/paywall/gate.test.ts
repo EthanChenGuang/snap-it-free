@@ -11,6 +11,8 @@ import {
   resolveListingAccess,
   resolveOnboardingGate,
   shouldShowOnboarding,
+  isOnboardingEveryVisitEnv,
+  hasCheckoutReturnParam,
   urlWithoutForceParam,
 } from './gate';
 
@@ -70,8 +72,25 @@ describe('shouldShowOnboarding', () => {
     [{ flagEnabled: true, forced: false, completed: true }, false],
     [{ flagEnabled: false, forced: true, completed: true }, true],
     [{ flagEnabled: true, forced: true, completed: true }, true],
+    [{ flagEnabled: true, forced: false, completed: true, everyVisit: true }, true],
+    [{ flagEnabled: false, forced: false, completed: true, everyVisit: true }, false],
   ])('%o → %s', (input, expected) => {
     expect(shouldShowOnboarding(input)).toBe(expected);
+  });
+});
+
+describe('isOnboardingEveryVisitEnv', () => {
+  it('re-shows onboarding on Preview and local builds, never in production', () => {
+    expect(isOnboardingEveryVisitEnv('preview')).toBe(true);
+    expect(isOnboardingEveryVisitEnv(undefined)).toBe(true);
+    expect(isOnboardingEveryVisitEnv('production')).toBe(false);
+  });
+});
+
+describe('hasCheckoutReturnParam', () => {
+  it('detects the Stripe return param', () => {
+    expect(hasCheckoutReturnParam('?checkout=success')).toBe(true);
+    expect(hasCheckoutReturnParam('?onboarding=1')).toBe(false);
   });
 });
 

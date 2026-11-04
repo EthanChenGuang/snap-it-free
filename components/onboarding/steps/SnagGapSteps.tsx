@@ -1,20 +1,28 @@
 'use client';
 
 import { motion, useReducedMotion } from 'motion/react';
-import { useState } from 'react';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
 import { pop } from '@/components/onboarding/pop-theme';
 import { Sparkle } from '@/components/onboarding/steps/PhotoCollage';
 import { SymbolIcon } from '@/components/onboarding/SymbolIcon';
+import type { ConsumerCityKey } from '@/lib/geo/italian-cities';
+import {
+  ITALY_MAINLAND,
+  ITALY_MAP_ASPECT,
+  NEIGHBOURS,
+  outlinePath,
+  projectToFrame,
+  SARDINIA,
+} from '@/lib/geo/italy-outline';
 import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { useMessages } from '@/lib/i18n/useMessages';
 import type { ListingRow } from '@/lib/listings/types';
-import type { DailyCount, MapTeaser } from '@/lib/paywall/onboarding-stats';
+import type { CityMap, DailyCount } from '@/lib/paywall/onboarding-stats';
 import { cn } from '@/lib/utils';
 
 /**
  * Visuals for the three screens added to match Snag's onboarding shape (quick 261031-ob4):
- * weekly volume, items on a map, saving favourites. Lagoon Pop UI (Stitch project 9058658661756179433),
+ * weekly volume, items per city on a map, saving favourites. Lagoon Pop UI (Stitch project 9058658661756179433),
  * our own copy, and only real figures from the live rows. No source names anywhere.
  */
 
@@ -105,77 +113,80 @@ export function WeeklyVolume({
   );
 }
 
-/** Real pins at their real relative positions over a decorative water/land backdrop. */
-export function NearbyMap({ teaser, cityLabel }: { teaser: MapTeaser; cityLabel: string }) {
-  const { messages, language, formatRelativeTime } = useMessages();
+const MAP_W = 400;
+const MAP_H = Math.round(MAP_W / ITALY_MAP_ASPECT);
+const LABELLED_CITIES = 3;
+
+/**
+ * City-level map: listings only carry their city's centre, so we never draw per-item pins. One
+ * bubble per city, area proportional to its real active count, over a simplified Italy backdrop.
+ */
+export function CityMapView({ map, cityLabels }: { map: CityMap; cityLabels: Record<ConsumerCityKey, string> }) {
+  const { messages, language } = useMessages();
   const reduceMotion = useReducedMotion();
-  const [focusId, setFocusId] = useState(teaser.pins[0]?.id ?? null);
-  const focus = teaser.pins.find((pin) => pin.id === focusId) ?? teaser.pins[0];
+  const tag = localeTag(language);
+  const max = Math.max(1, ...map.cities.map((bubble) => bubble.count));
+  const bubbles = map.cities.map((bubble) => ({
+    ...bubble,
+    ...projectToFrame(bubble.lngLat, MAP_W, MAP_H),
+    r: 5 + Math.sqrt(bubble.count / max) * 21,
+  }));
+  // Label the busiest cities; flip a label below its bubble when it would sit on an earlier one.
+  const labels: Array<{ city: ConsumerCityKey; x: number; y: number; below: boolean; count: number }> = [];
+  for (const bubble of bubbles.slice(0, LABELLED_CITIES)) {
+    const clash = labels.some((label) => Math.abs(label.x - bubble.x) < 120 && Math.abs(label.y - bubble.y) < 50);
+    labels.push({ city: bubble.city, x: bubble.x, y: bubble.y + (clash ? bubble.r : -bubble.r), below: clash, count: bubble.count });
+  }
 
   return (
     <div data-testid="onboarding-map">
       <div className={cn('relative mt-space-lg overflow-hidden', pop.card, 'bg-[#CFEFF5]')}>
-        <div className="relative aspect-[4/3] w-full">
-          <svg viewBox="0 0 400 300" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden>
-            <path d="M-10 70 C 60 30, 140 60, 190 40 S 330 10, 410 50 V-10 H-10Z" fill="#F5EEDC" stroke="#1A1A2E" strokeOpacity="0.15" strokeWidth="2" />
-            <path d="M30 150 C 70 110, 150 120, 180 150 S 150 230, 90 225 S 0 190, 30 150Z" fill="#F5EEDC" stroke="#1A1A2E" strokeOpacity="0.15" strokeWidth="2" />
-            <path d="M220 120 C 270 90, 360 100, 380 150 S 340 230, 270 225 S 180 160, 220 120Z" fill="#F5EEDC" stroke="#1A1A2E" strokeOpacity="0.15" strokeWidth="2" />
-            <path d="M-10 270 C 80 245, 170 290, 260 262 S 380 250, 410 270 V310 H-10Z" fill="#F5EEDC" stroke="#1A1A2E" strokeOpacity="0.15" strokeWidth="2" />
-            <path d="M0 105 C 120 95, 250 210, 400 200" stroke="#9DD6E2" strokeWidth="6" strokeDasharray="10 10" fill="none" />
+        <div className="relative w-full" style={{ aspectRatio: `${MAP_W} / ${MAP_H}` }}>
+          <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="absolute inset-0 h-full w-full" aria-hidden>
+            {NEIGHBOURS.map((points, index) => (
+              <path key={index} d={outlinePath(points, MAP_W, MAP_H)} fill="#E6E1D3" />
+            ))}
+            <path d={outlinePath(SARDINIA, MAP_W, MAP_H)} fill="#F5EEDC" stroke="#1A1A2E" strokeOpacity="0.2" strokeWidth="1.5" />
+            <path d={outlinePath(ITALY_MAINLAND, MAP_W, MAP_H)} fill="#F5EEDC" stroke="#1A1A2E" strokeOpacity="0.2" strokeWidth="1.5" />
+            {[...bubbles].reverse().map((bubble, index) => (
+              <motion.circle
+                key={bubble.city}
+                data-testid="map-city-bubble"
+                cx={bubble.x}
+                cy={bubble.y}
+                r={bubble.r}
+                fill="#F2512D"
+                fillOpacity={0.78}
+                stroke="#1A1A2E"
+                strokeWidth="2"
+                style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+                initial={reduceMotion ? false : { scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: reduceMotion ? 0 : 0.04 * (bubbles.length - index), type: 'spring', stiffness: 320, damping: 20 }}
+              />
+            ))}
           </svg>
-
-          <span className={cn(pop.pill, 'absolute left-2 top-2 z-10 bg-white text-[11px]')}>
-            <span className="h-2 w-2 rounded-full bg-[#F2512D]" aria-hidden />
-            {cityLabel}
-          </span>
-
-          {teaser.pins.map((pin, index) => {
-            const active = pin.id === focus?.id;
-            return (
-              <motion.button
-                key={pin.id}
-                type="button"
-                tabIndex={-1}
-                aria-hidden
-                onClick={() => setFocusId(pin.id)}
-                className={cn(
-                  'absolute -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full border-2 border-[#1A1A2E] bg-[#F2512D] p-0.5',
-                  active ? 'z-20 h-11 w-11 shadow-[2px_2px_0_#1A1A2E]' : 'z-10 h-8 w-8',
-                )}
-                style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
-                initial={reduceMotion ? false : { scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: reduceMotion ? 0 : 0.05 * index, type: 'spring', stiffness: 380, damping: 22 }}
-              >
-                <span className="relative block h-full w-full overflow-hidden rounded-full">
-                  <ListingPhoto src={pin.photoUrl} alt="" variant="thumbnail" sizes="44px" />
-                </span>
-              </motion.button>
-            );
-          })}
+          {labels.map((label) => (
+            <span
+              key={label.city}
+              className={cn(
+                pop.pill,
+                'absolute z-10 -translate-x-1/2 whitespace-nowrap bg-white px-2 py-0.5 text-[11px]',
+                label.below ? 'translate-y-1' : '-translate-y-[calc(100%+4px)]',
+              )}
+              style={{ left: `${(label.x / MAP_W) * 100}%`, top: `${(label.y / MAP_H) * 100}%` }}
+              aria-hidden
+            >
+              <span className="font-black">{cityLabels[label.city]}</span>
+              <span className="text-[#F2512D]">{label.count.toLocaleString(tag)}</span>
+            </span>
+          ))}
         </div>
-
-        {focus && (
-          <div className="flex items-center gap-space-sm border-t-2 border-[#1A1A2E] bg-white p-space-sm" aria-hidden>
-            <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 border-[#1A1A2E] bg-[#F3E2CF]">
-              <ListingPhoto src={focus.photoUrl} alt="" variant="thumbnail" sizes="56px" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="inline-block rounded-full border-2 border-[#1A1A2E] bg-[#7FE0B0] px-2 py-0 text-[10px] font-black uppercase text-[#1A1A2E]">
-                {messages.listing.free}
-              </span>
-              <span className="mt-0.5 block truncate text-label-md font-bold text-[#1A1A2E]">
-                {resolveListingTitle(focus.listing, language)}
-              </span>
-              <span className="block text-[11px] text-[#4A4A5E]">{formatRelativeTime(focus.listing.posted_at)}</span>
-            </span>
-          </div>
-        )}
       </div>
 
       <p className={cn(pop.pill, 'mt-space-md')} data-testid="map-pins-line">
         <SymbolIcon name="location_on" className="text-[16px] text-[#F2512D]" />
-        {messages.onboarding.map.pinsLine(teaser.total, cityLabel)}
+        {messages.onboarding.map.pinsLine(map.total, map.cities.length)}
       </p>
     </div>
   );

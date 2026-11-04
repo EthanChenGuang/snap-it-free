@@ -13,11 +13,11 @@ import type { ListingRow } from '@/lib/listings/types';
 import { isPaywallFlagEnabled } from '@/lib/paywall/gate';
 import {
   activeCityCount,
-  buildMapTeaser,
+  buildCityMap,
   dailyCountsLast7,
   newestPostedMs,
   type DailyCount,
-  type MapTeaser,
+  type CityMap,
 } from '@/lib/paywall/onboarding-stats';
 import { fetchPaywallTeaser, TEASER_PHOTO_LIMIT } from '@/lib/paywall/locked-preview';
 import { CITY_TEASER_THUMBNAIL_LIMIT, summarizeCityTeaser } from '@/lib/paywall/teaser';
@@ -43,8 +43,8 @@ export type RegionTeaserState =
       daily: DailyCount[];
       newestMs: number | null;
       cityCount: number;
-      /** Map screen: the busiest city's newest located items. */
-      map: MapTeaser | null;
+      /** Map screen: one bubble per city with its real active count (all cities, not just Veneto). */
+      map: CityMap | null;
       /** Favourites screen: newest items with a photo. */
       favorites: ListingRow[];
     }
@@ -126,7 +126,7 @@ export function useRegionTeaser(): RegionTeaserState {
           daily: dailyCountsLast7(scope, now),
           newestMs: newestPostedMs(scope, now),
           cityCount: activeCityCount(scope),
-          map: buildMapTeaser(scope),
+          map: buildCityMap(rows),
           favorites: newestWithPhoto(scope, 3),
         });
       },

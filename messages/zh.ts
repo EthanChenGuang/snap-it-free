@@ -420,7 +420,7 @@ export const messages: Messages = {
       emphasis: '一个',
       rows: [
         '最新发布的赠送好物，新的在前',
-        '每张卡片显示距离和发布时间',
+        '每张卡片显示城市和发布时间',
         '需要时可用地图和收藏',
       ],
     },
@@ -436,11 +436,11 @@ export const messages: Messages = {
       unavailable: '实时数字加载中，你可以先继续。',
     },
     map: {
-      title: '看看你身边有什么免费的',
-      emphasis: '身边',
-      body: '有位置的物品会以图钉显示在地图上。',
-      pinsLine: (count: number, city: string) => `${city}此刻地图上有 ${count.toLocaleString('zh-CN')} 件物品`,
-      rows: ['每件物品都标在地图上', '每张卡片显示距离', '点图钉就能看照片'],
+      title: '看看免费好物都在哪儿',
+      emphasis: '免费好物',
+      body: '我们覆盖的每个城市，按此刻的免费物品数量显示大小。',
+      pinsLine: (count: number, cities: number) => `此刻 ${cities} 个城市共有 ${count.toLocaleString('zh-CN')} 件免费物品`,
+      rows: ['一眼看出哪个城市最多', '一键按城市筛选', '点地图上的聚合点就能看照片'],
     },
     favorites: {
       title: '把喜欢的好物收藏起来',

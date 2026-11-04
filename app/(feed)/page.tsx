@@ -9,6 +9,7 @@ import {
   getLockedTeaser,
 } from '@/lib/listings/queries';
 import type { ListingRow } from '@/lib/listings/types';
+import { isOnboardingEveryVisitEnv } from '@/lib/paywall/gate';
 import { getListingAccess } from '@/lib/paywall/server-access';
 
 export const dynamic = 'force-dynamic';
@@ -25,7 +26,7 @@ export default async function FeedHomePage({ searchParams }: FeedHomePageProps) 
     return (
       <>
         <LockedFeed count={teaser.count} photos={teaser.photoUrls} />
-        <OnboardingGate />
+        <OnboardingGate everyVisit={isOnboardingEveryVisitEnv()} />
       </>
     );
   }

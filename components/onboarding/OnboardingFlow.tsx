@@ -10,7 +10,7 @@ import { AccountStep } from '@/components/onboarding/steps/AccountStep';
 import { AlertsMock } from '@/components/onboarding/steps/AlertsMock';
 import { BuildingFeed } from '@/components/onboarding/steps/BuildingFeed';
 import { MiniFeedCard } from '@/components/onboarding/steps/MiniFeedCard';
-import { FavoritesDemo, NearbyMap, WeeklyVolume } from '@/components/onboarding/steps/SnagGapSteps';
+import { CityMapView, FavoritesDemo, WeeklyVolume } from '@/components/onboarding/steps/SnagGapSteps';
 import { FeedSearching } from '@/components/listings/FeedSearching';
 import { PhotoCollage, Sparkle } from '@/components/onboarding/steps/PhotoCollage';
 import { useCityTeaser, useRegionTeaser } from '@/components/onboarding/useOnboardingData';
@@ -97,7 +97,7 @@ const MOBILITY_EMOJI = { foot: '🚶', bike: '🚲', car: '🚗' } as const;
 const HOW_ICONS = ['bolt', 'schedule', 'map'] as const;
 const HOW_FILLS = ['bg-[#EAE2FF]', 'bg-[#FFF2B8]', 'bg-[#D6F5E6]'] as const;
 const HOW_DOTS = ['bg-[#B69CFF]', 'bg-[#FFC83D]', 'bg-[#7FE0B0]'] as const;
-const MAP_ICONS = ['location_on', 'near_me', 'touch_app'] as const;
+const MAP_ICONS = ['location_on', 'tune', 'touch_app'] as const;
 
 /** "Bike or vaporetto (~5 km)" → ["Bike or vaporetto", "~5 km"]; works for （） too. */
 function splitDistance(label: string): [string, string | null] {
@@ -452,7 +452,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                       <StepTitle title={copy.map.title} emphasis={copy.map.emphasis} />
                       <p className="mt-space-sm text-body-md text-[#4A4A5E]">{copy.map.body}</p>
                       {region.status === 'ready' && region.map ? (
-                        <NearbyMap teaser={region.map} cityLabel={cityLabels[region.map.city]} />
+                        <CityMapView map={region.map} cityLabels={cityLabels} />
                       ) : null}
                       <ul className="mt-space-md flex flex-col gap-space-sm">
                         {copy.map.rows.map((row, index) => (

@@ -21,7 +21,19 @@ export type OnboardingGateInput = {
   flagEnabled: boolean;
   forced: boolean;
   completed: boolean;
+  /** Preview rule (Guang, 2026-11-04): a non-subscriber sees the flow on every visit, even after finishing it. */
+  everyVisit?: boolean;
 };
+
+/**
+ * Non-production builds (Vercel Preview, local) re-show onboarding to every non-subscriber on each
+ * visit, so testing needs no `?onboarding=1`. Production keeps "once per browser".
+ */
+export function isOnboardingEveryVisitEnv(
+  vercelEnv: string | undefined = process.env.NEXT_PUBLIC_VERCEL_ENV,
+): boolean {
+  return vercelEnv !== 'production';
+}
 
 type ReadableStorage = Pick<Storage, 'getItem'>;
 type WritableStorage = Pick<Storage, 'setItem'>;
@@ -60,19 +72,29 @@ export function markOnboardingCompleted(storage: WritableStorage | undefined): v
   }
 }
 
-export function shouldShowOnboarding({ flagEnabled, forced, completed }: OnboardingGateInput): boolean {
-  return forced || (flagEnabled && !completed);
+export function shouldShowOnboarding({ flagEnabled, forced, completed, everyVisit = false }: OnboardingGateInput): boolean {
+  return forced || (flagEnabled && (everyVisit || !completed));
 }
 
-/** Browser-only entry point; always false during SSR so server HTML never changes. */
+/** Back from Stripe (`?checkout=…`): the locked feed shows its own "activating" notice; don't cover it. */
+export function hasCheckoutReturnParam(search: string): boolean {
+  return new URLSearchParams(search).has('checkout');
+}
+
+/**
+ * Browser-only entry point; always false during SSR so server HTML never changes. `everyVisit` is
+ * passed by the server only for a locked (non-subscriber) feed on a non-production build.
+ */
 export function resolveOnboardingGate(
   flagEnabled: boolean = isPaywallFlagEnabled(),
+  everyVisit = false,
 ): boolean {
   if (typeof window === 'undefined') return false;
   return shouldShowOnboarding({
     flagEnabled,
     forced: hasOnboardingForceParam(window.location.search),
     completed: readOnboardingCompleted(window.localStorage),
+    everyVisit: everyVisit && !hasCheckoutReturnParam(window.location.search),
   });
 }
 

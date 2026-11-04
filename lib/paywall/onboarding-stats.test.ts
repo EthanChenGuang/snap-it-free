@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ListingRow } from '@/lib/listings/types';
-import { activeCityCount, buildMapTeaser, dailyCountsLast7, newestPostedMs } from './onboarding-stats';
+import { activeCityCount, buildCityMap, dailyCountsLast7, newestPostedMs } from './onboarding-stats';
 
 function row(over: Partial<ListingRow>): ListingRow {
   return {
@@ -50,49 +50,28 @@ describe('newestPostedMs / activeCityCount', () => {
   });
 });
 
-describe('buildMapTeaser', () => {
-  it('returns null without located rows', () => {
-    expect(buildMapTeaser([row({ zone: 'centro_storico' })])).toBeNull();
+describe('buildCityMap', () => {
+  it('returns null when no row has a known city', () => {
+    expect(buildCityMap([row({})])).toBeNull();
   });
 
-  it('picks the city with most located rows, newest first, positions inside the padded box with north up', () => {
+  it('counts every row per city, busiest first, at the catalog city centre', () => {
     const rows = [
-      row({ id: 'a', zone: 'centro_storico', lat: 45.44, lng: 12.32, posted_at: new Date(NOW - 1000).toISOString() }),
-      row({ id: 'b', zone: 'centro_storico', lat: 45.43, lng: 12.34, posted_at: new Date(NOW - 2000).toISOString() }),
-      row({ id: 'c', zone: 'centro_storico', lat: 45.45, lng: 12.33, posted_at: new Date(NOW - 3000).toISOString(), photo_url: '' }),
+      row({ zone: 'centro_storico' }),
+      ...Array.from({ length: 3 }, () => row({ city: 'milano' })),
+      row({ city: 'padova' }),
+      row({ city: 'padova' }),
+      row({}),
     ];
-    const teaser = buildMapTeaser(rows, 12, 10);
-    expect(teaser?.city).toBe('venice');
-    expect(teaser?.total).toBe(3);
-    expect(teaser?.pins.map((p) => p.id)).toEqual(['a', 'b']);
-    for (const pin of teaser!.pins) {
-      expect(pin.x).toBeGreaterThanOrEqual(10);
-      expect(pin.x).toBeLessThanOrEqual(90);
-      expect(pin.y).toBeGreaterThanOrEqual(10);
-      expect(pin.y).toBeLessThanOrEqual(90);
-    }
-    const [a, b] = teaser!.pins;
-    expect(a.y).toBeLessThan(b.y); // a is further north
-    expect(a.x).toBeLessThan(b.x); // a is further west
-  });
-
-  it('keeps one pin per spot and prefers the city with more distinct spots', () => {
-    const stacked = Array.from({ length: 30 }, (_, i) =>
-      row({ city: 'padova', lat: 45.4064, lng: 11.8768, posted_at: new Date(NOW - i * 1000).toISOString() }),
-    );
-    const spread = Array.from({ length: 4 }, (_, i) =>
-      row({ zone: 'centro_storico', lat: 45.43 + i * 0.01, lng: 12.33, posted_at: new Date(NOW - i * 1000).toISOString() }),
-    );
-    const teaser = buildMapTeaser([...stacked, ...spread]);
-    expect(teaser?.city).toBe('venice');
-    expect(teaser?.pins).toHaveLength(4);
-  });
-
-  it('respects the pin limit', () => {
-    const rows = Array.from({ length: 20 }, (_, i) =>
-      row({ zone: 'centro_storico', lat: 45.43 + i * 0.001, lng: 12.33, posted_at: new Date(NOW - i * 1000).toISOString() }),
-    );
-    expect(buildMapTeaser(rows, 5)?.pins).toHaveLength(5);
-    expect(buildMapTeaser(rows, 5)?.total).toBe(20);
+    const map = buildCityMap(rows);
+    expect(map?.total).toBe(6);
+    expect(map?.cities.map((c) => [c.city, c.count])).toEqual([
+      ['milano', 3],
+      ['padova', 2],
+      ['venice', 1],
+    ]);
+    const [lng, lat] = map!.cities[0].lngLat;
+    expect(lat).toBeCloseTo(45.45, 2);
+    expect(lng).toBeCloseTo(9.15, 2);
   });
 });

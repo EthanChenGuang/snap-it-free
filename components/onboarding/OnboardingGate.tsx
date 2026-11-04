@@ -11,16 +11,19 @@ const OnboardingFlow = dynamic(
   { ssr: false },
 );
 
-/** Renders nothing on the server and on first paint; the gate is checked after mount. */
-export function OnboardingGate() {
+/**
+ * Renders nothing on the server and on first paint; the gate is checked after mount. `everyVisit`
+ * re-shows the flow to a non-subscriber on each visit (non-production builds only; set by the page).
+ */
+export function OnboardingGate({ everyVisit = false }: { everyVisit?: boolean }) {
   const { setAutoOpenSuspended } = usePwaOnboarding();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (!resolveOnboardingGate()) return;
+    if (!resolveOnboardingGate(undefined, everyVisit)) return;
     setAutoOpenSuspended(true);
     setOpen(true);
-  }, [setAutoOpenSuspended]);
+  }, [setAutoOpenSuspended, everyVisit]);
 
   const handleFinish = useCallback(() => {
     setOpen(false);
