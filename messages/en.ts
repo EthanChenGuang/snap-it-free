@@ -653,11 +653,13 @@ export const messages: Messages = {
       title: 'Add to Home Screen',
       description:
         'On iPhone, push notifications only work when you open the app from the Home Screen icon.',
-      step1: 'Tap the Share button in Safari (icon at the bottom).',
+      step1: 'Tap your browser’s Share button (in Safari it’s at the bottom).',
       step2: 'Scroll and select “Add to Home Screen”.',
       step3: 'Open the app from the Home Screen icon, then enable push notifications.',
       confirmInstalled: 'I added it to Home',
       continueWithoutPush: 'Continue without push',
+      stillInBrowser:
+        'You’re still in the browser. Close this tab, then open ZeroDollar from the new icon on your Home Screen to turn on push.',
     },
   },
   sheet: {

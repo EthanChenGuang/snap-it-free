@@ -629,11 +629,12 @@ export const messages: Messages = {
     install: {
       title: '添加到主屏幕',
       description: '在 iPhone 上，只有从主屏幕图标打开应用时，推送通知才能正常工作。',
-      step1: '在 Safari 中点击分享按钮（底部图标）。',
+      step1: '点浏览器的分享按钮（Safari 在底部）。',
       step2: '向下滑动并选择「添加到主屏幕」。',
       step3: '从主屏幕图标打开应用，然后开启推送通知。',
       confirmInstalled: '我已添加到主屏幕',
       continueWithoutPush: '暂不开启推送',
+      stillInBrowser: '你现在还在浏览器里。请关掉这个页面，从主屏幕上新添加的图标打开零元，再开启推送。',
     },
   },
   sheet: {

@@ -663,11 +663,13 @@ export const messages = {
       title: 'Aggiungi alla Home Screen',
       description:
         'Su iPhone le notifiche push funzionano solo se apri l\'app dall\'icona sulla Home Screen.',
-      step1: 'Tocca il pulsante Condividi in Safari (icona in basso).',
+      step1: 'Tocca il pulsante Condividi del browser (in Safari è in basso).',
       step2: 'Scorri e seleziona «Aggiungi a Home».',
       step3: 'Apri l\'app dall\'icona sulla Home Screen, poi attiva le notifiche push.',
       confirmInstalled: 'Ho aggiunto alla Home',
       continueWithoutPush: 'Continua senza push',
+      stillInBrowser:
+        'Sei ancora nel browser. Chiudi questa scheda e apri ZeroDollar dalla nuova icona nella schermata Home per attivare le notifiche.',
     },
   },
   sheet: {
