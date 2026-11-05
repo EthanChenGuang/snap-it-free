@@ -3,7 +3,8 @@ import { reconcileInterestSelection } from '@/lib/paywall/onboarding-interests';
 
 /**
  * Snag-modelled onboarding (quick 261028-ob2; weekly/map/favorites added in 261031-ob4 to match
- * Snag's screen set): hook → how → weekly → map → favorites → interests → mobility → city →
+ * Snag's screen set; trust added in 261105-ob6 as the honest stand-in for Snag's testimonial wall):
+ * hook → how → weekly → map → favorites → trust → interests → mobility → city →
  * preview → account → alerts → paywall. The account step is a required sign-up (Guang,
  * 2026-10-28), so there is no path to the paywall that skips it. Skip only short-circuits the
  * value-prop run and lands on the personal preview, never past the account gate.
@@ -14,6 +15,7 @@ export const INTRO_STEPS = [
   'weekly',
   'map',
   'favorites',
+  'trust',
   'interests',
   'mobility',
   'city',

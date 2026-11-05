@@ -463,6 +463,18 @@ export const messages: Messages = {
       toast: 'Added to favourites',
       tabTitle: 'Find them anytime in the ♥ Favorites tab',
     },
+    trust: {
+      title: 'Why you can trust it',
+      emphasis: 'trust',
+      body: 'No fake reviews, no made-up numbers. Here is what we promise.',
+      rows: [
+        { title: 'Real listings only', line: 'Every item is a real post, linked to where it was published.' },
+        { title: 'Live numbers', line: 'Every count you see comes from the feed right now.' },
+        { title: 'Clear price, cancel any time', line: 'Price and auto-renewal are shown before you pay.' },
+        { title: 'Payments by Stripe', line: 'We never see or store your card.' },
+      ],
+      liveLine: (count: number) => `${count.toLocaleString('en-US')} free ${count === 1 ? 'item' : 'items'} live right now`,
+    },
     interests: {
       title: 'What are you looking for?',
       emphasis: 'looking',

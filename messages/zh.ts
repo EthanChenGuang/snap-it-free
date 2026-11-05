@@ -449,6 +449,18 @@ export const messages: Messages = {
       toast: '已加入收藏',
       tabTitle: '随时在 ♥ 收藏 页找到它们',
     },
+    trust: {
+      title: '为什么你可以信任我们',
+      emphasis: '信任',
+      body: '没有虚假评价，没有编造的数字。这是我们的承诺。',
+      rows: [
+        { title: '只有真实物品', line: '每件物品都是真实发布的，附有原发布处的链接。' },
+        { title: '实时数字', line: '你看到的每个数字都来自此刻的物品流。' },
+        { title: '价格清楚，随时可取消', line: '付款前就会显示价格和自动续订。' },
+        { title: '由 Stripe 处理付款', line: '我们不会看到，也不会保存你的银行卡。' },
+      ],
+      liveLine: (count: number) => `此刻共有 ${count.toLocaleString('zh-CN')} 件免费物品`,
+    },
     interests: {
       title: '你在找什么？',
       emphasis: '找',

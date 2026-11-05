@@ -473,6 +473,18 @@ export const messages = {
       toast: 'Aggiunto ai preferiti',
       tabTitle: 'Li ritrovi sempre nella scheda ♥ Preferiti',
     },
+    trust: {
+      title: 'Perché puoi fidarti',
+      emphasis: 'fidarti',
+      body: 'Niente recensioni finte, niente numeri inventati. Ecco cosa ti promettiamo.',
+      rows: [
+        { title: 'Solo annunci reali', line: 'Ogni oggetto è un annuncio vero, con il link a dove è stato pubblicato.' },
+        { title: 'Numeri dal vivo', line: 'Ogni numero che vedi viene dal feed in questo momento.' },
+        { title: 'Prezzo chiaro, disdici quando vuoi', line: 'Prezzo e rinnovo automatico sono indicati prima di pagare.' },
+        { title: 'Pagamenti con Stripe', line: 'Non vediamo né salviamo mai la tua carta.' },
+      ],
+      liveLine: (count: number) => `${count.toLocaleString('it-IT')} ${count === 1 ? 'oggetto gratis' : 'oggetti gratis'} online adesso`,
+    },
     interests: {
       title: 'Cosa stai cercando?',
       emphasis: 'cercando',

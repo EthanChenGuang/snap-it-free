@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * Visuals for the three screens added to match Snag's onboarding shape (quick 261031-ob4):
- * weekly volume, items per city on a map, saving favourites. Lagoon Pop UI (Stitch project 9058658661756179433),
+ * weekly volume, items per city on a map, saving favourites, and the trust promises. Lagoon Pop UI (Stitch project 9058658661756179433),
  * our own copy, and only real figures from the live rows. No source names anywhere.
  */
 
@@ -188,6 +188,57 @@ export function CityMapView({ map, cityLabels }: { map: CityMap; cityLabels: Rec
         <SymbolIcon name="location_on" className="text-[16px] text-[#F2512D]" />
         {messages.onboarding.map.pinsLine(map.total, map.cities.length)}
       </p>
+    </div>
+  );
+}
+
+const TRUST_ICONS = ['verified', 'bar_chart', 'receipt_long', 'lock'] as const;
+const TRUST_BADGES = ['bg-[#D6F5E6]', 'bg-[#DDF0FF]', 'bg-[#EAE2FF]', 'bg-[#FFE3D3]'] as const;
+
+/**
+ * Honest stand-in for Snag's testimonial wall (quick 261105-ob6, Stitch screen 857017fd…): four
+ * promises we keep, plus the live item count. No reviews, ratings or people, since we have none to show.
+ */
+export function TrustPromises({ liveCount }: { liveCount: number | null }) {
+  const { messages } = useMessages();
+  const copy = messages.onboarding.trust;
+  const reduceMotion = useReducedMotion();
+  return (
+    <div data-testid="onboarding-trust">
+      <ul className="mt-space-lg flex flex-col gap-space-sm">
+        {copy.rows.map((row, index) => (
+          <motion.li
+            key={row.title}
+            className={cn('flex items-center gap-space-md p-space-md', pop.card, 'rounded-[20px]')}
+            initial={reduceMotion ? false : { y: 12, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: reduceMotion ? 0 : 0.06 * index, duration: 0.3 }}
+          >
+            <span
+              className={cn(
+                'flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-[#1A1A2E] text-[#1A1A2E]',
+                TRUST_BADGES[index % TRUST_BADGES.length],
+              )}
+              aria-hidden
+            >
+              <SymbolIcon name={TRUST_ICONS[index % TRUST_ICONS.length]} className="text-[24px]" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-body-md font-black text-[#1A1A2E]">{row.title}</span>
+              <span className="block text-label-md text-[#4A4A5E]">{row.line}</span>
+            </span>
+          </motion.li>
+        ))}
+      </ul>
+      {liveCount !== null && liveCount > 0 && (
+        <p
+          className="mx-auto mt-space-md flex w-max items-center gap-2 rounded-full bg-[#1A1A2E] px-space-md py-1.5 text-label-md font-bold text-white"
+          data-testid="trust-live-line"
+        >
+          <span className="h-2.5 w-2.5 rounded-full bg-[#7FE0B0]" aria-hidden />
+          {copy.liveLine(liveCount)}
+        </p>
+      )}
     </div>
   );
 }

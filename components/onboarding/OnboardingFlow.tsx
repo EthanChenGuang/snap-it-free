@@ -10,7 +10,7 @@ import { AccountStep } from '@/components/onboarding/steps/AccountStep';
 import { AlertsMock } from '@/components/onboarding/steps/AlertsMock';
 import { BuildingFeed } from '@/components/onboarding/steps/BuildingFeed';
 import { MiniFeedCard } from '@/components/onboarding/steps/MiniFeedCard';
-import { CityMapView, FavoritesDemo, WeeklyVolume } from '@/components/onboarding/steps/SnagGapSteps';
+import { CityMapView, FavoritesDemo, TrustPromises, WeeklyVolume } from '@/components/onboarding/steps/SnagGapSteps';
 import { FeedSearching } from '@/components/listings/FeedSearching';
 import { PhotoCollage, Sparkle } from '@/components/onboarding/steps/PhotoCollage';
 import { useCityTeaser, useRegionTeaser } from '@/components/onboarding/useOnboardingData';
@@ -479,6 +479,14 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                       <FavoritesDemo
                         listings={region.status === 'ready' && region.favorites.length > 0 ? region.favorites : sampleListings}
                       />
+                    </>
+                  )}
+
+                  {state.screen === 'trust' && (
+                    <>
+                      <StepTitle title={copy.trust.title} emphasis={copy.trust.emphasis} />
+                      <p className="mt-space-sm text-body-md text-[#4A4A5E]">{copy.trust.body}</p>
+                      <TrustPromises liveCount={region.status === 'ready' ? (region.map?.total ?? null) : null} />
                     </>
                   )}
 

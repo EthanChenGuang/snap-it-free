@@ -29,7 +29,8 @@ describe('onboardingReducer', () => {
       { type: 'next' }, // how → weekly
       { type: 'next' }, // weekly → map
       { type: 'next' }, // map → favorites
-      { type: 'next' }, // favorites → interests
+      { type: 'next' }, // favorites → trust
+      { type: 'next' }, // trust → interests
       { type: 'toggleInterest', interest: 'books' },
       { type: 'next' }, // interests → mobility
       { type: 'selectMobility', mobility: 'bike' },
@@ -49,6 +50,7 @@ describe('onboardingReducer', () => {
       'weekly',
       'map',
       'favorites',
+      'trust',
       'interests',
       'interests',
       'mobility',
@@ -118,12 +120,12 @@ describe('onboardingReducer', () => {
 });
 
 describe('introStepIndex', () => {
-  it('numbers the eleven intro steps and excludes the paywall', () => {
+  it('numbers the twelve intro steps and excludes the paywall', () => {
     expect(
-      ['hook', 'how', 'weekly', 'map', 'favorites', 'interests', 'mobility', 'city', 'preview', 'account', 'alerts', 'paywall'].map((s) =>
+      ['hook', 'how', 'weekly', 'map', 'favorites', 'trust', 'interests', 'mobility', 'city', 'preview', 'account', 'alerts', 'paywall'].map((s) =>
         introStepIndex(s as never),
       ),
-    ).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -1]);
+    ).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, -1]);
   });
 });
 
