@@ -25,7 +25,7 @@ See: `.planning/ROADMAP.md`, `.planning/onboarding-snag/`, `HANDOFF.md` (no `PRO
 Phase: 2–3 of 4 complete **and verified** (`02-*/UAT.md`, `03-*/UAT.md`)
 Plan: 1 of 1 in each completed phase
 Status: in_progress (phases 1 and 4 deferred; follow-ups below)
-Last activity: 2026-11-04 — quick 261104-ob5 (87ac2ca + label fix) on Preview; drive.mjs onboarding 70/70, persist 9/9
+Last activity: 2026-11-05 — quick 261105-ob6 (trust screen) on Preview; drive.mjs onboarding 74/74, persist 9/9
 
 Progress: [█████░░░░░] 50% (phases 1 and 4 deferred)
 

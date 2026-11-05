@@ -18,4 +18,4 @@ footer slogan (other screens have neither; the slogan made claims we did not app
 - `drive.mjs`: walks the new step; asserts no star ratings and no listing source names.
 
 ## Verify
-`npm run lint` clean, `npm test` 864/864. Preview drive: see STATE.md.
+`npm run lint` clean, `npm test` 864/864. Preview drive 2026-11-05: onboarding 74/74, persist 9/9.
