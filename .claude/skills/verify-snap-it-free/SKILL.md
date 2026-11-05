@@ -37,7 +37,17 @@ The surface is the mobile-first web PWA served by `next start`. All helpers live
 | `onboarding` | off | `?onboarding=1` walk of all steps, real teaser, alerts, hard paywall, coming-soon CTA, locked feed and detail, zh copy (`01`–`13`) |
 | `desktop-paywall` | off | 1280x800 centered paywall card (`14`) |
 | `compare` | off, twice | home DOM identical to the `--base` server once scripts are dropped |
+| `iphone` | on (Preview) | iPhone user agent, signed out: full onboarding walk, honest alerts reason, paywall closes to a usable locked feed, no blocking dialog (`i1`–`i3`) |
 | `persist` | on | shows without a param, not again after completion + reload, locked feed/favorites, no listing payload in HTML, subscription Terms/Privacy, real city teaser (`15`–`20`) |
+
+## Vercel Preview access
+
+The Preview is behind Vercel deployment protection. Pass **one** of these via env only (never print or commit):
+
+- `VERCEL_BYPASS_SECRET` — the project's Protection Bypass for Automation secret (Guang allowed agent tests to use it, 2026-11-05; it is the same value as the `x-vercel-protection-bypass` query on the Stripe test webhook URL). drive.mjs plants it as a cookie on the Preview host by a first visit; it is never sent as a header, so it cannot leak to image or CDN hosts. Does not expire.
+- `VERCEL_SHARE_TOKEN` — a share link token from Vercel → deployment → Share (expires).
+
+In cloud sessions also set `PLAYWRIGHT_CORE=/opt/node-tools/node_modules/playwright`.
 
 ## Data-layer checks (migrations and RLS)
 

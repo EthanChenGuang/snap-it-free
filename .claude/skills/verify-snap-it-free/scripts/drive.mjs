@@ -21,6 +21,9 @@ const lang = opt('lang', 'en');
 // Optional: a Vercel deployment-protection share token (read from env only, never hardcoded/committed).
 // When set, each fresh context first visits `${url}/?_vercel_share=<token>` to plant the bypass cookie.
 const shareToken = process.env.VERCEL_SHARE_TOKEN || '';
+// Or the project's "Protection Bypass for Automation" secret (env only). Planted as a cookie on the
+// Preview host via a first visit, never sent as a header (headers would leak to image/CDN hosts).
+const bypassSecret = process.env.VERCEL_BYPASS_SECRET || '';
 mkdirSync(out, { recursive: true });
 
 const PHONE = { width: 390, height: 844 };
@@ -30,8 +33,16 @@ function check(ok, label) {
   console.log(`${ok ? 'PASS' : 'FAIL'} ${label}`);
 }
 
-async function newPage(browser, viewport = PHONE, language = lang, { stubAuth = false } = {}) {
-  const context = await browser.newContext({ viewport, deviceScaleFactor: 2, locale: 'en-US' });
+const IPHONE_UA =
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1';
+
+async function newPage(browser, viewport = PHONE, language = lang, { stubAuth = false, iphone = false } = {}) {
+  const context = await browser.newContext({
+    viewport,
+    deviceScaleFactor: 2,
+    locale: 'en-US',
+    ...(iphone ? { userAgent: IPHONE_UA, isMobile: true, hasTouch: true } : {}),
+  });
   await context.addInitScript((value) => {
     if (!localStorage.getItem('shoumanwu_app_preferences')) {
       localStorage.setItem(
@@ -51,7 +62,13 @@ async function newPage(browser, viewport = PHONE, language = lang, { stubAuth = 
   }
   const page = await context.newPage();
   // Plant the Vercel protection-bypass cookie once per context, before the real navigations.
-  if (shareToken && url) {
+  if (bypassSecret && url) {
+    await page
+      .goto(`${url}/?x-vercel-protection-bypass=${encodeURIComponent(bypassSecret)}&x-vercel-set-bypass-cookie=true`, {
+        waitUntil: 'domcontentloaded',
+      })
+      .catch(() => {});
+  } else if (shareToken && url) {
     await page
       .goto(`${url}/?_vercel_share=${encodeURIComponent(shareToken)}`, { waitUntil: 'domcontentloaded' })
       .catch(() => {});
@@ -555,7 +572,44 @@ async function compare(browser) {
   check(a.dom === b.dom, `flag off: home DOM identical to main (${a.dom.length} vs ${b.dom.length} chars)`);
 }
 
-const journeys = { 'flag-off': flagOff, onboarding, 'desktop-paywall': desktopPaywall, persist, compare };
+/**
+ * iPhone in a browser tab, signed out (the QA stub is not a real session). Walks the whole onboarding with an
+ * iPhone user agent: alerts must say honestly why they can't turn on, the paywall must close to a usable locked
+ * feed, and nothing may block it. The "Add to Home Screen" guide itself needs a real session (it opens after a
+ * signed-in user taps Turn on alerts); its "I added it to Home" behaviour is covered by
+ * components/pwa/IosInstallGuide.test.tsx and was checked on Guang's iPhone 2026-11-05.
+ */
+async function iphone(browser) {
+  const { context, page } = await newPage(browser, PHONE, 'en', { stubAuth: true, iphone: true });
+  await page.goto(`${url}/?onboarding=1`, { waitUntil: 'load' });
+  await overlay(page).waitFor({ timeout: 15000 });
+  await walkToPreview(page);
+  check(await screenIs(page, 'preview'), 'iPhone: walks the value-prop steps to the preview');
+  await page.getByTestId('preview-save').click();
+  await settle(page);
+  check(await screenIs(page, 'account'), 'iPhone: reaches the account step');
+  await page.getByTestId('account-continue').click();
+  await settle(page);
+  check(await screenIs(page, 'alerts'), 'iPhone: reaches the alerts step');
+  await page.getByRole('button', { name: 'Turn on alerts' }).click();
+  const status = page.getByRole('status').filter({ hasText: /account|iPhone|Home Screen/ });
+  await status.waitFor({ timeout: 10000 }).catch(() => {});
+  check((await status.count()) === 1, `iPhone: alerts give an honest reason ("${(await status.innerText().catch(() => '')).trim()}")`);
+  await shot(page, 'i1-alerts-iphone');
+  await page.getByRole('button', { name: 'Not now' }).click();
+  await settle(page);
+  check(await screenIs(page, 'paywall'), 'iPhone: paywall after alerts');
+  await shot(page, 'i2-paywall-iphone');
+  await page.getByTestId('paywall-close').click();
+  await settle(page, 1500);
+  check((await overlay(page).count()) === 0, 'iPhone: closing the paywall ends onboarding');
+  check((await page.getByRole('dialog').count()) === 0, 'iPhone: no dialog blocks the feed for a signed-out user');
+  check(await page.getByTestId('locked-feed').isVisible().catch(() => false), 'iPhone: the locked feed is visible and usable');
+  await shot(page, 'i3-locked-feed-iphone');
+  await context.close();
+}
+
+const journeys = { 'flag-off': flagOff, onboarding, 'desktop-paywall': desktopPaywall, persist, compare, iphone };
 if (!journeys[journey] || !url) {
   console.error('usage: node drive.mjs <flag-off|onboarding|desktop-paywall|persist|compare> --url URL [--out DIR] [--base URL]');
   process.exit(2);

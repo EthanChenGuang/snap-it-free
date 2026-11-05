@@ -63,6 +63,8 @@ VERCEL_SHARE_TOKEN=<token from Guang> node .claude/skills/verify-snap-it-free/sc
 Then `/gsd-verify-work` for phases 2 and 3 so `UAT.md` exists. Preview is Vercel-auth protected; regenerate a share link with Vercel MCP `get_access_to_vercel_url` if the old one expired.
 
 - Stub past the required account step only with `?onboarding=1` + localStorage `shoumanwu_onboarding_stub_auth=1` (Preview/local, never production).
+- **Preview access for agents:** `VERCEL_BYPASS_SECRET` (env only; allowed by Guang 2026-11-05; see the verify-snap-it-free SKILL.md). No share link needed.
+- `drive.mjs iphone`: iPhone user-agent walk (signed out). The signed-in "Add to Home Screen" guide is covered by `components/pwa/IosInstallGuide.test.tsx` and Guang's device check 2026-11-05.
 - Phone viewports: iPhone 390×844 and Android 412×915, each in en, it, zh.
 - Webhook-only path is **not** covered by drive.mjs; that is the Guang-gated 4242 test in §3.2.
 
