@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,6 +21,8 @@ type IosInstallGuideProps = {
 
 export function IosInstallGuide({ open, onOpenChange, onDismiss, onInstalled }: IosInstallGuideProps) {
   const { messages } = useMessages();
+  // The browser tab never becomes the installed app, so say what to do instead of silently ignoring the tap.
+  const [stillInBrowser, setStillInBrowser] = useState(false);
   const steps = [
     { icon: 'ios_share', text: messages.pwa.install.step1 },
     { icon: 'add_box', text: messages.pwa.install.step2 },
@@ -36,7 +39,9 @@ export function IosInstallGuide({ open, onOpenChange, onDismiss, onInstalled }: 
     if (isStandalonePwa()) {
       onInstalled?.();
       onOpenChange(false);
+      return;
     }
+    setStillInBrowser(true);
   };
 
   return (
@@ -68,6 +73,16 @@ export function IosInstallGuide({ open, onOpenChange, onDismiss, onInstalled }: 
             </li>
           ))}
         </ol>
+
+        {stillInBrowser && (
+          <p
+            role="status"
+            className="mt-space-md rounded border border-outline-variant bg-surface-container p-space-md text-body-md text-on-surface"
+            data-testid="ios-install-still-in-browser"
+          >
+            {messages.pwa.install.stillInBrowser}
+          </p>
+        )}
 
         <div className="mt-space-lg flex flex-col gap-space-sm">
           <Button type="button" onClick={handleInstalled}>

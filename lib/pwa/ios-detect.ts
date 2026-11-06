@@ -1,5 +1,7 @@
 export function isIOS(): boolean {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent)) return true;
+  // iPadOS 13+ reports a desktop Mac user agent; a touch screen gives it away.
+  return /Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
 }
 
 export function isStandalonePwa(): boolean {

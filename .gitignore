@@ -1,5 +1,4 @@
 # Local tooling / agent config (not part of app source)
-.planning/
 .cursor/
 .claude/
 

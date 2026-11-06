@@ -3,6 +3,8 @@
 import { useSearchParams } from 'next/navigation';
 import { AccountHeaderSection } from '@/components/settings/AccountHeaderSection';
 import { AccountSection } from '@/components/settings/AccountSection';
+import { SubscriptionSection } from '@/components/settings/SubscriptionSection';
+import { isPaywallFlagEnabled } from '@/lib/paywall/gate';
 import { AdvancedSection } from '@/components/settings/AdvancedSection';
 import { GeneralSection } from '@/components/settings/GeneralSection';
 import { LanguageSection } from '@/components/settings/LanguageSection';
@@ -30,6 +32,7 @@ export function SettingsPageClient() {
       {SETTINGS_FEATURES.notifications && <NotificationsSection />}
       {SETTINGS_FEATURES.pushManagement && <ZonesSection autoOpenCreate={autoOpenCreate} />}
       <LanguageSection />
+      {isPaywallFlagEnabled() && <SubscriptionSection />}
       <AccountSection />
       <AdvancedSection />
     </main>

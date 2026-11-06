@@ -47,6 +47,8 @@ export const messages: Messages = {
     refreshing: 'Refreshing…',
   },
   feed: {
+    searching: 'Searching for free items…',
+    searchingIn: (city: string) => `Searching for free items in ${city}…`,
     searchPlaceholder: 'Search items…',
     openFilters: 'Filters',
     openSelectLocation: 'Choose browse location',
@@ -347,6 +349,7 @@ export const messages: Messages = {
   privacy: {
     title: 'Privacy Policy',
     lastUpdated: 'Last updated: September 7, 2025',
+    lastUpdatedPaid: 'Last updated: October 25, 2026',
     intro:
       'ZeroDollar ("we") helps people find and share free items in Venice. This policy describes what personal information we collect and how we use it.',
     collectTitle: 'Information we collect',
@@ -361,9 +364,16 @@ export const messages: Messages = {
     sharingTitle: 'Service providers',
     sharingBody:
       'We use Supabase for authentication and data storage and Vercel for hosting. We do not sell your personal information to third parties.',
+    sharingBodyPaid:
+      'We use Supabase for authentication and data storage, Vercel for hosting and Stripe for subscription payments. We do not sell your personal information to third parties.',
     retentionTitle: 'Your choices',
     retentionBody:
       'You may delete your account at any time in Settings. Deletion removes your listings, messages, favorites, and other account data we store.',
+    retentionBodyPaid:
+      'You may delete your account at any time in Settings. Deletion first cancels an active subscription, then removes your listings, messages, favorites, subscription record and other account data we store. Stripe keeps its own records of past payments under its privacy policy.',
+    paymentsTitle: 'Payments and subscriptions',
+    paymentsBody:
+      'If you subscribe, Stripe (Stripe Payments Europe, Limited) processes your payment. You enter your card and payment details on Stripe pages, and Stripe handles them under its own privacy policy. We never see or store them. We store your Stripe customer and subscription identifiers, your plan, the subscription status and the end of the current period, together with the email address of your account, so that we can unlock listings for you.',
     contactTitle: 'Contact',
     contactBody:
       'For privacy questions, use the Contact link in the app footer or reach out through your usual support channel for ZeroDollar.',
@@ -372,6 +382,7 @@ export const messages: Messages = {
   terms: {
     title: 'Terms of Service',
     lastUpdated: 'Last updated: September 8, 2025',
+    lastUpdatedPaid: 'Last updated: October 25, 2026',
     intro:
       'These terms govern your use of ZeroDollar, a community marketplace for free items. By signing in or using the service, you agree to these terms.',
     serviceTitle: 'The service',
@@ -386,21 +397,269 @@ export const messages: Messages = {
     liabilityTitle: 'Disclaimer',
     liabilityBody:
       'ZeroDollar is provided as-is. Pickup and handoff happen directly between users. We are not responsible for disputes, injuries, or losses from in-person exchanges.',
+    subscriptionTitle: 'Subscriptions',
+    subscriptionBody:
+      'Seeing listings requires a ZeroDollar Plus subscription. Plans cost €1.99 per week, €4.99 per month or €19.99 per year. The price and billing period are shown before you pay. A subscription renews automatically at the end of each period and is charged to your payment method until you cancel.',
+    cancelTitle: 'Cancelling',
+    cancelBody:
+      'You can cancel at any time in Settings → Manage subscription, which opens the Stripe customer portal. Cancelling stops future renewals. You keep access until the end of the period you have already paid for. Cancelling does not refund that period.',
+    paymentsTitle: 'Payments',
+    paymentsBody:
+      'Payments are processed by Stripe (Stripe Payments Europe, Limited). If a renewal payment fails, you keep access for up to 3 days while Stripe retries the payment. After that, listings are locked until the payment succeeds or you subscribe again.',
     contactTitle: 'Contact',
     contactBody:
       'Questions about these terms: use the Contact link in the app footer or your usual support channel for ZeroDollar.',
     backHome: 'Back to home',
+  },
+  onboarding: {
+    dialogLabel: 'Welcome to ZeroDollar',
+    progress: (current: number, total: number) => `Step ${current} of ${total}`,
+    skip: 'Skip',
+    back: 'Back',
+    continue: 'Continue',
+    regionLabel: 'Veneto',
+    hook: {
+      title: 'Free stuff near you, every day',
+      emphasis: 'Free',
+      body: 'Giveaways near you, gathered in one colourful feed and updated all day.',
+      liveLine: (count: number) =>
+        count === 1
+          ? '1 free item active in Veneto right now'
+          : `${count.toLocaleString('en-US')} free items active in Veneto right now`,
+    },
+    how: {
+      title: 'Every free find in one feed',
+      emphasis: 'one',
+      rows: [
+        'Fresh giveaways, newest first',
+        'City and posting time on every card',
+        'Map and favourites when you need them',
+      ],
+    },
+    weekly: {
+      title: 'New free stuff every single day',
+      emphasis: 'every',
+      body: 'Live numbers from the feed, not estimates.',
+      statCaption: (count: number) =>
+        count === 1 ? 'new free item in Veneto in the last 7 days' : 'new free items in Veneto in the last 7 days',
+      chartTitle: 'Added per day',
+      perDay: (count: number) => `≈ ${count.toLocaleString('en-US')} a day`,
+      newest: (when: string) => `Newest ${when}`,
+      cities: (count: number) => (count === 1 ? '1 city' : `${count} cities`),
+      unavailable: 'Live numbers are loading. You can keep going.',
+    },
+    map: {
+      title: 'See where the free stuff is',
+      emphasis: 'free stuff',
+      body: 'Every city we cover, sized by how many free items it has right now.',
+      pinsLine: (count: number, cities: number) =>
+        `${count.toLocaleString('en-US')} free ${count === 1 ? 'item' : 'items'} in ${cities === 1 ? '1 city' : `${cities} cities`} right now`,
+      rows: ['See which cities have the most', 'Filter the feed by city in one tap', 'Tap a cluster on the map to see the photos'],
+    },
+    favorites: {
+      title: 'Save your favourite finds for later',
+      emphasis: 'favourite',
+      body: 'Tap the heart on any item to keep it for later.',
+      toast: 'Added to favourites',
+      tabTitle: 'Find them anytime in the ♥ Favorites tab',
+    },
+    trust: {
+      title: 'Why you can trust it',
+      emphasis: 'trust',
+      body: 'No fake reviews, no made-up numbers. Here is what we promise.',
+      rows: [
+        { title: 'Real listings only', line: 'Every item is a real post, linked to where it was published.' },
+        { title: 'Live numbers', line: 'Every count you see comes from the feed right now.' },
+        { title: 'Clear price, cancel any time', line: 'Price and auto-renewal are shown before you pay.' },
+        { title: 'Payments by Stripe', line: 'We never see or store your card.' },
+      ],
+      liveLine: (count: number) => `${count.toLocaleString('en-US')} free ${count === 1 ? 'item' : 'items'} live right now`,
+    },
+    interests: {
+      title: 'What are you looking for?',
+      emphasis: 'looking',
+      hint: 'Pick as many as you like. We’ll use them for your feed and alerts.',
+      selected: (count: number) => `${count} selected`,
+      chips: {
+        furniture: 'Furniture',
+        electronics: 'Electronics',
+        clothes: 'Clothes',
+        books: 'Books',
+        home_decor: 'Home & decor',
+        everything: 'Everything',
+      },
+    },
+    mobility: {
+      title: 'How do you get around?',
+      emphasis: 'around',
+      hint: 'This sets your default search distance. You can change it any time.',
+      options: {
+        foot: 'On foot (~1 km)',
+        bike: 'Bike or vaporetto (~5 km)',
+        car: 'Car (~15 km)',
+      },
+    },
+    city: {
+      title: 'Where should we look?',
+      emphasis: 'look',
+      body: 'Your feed will start here. You can change it any time in filters.',
+    },
+    preview: {
+      title: 'Your feed is ready',
+      emphasis: 'ready',
+      building: 'Building your feed…',
+      checkCity: (city: string) => `City · ${city}`,
+      checkInterests: 'Your interests',
+      checkRadius: (km: number) => `Within ${km} km`,
+      result: (count: number, city: string) =>
+        count === 1
+          ? `1 free item in ${city} right now`
+          : `${count.toLocaleString('en-US')} free items in ${city} right now`,
+      lowSupply: (count: number, city: string) =>
+        `Only ${count} right now in ${city}. Try a wider radius or another city.`,
+      cta: 'Save my feed',
+      seePlans: 'See plans',
+      unavailable: 'We couldn’t load your feed right now. You can still continue.',
+    },
+    account: {
+      title: 'Save your feed and alerts',
+      emphasis: 'Save',
+      body: 'A free account keeps your city, interests and alerts on every device.',
+      google: 'Continue with Google',
+      email: 'Email me a sign-in link',
+      emailSending: 'Sending…',
+      emailSent: 'Check your email for a sign-in link, then come back here.',
+      emailPlaceholder: 'you@email.com',
+      emailError: 'Couldn’t send the link. Check the address and try again.',
+      optIn: 'Send me occasional product emails (optional)',
+      signedIn: 'You’re signed in. Continue to finish setting up.',
+      signedInAs: (email: string) => `Signed in as ${email}.`,
+      switchAccount: 'Not you? Use another account',
+      switchingAccount: 'Signing out…',
+      payingAs: (email: string) => `Paying as ${email}`,
+    },
+    alerts: {
+      title: 'Be first to new finds',
+      emphasis: 'first',
+      body: 'We’ll notify you when a matching free item appears.',
+      mockLabel: 'Example',
+      mockLine: 'Free bookshelf · Cannaregio',
+      mockLine2: (city: string) => `New free item in ${city}`,
+      enable: 'Turn on alerts',
+      enabling: 'Turning on…',
+      notNow: 'Not now',
+      enabled: 'Alerts are on. We created one from your interests — manage it in Settings.',
+      notLoggedIn: 'Alerts need an account. Sign in and turn them on any time in Settings.',
+      iosNotReady: 'On iPhone, add ZeroDollar to your Home Screen first. We’ll show you how at the end.',
+      unsupported: 'This browser doesn’t support notifications.',
+      permissionDenied: 'Notifications are blocked in your browser settings.',
+      failed: 'Couldn’t turn on notifications right now. Try again later in Settings.',
+    },
+  },
+  emailCode: {
+    send: 'Email me a sign-in link',
+    sending: 'Sending…',
+    sent: (email: string) => `We sent an email to ${email}. Tap the link in it to sign in. If the email shows a code, you can enter it below instead.`,
+    codeLabel: 'Code from the email (if it has one)',
+    verify: 'Sign in',
+    verifying: 'Signing in…',
+    sendError: 'Couldn’t send the email. Check the address and try again.',
+    codeError: 'That code didn’t work. Check it, or request a new one.',
+    changeEmail: 'Use a different email',
+    resend: 'Send a new email',
+    inAppBrowser:
+      'You’re in an app’s built-in browser, where Google sign-in may not work. Use the email link, or open this page in Safari or Chrome.',
+  },
+  paywall: {
+    close: 'Close',
+    title: 'ZeroDollar Plus',
+    subtitle: 'Subscribe to see every free listing near you.',
+    titlePersonalized: (count: number, city: string) =>
+      count === 1 ? `Unlock 1 free item in ${city}` : `Unlock ${count.toLocaleString('en-US')} free items in ${city}`,
+    titleFallback: 'See every free item near you',
+    proofLine: (count: number) =>
+      count === 1
+        ? '1 new free item in Veneto in the last 7 days'
+        : `${count.toLocaleString('en-US')} new free items in Veneto in the last 7 days`,
+    savingsVsMonthly: (pct: number) => `Save ${pct}%`,
+    billed: (price: string) => `Billed ${price} per year`,
+    freeNote: 'The items are free; the subscription pays for finding them all in one place.',
+    benefitListings: 'Every active free listing near you',
+    benefitMap: 'The full feed, map and filters',
+    benefitAlerts: 'Keyword alerts when a match appears',
+    benefitSupport: 'Support an independent project',
+    plansLabel: 'Choose a plan',
+    planWeekly: 'Weekly',
+    planMonthly: 'Monthly',
+    planYearly: 'Yearly',
+    periodWeekly: 'week',
+    periodMonthly: 'month',
+    periodYearly: 'year',
+    bestValue: 'Best value',
+    perWeek: (price: string) => `${price} / wk`,
+    cta: 'Unlock my feed',
+    renewal: (price: string, period: string) =>
+      `${price} per ${period}. Renews automatically until you cancel. Cancel anytime.`,
+    restore: 'Restore purchases',
+    restoreNothing: 'Nothing to restore: no purchases have been made yet.',
+    terms: 'Terms',
+    privacy: 'Privacy',
+    comingSoonTitle: 'Payments aren’t enabled yet',
+    comingSoonBody: 'You were not charged. Subscriptions open soon.',
+    comingSoonContinue: 'Close',
+    pending: 'Opening checkout…',
+    checkoutError: 'Couldn’t start checkout. Please try again.',
+    alreadySubscribedTitle: 'You’re already subscribed',
+    alreadySubscribedBody: 'Your plan is active on this account, so there’s nothing to pay. Open your feed to see every listing.',
+    openFeed: 'Open my feed',
+    signInTitle: 'Sign in to subscribe',
+    signInBody: 'Your subscription is linked to your account, so you can use it on any device. Sign in below and we’ll take you straight to checkout.',
+    goToSettings: 'Go to Settings',
+    restoreSignIn: 'Sign in first to restore a subscription.',
+  },
+  locked: {
+    title: 'Subscribe to see the listings',
+    body: (count: number) =>
+      count > 0
+        ? `${count.toLocaleString('en-US')} free listings are active right now across all cities. Subscribe to see them all, with photos, details and the map.`
+        : 'Subscribe to see every free listing, with photos, details and the map.',
+    bodyFiltered: (count: number) =>
+      count > 0
+        ? `${count.toLocaleString('en-US')} free listings match your search and filters. Subscribe to see them all, with photos, details and the map.`
+        : 'No free listings match your search and filters. Subscribe to see every listing, with photos, details and the map.',
+    previewLabel: 'Blurred preview of current listings',
+    seePlans: 'See plans',
+    signInHint: 'Already subscribed?',
+    signIn: 'Sign in',
+    refreshStatus: 'Refresh status',
+    refreshNothing: 'No active subscription on this account yet. If you just paid, try again in a minute.',
+    detailTitle: 'This listing is for subscribers',
+    detailBody: 'Subscribe to see photos, details and how to collect it.',
+    favoritesTitle: 'Favorites are for subscribers',
+    favoritesBody: 'Subscribe to see the listings you saved.',
+    backHome: 'Back to home',
+    checkoutPending: 'Payment received? Activation can take a minute. Refresh this page shortly.',
+  },
+  subscription: {
+    sectionTitle: 'Subscription',
+    manage: 'Manage subscription',
+    active: (plan: string) => `Active plan: ${plan}`,
+    inactive: 'No active subscription',
+    endsAtPeriodEnd: 'Cancels at the end of the current period',
+    portalError: 'Couldn’t open the billing portal. Please try again.',
   },
   pwa: {
     install: {
       title: 'Add to Home Screen',
       description:
         'On iPhone, push notifications only work when you open the app from the Home Screen icon.',
-      step1: 'Tap the Share button in Safari (icon at the bottom).',
+      step1: 'Tap your browser’s Share button (in Safari it’s at the bottom).',
       step2: 'Scroll and select “Add to Home Screen”.',
       step3: 'Open the app from the Home Screen icon, then enable push notifications.',
       confirmInstalled: 'I added it to Home',
       continueWithoutPush: 'Continue without push',
+      stillInBrowser:
+        'You’re still in the browser. Close this tab, then open ZeroDollar from the new icon on your Home Screen to turn on push.',
     },
   },
   sheet: {
