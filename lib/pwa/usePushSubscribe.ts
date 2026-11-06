@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
-import { canOfferPush, canRequestPushPermission } from '@/lib/pwa/ios-detect';
+import { canOfferPush, canRequestPushPermission, isIOS, isStandalonePwa } from '@/lib/pwa/ios-detect';
 import { urlBase64ToUint8Array } from '@/lib/pwa/vapid';
 import { readAppPreferences } from '@/lib/settings/preferences';
 
@@ -24,6 +24,13 @@ export async function requestPushPermissionAndSubscribe(): Promise<PushSubscribe
   } = await supabase.auth.getUser();
   if (!user) {
     return { ok: false, reason: 'not_logged_in' };
+  }
+
+  // Every iOS browser (Safari, Edge, Chrome…) lacks web push in a normal tab; it only exists once the app is
+  // opened from the Home Screen. Check this before feature detection, or iPhone users get "unsupported"
+  // instead of the Add to Home Screen guidance.
+  if (isIOS() && !isStandalonePwa()) {
+    return { ok: false, reason: 'ios_not_ready' };
   }
 
   if (!canOfferPush()) {
