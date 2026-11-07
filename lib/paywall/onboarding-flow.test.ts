@@ -84,8 +84,8 @@ describe('onboardingReducer', () => {
     });
     state = onboardingReducer(state, { type: 'toggleInterest', interest: 'everything' });
     expect(state.interests).toEqual(['everything']);
-    state = onboardingReducer(state, { type: 'toggleInterest', interest: 'furniture' });
-    expect(state.interests).toEqual(['furniture']);
+    state = onboardingReducer(state, { type: 'toggleInterest', interest: 'pets' });
+    expect(state.interests).toEqual(['pets']);
   });
 
   it('skip from a value-prop step lands on the preview, not past it', () => {
@@ -134,7 +134,7 @@ describe('resume state', () => {
     const state: OnboardingState = {
       screen: 'alerts',
       city: 'venice',
-      interests: ['books', 'furniture'],
+      interests: ['books', 'pets'],
       mobility: 'foot',
       radiusKm: 1,
       locationGranted: true,
@@ -160,5 +160,24 @@ describe('resume state', () => {
     expect(readResumeState(storage)?.screen).toBe('account');
     clearResumeState(storage);
     expect(readResumeState(storage)).toBeNull();
+  });
+});
+
+describe('alerts step where push cannot work in this tab', () => {
+  const at = (screen: OnboardingState['screen'], alertsAvailable: boolean): OnboardingState => ({
+    ...INITIAL_ONBOARDING_STATE,
+    screen,
+    alertsAvailable,
+  });
+
+  it('goes straight from the account step to the paywall', () => {
+    expect(onboardingReducer(at('account', false), { type: 'next' }).screen).toBe('paywall');
+    expect(onboardingReducer(at('account', true), { type: 'next' }).screen).toBe('alerts');
+  });
+
+  it('resuming onto the alerts step lands on the paywall and keeps this tab’s capability', () => {
+    const resumed = onboardingReducer(at('hook', false), { type: 'resume', state: at('alerts', true) });
+    expect(resumed.screen).toBe('paywall');
+    expect(resumed.alertsAvailable).toBe(false);
   });
 });

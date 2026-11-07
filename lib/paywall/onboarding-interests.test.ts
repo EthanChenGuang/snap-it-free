@@ -14,7 +14,7 @@ describe('reconcileInterestSelection', () => {
   });
 
   it('makes "everything" exclusive both ways', () => {
-    expect(reconcileInterestSelection(['books', 'furniture'], 'everything')).toEqual(['everything']);
+    expect(reconcileInterestSelection(['books', 'pets'], 'everything')).toEqual(['everything']);
     expect(reconcileInterestSelection(['everything'], 'books')).toEqual(['books']);
     expect(reconcileInterestSelection(['everything'], 'everything')).toEqual([]);
   });
@@ -29,14 +29,14 @@ describe('interestsToSubitoSlugs', () => {
   it('returns no filter for everything, nothing, or all specific interests picked', () => {
     expect(interestsToSubitoSlugs(['everything'])).toEqual([]);
     expect(interestsToSubitoSlugs([])).toEqual([]);
-    expect(interestsToSubitoSlugs(['furniture', 'electronics', 'clothes', 'books', 'home_decor'])).toEqual([]);
+    expect(interestsToSubitoSlugs(['electronics', 'kids', 'appliances', 'books', 'clothes', 'home_decor', 'pets'])).toEqual([]);
   });
 });
 
 describe('interestsToAlertKeyword', () => {
   it('only yields a keyword when exactly one specific interest is picked', () => {
     expect(interestsToAlertKeyword(['books'])).toBe('libri');
-    expect(interestsToAlertKeyword(['books', 'furniture'])).toBeNull();
+    expect(interestsToAlertKeyword(['books', 'pets'])).toBeNull();
     expect(interestsToAlertKeyword(['everything'])).toBeNull();
     expect(interestsToAlertKeyword([])).toBeNull();
   });
@@ -67,5 +67,15 @@ describe('onboardingFilterPrefs', () => {
     expect(prefs.mode).toBe('city');
     expect(prefs.radiusEnabled).toBe(false);
     expect(prefs.categories).toEqual([]);
+  });
+});
+
+describe('interest chips (Guang, 2026-11-07)', () => {
+  it('has no furniture chip and keeps pets in the bottom row', async () => {
+    const { ONBOARDING_INTERESTS } = await import('./onboarding-interests');
+    const keys = ONBOARDING_INTERESTS.map((interest) => interest.key);
+    expect(keys).not.toContain('furniture');
+    expect(keys.indexOf('pets')).toBeGreaterThanOrEqual(keys.length - 2);
+    expect(ONBOARDING_INTERESTS.find((interest) => interest.key === 'kids')?.subitoSlugs).toEqual(['bambini-giocattoli']);
   });
 });

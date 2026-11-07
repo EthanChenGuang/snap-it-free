@@ -50,6 +50,15 @@ export function canRequestPushPermission(isLoggedIn: boolean): boolean {
   return true;
 }
 
+/**
+ * Whether "Turn on alerts" can actually work in this tab. iOS browsers only get web push once the app is
+ * opened from the Home Screen; other browsers need the Push API. Onboarding skips its alerts step when false.
+ */
+export function canUsePushHere(): boolean {
+  if (isIOS() && !isStandalonePwa()) return false;
+  return canOfferPush();
+}
+
 export function needsIosInstallGuide(): boolean {
   return isIOS() && !isStandalonePwa() && !isIosPushDismissed();
 }

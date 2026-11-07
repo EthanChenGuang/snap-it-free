@@ -16,11 +16,15 @@ export type OnboardingInterest = {
 };
 
 export const ONBOARDING_INTERESTS: readonly OnboardingInterest[] = [
-  { key: 'furniture', subitoSlugs: ['arredamento-casalinghi'], keyword: 'mobili' },
+  // Order is display order (Guang, 2026-11-07): no furniture chip (most of it is worn; "Everything" still
+  // includes it), pets low in the grid.
   { key: 'electronics', subitoSlugs: ['informatica', 'telefonia', 'audio-video'], keyword: 'elettronica' },
-  { key: 'clothes', subitoSlugs: ['abbigliamento-accessori'], keyword: 'abbigliamento' },
+  { key: 'kids', subitoSlugs: ['bambini-giocattoli'], keyword: 'giochi' },
+  { key: 'appliances', subitoSlugs: ['elettrodomestici'], keyword: 'elettrodomestico' },
   { key: 'books', subitoSlugs: ['libri-riviste'], keyword: 'libri' },
-  { key: 'home_decor', subitoSlugs: ['giardino-fai-da-te'], keyword: 'casa' },
+  { key: 'clothes', subitoSlugs: ['abbigliamento-accessori'], keyword: 'abbigliamento' },
+  { key: 'home_decor', subitoSlugs: ['giardino-fai-da-te'], keyword: 'giardino' },
+  { key: 'pets', subitoSlugs: ['animali'], keyword: 'animali' },
   { key: 'everything', subitoSlugs: [], keyword: null },
 ];
 

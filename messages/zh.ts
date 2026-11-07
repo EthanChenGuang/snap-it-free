@@ -416,8 +416,8 @@ export const messages: Messages = {
       liveLine: (count: number) => `威尼托大区此刻有 ${count.toLocaleString('zh-CN')} 件免费物品`,
     },
     how: {
-      title: '所有免费好物，一个信息流',
-      emphasis: '一个',
+      title: '免费好物，轻松找到',
+      emphasis: '轻松',
       rows: [
         '最新发布的赠送好物，新的在前',
         '每张卡片显示城市和发布时间',
@@ -467,11 +467,13 @@ export const messages: Messages = {
       hint: '可多选，我们会用它们设置你的信息流和提醒。',
       selected: (count: number) => `已选 ${count} 项`,
       chips: {
-        furniture: '家具',
         electronics: '电子产品',
-        clothes: '衣物',
+        kids: '儿童与玩具',
+        appliances: '家电',
         books: '书籍',
-        home_decor: '家居装饰',
+        clothes: '衣物',
+        home_decor: '园艺与 DIY',
+        pets: '宠物',
         everything: '全部',
       },
     },

@@ -590,15 +590,9 @@ async function iphone(browser) {
   check(await screenIs(page, 'account'), 'iPhone: reaches the account step');
   await page.getByTestId('account-continue').click();
   await settle(page);
-  check(await screenIs(page, 'alerts'), 'iPhone: reaches the alerts step');
-  await page.getByRole('button', { name: 'Turn on alerts' }).click();
-  const status = page.getByRole('status').filter({ hasText: /account|iPhone|Home Screen/ });
-  await status.waitFor({ timeout: 10000 }).catch(() => {});
-  check((await status.count()) === 1, `iPhone: alerts give an honest reason ("${(await status.innerText().catch(() => '')).trim()}")`);
-  await shot(page, 'i1-alerts-iphone');
-  await page.getByRole('button', { name: 'Not now' }).click();
-  await settle(page);
-  check(await screenIs(page, 'paywall'), 'iPhone: paywall after alerts');
+  // Guang 2026-11-07: an iPhone browser tab can't turn on alerts, so the alerts step is skipped, not a dead end.
+  check(await screenIs(page, 'paywall'), 'iPhone: the account step goes straight to the paywall (no dead-end alerts step)');
+  check((await page.getByRole('button', { name: 'Turn on alerts' }).count()) === 0, 'iPhone: no "Turn on alerts" button that cannot work');
   await shot(page, 'i2-paywall-iphone');
   await page.getByTestId('paywall-close').click();
   await settle(page, 1500);

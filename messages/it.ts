@@ -438,8 +438,8 @@ export const messages = {
           : `${count.toLocaleString('it-IT')} oggetti gratis disponibili in Veneto in questo momento`,
     },
     how: {
-      title: 'Tutto il gratis in un solo feed',
-      emphasis: 'un solo',
+      title: 'Oggetti gratis, trovarli è facile',
+      emphasis: 'facile',
       rows: [
         'Regali appena pubblicati, dai più recenti',
         'Città e ora di pubblicazione su ogni scheda',
@@ -491,11 +491,13 @@ export const messages = {
       hint: 'Scegline quante vuoi. Le useremo per il tuo feed e gli avvisi.',
       selected: (count: number) => (count === 1 ? '1 selezionato' : `${count} selezionati`),
       chips: {
-        furniture: 'Mobili',
         electronics: 'Elettronica',
-        clothes: 'Abbigliamento',
+        kids: 'Bambini e giochi',
+        appliances: 'Elettrodomestici',
         books: 'Libri',
-        home_decor: 'Casa e decorazioni',
+        clothes: 'Abbigliamento',
+        home_decor: 'Giardino e fai da te',
+        pets: 'Animali',
         everything: 'Tutto',
       },
     },

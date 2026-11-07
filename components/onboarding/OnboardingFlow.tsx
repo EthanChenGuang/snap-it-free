@@ -35,11 +35,11 @@ import {
   canAdvance,
   canGoBack,
   clearResumeState,
-  introStepIndex,
   isSkippable,
   onboardingReducer,
   persistResumeState,
   readResumeState,
+  type IntroStep,
   type OnboardingAction,
   type OnboardingState,
 } from '@/lib/paywall/onboarding-flow';
@@ -52,6 +52,7 @@ import { readFilterPrefs, writeFilterPrefs } from '@/lib/filter-prefs/storage';
 import { insertAlert } from '@/lib/alerts/db';
 import { createClient } from '@/lib/supabase/client';
 import { getSupabaseEnv } from '@/lib/supabase/env';
+import { canUsePushHere } from '@/lib/pwa/ios-detect';
 import { requestPushPermissionAndSubscribe, type PushSubscribeResult } from '@/lib/pwa/usePushSubscribe';
 import { cn } from '@/lib/utils';
 import type { Messages } from '@/messages';
@@ -84,11 +85,13 @@ function StepTitle({ title, emphasis }: { title: string; emphasis: string }) {
 }
 
 const INTEREST_EMOJI: Record<string, string> = {
-  furniture: '🛋️',
   electronics: '🎧',
-  clothes: '👕',
+  kids: '🧸',
+  appliances: '☕',
   books: '📚',
+  clothes: '👕',
   home_decor: '🪴',
+  pets: '🐾',
   everything: '✨',
 };
 
@@ -131,7 +134,10 @@ function IntroHeader({
   dispatch: (action: OnboardingAction) => void;
   messages: Messages;
 }) {
-  const index = introStepIndex(state.screen);
+  // Skipped alerts step (no push in this tab) gets no dot.
+  const steps: readonly IntroStep[] =
+    state.alertsAvailable === false ? INTRO_STEPS.filter((step) => step !== 'alerts') : INTRO_STEPS;
+  const index = steps.indexOf(state.screen as IntroStep);
   return (
     <header className="flex h-16 shrink-0 items-center gap-space-md px-space-md">
       <div className="flex w-16 justify-start">
@@ -153,7 +159,7 @@ function IntroHeader({
         )}
       </div>
       <div className="flex flex-1 items-center gap-1" aria-hidden>
-        {INTRO_STEPS.map((step, stepIndex) => (
+        {steps.map((step, stepIndex) => (
           <span
             key={step}
             className={cn(
@@ -164,7 +170,7 @@ function IntroHeader({
         ))}
       </div>
       <p className="sr-only" aria-live="polite">
-        {messages.onboarding.progress(index + 1, INTRO_STEPS.length)}
+        {messages.onboarding.progress(index + 1, steps.length)}
       </p>
       <div className="flex w-16 justify-end">
         {isSkippable(state.screen) ? (
@@ -185,7 +191,10 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
   const { messages, language } = useMessages();
   const { openInstallGuide } = usePwaOnboarding();
   const reduceMotion = useReducedMotion();
-  const [state, dispatch] = useReducer(onboardingReducer, INITIAL_ONBOARDING_STATE);
+  const [state, dispatch] = useReducer(onboardingReducer, INITIAL_ONBOARDING_STATE, (initial) => ({
+    ...initial,
+    alertsAvailable: canUsePushHere(),
+  }));
   const [push, setPush] = useState<PushState>({ status: 'idle' });
   const copy = messages.onboarding;
   const cityLabels = consumerCityLabelsFromMessages(messages);

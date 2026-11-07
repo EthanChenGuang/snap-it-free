@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   canRequestPushPermission,
+  canUsePushHere,
   isIOS,
   isIosPushDismissed,
   isStandalonePwa,
@@ -53,6 +54,22 @@ describe('isIOS', () => {
         'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
     });
     expect(isIOS()).toBe(false);
+  });
+});
+
+describe('canUsePushHere', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('is false in an iPhone browser tab, whatever the browser', () => {
+    vi.stubGlobal('navigator', { userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) EdgiOS/130.0', maxTouchPoints: 5 });
+    vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false })));
+    expect(canUsePushHere()).toBe(false);
+  });
+
+  it('is false for iPadOS reporting a desktop Mac user agent', () => {
+    vi.stubGlobal('navigator', { userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15', maxTouchPoints: 5 });
+    vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false })));
+    expect(canUsePushHere()).toBe(false);
   });
 });
 

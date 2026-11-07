@@ -45,6 +45,12 @@ export type OnboardingState = {
   mobility: MobilityKey | null;
   radiusKm: number;
   locationGranted: boolean;
+  /**
+   * False where alerts can't be turned on in this tab (iPhone browser tab, no Push API). The alerts step is
+   * then skipped rather than shown as a dead end (Guang, 2026-11-07). Set once from the device; optional so
+   * older saved resume states still parse.
+   */
+  alertsAvailable?: boolean;
 };
 
 export type OnboardingAction =
@@ -103,9 +109,10 @@ export function canAdvance(state: OnboardingState): boolean {
   }
 }
 
-function shift(screen: OnboardingScreen, delta: 1 | -1): OnboardingScreen {
+function shift(screen: OnboardingScreen, delta: 1 | -1, alertsAvailable = true): OnboardingScreen {
   const index = SCREEN_ORDER.indexOf(screen);
-  return SCREEN_ORDER[Math.min(Math.max(index + delta, 0), SCREEN_ORDER.length - 1)];
+  const next = SCREEN_ORDER[Math.min(Math.max(index + delta, 0), SCREEN_ORDER.length - 1)];
+  return next === 'alerts' && !alertsAvailable ? shift(next, delta, alertsAvailable) : next;
 }
 
 export function onboardingReducer(state: OnboardingState, action: OnboardingAction): OnboardingState {
@@ -114,10 +121,10 @@ export function onboardingReducer(state: OnboardingState, action: OnboardingActi
   switch (action.type) {
     case 'next':
       if (state.screen === 'paywall' || !canAdvance(state)) return state;
-      return { ...state, screen: shift(state.screen, 1) };
+      return { ...state, screen: shift(state.screen, 1, state.alertsAvailable !== false) };
     case 'back':
       if (!canGoBack(state.screen)) return state;
-      return { ...state, screen: shift(state.screen, -1) };
+      return { ...state, screen: shift(state.screen, -1, state.alertsAvailable !== false) };
     case 'skip':
       if (!isSkippable(state.screen)) return state;
       return { ...state, screen: SKIP_TARGET };
@@ -135,7 +142,12 @@ export function onboardingReducer(state: OnboardingState, action: OnboardingActi
     case 'grantLocation':
       return { ...state, locationGranted: true };
     case 'resume':
-      return action.state;
+      // Device capability belongs to this tab, not to the saved answers.
+      return {
+        ...action.state,
+        alertsAvailable: state.alertsAvailable,
+        screen: action.state.screen === 'alerts' && state.alertsAvailable === false ? 'paywall' : action.state.screen,
+      };
     case 'finish':
       return { ...state, screen: 'done' };
   }

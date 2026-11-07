@@ -428,8 +428,8 @@ export const messages: Messages = {
           : `${count.toLocaleString('en-US')} free items active in Veneto right now`,
     },
     how: {
-      title: 'Every free find in one feed',
-      emphasis: 'one',
+      title: 'Free finds, made easy',
+      emphasis: 'easy',
       rows: [
         'Fresh giveaways, newest first',
         'City and posting time on every card',
@@ -481,11 +481,13 @@ export const messages: Messages = {
       hint: 'Pick as many as you like. We’ll use them for your feed and alerts.',
       selected: (count: number) => `${count} selected`,
       chips: {
-        furniture: 'Furniture',
         electronics: 'Electronics',
-        clothes: 'Clothes',
+        kids: 'Kids & toys',
+        appliances: 'Appliances',
         books: 'Books',
-        home_decor: 'Home & decor',
+        clothes: 'Clothes',
+        home_decor: 'Garden & DIY',
+        pets: 'Pets',
         everything: 'Everything',
       },
     },
