@@ -9,6 +9,10 @@
   - Supabase usage / plan: https://supabase.com/dashboard/project/wnerhajyjjmrtsdmdpzu/settings/billing/usage
   - Supabase SQL editor: https://supabase.com/dashboard/project/wnerhajyjjmrtsdmdpzu/sql/new
   - Supabase table editor: https://supabase.com/dashboard/project/wnerhajyjjmrtsdmdpzu/editor
+- **Act autonomously.** Do everything you are able to do yourself without asking the owner first
+  (owner instruction, 2026-11-08). Only come back to the owner for things you truly cannot do
+  (a missing credential, a blocked permission, or a decision that is genuinely theirs, like shipping
+  featured picks).
 - Reply in Chinese (the owner writes in Chinese).
 - Prefer the least-privileged credential that does the job (e.g. Supabase anon/publishable key
   for reads of public views) and say why.
