@@ -10,6 +10,7 @@ export default defineConfig({
       'messages/**/*.test.ts',
       'hooks/**/*.test.ts',
       'app/api/cron/**/*.test.ts',
+      'app/api/admin/featured/**/*.test.ts',
     ],
   },
   resolve: {

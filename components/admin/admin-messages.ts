@@ -5,6 +5,7 @@ export const adminNav = {
   runs: '运行记录',
   rejects: '拒绝记录',
   translation: '翻译队列',
+  featured: '今日精选',
   settings: '系统设置',
 } as const;
 
@@ -463,13 +464,32 @@ export const settingsMessages = {
   degradedBannerSettingsLink: '打开代理设置',
 } as const;
 
+export const featuredReviewMessages = {
+  pageTitle: '今日精选 · 审核',
+  pageSubtitle: '只有你点「通过」的图片才会出现在首页。',
+  remaining: (n: number) => `还剩 ${n} 件`,
+  studioLabel: '处理后',
+  originalLabel: '原图',
+  originalMissing: '原图不可用',
+  approve: '通过',
+  reject: '不要',
+  undo: '撤销',
+  approvedToast: '已通过',
+  rejectedToast: '已拒绝',
+  empty: '今天没有待审核的候选',
+  emptyHint: '新的候选每天早上自动生成，生成后会发消息给你。',
+  saveFailed: '保存失败，已放回队列，请重试。',
+  alreadyDecided: '这一件已经在别处审核过了。',
+  viewListing: '查看商品',
+} as const;
+
 export type AdminNavKey = keyof typeof adminNav;
 
 export const adminNavItems: Array<{
   key: AdminNavKey;
   href: string;
   icon: string;
-  badge?: 'pendingTranslations' | 'rejects';
+  badge?: 'pendingTranslations' | 'rejects' | 'featured';
 }> = [
   { key: 'dashboard', href: '/admin', icon: 'dashboard' },
   { key: 'sources', href: '/admin/sources', icon: 'source' },
@@ -477,5 +497,6 @@ export const adminNavItems: Array<{
   { key: 'runs', href: '/admin/runs', icon: 'play_arrow' },
   { key: 'rejects', href: '/admin/rejects', icon: 'block', badge: 'rejects' },
   { key: 'translation', href: '/admin/translation', icon: 'translate', badge: 'pendingTranslations' },
+  { key: 'featured', href: '/admin/featured', icon: 'auto_awesome', badge: 'featured' },
   { key: 'settings', href: '/admin/settings', icon: 'settings' },
 ];

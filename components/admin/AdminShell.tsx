@@ -18,6 +18,7 @@ type AdminShellProps = {
   children: React.ReactNode;
   pendingTranslationsCount?: number;
   rejectsCount?: number;
+  featuredPendingCount?: number;
   footerStats?: FooterStats;
 };
 
@@ -39,10 +40,14 @@ function isNavActive(pathname: string, href: string): boolean {
 }
 
 function badgeCount(
-  badge: 'pendingTranslations' | 'rejects' | undefined,
+  badge: 'pendingTranslations' | 'rejects' | 'featured' | undefined,
   pendingTranslationsCount: number,
   rejectsCount: number,
+  featuredPendingCount = 0,
 ): number | undefined {
+  if (badge === 'featured' && featuredPendingCount > 0) {
+    return featuredPendingCount;
+  }
   if (badge === 'pendingTranslations' && pendingTranslationsCount > 0) {
     return pendingTranslationsCount;
   }
@@ -57,6 +62,7 @@ export function AdminShell({
   children,
   pendingTranslationsCount = 0,
   rejectsCount = 0,
+  featuredPendingCount = 0,
   footerStats,
 }: AdminShellProps) {
   return (
@@ -65,6 +71,7 @@ export function AdminShell({
         <AdminShellInner
           operatorEmail={operatorEmail}
           rejectsCount={rejectsCount}
+          featuredPendingCount={featuredPendingCount}
           footerStats={footerStats}
         >
           {children}
@@ -78,6 +85,7 @@ function AdminShellInner({
   operatorEmail,
   children,
   rejectsCount = 0,
+  featuredPendingCount = 0,
   footerStats,
 }: Omit<AdminShellProps, 'pendingTranslationsCount'>) {
   const pathname = usePathname();
@@ -96,7 +104,7 @@ function AdminShellInner({
         <nav className="flex flex-1 flex-col gap-1" aria-label="Admin navigation">
           {adminNavItems.map((item) => {
             const active = isNavActive(pathname, item.href);
-            const count = badgeCount(item.badge, pendingTranslationsCount, rejectsCount);
+            const count = badgeCount(item.badge, pendingTranslationsCount, rejectsCount, featuredPendingCount);
 
             return (
               <Link
