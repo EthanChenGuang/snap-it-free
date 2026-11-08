@@ -313,6 +313,15 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
         transition: { duration: 0.24, ease: [0.16, 1, 0.3, 1] as const },
       };
 
+  // "How" cards: the curated computer + pet. Wait for them rather than flash other items first; fall back to
+  // plain newest rows only if the region data fails or has no match.
+  const howCards =
+    region.status === 'ready' && region.showcase.length === 2
+      ? region.showcase
+      : region.status === 'loading'
+        ? []
+        : sampleListings.slice(0, 2);
+
   // Personalized preview/paywall figures from real data.
   const previewCityLabel = state.city ? cityLabels[state.city] : null;
   const previewCount =
@@ -410,9 +419,9 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                   {state.screen === 'how' && (
                     <>
                       <StepTitle title={copy.how.title} emphasis={copy.how.emphasis} />
-                      {sampleListings.length > 0 && (
+                      {howCards.length > 0 && (
                         <div className="relative mt-space-lg flex justify-center gap-space-md px-space-xs py-space-xs">
-                          {sampleListings.slice(0, 2).map((listing, index) => (
+                          {howCards.map((listing, index) => (
                             <MiniFeedCard key={listing.id} listing={listing} tilt={index === 0 ? -4 : 4} />
                           ))}
                           <Sparkle className="-top-1 right-1 h-6 w-6 text-[#F2512D]" />

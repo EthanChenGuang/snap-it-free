@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ListingRow } from '@/lib/listings/types';
-import { activeCityCount, buildCityMap, dailyCountsLast7, newestPostedMs } from './onboarding-stats';
+import { activeCityCount, buildCityMap, dailyCountsLast7, newestPostedMs, pickShowcase } from './onboarding-stats';
 
 function row(over: Partial<ListingRow>): ListingRow {
   return {
@@ -73,5 +73,37 @@ describe('buildCityMap', () => {
     const [lng, lat] = map!.cities[0].lngLat;
     expect(lat).toBeCloseTo(45.45, 2);
     expect(lng).toBeCloseTo(9.15, 2);
+  });
+});
+
+describe('pickShowcase', () => {
+  const tech = (id: string, title: string, at: number) => row({ id, title, category: 'informatica', posted_at: new Date(at).toISOString() });
+  const pet = (id: string, title: string, at: number) => row({ id, title, category: 'animali', posted_at: new Date(at).toISOString() });
+
+  it('uses the pinned iMac and Ragdoll while they are active', async () => {
+    const { SHOWCASE_PINNED } = await import('./onboarding-stats');
+    const picked = pickShowcase([
+      tech('x', 'MacBook Pro', NOW),
+      tech(SHOWCASE_PINNED.electronics, 'iMac', NOW - 9e8),
+      pet(SHOWCASE_PINNED.pet, 'Ragdoll', NOW - 9e8),
+      pet('y', 'Gattina', NOW),
+    ]);
+    expect(picked.map((r) => r.id)).toEqual([SHOWCASE_PINNED.electronics, SHOWCASE_PINNED.pet]);
+  });
+
+  it('falls back to the newest premium-looking computer item and the newest pet, skipping junk', () => {
+    const picked = pickShowcase([
+      tech('a', 'Cover iPhone 5', NOW),
+      tech('b', 'C.E.R.C.O MSI MEG', NOW),
+      tech('c', 'Monitor Samsung 22 pollici', NOW - 1000),
+      tech('d', 'Stampante Epson', NOW - 10),
+      pet('e', 'Cucciola Doriana', NOW - 5),
+      row({ id: 'f', title: 'Divano', category: 'arredamento-casalinghi', posted_at: new Date(NOW).toISOString() }),
+    ]);
+    expect(picked.map((r) => r.id)).toEqual(['c', 'e']);
+  });
+
+  it('never picks an item without a photo', () => {
+    expect(pickShowcase([tech('a', 'Laptop Dell', NOW), pet('b', 'Gatto', NOW)].map((r) => ({ ...r, photo_url: '' })))).toEqual([]);
   });
 });

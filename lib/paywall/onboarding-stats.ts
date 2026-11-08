@@ -1,5 +1,6 @@
 import { getCityByConsumerKey, type ConsumerCityKey } from '@/lib/geo/italian-cities';
 import { listingConsumerCity } from '@/lib/listings/filters';
+import { listingPhotoUrls } from '@/lib/listings/listing-photos';
 import type { ListingRow } from '@/lib/listings/types';
 
 /**
@@ -98,4 +99,38 @@ export function buildCityMap(rows: readonly ListingRow[]): CityMap | null {
   if (cities.length === 0) return null;
   cities.sort((a, b) => b.count - a.count || a.city.localeCompare(b.city));
   return { total: cities.reduce((sum, bubble) => sum + bubble.count, 0), cities };
+}
+
+/**
+ * Hand-picked real listings for the "how" screen (Guang, 2026-11-08: one premium-looking computer, one pet).
+ * Used only while still in the active rows; when they expire the rule-based pick below takes over.
+ */
+export const SHOWCASE_PINNED = {
+  electronics: '9f15b82a-ce81-4225-83d2-6d0eab6c2894', // iMac
+  pet: '71c423ec-72bb-4a10-9f0d-67a43bf93ccd', // Ragdoll kitten for adoption
+} as const;
+
+const ELECTRONICS_CATEGORIES = new Set(['informatica', 'telefonia', 'audio-video', 'videogiochi']);
+const PREMIUM_ELECTRONICS =
+  /macbook|imac|ipad|iphone|laptop|notebook|portatile|monitor|msi|asus|rog|alienware|lenovo|dell|thinkpad|surface|playstation|ps5|nintendo|xbox|gaming|computer|tablet/i;
+// Wanted ads, accessories and broken items don't sell the idea.
+const NOT_SHOWCASE =
+  /cerco|c\.e\.r\.c\.o|cover|custodia|cavo|cavi|toner|non funzionant|rott|danneggiat|ritiro|prenotat|vecchi|datat|crt|charging|stand|batteria|tastiera/i;
+
+function newestFirst(rows: readonly ListingRow[]): ListingRow[] {
+  return [...rows].sort((a, b) => (postedMs(b) ?? 0) - (postedMs(a) ?? 0));
+}
+
+/** One computer-type item and one pet, both real active rows with a photo; [] slots are dropped. */
+export function pickShowcase(rows: readonly ListingRow[]): ListingRow[] {
+  const withPhoto = rows.filter((row) => listingPhotoUrls(row)[0]);
+  const byId = new Map(withPhoto.map((row) => [row.id, row]));
+  const electronics = withPhoto.filter((row) => ELECTRONICS_CATEGORIES.has(row.category ?? ''));
+  const pets = withPhoto.filter((row) => row.category === 'animali' && !NOT_SHOWCASE.test(row.title));
+  const tech =
+    byId.get(SHOWCASE_PINNED.electronics) ??
+    newestFirst(electronics.filter((row) => PREMIUM_ELECTRONICS.test(row.title) && !NOT_SHOWCASE.test(row.title)))[0] ??
+    newestFirst(electronics.filter((row) => !NOT_SHOWCASE.test(row.title)))[0];
+  const pet = byId.get(SHOWCASE_PINNED.pet) ?? newestFirst(pets)[0];
+  return [tech, pet].filter((row): row is ListingRow => Boolean(row));
 }

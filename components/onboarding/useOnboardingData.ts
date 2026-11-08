@@ -14,6 +14,7 @@ import { isPaywallFlagEnabled } from '@/lib/paywall/gate';
 import {
   activeCityCount,
   buildCityMap,
+  pickShowcase,
   dailyCountsLast7,
   newestPostedMs,
   type DailyCount,
@@ -47,6 +48,8 @@ export type RegionTeaserState =
       map: CityMap | null;
       /** Favourites screen: newest items with a photo. */
       favorites: ListingRow[];
+      /** "How" screen cards: a hand-picked computer item and a pet (real, active). */
+      showcase: ListingRow[];
     }
   | { status: 'error' };
 
@@ -128,6 +131,7 @@ export function useRegionTeaser(): RegionTeaserState {
           cityCount: activeCityCount(scope),
           map: buildCityMap(rows),
           favorites: newestWithPhoto(scope, 3),
+          showcase: pickShowcase(rows),
         });
       },
       () => !cancelled && setState({ status: 'error' }),
