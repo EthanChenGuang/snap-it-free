@@ -21,7 +21,7 @@ describe('parseCategoryNextData', () => {
     expect(first.external_id).toBe('656979545');
     expect(first.title).toBe('mobiletto legno');
     expect(first.photo_url).toContain('1f42c45e-b720-48ea-bc45-6f4dca904710');
-    expect(first.photo_url).toContain('rule=card-desktop-new-small-4x-auto');
+    expect(first.photo_url).toContain('rule=card-mobile-new-large-4x-auto');
     expect(first.external_url).toContain('656979545.htm');
     expect(first.posted_at).toMatch(/2026-08-11/);
     expect(first.price).toBe('0 €');

@@ -9,15 +9,21 @@
   - Supabase usage / plan: https://supabase.com/dashboard/project/wnerhajyjjmrtsdmdpzu/settings/billing/usage
   - Supabase SQL editor: https://supabase.com/dashboard/project/wnerhajyjjmrtsdmdpzu/sql/new
   - Supabase table editor: https://supabase.com/dashboard/project/wnerhajyjjmrtsdmdpzu/editor
+- **Act autonomously.** Do everything you are able to do yourself without asking the owner first
+  (owner instruction, 2026-11-08). Only come back to the owner for things you truly cannot do
+  (a missing credential, a blocked permission, or a decision that is genuinely theirs).
 - Reply in Chinese (the owner writes in Chinese).
 - Prefer the least-privileged credential that does the job (e.g. Supabase anon/publishable key
   for reads of public views) and say why.
 
 ## Product constraints
 
-- **Never display watermarked listing photos.** Subito full-frame presets (`gallery-*`,
-  `fullscreen-*`, `card-mobile-large-*`) burn the Subito logo in; only `*-new-*` card presets are
-  watermark-free. See `lib/listings/subito-photo-url.ts` and its guard test.
+- **Never display watermarked listing photos.** `gallery-*`, `fullscreen-*` and old
+  `card-mobile-large-*` presets burn the Subito logo in; only `*-new-*` card presets are
+  watermark-free (`card-mobile-new-large-*` is watermark-free and full frame). See `lib/listings/subito-photo-url.ts` and its guard test.
 - Listing images are hot-linked from the Subito CDN (native `<img>` / `unoptimized`), so they
   cost us no hosting or image-optimization fees. Anything that makes us host images ourselves
   (e.g. AI-processed photos) adds Supabase storage/egress cost — call that out.
+- Owner prefers large, high-resolution listing photos (looks more premium). Featured picks
+  (AI cutouts, branch `claude/featured-picks`) were tried and rejected by the owner: cutouts of
+  worn free items still look cheap. Do not revive that direction.
