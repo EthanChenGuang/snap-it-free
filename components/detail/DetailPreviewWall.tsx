@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeSubitoPhotoUrl } from '@/lib/listings/subito-photo-url';
 import '@/app/listing-detail.css';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -74,7 +75,7 @@ export function DetailPreviewWall({ listing, redirectTo }: DetailPreviewWallProp
       <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-surface-container-low md:aspect-[4/3]">
         {listing.photo_url ? (
           <Image
-            src={listing.photo_url}
+            src={normalizeSubitoPhotoUrl(listing.photo_url)}
             alt={displayTitle}
             fill
             className="object-cover"

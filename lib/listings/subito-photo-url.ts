@@ -1,5 +1,13 @@
-/** Subito CDN requires a resize rule; bare cdnBaseUrl returns HTTP 400. */
-export const SUBITO_LISTING_IMAGE_RULE = 'gallery-mobile-1x-auto';
+/**
+ * Subito CDN requires a resize rule; bare cdnBaseUrl returns HTTP 400.
+ *
+ * Watermark policy: only `*-new-*` card presets are center-cropped WITHOUT the Subito
+ * watermark. Full-frame presets (`gallery-*`, `fullscreen-*`, `card-mobile-large-*`)
+ * burn the Subito logo into the bottom-right corner — never use them for display.
+ */
+
+/** Detail hero / default preset — 800×800 watermark-free square (~30–60 KB JPEG). */
+export const SUBITO_LISTING_IMAGE_RULE = 'card-desktop-new-small-4x-auto';
 
 /** ~216×164 JPEG (~5.7 KB) — Subito search-card preset; good for 2-col feed thumbs. */
 export const SUBITO_LISTING_THUMBNAIL_RULE = 'card-mobile-new-small-2x-auto';
