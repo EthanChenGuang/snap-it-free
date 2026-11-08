@@ -86,12 +86,12 @@ function StepTitle({ title, emphasis }: { title: string; emphasis: string }) {
 
 const INTEREST_EMOJI: Record<string, string> = {
   electronics: '🎧',
+  pets: '🐾',
   kids: '🧸',
+  furniture: '🛋️',
   appliances: '☕',
   books: '📚',
   clothes: '👕',
-  home_decor: '🪴',
-  pets: '🐾',
   everything: '✨',
 };
 

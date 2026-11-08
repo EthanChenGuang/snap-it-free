@@ -29,7 +29,7 @@ describe('interestsToSubitoSlugs', () => {
   it('returns no filter for everything, nothing, or all specific interests picked', () => {
     expect(interestsToSubitoSlugs(['everything'])).toEqual([]);
     expect(interestsToSubitoSlugs([])).toEqual([]);
-    expect(interestsToSubitoSlugs(['electronics', 'kids', 'appliances', 'books', 'clothes', 'home_decor', 'pets'])).toEqual([]);
+    expect(interestsToSubitoSlugs(['electronics', 'pets', 'kids', 'furniture', 'appliances', 'books', 'clothes'])).toEqual([]);
   });
 });
 
@@ -70,12 +70,13 @@ describe('onboardingFilterPrefs', () => {
   });
 });
 
-describe('interest chips (Guang, 2026-11-07)', () => {
-  it('has no furniture chip and keeps pets in the bottom row', async () => {
+describe('interest chips (Guang, 2026-11-08)', () => {
+  it('puts pets second and furniture fourth, in an even grid', async () => {
     const { ONBOARDING_INTERESTS } = await import('./onboarding-interests');
     const keys = ONBOARDING_INTERESTS.map((interest) => interest.key);
-    expect(keys).not.toContain('furniture');
-    expect(keys.indexOf('pets')).toBeGreaterThanOrEqual(keys.length - 2);
+    expect(keys[1]).toBe('pets');
+    expect(keys[3]).toBe('furniture');
+    expect(keys.length % 2).toBe(0);
     expect(ONBOARDING_INTERESTS.find((interest) => interest.key === 'kids')?.subitoSlugs).toEqual(['bambini-giocattoli']);
   });
 });
