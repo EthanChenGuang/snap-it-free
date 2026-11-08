@@ -18,6 +18,7 @@ source: docs/explore/premium-listing-photos/README.md
 - **FEAT-04** 首页 `今日精选` 横滑栏位于 feed 顶部；点开进入原商品详情页（详情页继续用原图）。
 - **FEAT-05** 精选图由我们托管：WebP 400×500（卡片）为主，商品下架或过期时删除。
 - **FEAT-06** 成本可见：记录每日处理张数、质检花费、存储量；流量过 Supabase Free 额度一半时告警。
+- **FEAT-08** 视觉采用 A′（`sketch-featured-final.html`）：横滑 4:5 卡片、宽 40%、中性灰棚拍背景、图上不叠文字、真实件数 + “店主每日挑选”、依次浮现（遵守 prefers-reduced-motion）。
 - **FEAT-07** 无精选时（审核前 / 0 张通过）整栏隐藏，不显示空状态。
 
 ## Pipeline（草案）
@@ -26,7 +27,7 @@ source: docs/explore/premium-listing-photos/README.md
    源图用 full-frame `gallery-desktop-2x-auto`（仅在内部处理，绝不直接展示）。
 3. **质检**：spike 001 的 mask 启发式（水印区、贴边、碎片、solidity、覆盖率）+ 视觉 AI 复核
    （"物品完整？只有一件？有无 logo/文字水印？"）。
-4. **合成**：暖灰渐变背景 + 柔和接触阴影，输出 4:5。
+4. **合成**：中性灰渐变背景（#F9F9F8→#E8E8E7） + 柔和接触阴影，输出 4:5。
 5. **审核**：`featured_candidates` 表（listing_id、processed_path、gate 结果、status: pending/approved/rejected、date）。
 6. **展示**：`featured_picks` 当天 approved 记录 → 首页横滑栏。
 
@@ -41,5 +42,5 @@ source: docs/explore/premium-listing-photos/README.md
 - UGC 照片处理（后续视效果再定）。
 
 ## Suggested next GSD steps
-`/gsd-sketch --wrap-up`（先在 sketch-featured-strip.html 里选定样式）→ `/gsd-discuss-phase` →
+`/gsd-discuss-phase` →
 `/gsd-plan-phase` → `/gsd-execute-phase`。

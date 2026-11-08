@@ -13,7 +13,7 @@ from PIL import Image, ImageFilter, ImageEnhance
 from rembg import new_session, remove
 
 CANVAS = (1000, 1250)          # 4:5, matches the feed card
-BG_TOP, BG_BOTTOM = (247, 245, 242), (229, 225, 219)   # warm grey studio sweep
+BG_TOP, BG_BOTTOM = (249, 249, 248), (232, 232, 231)   # neutral sweep = DESIGN.md surface tokens (spike ran warm #F7F5F2→#E5E1DB)
 
 
 def keep_main_components(alpha: np.ndarray, min_ratio=0.04) -> np.ndarray:

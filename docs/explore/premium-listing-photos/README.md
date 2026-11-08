@@ -26,7 +26,10 @@ feed 里的物品看起来破旧、简陋。图片糊只是一部分原因；根
 3. **不对全部商品自动处理**（见 spike 001：约 1/3 失败，水印压在物品上时去不掉）。
 4. **改为"今日精选"**：每天挑 15–20 件照片条件好的商品做棚拍图，放在首页顶部横滑栏；
    其余商品保持现状。
-5. **挑选方式：C 半自动** —— 系统自动生成候选 + 棚拍图，owner 在后台点"通过/不要"
+5. **视觉方案：A′ 横滑卡片（定稿）** —— 按 taste-design 规则 + DESIGN.md 审查 A/B/C 后选定，
+   见 [sketch-featured-final.html](sketch-featured-final.html)。棚拍背景用中性灰 `#F9F9F8→#E8E8E7`
+   （与 surface token 一致），图上不叠文字，显示真实件数，依次浮现。
+6. **挑选方式：C 半自动** —— 系统自动生成候选 + 棚拍图，owner 在后台点"通过/不要"
    （预计每天 1–2 分钟）。
 
 ## 真实数据（Supabase `listings_public`，2026-11-08）
@@ -58,3 +61,4 @@ feed 里的物品看起来破旧、简陋。图片糊只是一部分原因；根
 - [phase-featured-picks.md](phase-featured-picks.md) — 新阶段：今日精选
 - [research-questions.md](research-questions.md) — 待研究问题
 - [sketch-featured-strip.html](sketch-featured-strip.html) — 今日精选栏 3 个视觉方案
+- [sketch-featured-final.html](sketch-featured-final.html) — 定稿 A′ 与原 A 对比及修改依据
