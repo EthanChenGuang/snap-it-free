@@ -52,3 +52,22 @@ describe('summarizeCityTeaser', () => {
     expect(summarizeCityTeaser(rows, 'verona')).toEqual({ count: 0, thumbnails: [] });
   });
 });
+
+describe('summarizeCityTeaser follows interests and "Other city"', () => {
+  const items = [
+    listing({ id: 'b1', city: 'milano', category: 'libri-riviste', photo_url: 'https://img/b1.jpg' }),
+    listing({ id: 'p1', city: 'milano', category: 'animali', photo_url: 'https://img/p1.jpg' }),
+    listing({ id: 'b2', city: 'roma', category: 'libri-riviste', photo_url: 'https://img/b2.jpg' }),
+    listing({ id: 'x', city: 'nowhere', category: 'libri-riviste' }),
+  ];
+
+  it('counts only the picked categories in the city', () => {
+    expect(summarizeCityTeaser(items, 'milano', 4, ['libri-riviste']).count).toBe(1);
+    expect(summarizeCityTeaser(items, 'milano', 4, []).count).toBe(2);
+  });
+
+  it("'all' counts every covered city, still narrowed by interests", () => {
+    expect(summarizeCityTeaser(items, 'all', 4, ['libri-riviste']).count).toBe(2);
+    expect(summarizeCityTeaser(items, 'all', 4).count).toBe(3);
+  });
+});

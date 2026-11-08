@@ -44,6 +44,7 @@ import {
 import {
   ONBOARDING_INTERESTS,
   interestsToAlertKeyword,
+  interestsToSubitoSlugs,
   onboardingFilterPrefs,
 } from '@/lib/paywall/onboarding-interests';
 import { readFilterPrefs, writeFilterPrefs } from '@/lib/filter-prefs/storage';
@@ -209,9 +210,11 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
 
   // Teaser data: region-wide (hook collage + Veneto counts) and per picked city.
   const region = useRegionTeaser();
-  // 'all' (the "Other" chip) means every city: no per-city teaser, region-wide totals instead.
+  // 'all' (the "Other city" chip) means every covered city, no city filter.
   const pickedCity = state.city === 'all' ? null : state.city;
-  const cityTeaser = useCityTeaser(pickedCity);
+  // Counts and photos follow the picked interests (Guang, 2026-11-08).
+  const interestCategories = useMemo(() => interestsToSubitoSlugs(state.interests), [state.interests]);
+  const cityTeaser = useCityTeaser(state.city, interestCategories);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -303,23 +306,20 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
   const allCitiesCount = region.status === 'ready' ? (region.map?.total ?? null) : null;
   const coveredCities = region.status === 'ready' ? (region.map?.cities.length ?? 0) : 0;
   const previewCityLabel = state.city === 'all' ? copy.city.allLabel : pickedCity ? cityLabels[pickedCity] : null;
-  const previewCount =
-    state.city === 'all'
-      ? allCitiesCount
-      : pickedCity
-        ? cityTeaser.status === 'ready'
-          ? cityTeaser.count
-          : null
-        : region.status === 'ready'
-          ? region.venetoCount
-          : null;
+  const previewCount = state.city
+    ? cityTeaser.status === 'ready'
+      ? cityTeaser.count
+      : null
+    : region.status === 'ready'
+      ? region.venetoCount
+      : null;
   const previewPhotos =
-    pickedCity && cityTeaser.status === 'ready' && cityTeaser.photos.length > 0
+    state.city && cityTeaser.status === 'ready' && cityTeaser.photos.length > 0
       ? cityTeaser.photos
       : region.status === 'ready'
         ? region.collage
         : [];
-  const previewLoading = pickedCity ? cityTeaser.status === 'loading' : region.status === 'loading';
+  const previewLoading = state.city ? cityTeaser.status === 'loading' : region.status === 'loading';
   const proofCount = region.status === 'ready' && region.venetoNew7d > 0 ? region.venetoNew7d : null;
 
   const paywallContext = useMemo(

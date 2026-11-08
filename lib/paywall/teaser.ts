@@ -1,5 +1,5 @@
 import type { ConsumerCityKey } from '@/lib/geo/italian-cities';
-import { matchesConsumerCity } from '@/lib/listings/filters';
+import { listingConsumerCity, matchesConsumerCity } from '@/lib/listings/filters';
 import { listingPhotoUrls } from '@/lib/listings/listing-photos';
 import type { ListingRow } from '@/lib/listings/types';
 
@@ -19,10 +19,18 @@ export const CITY_TEASER_THUMBNAIL_LIMIT = 4;
 /** Same city predicate as the feed filter, so the count equals what browse shows for that city. */
 export function summarizeCityTeaser(
   listings: readonly ListingRow[],
-  city: ConsumerCityKey,
+  city: ConsumerCityKey | 'all',
   limit = CITY_TEASER_THUMBNAIL_LIMIT,
+  /** Subito category slugs from the picked interests; empty means every category. */
+  categories: readonly string[] = [],
 ): CityTeaser {
-  const inCity = listings.filter((listing) => matchesConsumerCity(listing, city));
+  const wanted = new Set(categories);
+  const inCity = listings.filter(
+    (listing) =>
+      // 'all' ("Other city"): every covered city, the same rows the city map counts.
+      (city === 'all' ? listingConsumerCity(listing) !== null : matchesConsumerCity(listing, city)) &&
+      (wanted.size === 0 || wanted.has(listing.category ?? '')),
+  );
   const thumbnails: CityTeaserThumbnail[] = [];
   const seenPhotos = new Set<string>();
   for (const listing of inCity) {

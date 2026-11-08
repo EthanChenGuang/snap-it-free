@@ -128,11 +128,16 @@ export function useRegionTeaser(): RegionTeaserState {
  * Per-city teaser. Paywall on: the per-city definer function (044). Paywall off, or before 044:
  * summarize the rows the feed itself loads. Mirrors the original OnboardingFlow behaviour.
  */
-export function useCityTeaser(city: ConsumerCityKey | null): CityTeaserState {
+/**
+ * Real count + photos for the picked city ('all' = every covered city), narrowed to the picked interests'
+ * categories so "the free things you're interested in" is literally true (Guang, 2026-11-08).
+ */
+export function useCityTeaser(city: ConsumerCityKey | 'all' | null, categories: readonly string[] = []): CityTeaserState {
   const { language } = useMessages();
   const [state, setState] = useState<CityTeaserState>({ status: 'loading' });
   const rows = useCallback(() => activeRowsOnce(), []);
-  const lastCity = useRef<ConsumerCityKey | null>(null);
+  const lastCity = useRef<ConsumerCityKey | 'all' | null>(null);
+  const categoryKey = categories.join(',');
 
   useEffect(() => {
     if (!isPaywallFlagEnabled() && getSupabaseEnv()) void rows().catch(() => {});
@@ -148,14 +153,15 @@ export function useCityTeaser(city: ConsumerCityKey | null): CityTeaserState {
     let cancelled = false;
     setState({ status: 'loading' });
     const load = async (): Promise<CityTeaserState> => {
-      if (isPaywallFlagEnabled()) {
+      // The server teaser counts a whole city; use it only when no category narrows the count.
+      if (isPaywallFlagEnabled() && city !== 'all' && categoryKey === '') {
         const teaser = await fetchPaywallTeaser(createAnonClient(), { city, since: feedLookbackSinceIso() });
         if (teaser && teaser.count !== null) {
           const photos = teaser.photoUrls.slice(0, CITY_TEASER_THUMBNAIL_LIMIT);
           return { status: 'ready', count: teaser.count, photos: photos.map((url) => ({ key: url, url, alt: '' })) };
         }
       }
-      const summary = summarizeCityTeaser(await rows(), city);
+      const summary = summarizeCityTeaser(await rows(), city, undefined, categoryKey ? categoryKey.split(',') : []);
       return {
         status: 'ready',
         count: summary.count,
@@ -173,7 +179,7 @@ export function useCityTeaser(city: ConsumerCityKey | null): CityTeaserState {
     return () => {
       cancelled = true;
     };
-  }, [city, language, rows]);
+  }, [city, categoryKey, language, rows]);
 
   return state;
 }
