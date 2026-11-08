@@ -4,7 +4,7 @@ import { pop } from '@/components/onboarding/pop-theme';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
-/** Photo-only card with the FREE badge, for bundled illustrative photos (Stitch screen f1f5f2ef…, 2026-11-08). */
+/** Photo-only card with the FREE badge for bundled showcase photos (layout: Stitch screen f1f5f2ef…, 2026-11-08). */
 export function PhotoCard({ src, tilt = 0 }: { src: string; tilt?: number }) {
   const { messages } = useMessages();
   return (

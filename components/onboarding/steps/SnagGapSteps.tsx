@@ -241,8 +241,8 @@ export function TrustPromises({ liveCount }: { liveCount: number | null }) {
 }
 
 /**
- * Illustrative example items (Stitch screen afff87b6…, 2026-11-08), bundled so they show at once. They are
- * not listings, so the cards carry only a short item name: no listing title, age or place.
+ * Real giveaway photos hand-picked from live listings (2026-11-08), bundled so they show at once. Card layout
+ * from Stitch screen afff87b6…: a short item name only, no listing title, age or place (the listings expire).
  */
 const FAVORITE_EXAMPLES = [
   { key: 'bike', url: '/images/onboarding/favorites/bike.webp' },

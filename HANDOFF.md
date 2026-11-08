@@ -91,6 +91,7 @@ Then `/gsd-verify-work` for phases 2 and 3 so `UAT.md` exists. Preview is Vercel
 5. Webhook-only test: Guang asked for a recommendation (2026-11-04) — he runs it himself with a +alias account; see §3.2. Awaiting his go.
 6. How should this stack land on `main`? Preview already contains #8 → #7 → onboarding-snag.
 7. Legal review of the subscription Terms/Privacy copy is still pending (the 14-day clause stays unwritten).
+7b. Legal review should also cover the onboarding showcase photos: 13 real listing photos bundled as fixed promo images (list + ids in `.planning/quick/261108-ob7-curated-how-cards/SUMMARY.md`). They belong to the posters; a few originals carried a faint source watermark.
 8. `VERCEL_SHARE_TOKEN` for Preview `drive.mjs` (env only, never in the repo).
 9. ~~OTP line in production templates~~ — authorized 2026-11-04; needs a Supabase access token in the session (§3.3).
 10. Revoke the leaked Playwright session refresh token (PR #6 follow-up); decide on history purge.

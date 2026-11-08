@@ -391,7 +391,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                   {state.screen === 'how' && (
                     <>
                       <StepTitle title={copy.how.title} emphasis={copy.how.emphasis} />
-                      {/* Illustrative Stitch photos (a computer, a pet), bundled so they show at once. */}
+                      {/* Real giveaway photos (an iMac, a Ragdoll kitten) picked from live listings, bundled so they show at once. */}
                       <div className="relative mt-space-lg flex justify-center gap-space-md px-space-xs py-space-xs">
                         <PhotoCard src="/images/onboarding/how/computer.webp" tilt={-4} />
                         <PhotoCard src="/images/onboarding/how/ragdoll.webp" tilt={4} />

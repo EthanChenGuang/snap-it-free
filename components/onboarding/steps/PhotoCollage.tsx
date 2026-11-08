@@ -15,18 +15,18 @@ const SLOTS = [
 ] as const;
 
 /**
- * Hook visual (Guang, 2026-11-08): six illustrative product photos generated in Stitch (project
- * 9058658661756179433), bundled under /public so they show instantly instead of waiting for listing data.
- * They illustrate the kinds of things people give away; the live count under the headline is the real figure.
- * Stickers ("FREE", "€0") are decoration. aria-hidden.
+ * Hook visual (Guang, 2026-11-08): six real giveaway photos hand-picked from live listings (the most
+ * appealing per type), bundled under /public so they show instantly instead of waiting for listing data.
+ * Source listing ids are in .planning/quick/261108-ob7-curated-how-cards/SUMMARY.md. The live count under
+ * the headline is the real figure. Stickers ("FREE", "€0") are decoration. aria-hidden.
  */
 export const HOOK_PHOTOS = [
   { key: 'puppy', url: '/images/onboarding/hook/puppy.webp' },
-  { key: 'laptop', url: '/images/onboarding/hook/laptop.webp' },
+  { key: 'computer', url: '/images/onboarding/hook/computer.webp' },
   { key: 'kitten', url: '/images/onboarding/hook/kitten.webp' },
   { key: 'books', url: '/images/onboarding/hook/books.webp' },
   { key: 'armchair', url: '/images/onboarding/hook/armchair.webp' },
-  { key: 'headphones', url: '/images/onboarding/hook/headphones.webp' },
+  { key: 'speakers', url: '/images/onboarding/hook/speakers.webp' },
 ] as const;
 
 export function PhotoCollage({ freeLabel }: { freeLabel: string }) {

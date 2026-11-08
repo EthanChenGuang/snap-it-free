@@ -457,7 +457,7 @@ export const messages: Messages = {
       rows: ['See which cities have the most', 'Filter the feed by city in one tap', 'Tap a cluster on the map to see the photos'],
     },
     favorites: {
-      examples: { bike: 'Vintage bike', lamp: 'Table lamp', guitar: 'Acoustic guitar' },
+      examples: { bike: 'City bike', lamp: 'Desk lamp', guitar: 'Electric guitar' },
       title: 'Save your favourite finds for later',
       emphasis: 'favourite',
       body: 'Tap the heart on any item to keep it for later.',
