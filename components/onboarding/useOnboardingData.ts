@@ -14,7 +14,6 @@ import { isPaywallFlagEnabled } from '@/lib/paywall/gate';
 import {
   activeCityCount,
   buildCityMap,
-  pickShowcase,
   dailyCountsLast7,
   newestPostedMs,
   type DailyCount,
@@ -46,10 +45,6 @@ export type RegionTeaserState =
       cityCount: number;
       /** Map screen: one bubble per city with its real active count (all cities, not just Veneto). */
       map: CityMap | null;
-      /** Favourites screen: newest items with a photo. */
-      favorites: ListingRow[];
-      /** "How" screen cards: a hand-picked computer item and a pet (real, active). */
-      showcase: ListingRow[];
     }
   | { status: 'error' };
 
@@ -86,19 +81,6 @@ function distinctPhotos(listings: readonly ListingRow[], limit: number, language
   return out;
 }
 
-function newestWithPhoto(rows: readonly ListingRow[], limit: number): ListingRow[] {
-  const seen = new Set<string>();
-  return [...rows]
-    .sort((a, b) => new Date(b.posted_at).getTime() - new Date(a.posted_at).getTime())
-    .filter((row) => {
-      const url = listingPhotoUrls(row)[0];
-      if (!url || seen.has(url)) return false;
-      seen.add(url);
-      return true;
-    })
-    .slice(0, limit);
-}
-
 /** Region-wide collage + honest Veneto counts for the hook and the paywall proof line, from real rows. */
 export function useRegionTeaser(): RegionTeaserState {
   const { language } = useMessages();
@@ -130,8 +112,6 @@ export function useRegionTeaser(): RegionTeaserState {
           newestMs: newestPostedMs(scope, now),
           cityCount: activeCityCount(scope),
           map: buildCityMap(rows),
-          favorites: newestWithPhoto(scope, 3),
-          showcase: pickShowcase(rows),
         });
       },
       () => !cancelled && setState({ status: 'error' }),

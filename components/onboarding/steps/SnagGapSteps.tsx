@@ -1,7 +1,6 @@
 'use client';
 
 import { motion, useReducedMotion } from 'motion/react';
-import { ListingPhoto } from '@/components/listings/ListingPhoto';
 import { pop } from '@/components/onboarding/pop-theme';
 import { Sparkle } from '@/components/onboarding/steps/PhotoCollage';
 import { SymbolIcon } from '@/components/onboarding/SymbolIcon';
@@ -14,9 +13,7 @@ import {
   projectToFrame,
   SARDINIA,
 } from '@/lib/geo/italy-outline';
-import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { useMessages } from '@/lib/i18n/useMessages';
-import type { ListingRow } from '@/lib/listings/types';
 import type { CityMap, DailyCount } from '@/lib/paywall/onboarding-stats';
 import { cn } from '@/lib/utils';
 
@@ -243,24 +240,34 @@ export function TrustPromises({ liveCount }: { liveCount: number | null }) {
   );
 }
 
-/** Fanned real cards; the heart on the front card fills in on a loop (static under reduced motion). */
-export function FavoritesDemo({ listings }: { listings: ListingRow[] }) {
-  const { messages, language, formatRelativeTime } = useMessages();
+/**
+ * Illustrative example items (Stitch screen afff87b6…, 2026-11-08), bundled so they show at once. They are
+ * not listings, so the cards carry only a short item name: no listing title, age or place.
+ */
+const FAVORITE_EXAMPLES = [
+  { key: 'bike', url: '/images/onboarding/favorites/bike.webp' },
+  { key: 'lamp', url: '/images/onboarding/favorites/lamp.webp' },
+  { key: 'guitar', url: '/images/onboarding/favorites/guitar.webp' },
+] as const;
+
+/** Fanned example cards; the heart on the front card fills in on a loop (static under reduced motion). */
+export function FavoritesDemo() {
+  const { messages } = useMessages();
   const copy = messages.onboarding.favorites;
   const reduceMotion = useReducedMotion();
-  const cards = listings.slice(0, 3);
+  const cards = FAVORITE_EXAMPLES;
   const front = cards[0];
   const tilts = [0, -7, 6];
 
   return (
     <div data-testid="onboarding-favorites">
       <div className="relative mx-auto mt-space-lg h-[250px] w-full max-w-[340px]" aria-hidden>
-        {[...cards].reverse().map((listing) => {
-          const index = cards.indexOf(listing);
+        {[...cards].reverse().map((item) => {
+          const index = cards.indexOf(item);
           const isFront = index === 0;
           return (
             <div
-              key={listing.id}
+              key={item.key}
               className={cn('absolute left-1/2 top-2 w-[58%] bg-white p-1.5', pop.card, 'rounded-2xl')}
               style={{
                 translate: `${-50 + (index === 1 ? -34 : index === 2 ? 34 : 0)}% ${isFront ? 0 : 14}px`,
@@ -269,7 +276,8 @@ export function FavoritesDemo({ listings }: { listings: ListingRow[] }) {
               }}
             >
               <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-[#F3E2CF]">
-                <ListingPhoto src={listing.photo_url} alt="" variant="thumbnail" sizes="200px" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={item.url} alt="" className="absolute inset-0 h-full w-full object-cover" decoding="async" />
                 <span className="absolute left-1.5 top-1.5 z-[2] rounded-full border-2 border-[#1A1A2E] bg-[#7FE0B0] px-2 py-0.5 text-[10px] font-black uppercase text-[#1A1A2E]">
                   {messages.listing.free}
                 </span>
@@ -283,10 +291,9 @@ export function FavoritesDemo({ listings }: { listings: ListingRow[] }) {
                   </motion.span>
                 )}
               </div>
-              <p className="mt-1.5 line-clamp-1 px-0.5 text-label-sm font-semibold text-[#1A1A2E]">
-                {resolveListingTitle(listing, language)}
+              <p className="mt-1.5 line-clamp-1 px-0.5 pb-0.5 text-label-sm font-semibold text-[#1A1A2E]">
+                {copy.examples[item.key]}
               </p>
-              <p className="px-0.5 pb-0.5 text-[11px] text-[#4A4A5E]">{formatRelativeTime(listing.posted_at)}</p>
             </div>
           );
         })}

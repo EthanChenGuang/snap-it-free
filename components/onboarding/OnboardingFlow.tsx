@@ -9,7 +9,7 @@ import { PaywallScreen } from '@/components/onboarding/PaywallScreen';
 import { AccountStep } from '@/components/onboarding/steps/AccountStep';
 import { AlertsMock } from '@/components/onboarding/steps/AlertsMock';
 import { BuildingFeed } from '@/components/onboarding/steps/BuildingFeed';
-import { MiniFeedCard } from '@/components/onboarding/steps/MiniFeedCard';
+import { PhotoCard } from '@/components/onboarding/steps/PhotoCard';
 import { CityMapView, FavoritesDemo, TrustPromises, WeeklyVolume } from '@/components/onboarding/steps/SnagGapSteps';
 import { FeedSearching } from '@/components/listings/FeedSearching';
 import { PhotoCollage, Sparkle } from '@/components/onboarding/steps/PhotoCollage';
@@ -20,9 +20,7 @@ import { ArrowRight, SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { Button } from '@/components/ui/button';
 import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
 import { useMessages } from '@/lib/i18n/useMessages';
-import { fetchActiveListingsClient } from '@/lib/listings/client-queries';
 import { ONBOARDING_CITY_ORDER } from '@/lib/listings/filters';
-import type { ListingRow } from '@/lib/listings/types';
 import {
   isOnboardingResumeParam,
   isPaywallFlagEnabled,
@@ -213,20 +211,6 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
   const region = useRegionTeaser();
   const cityTeaser = useCityTeaser(state.city);
 
-  // One real listing for the "how it works" mini-cards.
-  const [sampleListings, setSampleListings] = useState<ListingRow[]>([]);
-  useEffect(() => {
-    if (!getSupabaseEnv()) return;
-    let cancelled = false;
-    fetchActiveListingsClient().then(
-      (rows) => !cancelled && setSampleListings(rows.slice(0, 3)),
-      () => {},
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     titleRef.current = document.getElementById(TITLE_ID) as HTMLHeadingElement | null;
@@ -312,15 +296,6 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
         exit: { opacity: 0, x: -16 },
         transition: { duration: 0.24, ease: [0.16, 1, 0.3, 1] as const },
       };
-
-  // "How" cards: the curated computer + pet. Wait for them rather than flash other items first; fall back to
-  // plain newest rows only if the region data fails or has no match.
-  const howCards =
-    region.status === 'ready' && region.showcase.length === 2
-      ? region.showcase
-      : region.status === 'loading'
-        ? []
-        : sampleListings.slice(0, 2);
 
   // Personalized preview/paywall figures from real data.
   const previewCityLabel = state.city ? cityLabels[state.city] : null;
@@ -416,15 +391,13 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                   {state.screen === 'how' && (
                     <>
                       <StepTitle title={copy.how.title} emphasis={copy.how.emphasis} />
-                      {howCards.length > 0 && (
-                        <div className="relative mt-space-lg flex justify-center gap-space-md px-space-xs py-space-xs">
-                          {howCards.map((listing, index) => (
-                            <MiniFeedCard key={listing.id} listing={listing} tilt={index === 0 ? -4 : 4} photoOnly />
-                          ))}
-                          <Sparkle className="-top-1 right-1 h-6 w-6 text-[#F2512D]" />
-                          <Sparkle className="bottom-2 left-0 h-5 w-5 text-[#00A6A6]" />
-                        </div>
-                      )}
+                      {/* Illustrative Stitch photos (a computer, a pet), bundled so they show at once. */}
+                      <div className="relative mt-space-lg flex justify-center gap-space-md px-space-xs py-space-xs">
+                        <PhotoCard src="/images/onboarding/how/computer.webp" tilt={-4} />
+                        <PhotoCard src="/images/onboarding/how/ragdoll.webp" tilt={4} />
+                        <Sparkle className="-top-1 right-1 h-6 w-6 text-[#F2512D]" />
+                        <Sparkle className="bottom-2 left-0 h-5 w-5 text-[#00A6A6]" />
+                      </div>
                       <ul className="mt-space-lg flex flex-col gap-space-sm">
                         {copy.how.rows.map((row, index) => (
                           <li
@@ -491,9 +464,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                     <>
                       <StepTitle title={copy.favorites.title} emphasis={copy.favorites.emphasis} />
                       <p className="mt-space-sm text-body-md text-[#4A4A5E]">{copy.favorites.body}</p>
-                      <FavoritesDemo
-                        listings={region.status === 'ready' && region.favorites.length > 0 ? region.favorites : sampleListings}
-                      />
+                      <FavoritesDemo />
                     </>
                   )}
 
@@ -720,7 +691,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                       <AlertsMock
                         label={copy.alerts.mockLabel}
                         appName={messages.app.title}
-                        photos={previewPhotos.slice(0, 2).map((photo) => photo.url)}
+                        photos={['/images/onboarding/alerts/bookshelf.webp', '/images/onboarding/alerts/espresso.webp']}
                         lines={[copy.alerts.mockLine, copy.alerts.mockLine2(cityOrRegion)]}
                       />
                       {push.status === 'settled' && (

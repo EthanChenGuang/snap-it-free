@@ -19,3 +19,14 @@ photos generated in Stitch (screen `e4a2b5963d1c456e891fa29b9418b36d`, `stitch/h
 kitten, books, armchair, headphones. Bundled as ~10 KB webp in `public/images/onboarding/hook/`, no data fetch.
 They illustrate categories; the live count under the headline stays the real number. Stitch's draft copy named
 Subito and claimed "No credit card required"; neither was used. Hook body no longer says "one colourful feed".
+
+## Other dynamic images (2026-11-08, later)
+Guang: same treatment for any other screen that loads photos. Now bundled Stitch photos:
+- "how": computer + ragdoll kitten (`public/images/onboarding/how/`), `PhotoCard` (photo + FREE). Replaces the
+  pinned-listing picker (`pickShowcase`, removed) and the extra full listings download it needed.
+- favourites: bike, table lamp, guitar (`.../favorites/`). Illustrative, so cards show only a short item name
+  (no listing title, age or place). Design: Stitch screen `afff87b6644f4a2ca34d3a447637af4b` (`stitch/favorites-static.png`).
+- alerts example: bookshelf + espresso machine thumbnails (`.../alerts/`); the mock is already labelled Example.
+  Stitch screen `7369a0681b2d4fc093ccbd77cab5a28b` (`stitch/alerts-static.png`).
+Kept real on purpose: the personal preview and paywall strip (blurred photos of the actual locked items behind
+"N free items in <city>").
