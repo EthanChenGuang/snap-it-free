@@ -431,7 +431,7 @@ export const messages = {
     hook: {
       title: 'Cose gratis vicino a te, ogni giorno',
       emphasis: 'gratis',
-      body: 'Gli oggetti in regalo vicino a te, raccolti in un unico feed aggiornato tutto il giorno.',
+      body: 'Computer, libri, mobili e tanto altro, regalati da persone vicino a te. Ogni giorno ne arrivano di nuovi.',
       liveLine: (count: number) =>
         count === 1
           ? '1 oggetto gratis disponibile in Veneto in questo momento'

@@ -1,9 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'motion/react';
-import { ListingPhoto } from '@/components/listings/ListingPhoto';
 import { pop } from '@/components/onboarding/pop-theme';
-import type { TeaserPhoto } from '@/components/onboarding/useOnboardingData';
 import { cn } from '@/lib/utils';
 
 /** Sticker slots (percent of the stage): position, size, tilt and shape. */
@@ -17,53 +15,51 @@ const SLOTS = [
 ] as const;
 
 /**
- * Hook visual: up to 6 real recent listing photos floating like stickers in a sticker book, with a
- * "FREE" starburst and a "€0" tag. Photos are real; the stickers are decoration. aria-hidden.
+ * Hook visual (Guang, 2026-11-08): six illustrative product photos generated in Stitch (project
+ * 9058658661756179433), bundled under /public so they show instantly instead of waiting for listing data.
+ * They illustrate the kinds of things people give away; the live count under the headline is the real figure.
+ * Stickers ("FREE", "€0") are decoration. aria-hidden.
  */
-export function PhotoCollage({ photos, freeLabel }: { photos: TeaserPhoto[]; freeLabel: string }) {
+export const HOOK_PHOTOS = [
+  { key: 'puppy', url: '/images/onboarding/hook/puppy.webp' },
+  { key: 'laptop', url: '/images/onboarding/hook/laptop.webp' },
+  { key: 'kitten', url: '/images/onboarding/hook/kitten.webp' },
+  { key: 'books', url: '/images/onboarding/hook/books.webp' },
+  { key: 'armchair', url: '/images/onboarding/hook/armchair.webp' },
+  { key: 'headphones', url: '/images/onboarding/hook/headphones.webp' },
+] as const;
+
+export function PhotoCollage({ freeLabel }: { freeLabel: string }) {
   const reduceMotion = useReducedMotion();
-  const tiles = photos.slice(0, SLOTS.length);
 
   return (
     <div className="relative mx-auto aspect-[1/0.82] w-full max-w-[380px]" aria-hidden data-testid="hook-collage">
-      {tiles.length === 0
-        ? SLOTS.map((slot, index) => (
-            <span
-              key={index}
-              className={cn('absolute bg-white/70', pop.sticker, slot.round ? 'rounded-full' : 'rounded-3xl')}
-              style={{
-                left: `${slot.left}%`,
-                top: `${slot.top}%`,
-                width: `${slot.size}%`,
-                aspectRatio: '1',
-                rotate: `${slot.rotate}deg`,
-              }}
-            />
-          ))
-        : tiles.map((photo, index) => {
-            const slot = SLOTS[index];
-            return (
-              <motion.div
-                key={photo.key}
-                className={cn(
-                  'absolute overflow-hidden bg-white',
-                  pop.sticker,
-                  slot.round ? 'rounded-full' : 'rounded-3xl',
-                )}
-                style={{ left: `${slot.left}%`, top: `${slot.top}%`, width: `${slot.size}%`, aspectRatio: '1' }}
-                initial={reduceMotion ? false : { opacity: 0, scale: 0.6, rotate: 0 }}
-                animate={{ opacity: 1, scale: 1, rotate: slot.rotate }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 260,
-                  damping: 18,
-                  delay: reduceMotion ? 0 : 0.08 + index * 0.07,
-                }}
-              >
-                <ListingPhoto src={photo.url} alt="" variant="thumbnail" sizes="140px" priority />
-              </motion.div>
-            );
-          })}
+      {HOOK_PHOTOS.map((photo, index) => {
+        const slot = SLOTS[index];
+        return (
+          <motion.div
+            key={photo.key}
+            className={cn(
+              'absolute overflow-hidden bg-white',
+              pop.sticker,
+              slot.round ? 'rounded-full' : 'rounded-3xl',
+            )}
+            style={{ left: `${slot.left}%`, top: `${slot.top}%`, width: `${slot.size}%`, aspectRatio: '1' }}
+            initial={reduceMotion ? false : { opacity: 0, scale: 0.6, rotate: 0 }}
+            animate={{ opacity: 1, scale: 1, rotate: slot.rotate }}
+            transition={{
+              type: 'spring',
+              stiffness: 260,
+              damping: 18,
+              delay: reduceMotion ? 0 : 0.08 + index * 0.07,
+            }}
+          >
+            {/* Small bundled webp (~10 KB each): a plain img, no lazy loading. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photo.url} alt="" className="h-full w-full object-cover" decoding="async" fetchPriority="high" />
+          </motion.div>
+        );
+      })}
 
       <motion.span
         className={cn(

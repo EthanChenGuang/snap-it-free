@@ -412,7 +412,7 @@ export const messages: Messages = {
     hook: {
       title: '身边的免费好物，每天都有',
       emphasis: '免费',
-      body: '身边的赠送好物，汇集在一个信息流里，全天更新。',
+      body: '电脑、书籍、家具等等，都是身边的人免费送出的。每天都有新的。',
       liveLine: (count: number) => `威尼托大区此刻有 ${count.toLocaleString('zh-CN')} 件免费物品`,
     },
     how: {

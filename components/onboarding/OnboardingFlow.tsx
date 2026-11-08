@@ -399,10 +399,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                 >
                   {state.screen === 'hook' && (
                     <>
-                      <PhotoCollage
-                        photos={region.status === 'ready' ? region.collage : []}
-                        freeLabel={messages.listing.free}
-                      />
+                      <PhotoCollage freeLabel={messages.listing.free} />
                       <div className="mt-space-md text-center">
                         <StepTitle title={copy.hook.title} emphasis={copy.hook.emphasis} />
                         <p className="mt-space-sm text-body-lg text-[#4A4A5E]">{copy.hook.body}</p>
