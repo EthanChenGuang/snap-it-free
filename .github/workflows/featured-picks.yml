@@ -62,8 +62,8 @@ jobs:
       - name: Cache cutout model
         uses: actions/cache@v4
         with:
-          path: ~/.u2net
-          key: u2net-birefnet-general-lite-v1
+          path: ~/.rembg
+          key: rembg-birefnet-general-lite-v1
 
       - name: Test image pipeline
         working-directory: scraper/featured
