@@ -110,12 +110,16 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
     setOrigin(window.location.origin);
     setInApp(isInAppBrowser(window.navigator.userAgent));
     const pending = takePendingCheckout(window.sessionStorage, source);
-    if (pending) setSelectedId(pending);
+    if (pending) {
+      setSelectedId(pending);
+      // Just back from sign-in: show progress, not the plan picker, while we check the account.
+      setPurchase('pending');
+    }
     let cancelled = false;
-    // A subscriber should never be asked to pay (e.g. onboarding forced with ?onboarding=1).
+    // A subscriber is never asked to pay and never shown a notice: straight to the feed.
     void checkRestore().then((status) => {
       if (cancelled) return;
-      if (status === 'reload') setPurchase('alreadySubscribed');
+      if (status === 'reload') openFeed();
       else if (pending) void subscribe(pending);
     });
     return () => {
@@ -127,6 +131,7 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
 
   // Leave onboarding for good and load the feed without the force param, so the server gate opens it.
   const openFeed = () => {
+    setPurchase('pending');
     markOnboardingCompleted(window.localStorage);
     clearResumeState(window.sessionStorage);
     window.location.assign(urlWithoutForceParam(window.location.href));
@@ -141,12 +146,13 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
     setPurchase('pending');
     const outcome = await startCheckout(plan);
     if (outcome.kind === 'redirect') window.location.assign(outcome.url);
+    else if (outcome.state === 'alreadySubscribed') openFeed();
     else setPurchase(outcome.state);
   };
 
   const restorePurchases = async () => {
     const outcome = await checkRestore();
-    if (outcome === 'reload') setPurchase('alreadySubscribed');
+    if (outcome === 'reload') openFeed();
     else setRestore(outcome);
   };
 
@@ -177,9 +183,7 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
       ? { icon: 'schedule', title: copy.comingSoonTitle, body: copy.comingSoonBody }
       : purchase === 'signInRequired'
         ? { icon: 'person', title: copy.signInTitle, body: copy.signInBody }
-        : purchase === 'alreadySubscribed'
-          ? { icon: 'verified', title: copy.alreadySubscribedTitle, body: copy.alreadySubscribedBody }
-          : null;
+        : null;
 
   if (notice) {
     return (
@@ -193,12 +197,6 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
             {notice.title}
           </h1>
           <p className="mt-space-sm text-body-lg text-on-surface-variant">{notice.body}</p>
-          {purchase === 'alreadySubscribed' && email && (
-            <p className="mt-space-md text-label-sm text-on-surface-variant" data-testid="paywall-subscribed-account">
-              {messages.onboarding.account.signedInAs(email)}{' '}
-              <SwitchAccountButton onSignedOut={afterSwitch} testId="paywall-switch-account" />
-            </p>
-          )}
         </div>
         <footer className="flex shrink-0 flex-col gap-space-sm px-gutter py-space-md">
           {purchase === 'signInRequired' && (
@@ -226,16 +224,10 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
               />
             </div>
           )}
-          {purchase === 'alreadySubscribed' && (
-            <Button type="button" className={pop.primaryButton} onClick={openFeed} data-testid="paywall-open-feed">
-              {copy.openFeed}
-              <ArrowRight />
-            </Button>
-          )}
           <Button
             type="button"
-            variant={purchase === 'signInRequired' || purchase === 'alreadySubscribed' ? 'ghost' : 'default'}
-            className={purchase === 'signInRequired' || purchase === 'alreadySubscribed' ? pop.ghostButton : pop.primaryButton}
+            variant={purchase === 'signInRequired' ? 'ghost' : 'default'}
+            className={purchase === 'signInRequired' ? pop.ghostButton : pop.primaryButton}
             onClick={onFinish}
             data-testid="paywall-coming-soon-continue"
           >

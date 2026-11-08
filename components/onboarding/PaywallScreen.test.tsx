@@ -173,20 +173,22 @@ describe('PaywallScreen inline sign-in', () => {
 });
 
 describe('PaywallScreen for an existing subscriber', () => {
-  it('says so on open instead of asking for payment', async () => {
-    const fetchMock = vi.fn(async () => jsonResponse(200, { signedIn: true, active: true }));
-    vi.stubGlobal('fetch', fetchMock);
+  it('opens the feed straight away instead of asking for payment or showing a notice', async () => {
+    const assign = vi.fn();
+    vi.stubGlobal('location', { ...window.location, href: 'https://x.test/?onboarding=1', assign });
+    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(200, { signedIn: true, active: true })));
     const container = await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} />);
     await flush();
 
-    expect(container.textContent).toContain(getMessages('en').paywall.alreadySubscribedTitle);
-    expect(container.querySelector('[data-testid="paywall-open-feed"]')).not.toBeNull();
-    expect(cta(container)).toBeNull();
+    expect(assign).toHaveBeenCalledTimes(1);
+    expect(String(assign.mock.calls[0][0])).not.toContain('onboarding=1');
+    expect(container.querySelector('[data-testid="paywall-alreadySubscribed"]')).toBeNull();
   });
 
-  it('shows the same notice instead of reloading when checkout answers 409', async () => {
+  it('opens the feed instead of reloading when checkout answers 409', async () => {
     const reload = vi.fn();
-    vi.stubGlobal('location', { ...window.location, reload });
+    const assign = vi.fn();
+    vi.stubGlobal('location', { ...window.location, href: 'https://x.test/?onboarding=1', reload, assign });
     vi.stubGlobal('fetch', routedFetch(jsonResponse(409, { error: 'already_subscribed' })).fn);
     const container = await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} />);
 
@@ -194,6 +196,6 @@ describe('PaywallScreen for an existing subscriber', () => {
     await flush();
 
     expect(reload).not.toHaveBeenCalled();
-    expect(container.textContent).toContain(getMessages('en').paywall.alreadySubscribedTitle);
+    expect(assign).toHaveBeenCalledTimes(1);
   });
 });

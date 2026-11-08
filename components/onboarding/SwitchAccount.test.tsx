@@ -68,18 +68,4 @@ describe('PaywallScreen account switch', () => {
     expect(container.querySelector('[data-testid="paywall-google"]')).not.toBeNull();
     expect(container.querySelector('[data-testid="paywall-cta"]')).toBeNull();
   });
-
-  it('lets an already-subscribed account switch to another one', async () => {
-    vi.stubGlobal('fetch', subscriptionStatus(true));
-    const container = await render(<PaywallScreen titleId="paywall-title" onFinish={() => {}} />);
-    await flush();
-
-    expect(container.querySelector('[data-testid="paywall-subscribed-account"]')?.textContent).toContain('wrong@example.test');
-    await click(switchButton(container));
-    await flush();
-
-    expect(signOut).toHaveBeenCalledTimes(1);
-    expect(container.textContent).toContain(getMessages('en').paywall.signInTitle);
-    expect(container.textContent).not.toContain(getMessages('en').paywall.alreadySubscribedTitle);
-  });
 });
