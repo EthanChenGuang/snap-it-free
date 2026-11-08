@@ -270,12 +270,12 @@ export function FavoritesDemo({ listings }: { listings: ListingRow[] }) {
             >
               <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-[#F3E2CF]">
                 <ListingPhoto src={listing.photo_url} alt="" variant="thumbnail" sizes="200px" />
-                <span className="absolute left-1.5 top-1.5 rounded-full border-2 border-[#1A1A2E] bg-[#7FE0B0] px-2 py-0.5 text-[10px] font-black uppercase text-[#1A1A2E]">
+                <span className="absolute left-1.5 top-1.5 z-[2] rounded-full border-2 border-[#1A1A2E] bg-[#7FE0B0] px-2 py-0.5 text-[10px] font-black uppercase text-[#1A1A2E]">
                   {messages.listing.free}
                 </span>
                 {isFront && (
                   <motion.span
-                    className="absolute bottom-1.5 right-1.5 flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#1A1A2E] bg-[#F2512D] text-white shadow-[2px_2px_0_#1A1A2E]"
+                    className="absolute bottom-1.5 right-1.5 z-[2] flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#1A1A2E] bg-[#F2512D] text-white shadow-[2px_2px_0_#1A1A2E]"
                     animate={reduceMotion ? undefined : { scale: [1, 1, 1.25, 1] }}
                     transition={{ duration: 2.4, repeat: Infinity, times: [0, 0.55, 0.65, 0.8] }}
                   >

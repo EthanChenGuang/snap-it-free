@@ -33,7 +33,7 @@ export function MiniFeedCard({
     <div className={cn('w-[46%] shrink-0 select-none bg-white p-1.5', pop.card, 'rounded-2xl')} style={{ rotate: `${tilt}deg` }} aria-hidden>
       <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-[#F3E2CF]">
         <ListingPhoto src={listing.photo_url} alt="" variant="thumbnail" sizes="160px" />
-        <span className="absolute left-1.5 top-1.5 rounded-full border-2 border-[#1A1A2E] bg-[#7FE0B0] px-2 py-0.5 text-[11px] font-black uppercase text-[#1A1A2E]">
+        <span className="absolute left-1.5 top-1.5 z-[2] rounded-full border-2 border-[#1A1A2E] bg-[#7FE0B0] px-2 py-0.5 text-[11px] font-black uppercase text-[#1A1A2E]">
           {messages.listing.free}
         </span>
       </div>
