@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeSubitoPhotoUrl } from '@/lib/listings/subito-photo-url';
 import Image from 'next/image';
 import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { useMessages } from '@/lib/i18n/useMessages';
@@ -21,7 +22,7 @@ export function HeroMetadata({ listing }: HeroMetadataProps) {
       <div className="group relative aspect-[16/9] w-full overflow-hidden rounded-xl border border-outline-variant bg-surface-container-low">
         {listing.photo_url ? (
           <Image
-            src={listing.photo_url}
+            src={normalizeSubitoPhotoUrl(listing.photo_url)}
             alt={displayTitle}
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-105"
