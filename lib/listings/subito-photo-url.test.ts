@@ -58,7 +58,12 @@ describe('normalizeSubitoThumbnailUrl', () => {
 });
 
 describe('normalizeSubitoFeedPhotoUrl', () => {
-  it('appends the compact feed card rule to bare sbito CDN URLs', () => {
+  it('uses the sharper watermark-free 400px square preset, not the tiny thumbnail', () => {
+    expect(SUBITO_LISTING_FEED_RULE).toBe('card-desktop-new-small-2x-auto');
+    expect(SUBITO_LISTING_FEED_RULE).not.toBe(SUBITO_LISTING_THUMBNAIL_RULE);
+  });
+
+  it('appends the feed card rule to bare sbito CDN URLs', () => {
     expect(
       normalizeSubitoFeedPhotoUrl(
         'https://images.sbito.it/api/v1/sbt-ads-images-pro/images/1f/1f42c45e-b720-48ea-bc45-6f4dca904710',
