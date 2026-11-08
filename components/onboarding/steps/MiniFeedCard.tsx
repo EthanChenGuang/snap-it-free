@@ -12,7 +12,19 @@ import { cn } from '@/lib/utils';
  * the FREE badge, the real title and the real posted-time. No distance faking — if we have no real
  * listing to show, nothing renders (the parent falls back to a plain text row).
  */
-export function MiniFeedCard({ listing, tilt = 0 }: { listing: ListingRow | null; tilt?: number }) {
+/**
+ * `photoOnly` (Stitch screen f1f5f2ef…, 2026-11-08): just the photo and the FREE badge, for curated showcase
+ * cards whose title or age would distract (e.g. "iMac del 2009/10 · 27 days ago").
+ */
+export function MiniFeedCard({
+  listing,
+  tilt = 0,
+  photoOnly = false,
+}: {
+  listing: ListingRow | null;
+  tilt?: number;
+  photoOnly?: boolean;
+}) {
   const { language, messages, formatRelativeTime } = useMessages();
   if (!listing) return null;
   const title = resolveListingTitle(listing, language);
@@ -25,8 +37,12 @@ export function MiniFeedCard({ listing, tilt = 0 }: { listing: ListingRow | null
           {messages.listing.free}
         </span>
       </div>
-      <p className="mt-1.5 line-clamp-1 px-0.5 text-label-sm font-semibold text-[#1A1A2E]">{title}</p>
-      <p className="px-0.5 pb-0.5 text-[11px] text-[#4A4A5E]">{formatRelativeTime(listing.posted_at)}</p>
+      {!photoOnly && (
+        <>
+          <p className="mt-1.5 line-clamp-1 px-0.5 text-label-sm font-semibold text-[#1A1A2E]">{title}</p>
+          <p className="px-0.5 pb-0.5 text-[11px] text-[#4A4A5E]">{formatRelativeTime(listing.posted_at)}</p>
+        </>
+      )}
     </div>
   );
 }

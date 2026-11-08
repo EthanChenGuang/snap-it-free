@@ -422,7 +422,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                       {howCards.length > 0 && (
                         <div className="relative mt-space-lg flex justify-center gap-space-md px-space-xs py-space-xs">
                           {howCards.map((listing, index) => (
-                            <MiniFeedCard key={listing.id} listing={listing} tilt={index === 0 ? -4 : 4} />
+                            <MiniFeedCard key={listing.id} listing={listing} tilt={index === 0 ? -4 : 4} photoOnly />
                           ))}
                           <Sparkle className="-top-1 right-1 h-6 w-6 text-[#F2512D]" />
                           <Sparkle className="bottom-2 left-0 h-5 w-5 text-[#00A6A6]" />

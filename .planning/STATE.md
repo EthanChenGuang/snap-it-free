@@ -74,6 +74,7 @@ None in `.planning/todos/pending/`.
 | 261028-ob2 | Snag-modelled 10-screen onboarding + honest personalized paywall; 261029 follow-up | 2026-10-29 | 5a9618e | [261028-ob2-onboarding-snag-redesign](./quick/261028-ob2-onboarding-snag-redesign/) |
 | 261030-ob3 | Colorful "Lagoon Pop" onboarding + paywall redesign from Stitch (preview only) | 2026-10-30 | 3e3280a | [261030-ob3-colorful-onboarding](./quick/261030-ob3-colorful-onboarding/) |
 | 261031-ob4 | Snag weekly / map / favorites screens; hide listing sources | 2026-10-31 | ef22e5f, f8d5589 | [261031-ob4-snag-gap-screens](./quick/261031-ob4-snag-gap-screens/) |
+| 261108-ob7 | Curated photo-only "how" cards (iMac + pet), interest chips reorder, no dead-end alerts step on iPhone | 2026-11-08 | (see git log) | [261108-ob7-curated-how-cards](./quick/261108-ob7-curated-how-cards/) |
 | 261105-ob6 | "Why you can trust it" onboarding screen (Stitch), honest stand-in for Snag's testimonial wall | 2026-11-05 | (see git log) | [261105-ob6-trust-screen](./quick/261105-ob6-trust-screen/) |
 | 261104-ob5 | City-level onboarding map (real counts); onboarding every visit for non-subscribers off production | 2026-11-04 | 87ac2ca | [261104-ob5-city-map-every-visit](./quick/261104-ob5-city-map-every-visit/) |
 
