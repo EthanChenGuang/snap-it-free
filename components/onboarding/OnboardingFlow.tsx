@@ -209,7 +209,9 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
 
   // Teaser data: region-wide (hook collage + Veneto counts) and per picked city.
   const region = useRegionTeaser();
-  const cityTeaser = useCityTeaser(state.city);
+  // 'all' (the "Other" chip) means every city: no per-city teaser, region-wide totals instead.
+  const pickedCity = state.city === 'all' ? null : state.city;
+  const cityTeaser = useCityTeaser(pickedCity);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -262,18 +264,18 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
       } = await supabase.auth.getUser();
       if (!user) return;
       const keyword = interestsToAlertKeyword(state.interests);
-      if (!keyword && !state.city) return;
+      if (!keyword && !pickedCity) return;
       await insertAlert(supabase, {
         user_id: user.id,
         keyword,
         zone: null,
-        city: state.city,
+        city: pickedCity,
         enabled: true,
       });
     } catch {
       // Non-blocking: the user can always create alerts in Settings.
     }
-  }, [state.city, state.interests]);
+  }, [pickedCity, state.interests]);
 
   const enablePush = useCallback(async () => {
     setPush({ status: 'pending' });
@@ -298,22 +300,25 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
       };
 
   // Personalized preview/paywall figures from real data.
-  const previewCityLabel = state.city ? cityLabels[state.city] : null;
+  const allCitiesCount = region.status === 'ready' ? (region.map?.total ?? null) : null;
+  const previewCityLabel = state.city === 'all' ? copy.city.allLabel : pickedCity ? cityLabels[pickedCity] : null;
   const previewCount =
-    state.city
-      ? cityTeaser.status === 'ready'
-        ? cityTeaser.count
-        : null
-      : region.status === 'ready'
-        ? region.venetoCount
-        : null;
+    state.city === 'all'
+      ? allCitiesCount
+      : pickedCity
+        ? cityTeaser.status === 'ready'
+          ? cityTeaser.count
+          : null
+        : region.status === 'ready'
+          ? region.venetoCount
+          : null;
   const previewPhotos =
-    state.city && cityTeaser.status === 'ready' && cityTeaser.photos.length > 0
+    pickedCity && cityTeaser.status === 'ready' && cityTeaser.photos.length > 0
       ? cityTeaser.photos
       : region.status === 'ready'
         ? region.collage
         : [];
-  const previewLoading = state.city ? cityTeaser.status === 'loading' : region.status === 'loading';
+  const previewLoading = pickedCity ? cityTeaser.status === 'loading' : region.status === 'loading';
   const proofCount = region.status === 'ready' && region.venetoNew7d > 0 ? region.venetoNew7d : null;
 
   const paywallContext = useMemo(
@@ -599,11 +604,27 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                             </button>
                           );
                         })}
+                        {/* "Other": no city filter, every listing (Guang, 2026-11-08). */}
+                        <button
+                          type="button"
+                          role="radio"
+                          aria-checked={state.city === 'all'}
+                          onClick={() => dispatch({ type: 'selectCity', city: 'all' })}
+                          className={cn(
+                            'h-11 rounded-full border-2 border-[#1A1A2E] px-space-md text-label-md font-bold transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00A6A6]',
+                            state.city === 'all'
+                              ? 'scale-105 bg-[#00A6A6] text-white shadow-[3px_3px_0_#1A1A2E]'
+                              : 'bg-white text-[#1A1A2E] hover:bg-[#FFF3E4]',
+                          )}
+                          data-testid="city-other"
+                        >
+                          {copy.city.other}
+                        </button>
                       </div>
-                      {state.city && cityTeaser.status === 'ready' && cityTeaser.count > 0 && (
+                      {previewCityLabel && previewCount !== null && previewCount > 0 && !previewLoading && (
                         <p className={cn(pop.pill, 'mt-space-lg')} data-testid="city-live-count">
                           <LiveDot />
-                          {copy.preview.result(cityTeaser.count, cityLabels[state.city])}
+                          {copy.preview.result(previewCount, previewCityLabel)}
                         </p>
                       )}
                     </>

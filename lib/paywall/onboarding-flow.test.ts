@@ -181,3 +181,13 @@ describe('alerts step where push cannot work in this tab', () => {
     expect(resumed.alertsAvailable).toBe(false);
   });
 });
+
+describe('city step "Other" (every city)', () => {
+  it('counts as an answer so Continue works, and is stored as "all"', () => {
+    let state: OnboardingState = { ...INITIAL_ONBOARDING_STATE, screen: 'city' };
+    expect(onboardingReducer(state, { type: 'next' }).screen).toBe('city');
+    state = onboardingReducer(state, { type: 'selectCity', city: 'all' });
+    expect(state.city).toBe('all');
+    expect(onboardingReducer(state, { type: 'next' }).screen).toBe('preview');
+  });
+});

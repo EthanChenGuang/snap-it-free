@@ -506,6 +506,9 @@ export const messages: Messages = {
       title: 'Where should we look?',
       emphasis: 'look',
       body: 'Your feed will start here. You can change it any time in filters.',
+      other: 'Other',
+      /** Label for the "Other" (every city) choice in counts and the paywall title. */
+      allLabel: 'all cities',
     },
     preview: {
       title: 'Your feed is ready',

@@ -2,6 +2,9 @@ import type { ListingCategory } from '@/lib/listings/categories';
 import type { VeniceZone } from '@/lib/listings/types';
 import { subitoCategoriesIt } from './subito-category-labels';
 
+/** "a Milano", but "in tutte le città" for the every-city choice. */
+const aCitta = (city: string) => (city === 'tutte le città' ? `in ${city}` : `a ${city}`);
+
 export const messages = {
   app: {
     title: 'ZeroEuro',
@@ -516,6 +519,9 @@ export const messages = {
       title: 'Dove cerchiamo?',
       emphasis: 'cerchiamo',
       body: 'Il feed partirà da qui. Puoi cambiarla quando vuoi dai filtri.',
+      other: 'Altro',
+      /** Label for the "Other" (every city) choice in counts and the paywall title. */
+      allLabel: 'tutte le città',
     },
     preview: {
       title: 'Il tuo feed è pronto',
@@ -526,10 +532,10 @@ export const messages = {
       checkRadius: (km: number) => `Entro ${km} km`,
       result: (count: number, city: string) =>
         count === 1
-          ? `1 oggetto gratis a ${city} in questo momento`
-          : `${count.toLocaleString('it-IT')} oggetti gratis a ${city} in questo momento`,
+          ? `1 oggetto gratis ${aCitta(city)} in questo momento`
+          : `${count.toLocaleString('it-IT')} oggetti gratis ${aCitta(city)} in questo momento`,
       lowSupply: (count: number, city: string) =>
-        `Per ora solo ${count} a ${city}. Prova un raggio più ampio o un’altra città.`,
+        `Per ora solo ${count} ${aCitta(city)}. Prova un raggio più ampio o un’altra città.`,
       cta: 'Salva il mio feed',
       seePlans: 'Vedi i piani',
       unavailable: 'Non siamo riusciti a caricare il tuo feed ora. Puoi continuare lo stesso.',
@@ -557,7 +563,7 @@ export const messages = {
       body: 'Ti avvisiamo quando compare un oggetto gratis corrispondente.',
       mockLabel: 'Esempio',
       mockLine: 'Libreria in regalo · Cannaregio',
-      mockLine2: (city: string) => `Nuovo oggetto gratis a ${city}`,
+      mockLine2: (city: string) => `Nuovo oggetto gratis ${aCitta(city)}`,
       enable: 'Attiva gli avvisi',
       enabling: 'Attivazione…',
       notNow: 'Non ora',
@@ -588,7 +594,7 @@ export const messages = {
     title: 'ZeroEuro Plus',
     subtitle: 'Abbonati per vedere tutti gli annunci gratis vicino a te.',
     titlePersonalized: (count: number, city: string) =>
-      count === 1 ? `Sblocca 1 oggetto gratis a ${city}` : `Sblocca ${count.toLocaleString('it-IT')} oggetti gratis a ${city}`,
+      count === 1 ? `Sblocca 1 oggetto gratis ${aCitta(city)}` : `Sblocca ${count.toLocaleString('it-IT')} oggetti gratis ${aCitta(city)}`,
     titleFallback: 'Vedi tutti gli oggetti gratis vicino a te',
     proofLine: (count: number) =>
       count === 1

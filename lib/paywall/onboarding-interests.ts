@@ -69,7 +69,7 @@ export function interestsToAlertKeyword(interests: string[]): string | null {
 /** Build the filter prefs the onboarding answers imply, layered over the current prefs. */
 export function onboardingFilterPrefs(
   base: FilterPrefs,
-  answers: { city: ConsumerCityKey | null; interests: string[]; radiusKm: number; locationGranted: boolean },
+  answers: { city: ConsumerCityKey | 'all' | null; interests: string[]; radiusKm: number; locationGranted: boolean },
 ): FilterPrefs {
   return {
     ...base,

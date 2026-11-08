@@ -80,3 +80,12 @@ describe('interest chips (Guang, 2026-11-08)', () => {
     expect(ONBOARDING_INTERESTS.find((interest) => interest.key === 'kids')?.subitoSlugs).toEqual(['bambini-giocattoli']);
   });
 });
+
+describe('onboardingFilterPrefs with "Other"', () => {
+  it('clears the city filter (all cities)', async () => {
+    const { onboardingFilterPrefs } = await import('./onboarding-interests');
+    const { DEFAULT_FILTER_PREFS } = await import('@/lib/filter-prefs/storage');
+    const prefs = onboardingFilterPrefs({ ...DEFAULT_FILTER_PREFS, city: 'milano' }, { city: 'all', interests: [], radiusKm: 10, locationGranted: false });
+    expect(prefs.city).toBe('all');
+  });
+});

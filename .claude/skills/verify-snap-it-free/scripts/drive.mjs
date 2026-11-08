@@ -243,6 +243,12 @@ async function onboarding(browser) {
   ];
   check(firstTwo[0] === 'Venice' && firstTwo[1] === 'Padova', `P1-2: Venice + Padova lead the city list (${firstTwo.join(', ')})`);
   check(await page.getByTestId('onboarding-continue').isDisabled(), 'Continue disabled until a city is picked');
+  // "Other" = every city, no city filter (Guang 2026-11-08): it is a valid answer with an all-cities count.
+  await page.getByTestId('city-other').click();
+  await page.getByTestId('city-live-count').waitFor({ timeout: 15000 }).catch(() => {});
+  const allCount = (await page.getByTestId('city-live-count').innerText().catch(() => '')).trim();
+  check(/\d[\d,]* free items? in all cities/.test(allCount), `"Other" shows a real all-cities count: "${allCount}"`);
+  check(!(await page.getByTestId('onboarding-continue').isDisabled()), '"Other" counts as an answer (Continue enabled)');
   await page.getByRole('radio', { name: 'Milan' }).click();
   await shot(page, '05-city');
 

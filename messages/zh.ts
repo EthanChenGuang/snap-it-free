@@ -492,6 +492,9 @@ export const messages: Messages = {
       title: '我们在哪里帮你找？',
       emphasis: '找',
       body: '信息流会从这里开始。之后随时可以在筛选中更改。',
+      other: '其他',
+      /** Label for the "Other" (every city) choice in counts and the paywall title. */
+      allLabel: '所有城市',
     },
     preview: {
       title: '你的信息流已就绪',

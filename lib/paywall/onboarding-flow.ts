@@ -39,7 +39,8 @@ export const DEFAULT_ONBOARDING_RADIUS_KM = 10;
 
 export type OnboardingState = {
   screen: OnboardingScreen;
-  city: ConsumerCityKey | null;
+  /** A city, or 'all' ("Other": every city, no city filter — Guang 2026-11-08); null until answered. */
+  city: ConsumerCityKey | 'all' | null;
   /** Interest keys from onboarding-interests; drives the feed category filter and the preview count. */
   interests: string[];
   mobility: MobilityKey | null;
@@ -57,7 +58,7 @@ export type OnboardingAction =
   | { type: 'next' }
   | { type: 'back' }
   | { type: 'skip' }
-  | { type: 'selectCity'; city: ConsumerCityKey }
+  | { type: 'selectCity'; city: ConsumerCityKey | 'all' }
   | { type: 'toggleInterest'; interest: string }
   | { type: 'selectMobility'; mobility: MobilityKey }
   | { type: 'grantLocation' }
@@ -175,7 +176,7 @@ export function parseResumeState(raw: string | null): OnboardingState | null {
     }
     return {
       screen: parsed.screen as OnboardingScreen,
-      city: (parsed.city as ConsumerCityKey | null) ?? null,
+      city: (parsed.city as ConsumerCityKey | 'all' | null) ?? null,
       interests: Array.isArray(parsed.interests)
         ? parsed.interests.filter((key): key is string => typeof key === 'string')
         : [],
