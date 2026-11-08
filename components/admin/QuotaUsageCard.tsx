@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import {
   SUPABASE_FREE_LIMITS,
+  classifyQuotaUsage,
   formatQuotaBytes,
   quotaPercent,
   type QuotaLevel,
@@ -194,6 +195,15 @@ export function QuotaUsagePanel({ snapshot, loading, error, refresh }: QuotaUsag
             level={snapshot.storage.level}
             detail={`${snapshot.storage.objectCount} 个对象`}
           />
+          {snapshot.featuredStorage && (
+            <UsageMeter
+              label={`Storage (${snapshot.featuredStorage.bucket} · 今日精选)`}
+              usedBytes={snapshot.featuredStorage.bytes}
+              limitBytes={SUPABASE_FREE_LIMITS.storageBytes}
+              level={classifyQuotaUsage(snapshot.featuredStorage.bytes, SUPABASE_FREE_LIMITS.storageBytes)}
+              detail={`${snapshot.featuredStorage.objectCount} 个对象`}
+            />
+          )}
           <p className="text-[12px] text-[#86868b]">{snapshot.egressNote}</p>
           {topTables.length > 0 ? (
             <ul className="space-y-1 border-t border-black/[0.05] pt-3 font-mono text-[11px] tabular-nums text-[#636366]">

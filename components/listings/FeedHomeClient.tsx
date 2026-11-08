@@ -2,12 +2,15 @@
 
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { FeaturedStrip } from '@/components/listings/FeaturedStrip';
 import { ListListingCard } from '@/components/listings/ListListingCard';
 import { RubberbandScroll } from '@/components/ui/RubberbandScroll';
 import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import { useFeedScroll } from '@/components/shell/FeedScrollContext';
 import { composeFeedListings, useDistanceCenter } from '@/hooks/useDistanceCenter';
 import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
+import { selectPicksForCity } from '@/lib/featured/queries';
+import type { FeaturedPick } from '@/lib/featured/types';
 import { excludeReportedIds } from '@/lib/listings/filters';
 import { useListingsPoll } from '@/lib/listings/useListingsPoll';
 import { readReportedIds, REPORTS_CHANGE_EVENT } from '@/lib/reports/storage';
@@ -18,6 +21,8 @@ import { cn } from '@/lib/utils';
 type FeedHomeClientProps = {
   initialListings: ListingRow[];
   initialTotalCount?: number | null;
+  /** Approved 今日精选 picks (all cities); filtered by the applied city here. */
+  featuredPicks?: FeaturedPick[];
 };
 
 const CONTENT_MOTION = {
@@ -37,6 +42,7 @@ const SCROLL_LOAD_AHEAD_PX = 900;
 export function FeedHomeClient({
   initialListings,
   initialTotalCount = null,
+  featuredPicks = [],
 }: FeedHomeClientProps) {
   const { messages, language } = useMessages();
   const { searchQuery, registerScrollContainer } = useFeedScroll();
@@ -141,6 +147,15 @@ export function FeedHomeClient({
   const hasActiveFilter =
     hasSearchQuery || hasRadiusFilter || hasCityFilter || hasCategoryFilter;
 
+  // Featured strip: city mode only (map/radius has no curated set), hidden while searching.
+  const visiblePicks = useMemo(
+    () =>
+      hasSearchQuery || applied.mode !== 'city'
+        ? []
+        : selectPicksForCity(featuredPicks, applied.city),
+    [featuredPicks, hasSearchQuery, applied.mode, applied.city],
+  );
+
   const displayCount = hasActiveFilter
     ? filteredListings.length
     : (totalCount ?? filteredListings.length);
@@ -220,6 +235,8 @@ export function FeedHomeClient({
                   {messages.list.refreshing}
                 </div>
               )}
+
+              <FeaturedStrip picks={visiblePicks} />
 
               <p
                 className={cn(

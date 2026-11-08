@@ -598,6 +598,10 @@ export const messages = {
       days: (n: number) => (n === 1 ? '1 giorno fa' : `${n} giorni fa`),
     },
   },
+  featured: {
+    title: 'Selezione di oggi',
+    subtitle: (count: number) => `Scelti ogni giorno · ${count}`,
+  },
   locateMe: {
     label: 'La mia posizione',
   },

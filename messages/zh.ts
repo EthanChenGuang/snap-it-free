@@ -575,6 +575,10 @@ export const messages: Messages = {
       days: (n: number) => (n === 1 ? '1 天前' : `${n} 天前`),
     },
   },
+  featured: {
+    title: '今日精选',
+    subtitle: (count: number) => `店主每日挑选 · ${count} 件`,
+  },
   locateMe: {
     label: '我的位置',
   },

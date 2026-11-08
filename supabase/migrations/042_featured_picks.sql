@@ -69,3 +69,22 @@ drop policy if exists "featured_photos_select_public" on storage.objects;
 create policy "featured_photos_select_public"
   on storage.objects for select to public
   using (bucket_id = 'featured-photos');
+
+-- Operator quota card: size of the featured-photos bucket (service role only).
+create or replace function public.get_featured_storage_usage()
+returns jsonb
+language sql
+security definer
+set search_path = public, storage, pg_catalog
+as $$
+  select jsonb_build_object(
+    'bucket', 'featured-photos',
+    'object_count', count(*)::bigint,
+    'bytes', coalesce(sum((o.metadata->>'size')::bigint), 0)::bigint
+  )
+  from storage.objects o
+  where o.bucket_id = 'featured-photos';
+$$;
+
+revoke all on function public.get_featured_storage_usage() from public;
+grant execute on function public.get_featured_storage_usage() to service_role;

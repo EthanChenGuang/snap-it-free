@@ -25,6 +25,8 @@ export type QuotaUsageSnapshot = {
     bytes: number;
     level: QuotaLevel;
   };
+  /** 今日精选 self-hosted images; null when the featured migration is not applied. */
+  featuredStorage: { bucket: string; objectCount: number; bytes: number } | null;
   /** Egress is only visible in Supabase Dashboard → Project Settings → Usage */
   egressNote: string;
 };
@@ -62,6 +64,18 @@ export function quotaPercent(usedBytes: number, limitBytes: number): number {
   return Math.min(100, Math.round((usedBytes / limitBytes) * 1000) / 10);
 }
 
+type FeaturedStorageRpc = { bucket?: string; object_count?: number; bytes?: number };
+
+export function parseFeaturedStorage(raw: unknown): QuotaUsageSnapshot['featuredStorage'] {
+  if (!raw || typeof raw !== 'object') return null;
+  const r = raw as FeaturedStorageRpc;
+  return {
+    bucket: r.bucket ?? 'featured-photos',
+    objectCount: Number(r.object_count ?? 0),
+    bytes: Number(r.bytes ?? 0),
+  };
+}
+
 function parseRpcSnapshot(raw: RpcSnapshot): QuotaUsageSnapshot {
   const databaseBytes = Number(raw.database_bytes ?? 0);
   const storageBytes = Number(raw.storage?.bytes ?? 0);
@@ -81,6 +95,7 @@ function parseRpcSnapshot(raw: RpcSnapshot): QuotaUsageSnapshot {
       bytes: storageBytes,
       level: classifyQuotaUsage(storageBytes, SUPABASE_FREE_LIMITS.storageBytes),
     },
+    featuredStorage: null,
     egressNote:
       '出站流量（Egress）请在 Supabase Dashboard → Project Settings → Usage 查看（Free 限额 5 GB/月）。',
   };
@@ -96,5 +111,9 @@ export async function collectQuotaUsageSnapshot(
   if (!data || typeof data !== 'object') {
     throw new Error('get_quota_usage_snapshot returned empty payload');
   }
-  return parseRpcSnapshot(data as RpcSnapshot);
+  const snapshot = parseRpcSnapshot(data as RpcSnapshot);
+  // Optional: featured-photos bucket (migration 042). Missing function → card simply omits it.
+  const featured = await supabase.rpc('get_featured_storage_usage');
+  snapshot.featuredStorage = featured.error ? null : parseFeaturedStorage(featured.data);
+  return snapshot;
 }

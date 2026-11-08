@@ -37,3 +37,26 @@ describe('quotaPercent', () => {
     );
   });
 });
+
+describe('featured-photos storage (今日精选)', () => {
+  it('parses the RPC payload', async () => {
+    const { parseFeaturedStorage } = await import('./quota-usage');
+    expect(parseFeaturedStorage({ bucket: 'featured-photos', object_count: 3, bytes: 36000 })).toEqual({
+      bucket: 'featured-photos',
+      objectCount: 3,
+      bytes: 36000,
+    });
+    expect(parseFeaturedStorage(null)).toBeNull();
+  });
+
+  it('omits the featured bucket when its function is missing', async () => {
+    const { collectQuotaUsageSnapshot } = await import('./quota-usage');
+    const rpc = async (name: string) =>
+      name === 'get_quota_usage_snapshot'
+        ? { data: { database_bytes: 1, storage: { bytes: 2, object_count: 1 } }, error: null }
+        : { data: null, error: { message: 'function does not exist' } };
+    const snap = await collectQuotaUsageSnapshot({ rpc } as never);
+    expect(snap.featuredStorage).toBeNull();
+    expect(snap.storage.bytes).toBe(2);
+  });
+});

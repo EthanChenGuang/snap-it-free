@@ -11,6 +11,7 @@ export default defineConfig({
       'hooks/**/*.test.ts',
       'app/api/cron/**/*.test.ts',
       'app/api/admin/featured/**/*.test.ts',
+      'components/listings/FeaturedStrip.test.tsx',
     ],
   },
   resolve: {

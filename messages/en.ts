@@ -586,6 +586,10 @@ export const messages: Messages = {
       days: (n: number) => (n === 1 ? '1 day ago' : `${n} days ago`),
     },
   },
+  featured: {
+    title: "Today's picks",
+    subtitle: (count: number) => `Picked daily by the curator · ${count}`,
+  },
   locateMe: {
     label: 'My location',
   },
