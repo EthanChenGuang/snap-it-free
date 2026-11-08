@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeSubitoThumbnailUrl } from '@/lib/listings/subito-photo-url';
 import Image from 'next/image';
 import Link from 'next/link';
 import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
@@ -38,7 +39,7 @@ export function SimilarListings({ listings }: SimilarListingsProps) {
               <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded bg-surface-container-high">
                 {item.photo_url ? (
                   <Image
-                    src={item.photo_url}
+                    src={normalizeSubitoThumbnailUrl(item.photo_url)}
                     alt={item.title}
                     fill
                     className="object-cover"
