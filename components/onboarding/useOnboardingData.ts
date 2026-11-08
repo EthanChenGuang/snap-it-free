@@ -1,29 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ConsumerCityKey } from '@/lib/geo/italian-cities';
-import { getCityByConsumerKey } from '@/lib/geo/italian-cities';
-import { resolveListingTitle } from '@/lib/i18n/listing-fields';
-import { useMessages } from '@/lib/i18n/useMessages';
-import { fetchActiveListingsClient } from '@/lib/listings/client-queries';
-import { feedLookbackSinceIso } from '@/lib/listings/feed-window';
-import { excludeReportedIds, listingConsumerCity } from '@/lib/listings/filters';
-import { listingPhotoUrls } from '@/lib/listings/listing-photos';
-import type { ListingRow } from '@/lib/listings/types';
-import { isPaywallFlagEnabled } from '@/lib/paywall/gate';
-import {
-  activeCityCount,
-  buildCityMap,
-  dailyCountsLast7,
-  newestPostedMs,
-  type DailyCount,
-  type CityMap,
-} from '@/lib/paywall/onboarding-stats';
-import { fetchPaywallTeaser, TEASER_PHOTO_LIMIT } from '@/lib/paywall/locked-preview';
-import { CITY_TEASER_THUMBNAIL_LIMIT, summarizeCityTeaser } from '@/lib/paywall/teaser';
-import { readReportedIds } from '@/lib/reports/storage';
-import { createAnonClient } from '@/lib/supabase/anon';
-import { getSupabaseEnv } from '@/lib/supabase/env';
+import { dailyCountsFromMs, type CityMap, type DailyCount } from '@/lib/paywall/onboarding-stats';
+import { cityTeaserFromSummary, type OnboardingSummary } from '@/lib/paywall/onboarding-summary';
 
 export type TeaserPhoto = { key: string; url: string; alt: string };
 
@@ -48,138 +28,92 @@ export type RegionTeaserState =
     }
   | { status: 'error' };
 
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+/**
+ * Live figures come from /api/onboarding/summary (server-aggregated, CDN-cached) instead of every phone
+ * downloading ~40k rows (Guang, 2026-11-08: the weekly screen waited ~5 s). The last summary is kept in
+ * localStorage so a returning visitor sees figures at once while a fresh copy loads; a copy older than
+ * MAX_CACHED_AGE_MS is not shown. Counts no longer subtract items this browser reported (a handful at most).
+ */
+const CACHE_KEY = 'zerodollar_onboarding_summary_v1';
+const MAX_CACHED_AGE_MS = 6 * 60 * 60 * 1000;
 
-// One rows fetch shared across the hook instances (hook, preview, city teaser) in a single flow.
-let rowsPromise: Promise<ListingRow[]> | null = null;
-function activeRowsOnce(): Promise<ListingRow[]> {
-  rowsPromise ??= fetchActiveListingsClient().then((all) => excludeReportedIds(all, readReportedIds()));
-  return rowsPromise;
-}
+type SummaryState = { status: 'loading' } | { status: 'ready'; summary: OnboardingSummary } | { status: 'error' };
 
-const VENETO_KEYS = new Set<ConsumerCityKey>(
-  (['venice', 'padova', 'verona'] as ConsumerCityKey[]).filter(
-    (key) => getCityByConsumerKey(key)?.region === 'veneto',
-  ),
-);
-
-function isVeneto(listing: ListingRow): boolean {
-  const key = listingConsumerCity(listing);
-  return key !== null && VENETO_KEYS.has(key);
-}
-
-function distinctPhotos(listings: readonly ListingRow[], limit: number, language: 'en' | 'it' | 'zh'): TeaserPhoto[] {
-  const out: TeaserPhoto[] = [];
-  const seen = new Set<string>();
-  for (const listing of listings) {
-    if (out.length >= limit) break;
-    const url = listingPhotoUrls(listing)[0];
-    if (!url || seen.has(url)) continue;
-    seen.add(url);
-    out.push({ key: url, url, alt: resolveListingTitle(listing, language) });
+function readCached(): OnboardingSummary | null {
+  try {
+    const raw = window.localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const summary = JSON.parse(raw) as OnboardingSummary;
+    return Date.now() - summary.generatedAt < MAX_CACHED_AGE_MS ? summary : null;
+  } catch {
+    return null;
   }
-  return out;
 }
 
-/** Region-wide collage + honest Veneto counts for the hook and the paywall proof line, from real rows. */
-export function useRegionTeaser(): RegionTeaserState {
-  const { language } = useMessages();
-  const [state, setState] = useState<RegionTeaserState>({ status: 'loading' });
-
-  useEffect(() => {
-    if (!getSupabaseEnv()) {
-      setState({ status: 'error' });
-      return;
+// One request per page load, shared by every hook instance; started as soon as this module loads.
+let summaryPromise: Promise<OnboardingSummary> | null = null;
+function summaryOnce(): Promise<OnboardingSummary> {
+  summaryPromise ??= fetch('/api/onboarding/summary').then(async (res) => {
+    if (!res.ok) throw new Error(`summary ${res.status}`);
+    const summary = (await res.json()) as OnboardingSummary;
+    try {
+      window.localStorage.setItem(CACHE_KEY, JSON.stringify(summary));
+    } catch {
+      // Private mode / quota: just no cache next time.
     }
+    return summary;
+  });
+  return summaryPromise;
+}
+if (typeof window !== 'undefined') void summaryOnce().catch(() => {});
+
+function useSummary(): SummaryState {
+  const [state, setState] = useState<SummaryState>(() => {
+    if (typeof window === 'undefined') return { status: 'loading' };
+    const cached = readCached();
+    return cached ? { status: 'ready', summary: cached } : { status: 'loading' };
+  });
+  useEffect(() => {
     let cancelled = false;
-    activeRowsOnce().then(
-      (rows) => {
-        if (cancelled) return;
-        const veneto = rows.filter(isVeneto);
-        const now = Date.now();
-        const cutoff = now - SEVEN_DAYS_MS;
-        const scope = veneto.length > 0 ? veneto : rows;
-        const venetoNew7d = veneto.filter((row) => {
-          const posted = new Date(row.posted_at).getTime();
-          return Number.isFinite(posted) && posted >= cutoff;
-        }).length;
-        setState({
-          status: 'ready',
-          venetoCount: veneto.length,
-          venetoNew7d,
-          collage: distinctPhotos(scope, TEASER_PHOTO_LIMIT, language),
-          daily: dailyCountsLast7(scope, now),
-          newestMs: newestPostedMs(scope, now),
-          cityCount: activeCityCount(scope),
-          map: buildCityMap(rows),
-        });
-      },
-      () => !cancelled && setState({ status: 'error' }),
+    summaryOnce().then(
+      (summary) => !cancelled && setState({ status: 'ready', summary }),
+      // Keep showing a cached copy if the refresh fails.
+      () => !cancelled && setState((prev) => (prev.status === 'ready' ? prev : { status: 'error' })),
     );
     return () => {
       cancelled = true;
     };
-  }, [language]);
-
+  }, []);
   return state;
 }
 
-/**
- * Per-city teaser. Paywall on: the per-city definer function (044). Paywall off, or before 044:
- * summarize the rows the feed itself loads. Mirrors the original OnboardingFlow behaviour.
- */
+const asPhotos = (urls: readonly string[]): TeaserPhoto[] => urls.map((url) => ({ key: url, url, alt: '' }));
+
+/** Region-wide figures (Veneto counts, weekly bars, city map) for the hook, weekly, map and paywall. */
+export function useRegionTeaser(): RegionTeaserState {
+  const summary = useSummary();
+  if (summary.status !== 'ready') return summary;
+  const s = summary.summary;
+  const now = Date.now();
+  return {
+    status: 'ready',
+    venetoCount: s.venetoCount,
+    venetoNew7d: s.venetoRecentMs.length,
+    collage: asPhotos(s.collage),
+    daily: dailyCountsFromMs(s.venetoRecentMs, now),
+    newestMs: s.newestMs,
+    cityCount: s.cityCount,
+    map: s.map,
+  };
+}
+
 /**
  * Real count + photos for the picked city ('all' = every covered city), narrowed to the picked interests'
  * categories so "the free things you're interested in" is literally true (Guang, 2026-11-08).
  */
 export function useCityTeaser(city: ConsumerCityKey | 'all' | null, categories: readonly string[] = []): CityTeaserState {
-  const { language } = useMessages();
-  const [state, setState] = useState<CityTeaserState>({ status: 'loading' });
-  const rows = useCallback(() => activeRowsOnce(), []);
-  const lastCity = useRef<ConsumerCityKey | 'all' | null>(null);
-  const categoryKey = categories.join(',');
-
-  useEffect(() => {
-    if (!isPaywallFlagEnabled() && getSupabaseEnv()) void rows().catch(() => {});
-  }, [rows]);
-
-  useEffect(() => {
-    if (!city) return;
-    if (!getSupabaseEnv()) {
-      setState({ status: 'error' });
-      return;
-    }
-    lastCity.current = city;
-    let cancelled = false;
-    setState({ status: 'loading' });
-    const load = async (): Promise<CityTeaserState> => {
-      // The server teaser counts a whole city; use it only when no category narrows the count.
-      if (isPaywallFlagEnabled() && city !== 'all' && categoryKey === '') {
-        const teaser = await fetchPaywallTeaser(createAnonClient(), { city, since: feedLookbackSinceIso() });
-        if (teaser && teaser.count !== null) {
-          const photos = teaser.photoUrls.slice(0, CITY_TEASER_THUMBNAIL_LIMIT);
-          return { status: 'ready', count: teaser.count, photos: photos.map((url) => ({ key: url, url, alt: '' })) };
-        }
-      }
-      const summary = summarizeCityTeaser(await rows(), city, undefined, categoryKey ? categoryKey.split(',') : []);
-      return {
-        status: 'ready',
-        count: summary.count,
-        photos: summary.thumbnails.map((thumb) => ({
-          key: thumb.id,
-          url: thumb.photoUrl,
-          alt: resolveListingTitle(thumb.listing, language),
-        })),
-      };
-    };
-    load().then(
-      (next) => !cancelled && setState(next),
-      () => !cancelled && setState({ status: 'error' }),
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [city, categoryKey, language, rows]);
-
-  return state;
+  const summary = useSummary();
+  if (!city || summary.status !== 'ready') return summary.status === 'error' ? summary : { status: 'loading' };
+  const { count, photos } = cityTeaserFromSummary(summary.summary, city, categories);
+  return { status: 'ready', count, photos: asPhotos(photos) };
 }

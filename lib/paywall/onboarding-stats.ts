@@ -29,15 +29,24 @@ export type DailyCount = { dayStart: number; count: number };
  * the future (clock skew) count as today.
  */
 export function dailyCountsLast7(rows: readonly ListingRow[], now: number): DailyCount[] {
+  return dailyCountsFromMs(
+    rows.flatMap((row) => {
+      const ms = postedMs(row);
+      return ms === null ? [] : [ms];
+    }),
+    now,
+  );
+}
+
+/** Same as dailyCountsLast7, from posted timestamps (ms); buckets use this device's local days. */
+export function dailyCountsFromMs(stamps: readonly number[], now: number): DailyCount[] {
   const today = localDayStart(now);
   const days: DailyCount[] = [];
   for (let back = 6; back >= 0; back -= 1) {
     // Step by calendar day (DST-safe): noon of the day `back` days ago, floored to its local midnight.
     days.push({ dayStart: localDayStart(today + DAY_MS / 2 - back * DAY_MS), count: 0 });
   }
-  for (const row of rows) {
-    const ms = postedMs(row);
-    if (ms === null) continue;
+  for (const ms of stamps) {
     const start = localDayStart(Math.min(ms, now));
     const slot = days.find((day) => day.dayStart === start);
     if (slot) slot.count += 1;
