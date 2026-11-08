@@ -1,6 +1,6 @@
 # Featured Picks — Plan Overview
 
-**Status:** planned, not started · **Branch:** `claude/featured-picks` · **Date:** 2026-11-08
+**Status:** code complete on branch (2026-11-08) — waiting for migration 042 to be applied · **Branch:** `claude/featured-picks` · **Date:** 2026-11-08
 
 | Wave | Plan | What | Depends on | Owner action |
 |---|---|---|---|---|
@@ -32,6 +32,18 @@ Research: [RESEARCH.md](RESEARCH.md) · Context: [../featured-picks-CONTEXT.md](
 - **D-09 notification channel:** use the existing operator alert channels (`notifyOperator` — email /
   Telegram / WeChat / WhatsApp, whichever is configured) instead of web-push. Same intent (owner is told
   when candidates are ready), works on a phone, no new subscription plumbing.
+
+## Execution notes (deviations found while building)
+- **D-09** approved by owner ("通知方式可以").
+- Admin API returns **403** for both signed-out and non-operator callers (existing `requireOperatorSession` convention), not 401.
+- Workflow uses **Python 3.13** (versions pinned and tested on 3.13).
+- Prune also drops **pending** candidates older than 7 days (bounds storage if reviews are skipped).
+- `featured_picks_public` joins `listings` directly (same active filter as `listings_public`) so later
+  migrations can still drop/recreate `listings_public`.
+- Migration 042 also adds `get_featured_storage_usage()` for the quota card.
+- Scheduled workflows only run from the default branch, so the daily job does **not** run while this
+  stays on `claude/featured-picks`.
+- Real-photo check: 4/15 spike photos pass the gate; all watermark-risk photos are rejected.
 
 ## Ship / no-ship
 Everything here stays on `claude/featured-picks`. Nothing is merged to `main` until the owner decides
