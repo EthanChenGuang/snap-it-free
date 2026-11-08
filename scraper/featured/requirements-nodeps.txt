@@ -1,0 +1,4 @@
+# Installed with `pip install --no-deps -r requirements-nodeps.txt` (their declared extras pull
+# a different onnxruntime/opencv build; everything they need is pinned in requirements.txt).
+rembg==2.0.87
+pymatting==1.1.16
