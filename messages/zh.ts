@@ -505,7 +505,7 @@ export const messages: Messages = {
       checkCity: (city: string) => `城市 · ${city}`,
       checkInterests: '你的兴趣',
       checkRadius: (km: number) => `${km} 公里以内`,
-      result: (count: number, city: string) => `${city}有你感兴趣的 ${count.toLocaleString('zh-CN')} 件免费物品`,
+      result: (count: number, city: string) => `${city}新上你感兴趣的 ${count.toLocaleString('zh-CN')} 件免费物品`,
       lowSupply: (count: number, city: string) => `${city}目前只有 ${count} 件。可以扩大范围或换个城市。`,
       cta: '领取好物',
       seePlans: '查看方案',
