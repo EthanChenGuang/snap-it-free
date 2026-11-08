@@ -512,7 +512,7 @@ export const messages: Messages = {
       unavailable: '暂时无法加载你感兴趣的好物。你仍然可以继续。',
     },
     account: {
-      title: '保存你的信息流和提醒',
+      title: '保存你的偏好和提醒',
       emphasis: '保存',
       body: '免费账号会在所有设备上保存你的城市、兴趣和提醒。',
       google: '使用 Google 继续',
