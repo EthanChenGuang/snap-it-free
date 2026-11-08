@@ -55,3 +55,4 @@ frame crops hide most of it). Source listings:
 | alerts/espresso.webp | Macchina espresso Saeco | 95b7b1d9-1278-4093-af61-6a4bb5bce0d2 |
 
 Swaps (Guang, same day): puppy → golden retriever, city bike → mountain bike, Bluetooth speakers → Canon camera.
+Bike photo reframed around the bike (Guang chose this, 2026-11-08) so the source watermark falls outside the card.
