@@ -13,6 +13,11 @@ on:
   schedule:
     - cron: '23 5 * * *'
   workflow_dispatch: {}
+  # Branch trial runs: only while featured picks lives on its own branch (scheduled and manual
+  # runs need the workflow on main). Fires only when this file changes. Remove when shipping.
+  push:
+    branches: [claude/featured-picks]
+    paths: ['.github/workflows/featured-picks.yml']
 
 concurrency:
   group: featured-picks
