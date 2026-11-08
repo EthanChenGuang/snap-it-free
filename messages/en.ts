@@ -421,7 +421,7 @@ export const messages: Messages = {
     hook: {
       title: 'Free stuff near you, every day',
       emphasis: 'Free',
-      body: 'Laptops, books, furniture and more, given away by people near you. New ones every day.',
+      body: 'Computers, books, furniture and more, given away by people near you. New ones every day.',
       liveLine: (count: number) =>
         count === 1
           ? '1 free item active in Veneto right now'
