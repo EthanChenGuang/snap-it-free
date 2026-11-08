@@ -1,0 +1,92 @@
+[
+ {
+  "file": "00.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 12.78,
+  "object_coverage": 0.246
+ },
+ {
+  "file": "01.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 10.54,
+  "object_coverage": 0.007
+ },
+ {
+  "file": "02.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 9.57,
+  "object_coverage": 0.33
+ },
+ {
+  "file": "03.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 7.51,
+  "object_coverage": 0.548
+ },
+ {
+  "file": "04.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 7.42,
+  "object_coverage": 0.404
+ },
+ {
+  "file": "05.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 7.66,
+  "object_coverage": 0.472
+ },
+ {
+  "file": "06.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 7.58,
+  "object_coverage": 0.208
+ },
+ {
+  "file": "07.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 7.11,
+  "object_coverage": 0.233
+ },
+ {
+  "file": "08.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 7.19,
+  "object_coverage": 0.453
+ },
+ {
+  "file": "09.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 7.69,
+  "object_coverage": 0.44
+ },
+ {
+  "file": "10.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 7.46,
+  "object_coverage": 0.686
+ },
+ {
+  "file": "11.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 7.01,
+  "object_coverage": 0.594
+ },
+ {
+  "file": "12.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 6.56,
+  "object_coverage": 0.732
+ },
+ {
+  "file": "13.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 6.81,
+  "object_coverage": 0.716
+ },
+ {
+  "file": "14.jpg",
+  "model": "birefnet-general-lite",
+  "seconds": 6.64,
+  "object_coverage": 0.086
+ }
+]
