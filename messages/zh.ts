@@ -443,7 +443,7 @@ export const messages: Messages = {
       rows: ['一眼看出哪个城市最多', '一键按城市筛选', '点地图上的聚合点就能看照片'],
     },
     favorites: {
-      examples: { bike: '城市自行车', lamp: '台灯', guitar: '电吉他' },
+      examples: { bike: '山地自行车', lamp: '台灯', guitar: '电吉他' },
       title: '把喜欢的好物收藏起来',
       emphasis: '收藏',
       body: '点物品上的爱心，以后随时再看。',

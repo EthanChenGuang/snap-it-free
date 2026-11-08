@@ -467,7 +467,7 @@ export const messages = {
       rows: ['Vedi quali città ne hanno di più', 'Filtra il feed per città con un tocco', 'Tocca un gruppo sulla mappa per vedere le foto'],
     },
     favorites: {
-      examples: { bike: 'Bici da città', lamp: 'Lampada da scrivania', guitar: 'Chitarra elettrica' },
+      examples: { bike: 'Mountain bike', lamp: 'Lampada da scrivania', guitar: 'Chitarra elettrica' },
       title: 'Salva i tuoi preferiti per dopo',
       emphasis: 'preferiti',
       body: 'Tocca il cuore su un oggetto per ritrovarlo dopo.',

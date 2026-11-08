@@ -26,7 +26,7 @@ export const HOOK_PHOTOS = [
   { key: 'kitten', url: '/images/onboarding/hook/kitten.webp' },
   { key: 'books', url: '/images/onboarding/hook/books.webp' },
   { key: 'armchair', url: '/images/onboarding/hook/armchair.webp' },
-  { key: 'speakers', url: '/images/onboarding/hook/speakers.webp' },
+  { key: 'camera', url: '/images/onboarding/hook/camera.webp' },
 ] as const;
 
 export function PhotoCollage({ freeLabel }: { freeLabel: string }) {

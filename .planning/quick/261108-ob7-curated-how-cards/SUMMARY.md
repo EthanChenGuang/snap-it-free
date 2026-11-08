@@ -40,16 +40,18 @@ frame crops hide most of it). Source listings:
 
 | File (public/images/onboarding/) | Listing title | Listing id |
 |---|---|---|
-| hook/puppy.webp | cucciola taglia media | 4d672946-381d-45e9-90b0-19f3f44c0c2c |
+| hook/puppy.webp | Adozione Femmina di Golden Retriever Americana | d8f1756f-6b4d-422a-a3be-ca2b0d756976 |
 | hook/computer.webp | Case per computer nuovo imballato | f4da53a3-8dc5-4d08-80b7-0feb55d5fd32 |
 | hook/kitten.webp | micini 2mesi | 95e4adf1-4bd0-4b93-8e9d-91bc693c17e7 |
 | hook/books.webp | libri da leggere | cae8ad4a-655b-46fa-b867-649ffb7433cc |
 | hook/armchair.webp | Poltroncina maisondumonde | 6f5c75b0-f47f-4b7d-bf10-7e8756a9dde7 |
-| hook/speakers.webp | Speakers Bluetooth | 54fe8f13-26a1-4088-a08e-9dd94239b8de |
+| hook/camera.webp | Canon EOS-3 | 58d93c3a-bdb3-42db-b648-7a7e525fb90f |
 | how/computer.webp | iMac del 2009/10 | 9f15b82a-ce81-4225-83d2-6d0eab6c2894 |
 | how/ragdoll.webp | Adozione del cuore cucciolo Ragdoll | 71c423ec-72bb-4a10-9f0d-67a43bf93ccd |
-| favorites/bike.webp | bici da città | 31daf0cd-017c-49e6-9e54-b5debad1688e |
+| favorites/bike.webp | Mountain Bike | 9a95e061-e8d0-41c0-a9d9-31c0f6de919f |
 | favorites/lamp.webp | lampada da tavolo metallica | 93d35325-83ac-4dac-a629-bd411f441a15 |
 | favorites/guitar.webp | Chitarra elettrica Maxine nera | d82efc3b-fac5-449b-9b62-4d663c4c280e |
 | alerts/bookshelf.webp | Libreria | fdd98357-7f35-4b7f-b2b9-10590f3b2009 |
 | alerts/espresso.webp | Macchina espresso Saeco | 95b7b1d9-1278-4093-af61-6a4bb5bce0d2 |
+
+Swaps (Guang, same day): puppy → golden retriever, city bike → mountain bike, Bluetooth speakers → Canon camera.
