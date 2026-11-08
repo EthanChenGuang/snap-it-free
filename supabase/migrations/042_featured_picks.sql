@@ -87,4 +87,5 @@ as $$
 $$;
 
 revoke all on function public.get_featured_storage_usage() from public;
+revoke execute on function public.get_featured_storage_usage() from anon, authenticated;
 grant execute on function public.get_featured_storage_usage() to service_role;
