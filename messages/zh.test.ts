@@ -9,7 +9,7 @@ describe('messages/zh city interpolation spacing', () => {
   });
 
   it('feed-ready preview result hugs the city', () => {
-    expect(messages.onboarding.preview.result(355, '威尼斯')).toBe('威尼斯此刻有 355 件免费物品');
+    expect(messages.onboarding.preview.result(355, '威尼斯')).toBe('威尼斯有你感兴趣的 355 件免费物品');
   });
 
   it('feed-ready preview low-supply hugs the city', () => {
