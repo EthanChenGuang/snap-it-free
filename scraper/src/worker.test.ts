@@ -3,7 +3,7 @@ import { parseWorkerArgs } from './worker.js';
 
 describe('parseWorkerArgs', () => {
   it('defaults to source=subito, once=false, schedulerTick=false', () => {
-    expect(parseWorkerArgs([])).toEqual({ source: 'subito', once: false, schedulerTick: false });
+    expect(parseWorkerArgs([])).toEqual({ source: 'subito', once: false, schedulerTick: false, featuredTick: false });
   });
 
   it('parses --source override', () => {
@@ -11,6 +11,7 @@ describe('parseWorkerArgs', () => {
       source: 'vinted',
       once: false,
       schedulerTick: false,
+      featuredTick: false,
     });
   });
 
@@ -19,6 +20,7 @@ describe('parseWorkerArgs', () => {
       source: 'subito',
       once: true,
       schedulerTick: false,
+      featuredTick: false,
     });
   });
 
@@ -27,6 +29,7 @@ describe('parseWorkerArgs', () => {
       source: 'subito',
       once: false,
       schedulerTick: true,
+      featuredTick: false,
     });
   });
 
@@ -35,6 +38,7 @@ describe('parseWorkerArgs', () => {
       source: 'subito',
       once: false,
       schedulerTick: true,
+      featuredTick: false,
     });
   });
 });
@@ -69,5 +73,11 @@ describe('main() --scheduler-tick (D-07-66)', () => {
 
     expect(reconcileOrphanScrapeRuns).toHaveBeenCalledTimes(1);
     expect(runSchedulerTick).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('parseWorkerArgs --featured-tick', () => {
+  it('sets featuredTick', () => {
+    expect(parseWorkerArgs(['--', '--featured-tick']).featuredTick).toBe(true);
   });
 });

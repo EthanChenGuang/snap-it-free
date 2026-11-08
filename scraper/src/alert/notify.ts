@@ -233,39 +233,35 @@ async function deliverAlert(
   }
 }
 
-async function sendResendEmail(payload: AlertPayload, alertTo: string): Promise<void> {
+async function sendResendText(alertTo: string, subject: string, text: string): Promise<void> {
   const { Resend } = await import('resend');
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const { error } = await resend.emails.send({
-    from: process.env.ALERT_FROM!,
-    to: alertTo,
-    subject: buildEmailSubject(payload.runId),
-    text: buildEmailBody(payload),
-  });
+  const { error } = await resend.emails.send({ from: process.env.ALERT_FROM!, to: alertTo, subject, text });
   if (error) {
     throw new Error(error.message);
   }
 }
 
-async function sendTelegramMessage(payload: AlertPayload, chatId: string): Promise<void> {
-  const TelegramBot = (await import('node-telegram-bot-api')).default;
-  const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, { polling: false });
-  await bot.sendMessage(chatId, buildTelegramMessage(payload));
+async function sendResendEmail(payload: AlertPayload, alertTo: string): Promise<void> {
+  await sendResendText(alertTo, buildEmailSubject(payload.runId), buildEmailBody(payload));
 }
 
-async function sendWxPusherMessage(payload: AlertPayload): Promise<void> {
-  const spt = process.env.WXPUSHER_SPT!.trim();
-  const content = buildWeChatMessage(payload);
+async function sendTelegramText(chatId: string, text: string): Promise<void> {
+  const TelegramBot = (await import('node-telegram-bot-api')).default;
+  const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, { polling: false });
+  await bot.sendMessage(chatId, text.slice(0, TELEGRAM_MAX_LENGTH));
+}
 
+async function sendTelegramMessage(payload: AlertPayload, chatId: string): Promise<void> {
+  await sendTelegramText(chatId, buildTelegramMessage(payload));
+}
+
+async function sendWxPusherText(summary: string, content: string): Promise<void> {
+  const spt = process.env.WXPUSHER_SPT!.trim();
   const res = await fetch('https://wxpusher.zjiecode.com/api/send/message/simple-push', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      spt,
-      content,
-      summary: `[零元] Subito blocked — ${payload.failureCode}`,
-      contentType: 1,
-    }),
+    body: JSON.stringify({ spt, content, summary, contentType: 1 }),
   });
 
   const data = (await res.json()) as { code?: number; msg?: string; success?: boolean };
@@ -275,27 +271,18 @@ async function sendWxPusherMessage(payload: AlertPayload): Promise<void> {
   }
 }
 
-async function sendWeChatMessage(payload: AlertPayload): Promise<void> {
+async function sendWeChatText(title: string, content: string): Promise<void> {
   if (isWxPusherConfigured()) {
-    await sendWxPusherMessage(payload);
+    await sendWxPusherText(title, content);
     return;
   }
 
   const token = process.env.PUSHPLUS_TOKEN!.trim();
-  const title = `[零元] Subito blocked — ${payload.failureCode}`;
-  const content = buildWeChatMessage(payload);
   const channel = resolvePushPlusChannel();
-
   const res = await fetch('https://www.pushplus.plus/send', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      token,
-      title,
-      content,
-      template: 'txt',
-      channel,
-    }),
+    body: JSON.stringify({ token, title, content, template: 'txt', channel }),
   });
 
   const data = (await res.json()) as { code?: number; msg?: string };
@@ -304,10 +291,13 @@ async function sendWeChatMessage(payload: AlertPayload): Promise<void> {
   }
 }
 
-async function sendWhatsAppMessage(payload: AlertPayload): Promise<void> {
+async function sendWeChatMessage(payload: AlertPayload): Promise<void> {
+  await sendWeChatText(`[零元] Subito blocked — ${payload.failureCode}`, buildWeChatMessage(payload));
+}
+
+async function sendWhatsAppText(message: string): Promise<void> {
   const phone = process.env.CALLMEBOT_PHONE!;
   const apikey = process.env.CALLMEBOT_APIKEY!;
-  const message = buildWhatsAppMessage(payload);
   const url = new URL('https://api.callmebot.com/whatsapp.php');
   url.searchParams.set('phone', phone);
   url.searchParams.set('text', message);
@@ -323,6 +313,54 @@ async function sendWhatsAppMessage(payload: AlertPayload): Promise<void> {
   }
   if (/error|fail/i.test(body) && !/success|queued/i.test(body)) {
     throw new Error(`CallMeBot rejected: ${body.slice(0, 200)}`);
+  }
+}
+
+async function sendWhatsAppMessage(payload: AlertPayload): Promise<void> {
+  await sendWhatsAppText(buildWhatsAppMessage(payload));
+}
+
+export type OperatorTextMessage = { subject: string; text: string };
+
+/**
+ * Plain informational message to the operator over the same fallback chain as soft-block alerts
+ * (Telegram → WhatsApp → WeChat → email). Never throws.
+ */
+export async function notifyOperatorText(
+  supabase: SupabaseClient,
+  message: OperatorTextMessage,
+): Promise<void> {
+  let routing: AlertRouting;
+  try {
+    routing = await loadAlertRouting(supabase);
+  } catch (err) {
+    console.error(`OPERATOR_TEXT_FAILED stage=routing error=${err instanceof Error ? err.message : String(err)}`);
+    return;
+  }
+  const chain = getAlertFallbackChain(routing);
+  if (chain.length === 0) {
+    console.error('OPERATOR_TEXT_FAILED channel=none error=No alerting credentials configured');
+    return;
+  }
+  for (const channel of chain) {
+    try {
+      switch (channel) {
+        case 'telegram':
+          await sendTelegramText(routing.telegramChatId ?? process.env.TELEGRAM_CHAT_ID!, message.text);
+          return;
+        case 'whatsapp':
+          await sendWhatsAppText(message.text.slice(0, WHATSAPP_MAX_LENGTH));
+          return;
+        case 'wechat':
+          await sendWeChatText(message.subject, message.text.slice(0, WECHAT_MAX_LENGTH));
+          return;
+        case 'resend':
+          await sendResendText(routing.alertEmail ?? process.env.ALERT_TO!, message.subject, message.text);
+          return;
+      }
+    } catch (err) {
+      console.error(`OPERATOR_TEXT_FAILED channel=${channel} error=${err instanceof Error ? err.message : String(err)}`);
+    }
   }
 }
 

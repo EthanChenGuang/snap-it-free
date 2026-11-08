@@ -9,7 +9,8 @@ import {
   TRAILING_RUN_WINDOW,
   supabaseAdmin,
 } from './config.js';
-import { notifyOperator } from './alert/notify.js';
+import { notifyOperator, notifyOperatorText } from './alert/notify.js';
+import { runFeaturedTick } from './featured/run-featured-tick.js';
 import {
   loadJobCrawlMode,
   loadSourceConfig,
@@ -724,12 +725,14 @@ type WorkerCliArgs = {
   source: string;
   once: boolean;
   schedulerTick: boolean;
+  featuredTick: boolean;
 };
 
 export function parseWorkerArgs(argv: string[]): WorkerCliArgs {
   let source = 'subito';
   let once = false;
   let schedulerTick = false;
+  let featuredTick = false;
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -743,14 +746,32 @@ export function parseWorkerArgs(argv: string[]): WorkerCliArgs {
     }
     if (arg === '--scheduler-tick') {
       schedulerTick = true;
+      continue;
+    }
+    if (arg === '--featured-tick') {
+      featuredTick = true;
     }
   }
 
-  return { source, once, schedulerTick };
+  return { source, once, schedulerTick, featuredTick };
 }
 
 export async function main(): Promise<void> {
-  const { source, once, schedulerTick } = parseWorkerArgs(process.argv.slice(2));
+  const { source, once, schedulerTick, featuredTick } = parseWorkerArgs(process.argv.slice(2));
+
+  // Featured picks (今日精选): daily image pass, separate from ingest. Runs once and exits.
+  if (featuredTick) {
+    const maxMinutes = Number(process.env.FEATURED_MAX_MINUTES) || undefined;
+    const result = await runFeaturedTick({
+      supabase: supabaseAdmin,
+      maxMinutes,
+      appUrl: process.env.APP_URL?.trim() || undefined,
+      notify: (text) =>
+        notifyOperatorText(supabaseAdmin, { subject: '[零元] 今日精选候选待审核', text }),
+    });
+    console.log(`[featured] ${JSON.stringify(result)}`);
+    return;
+  }
 
   try {
     const reconciled = await reconcileOrphanScrapeRuns(supabaseAdmin);
