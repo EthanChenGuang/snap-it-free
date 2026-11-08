@@ -236,7 +236,7 @@ async function onboarding(browser) {
   await page.getByTestId('onboarding-continue').click();
   await settle(page);
   check(await screenIs(page, 'city'), 'step 5 city picker');
-  check((await page.getByRole('radio').count()) === 13, 'city picker lists the 13 supported cities');
+  check((await page.getByRole('radio').count()) === 14, 'city picker lists the 13 supported cities plus "Other city"');
   const firstTwo = [
     (await page.getByRole('radio').nth(0).innerText()).trim(),
     (await page.getByRole('radio').nth(1).innerText()).trim(),
