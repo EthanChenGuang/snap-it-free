@@ -34,7 +34,7 @@ export type PaywallContext = {
   count: number | null;
   photos: string[];
   proofCount: number | null;
-  /** Set when the user picked "Other city": we don't cover their city, so no "unlock N near you" claim. */
+  /** Set when the user picked "All of Italy": we don't cover their city, so no "unlock N near you" claim. */
   allCities?: { cities: number };
 };
 

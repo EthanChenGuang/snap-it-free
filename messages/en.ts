@@ -506,11 +506,11 @@ export const messages: Messages = {
       title: 'Where should we look?',
       emphasis: 'look',
       body: 'Your feed will start here. You can change it any time in filters.',
-      other: 'Other city',
+      other: 'All of Italy',
       /** Label for the "Other" (every city) choice in counts and the paywall title. */
-      allLabel: 'all cities',
+      allLabel: 'all of Italy',
       notCovered: (count: number, cities: number) =>
-        `We don't cover your city yet. Right now there are ${count.toLocaleString('en-US')} free items across our ${cities} cities, mostly picked up in person.`,
+        `All ${count.toLocaleString('en-US')} free items across the ${cities} cities we cover. Pickup is in person, so pick ones near you.`,
     },
     preview: {
       title: 'Your feed is ready',

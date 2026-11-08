@@ -111,7 +111,7 @@ describe('PaywallScreen personalization (honest, real figures)', () => {
     expect(container.querySelector('[data-testid="paywall-proof"]')).toBeNull();
   });
 
-  it('"Other city": no "unlock N near you" claim, names the covered cities and adds the pickup note', async () => {
+  it('"All of Italy": no "unlock N near you" claim, names the covered cities and adds the pickup note', async () => {
     const container = await render(
       <PaywallScreen
         titleId="paywall-title"

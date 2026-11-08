@@ -2,8 +2,8 @@ import type { ListingCategory } from '@/lib/listings/categories';
 import type { VeniceZone } from '@/lib/listings/types';
 import { subitoCategoriesIt } from './subito-category-labels';
 
-/** "a Milano", but "in tutte le città" for the every-city choice. */
-const aCitta = (city: string) => (city === 'tutte le città' ? `in ${city}` : `a ${city}`);
+/** "a Milano", but "in tutta Italia" for the every-city choice. */
+const aCitta = (city: string) => (city === 'tutta Italia' ? `in ${city}` : `a ${city}`);
 
 export const messages = {
   app: {
@@ -519,11 +519,11 @@ export const messages = {
       title: 'Dove cerchiamo?',
       emphasis: 'cerchiamo',
       body: 'Il feed partirà da qui. Puoi cambiarla quando vuoi dai filtri.',
-      other: 'Altra città',
+      other: 'Tutta Italia',
       /** Label for the "Other" (every city) choice in counts and the paywall title. */
-      allLabel: 'tutte le città',
+      allLabel: 'tutta Italia',
       notCovered: (count: number, cities: number) =>
-        `Non copriamo ancora la tua città. Ora ci sono ${count.toLocaleString('it-IT')} oggetti gratis nelle nostre ${cities} città, quasi sempre da ritirare di persona.`,
+        `Tutti i ${count.toLocaleString('it-IT')} oggetti gratis nelle ${cities} città che copriamo. Il ritiro è di persona: scegli quelli vicini a te.`,
     },
     preview: {
       title: 'Il tuo feed è pronto',

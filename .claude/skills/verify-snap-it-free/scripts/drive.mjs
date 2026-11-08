@@ -236,7 +236,7 @@ async function onboarding(browser) {
   await page.getByTestId('onboarding-continue').click();
   await settle(page);
   check(await screenIs(page, 'city'), 'step 5 city picker');
-  check((await page.getByRole('radio').count()) === 14, 'city picker lists the 13 supported cities plus "Other city"');
+  check((await page.getByRole('radio').count()) === 14, 'city picker lists the 13 supported cities plus "All of Italy"');
   const firstTwo = [
     (await page.getByRole('radio').nth(0).innerText()).trim(),
     (await page.getByRole('radio').nth(1).innerText()).trim(),
@@ -247,8 +247,8 @@ async function onboarding(browser) {
   await page.getByTestId('city-other').click();
   await page.getByTestId('city-not-covered').waitFor({ timeout: 15000 }).catch(() => {});
   const notCovered = (await page.getByTestId('city-not-covered').innerText().catch(() => '')).trim();
-  check(/don't cover your city yet.*\d[\d,]* free items across our \d+ cities/.test(notCovered), `"Other city" says honestly we don't cover it yet, with real totals: "${notCovered}"`);
-  check(!(await page.getByTestId('onboarding-continue').isDisabled()), '"Other city" counts as an answer (Continue enabled)');
+  check(/All \d[\d,]* free items across the \d+ cities we cover.*in person/.test(notCovered), `"All of Italy" says which cities it covers, with real totals and in-person pickup: "${notCovered}"`);
+  check(!(await page.getByTestId('onboarding-continue').isDisabled()), '"All of Italy" counts as an answer (Continue enabled)');
   await page.getByRole('radio', { name: 'Milan' }).click();
   await shot(page, '05-city');
 

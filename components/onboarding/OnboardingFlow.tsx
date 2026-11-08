@@ -210,7 +210,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
 
   // Teaser data: region-wide (hook collage + Veneto counts) and per picked city.
   const region = useRegionTeaser();
-  // 'all' (the "Other city" chip) means every covered city, no city filter.
+  // 'all' (the "All of Italy" chip) means every covered city, no city filter.
   const pickedCity = state.city === 'all' ? null : state.city;
   // Counts and photos follow the picked interests (Guang, 2026-11-08).
   const interestCategories = useMemo(() => interestsToSubitoSlugs(state.interests), [state.interests]);

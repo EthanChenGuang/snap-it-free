@@ -492,11 +492,11 @@ export const messages: Messages = {
       title: '我们在哪里帮你找？',
       emphasis: '找',
       body: '信息流会从这里开始。之后随时可以在筛选中更改。',
-      other: '其他城市',
+      other: '全意大利',
       /** Label for the "Other" (every city) choice in counts and the paywall title. */
-      allLabel: '所有城市',
+      allLabel: '全意大利',
       notCovered: (count: number, cities: number) =>
-        `我们暂时还没覆盖你的城市。目前在 ${cities} 个城市共有 ${count.toLocaleString('zh-CN')} 件免费物品，大多需要当面自取。`,
+        `汇总我们覆盖的 ${cities} 个城市，共 ${count.toLocaleString('zh-CN')} 件免费物品。物品需当面自取，建议挑离你近的。`,
     },
     preview: {
       title: '你感兴趣的好物已就绪',
