@@ -506,9 +506,11 @@ export const messages: Messages = {
       title: 'Where should we look?',
       emphasis: 'look',
       body: 'Your feed will start here. You can change it any time in filters.',
-      other: 'Other',
+      other: 'Other city',
       /** Label for the "Other" (every city) choice in counts and the paywall title. */
       allLabel: 'all cities',
+      notCovered: (count: number, cities: number) =>
+        `We don't cover your city yet. Right now there are ${count.toLocaleString('en-US')} free items across our ${cities} cities, mostly picked up in person.`,
     },
     preview: {
       title: 'Your feed is ready',
@@ -583,6 +585,8 @@ export const messages: Messages = {
     titlePersonalized: (count: number, city: string) =>
       count === 1 ? `Unlock 1 free item in ${city}` : `Unlock ${count.toLocaleString('en-US')} free items in ${city}`,
     titleFallback: 'See every free item near you',
+    titleAllCities: (cities: number) => `See every free item in our ${cities} cities`,
+    pickupNote: 'Items are picked up in person, so check they are near you.',
     proofLine: (count: number) =>
       count === 1
         ? '1 new free item in Veneto in the last 7 days'

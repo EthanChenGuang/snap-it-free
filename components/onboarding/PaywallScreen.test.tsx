@@ -110,6 +110,20 @@ describe('PaywallScreen personalization (honest, real figures)', () => {
     expect(container.querySelector('#paywall-title')?.textContent).toBe(getMessages('en').paywall.titleFallback);
     expect(container.querySelector('[data-testid="paywall-proof"]')).toBeNull();
   });
+
+  it('"Other city": no "unlock N near you" claim, names the covered cities and adds the pickup note', async () => {
+    const container = await render(
+      <PaywallScreen
+        titleId="paywall-title"
+        onFinish={() => {}}
+        context={{ cityLabel: 'all cities', count: 14289, photos: [], proofCount: null, allCities: { cities: 13 } }}
+      />,
+    );
+    const title = container.querySelector('#paywall-title')?.textContent ?? '';
+    expect(title).toBe('See every free item in our 13 cities');
+    expect(title).not.toContain('14,289');
+    expect(container.querySelector('[data-testid="paywall-pickup-note"]')?.textContent).toContain('in person');
+  });
 });
 
 describe('PaywallScreen inline sign-in', () => {

@@ -301,6 +301,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
 
   // Personalized preview/paywall figures from real data.
   const allCitiesCount = region.status === 'ready' ? (region.map?.total ?? null) : null;
+  const coveredCities = region.status === 'ready' ? (region.map?.cities.length ?? 0) : 0;
   const previewCityLabel = state.city === 'all' ? copy.city.allLabel : pickedCity ? cityLabels[pickedCity] : null;
   const previewCount =
     state.city === 'all'
@@ -327,8 +328,9 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
       count: previewCount,
       photos: previewPhotos.slice(0, 3).map((photo) => photo.url),
       proofCount,
+      allCities: state.city === 'all' && coveredCities > 0 ? { cities: coveredCities } : undefined,
     }),
-    [previewCityLabel, previewCount, previewPhotos, proofCount, copy.regionLabel],
+    [previewCityLabel, previewCount, previewPhotos, proofCount, copy.regionLabel, state.city, coveredCities],
   );
 
   if (state.screen === 'done') return null;
@@ -621,11 +623,25 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                           {copy.city.other}
                         </button>
                       </div>
-                      {previewCityLabel && previewCount !== null && previewCount > 0 && !previewLoading && (
-                        <p className={cn(pop.pill, 'mt-space-lg')} data-testid="city-live-count">
-                          <LiveDot />
-                          {copy.preview.result(previewCount, previewCityLabel)}
-                        </p>
+                      {state.city === 'all' ? (
+                        allCitiesCount !== null && coveredCities > 0 && (
+                          <p
+                            className={cn('mt-space-lg p-space-md text-body-md text-[#1A1A2E]', pop.card, 'rounded-2xl')}
+                            data-testid="city-not-covered"
+                          >
+                            {copy.city.notCovered(allCitiesCount, coveredCities)}
+                          </p>
+                        )
+                      ) : (
+                        previewCityLabel &&
+                        previewCount !== null &&
+                        previewCount > 0 &&
+                        !previewLoading && (
+                          <p className={cn(pop.pill, 'mt-space-lg')} data-testid="city-live-count">
+                            <LiveDot />
+                            {copy.preview.result(previewCount, previewCityLabel)}
+                          </p>
+                        )
                       )}
                     </>
                   )}

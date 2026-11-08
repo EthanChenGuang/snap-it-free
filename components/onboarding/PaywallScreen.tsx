@@ -34,6 +34,8 @@ export type PaywallContext = {
   count: number | null;
   photos: string[];
   proofCount: number | null;
+  /** Set when the user picked "Other city": we don't cover their city, so no "unlock N near you" claim. */
+  allCities?: { cities: number };
 };
 
 type PaywallScreenProps = {
@@ -245,7 +247,11 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
   }
 
   const hasCount = typeof context?.count === 'number' && context.count > 0;
-  const headline = hasCount && context ? copy.titlePersonalized(context.count as number, context.cityLabel) : copy.titleFallback;
+  const headline = context?.allCities
+    ? copy.titleAllCities(context.allCities.cities)
+    : hasCount && context
+      ? copy.titlePersonalized(context.count as number, context.cityLabel)
+      : copy.titleFallback;
   const strip = context?.photos.slice(0, 3) ?? [];
 
   return (
@@ -262,6 +268,11 @@ export function PaywallScreen({ titleId, onFinish, context, source = 'locked', r
         <h1 id={titleId} ref={titleRef} tabIndex={-1} className={cn(pop.display, 'text-[26px] leading-[1.25] outline-none')}>
           <HighlightNumber text={headline} />
         </h1>
+        {context?.allCities && (
+          <p className="mt-space-xs text-label-md text-[#4A4A5E]" data-testid="paywall-pickup-note">
+            {copy.pickupNote}
+          </p>
+        )}
 
         {strip.length > 0 && (
           <ul className="mt-space-sm grid grid-cols-3 gap-space-sm px-space-xs" aria-hidden data-testid="paywall-photo-strip">

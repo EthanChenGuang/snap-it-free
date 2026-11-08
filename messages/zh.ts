@@ -492,9 +492,11 @@ export const messages: Messages = {
       title: '我们在哪里帮你找？',
       emphasis: '找',
       body: '信息流会从这里开始。之后随时可以在筛选中更改。',
-      other: '其他',
+      other: '其他城市',
       /** Label for the "Other" (every city) choice in counts and the paywall title. */
       allLabel: '所有城市',
+      notCovered: (count: number, cities: number) =>
+        `我们暂时还没覆盖你的城市。目前在 ${cities} 个城市共有 ${count.toLocaleString('zh-CN')} 件免费物品，大多需要当面自取。`,
     },
     preview: {
       title: '你的信息流已就绪',
@@ -563,6 +565,8 @@ export const messages: Messages = {
     subtitle: '订阅后即可查看身边所有免费信息。',
     titlePersonalized: (count: number, city: string) => `解锁${city}的 ${count.toLocaleString('zh-CN')} 件免费物品`,
     titleFallback: '查看你身边的所有免费物品',
+    titleAllCities: (cities: number) => `查看我们 ${cities} 个城市里的所有免费物品`,
+    pickupNote: '物品需当面自取，请先确认离你不远。',
     proofLine: (count: number) => `过去 7 天威尼托新增 ${count.toLocaleString('zh-CN')} 件免费物品`,
     savingsVsMonthly: (pct: number) => `比月付省 ${pct}%`,
     billed: (price: string) => `每年扣费 ${price}`,

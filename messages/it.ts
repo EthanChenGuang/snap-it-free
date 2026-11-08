@@ -519,9 +519,11 @@ export const messages = {
       title: 'Dove cerchiamo?',
       emphasis: 'cerchiamo',
       body: 'Il feed partirà da qui. Puoi cambiarla quando vuoi dai filtri.',
-      other: 'Altro',
+      other: 'Altra città',
       /** Label for the "Other" (every city) choice in counts and the paywall title. */
       allLabel: 'tutte le città',
+      notCovered: (count: number, cities: number) =>
+        `Non copriamo ancora la tua città. Ora ci sono ${count.toLocaleString('it-IT')} oggetti gratis nelle nostre ${cities} città, quasi sempre da ritirare di persona.`,
     },
     preview: {
       title: 'Il tuo feed è pronto',
@@ -596,6 +598,8 @@ export const messages = {
     titlePersonalized: (count: number, city: string) =>
       count === 1 ? `Sblocca 1 oggetto gratis ${aCitta(city)}` : `Sblocca ${count.toLocaleString('it-IT')} oggetti gratis ${aCitta(city)}`,
     titleFallback: 'Vedi tutti gli oggetti gratis vicino a te',
+    titleAllCities: (cities: number) => `Vedi tutti gli oggetti gratis nelle nostre ${cities} città`,
+    pickupNote: 'Gli oggetti si ritirano di persona: controlla che siano vicino a te.',
     proofLine: (count: number) =>
       count === 1
         ? '1 nuovo oggetto gratis in Veneto negli ultimi 7 giorni'
