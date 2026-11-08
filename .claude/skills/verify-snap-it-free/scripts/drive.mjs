@@ -387,6 +387,16 @@ async function onboarding(browser) {
   const photosBeforeSearch = await page.getByTestId('locked-photos').locator('img').count();
   await searchBox.fill('zzzz-no-such-item');
   await settle(page, 800);
+  // The filtered count can land after the fixed settle on a slow load; wait up to 5 s for it to move.
+  await page
+    .waitForFunction(
+      ([count, photos]) =>
+        (document.querySelector('[data-testid="locked-count"]')?.textContent ?? '').trim() !== count ||
+        (document.querySelector('[data-testid="locked-photos"]')?.querySelectorAll('img').length ?? 0) !== photos,
+      [countBeforeSearch, photosBeforeSearch],
+      { timeout: 5000 },
+    )
+    .catch(() => {});
   check((await page.getByTestId('paywall-dialog').count()) === 0, 'locked feed: typing search does not open the paywall');
   const countAfterSearch = (await page.getByTestId('locked-count').innerText().catch(() => '')).trim();
   const photosAfterSearch = await page.getByTestId('locked-photos').locator('img').count();
