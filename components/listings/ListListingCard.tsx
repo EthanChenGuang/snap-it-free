@@ -12,25 +12,26 @@ import type { ListingRow } from '@/lib/listings/types';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
-/** Categories whose items usually look good as a big photo (pets, tech, appliances, bikes). */
-const HERO_CATEGORIES = new Set(['animali', 'informatica', 'telefonia', 'elettrodomestici', 'biciclette']);
-
 /**
- * Subito's furniture category also holds brackets, jars and boxes, so there the title must name a piece
- * of furniture (Italian, as listed).
+ * Titles (Italian, as listed) naming objects that look good as a big photo. Subito categories are too loose
+ * to rely on ("appliances" holds TV brackets, "furniture" holds jars), so the title decides.
  */
-const HERO_FURNITURE_TITLE =
-  /\b(divan\w*|poltron\w*|sedi[ae]\w*|tavol\w*|scrivani\w*|lett[oi]\b|armadi\w*|librer\w*|lamp\w*|comodin\w*|credenz\w*|cassettier\w*|madi\w*|vetrin\w*|specchi\w*|sofa)/i;
+const HERO_TITLE =
+  /\b(divan\w*|poltron\w*|sedi[ae]\w*|tavol\w*|scrivani\w*|lett[oi]\b|armadi\w*|librer\w*|lamp\w*|comodin\w*|credenz\w*|cassettier\w*|vetrin\w*|specchi\w*|sofa|bici\w*|biciclett\w*|computer|pc|notebook|laptop|macbook|monitor|ipad|iphone|tablet|lavatric\w*|frigorifer\w*|microonde|aspirapolvere|forno|caff[eè]\w*|chitarr\w*|pianofort\w*)\b/i;
+
+/** Parts and accessories look cheap enlarged even when the title also names a nice object. */
+const HERO_EXCLUDE = /\b(materass\w*|dogh\w*|senza|support\w*|staff\w*|cav[oi]|ricamb\w*|pezz[io]|scatol\w*|barattol\w*|rott\w*|guast\w*)\b/i;
 
 /**
  * Whether a listing may get the full-width card. A big photo of a bracket or a box of jars makes the feed
- * look cheaper, so only photo-friendly items qualify. (Scraped rows carry one photo, so photo count can't be
- * used as a quality signal.)
+ * look cheaper, so only pets and clearly named desirable objects qualify. (Scraped rows carry one photo, so
+ * photo count can't be used as a quality signal.)
  */
 export function isHeroWorthy(listing: Pick<ListingRow, 'photo_url' | 'category' | 'title'>): boolean {
-  if (!listing.photo_url || !listing.category) return false;
-  if (HERO_CATEGORIES.has(listing.category)) return true;
-  return listing.category === 'arredamento-casalinghi' && HERO_FURNITURE_TITLE.test(listing.title ?? '');
+  if (!listing.photo_url) return false;
+  if (listing.category === 'animali') return true;
+  const title = listing.title ?? '';
+  return HERO_TITLE.test(title) && !HERO_EXCLUDE.test(title);
 }
 
 type ListListingCardProps = {
