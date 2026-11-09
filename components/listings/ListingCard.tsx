@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeSubitoFeedPhotoUrl } from '@/lib/listings/subito-photo-url';
 import Image from 'next/image';
 import Link from 'next/link';
 import { forwardRef } from 'react';
@@ -46,7 +47,7 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(
           >
             {listing.photo_url ? (
               <Image
-                src={listing.photo_url}
+                src={normalizeSubitoFeedPhotoUrl(listing.photo_url)}
                 alt={displayTitle}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
