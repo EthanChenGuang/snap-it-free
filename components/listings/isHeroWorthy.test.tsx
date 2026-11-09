@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { isHeroWorthy } from './ListListingCard';
 
-const base: { photo_url: string | null; category: string | null } = {
-  photo_url: 'https://images.sbito.it/a.jpg',
-  category: 'arredamento-casalinghi',
-};
+type HeroInput = Parameters<typeof isHeroWorthy>[0];
+const base: HeroInput = { photo_url: 'https://images.sbito.it/a.jpg', category: 'arredamento-casalinghi' };
 
 describe('isHeroWorthy', () => {
   it('enlarges photo-friendly categories', () => {
@@ -14,7 +12,7 @@ describe('isHeroWorthy', () => {
 
   it('keeps other categories and photo-less listings as normal cards', () => {
     expect(isHeroWorthy({ ...base, category: 'audio-video' })).toBe(false);
-    expect(isHeroWorthy({ ...base, photo_url: null })).toBe(false);
+    expect(isHeroWorthy({ ...base, photo_url: '' })).toBe(false);
     expect(isHeroWorthy({ ...base, category: null })).toBe(false);
   });
 });
