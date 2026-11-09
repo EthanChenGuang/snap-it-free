@@ -122,7 +122,7 @@ export function EmailCodeSignIn({
           autoFocus
           value={code}
           onChange={(event) => setCode(event.target.value)}
-          placeholder="123456"
+          placeholder="12345678"
           aria-label={copy.codeLabel}
           className={cn(inputClass, 'text-center text-[22px] font-bold tracking-[0.4em]')}
           data-testid={`${testIdPrefix}-code`}
