@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { pop } from '@/components/onboarding/pop-theme';
+import { SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { Button } from '@/components/ui/button';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { createClient } from '@/lib/supabase/client';
@@ -96,9 +97,22 @@ export function EmailCodeSignIn({
   if (phase === 'code' || phase === 'verifying') {
     return (
       <form onSubmit={verify} className="flex flex-col gap-space-sm" data-testid={`${testIdPrefix}-verify-form`}>
-        <p role="status" className="text-label-md text-[#1A1A2E]">
-          {copy.sent(email.trim())}
-        </p>
+        <div
+          role="status"
+          className={cn('mb-space-xs flex items-start gap-space-sm p-space-md text-[#1A1A2E]', pop.card, 'rounded-2xl bg-[#D6F5E6]')}
+          data-testid={`${testIdPrefix}-sent`}
+        >
+          <span className={cn('flex h-10 w-10 shrink-0 -rotate-3 items-center justify-center rounded-xl bg-[#FFC83D]', pop.outline)}>
+            <SymbolIcon name="mark_email_unread" className="text-[22px]" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-body-lg font-bold">{copy.sentTitle}</p>
+            <p className="mt-0.5 text-body-md">
+              {copy.sentTo} <strong className="break-all font-bold">{email.trim()}</strong>
+            </p>
+            <p className="mt-space-xs text-label-md text-[#4A4A5E]">{copy.sentHint}</p>
+          </div>
+        </div>
         <input
           type="text"
           inputMode="numeric"

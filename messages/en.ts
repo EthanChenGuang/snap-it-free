@@ -567,7 +567,9 @@ export const messages: Messages = {
   emailCode: {
     send: 'Email me a sign-in link',
     sending: 'Sending…',
-    sent: (email: string) => `We sent an email to ${email}. Tap the link in it to sign in. If the email shows a code, you can enter it below instead.`,
+    sentTitle: 'Check your inbox',
+    sentTo: 'Sent to',
+    sentHint: 'Tap the link in the email to sign in. If it shows a code, you can enter it below instead.',
     codeLabel: 'Code from the email (if it has one)',
     verify: 'Sign in',
     verifying: 'Signing in…',

@@ -580,7 +580,9 @@ export const messages = {
   emailCode: {
     send: 'Inviami un link di accesso',
     sending: 'Invio…',
-    sent: (email: string) => `Abbiamo inviato un’email a ${email}. Tocca il link nell’email per accedere. Se l’email mostra un codice, puoi inserirlo qui.`,
+    sentTitle: 'Controlla la tua email',
+    sentTo: 'Inviata a',
+    sentHint: 'Tocca il link nell’email per accedere. Se mostra un codice, puoi inserirlo qui sotto.',
     codeLabel: 'Codice dell’email (se presente)',
     verify: 'Accedi',
     verifying: 'Accesso…',

@@ -549,7 +549,9 @@ export const messages: Messages = {
   emailCode: {
     send: '发送登录链接到邮箱',
     sending: '正在发送…',
-    sent: (email: string) => `已发送邮件到 ${email}。点邮件里的链接即可登录；如果邮件里有验证码，也可以在下面输入。`,
+    sentTitle: '去邮箱查收登录邮件',
+    sentTo: '已发送到',
+    sentHint: '点邮件里的链接即可登录。如果邮件里有验证码，也可以在下面输入。',
     codeLabel: '邮件里的验证码（如果有）',
     verify: '登录',
     verifying: '正在登录…',
