@@ -34,6 +34,28 @@ export function isHeroWorthy(listing: Pick<ListingRow, 'photo_url' | 'category' 
   return HERO_TITLE.test(title) && !HERO_EXCLUDE.test(title);
 }
 
+/**
+ * Ids of listings shown as full-width cards: after at least `every` normal cards, the next hero-worthy
+ * listing that starts a fresh row (an even number of normal cards since the last hero, so the 2-column grid
+ * has no gap) is enlarged. Keeps feed order.
+ */
+export function pickHeroIds(
+  listings: readonly Pick<ListingRow, 'id' | 'photo_url' | 'category' | 'title'>[],
+  every = 8,
+): Set<string> {
+  const heroes = new Set<string>();
+  let normalSince = 0;
+  for (const listing of listings) {
+    if (normalSince >= every && normalSince % 2 === 0 && isHeroWorthy(listing)) {
+      heroes.add(listing.id);
+      normalSince = 0;
+    } else {
+      normalSince += 1;
+    }
+  }
+  return heroes;
+}
+
 type ListListingCardProps = {
   listing: ListingRow;
   /** Eager-load photo for above-the-fold cards. */

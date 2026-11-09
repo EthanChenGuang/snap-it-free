@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FeedSearching } from '@/components/listings/FeedSearching';
-import { isHeroWorthy, ListListingCard } from '@/components/listings/ListListingCard';
+import { ListListingCard, pickHeroIds } from '@/components/listings/ListListingCard';
 import { RubberbandScroll } from '@/components/ui/RubberbandScroll';
 import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import { useFeedScroll } from '@/components/shell/FeedScrollContext';
@@ -142,6 +142,7 @@ export function FeedHomeClient({
     () => filteredListings.slice(0, renderLimit),
     [filteredListings, renderLimit],
   );
+  const heroIds = useMemo(() => pickHeroIds(visibleListings), [visibleListings]);
 
   const hasSearchQuery = searchQuery.trim().length > 0;
   const hasCategoryFilter = applied.categories.length > 0;
@@ -256,9 +257,8 @@ export function FeedHomeClient({
                     listing={listing}
                     priority={index < 4}
                     index={index}
-                    // After every 8 cards (4 full rows), a full-width card with the full-frame photo, but only
-                    // for items that look good large; otherwise it stays a normal card.
-                    hero={index % 9 === 8 && isHeroWorthy(listing)}
+                    // Now and then a full-width card with the full-frame photo, for items that look good large.
+                    hero={heroIds.has(listing.id)}
                   />
                 ))}
               </section>

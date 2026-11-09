@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isHeroWorthy } from './ListListingCard';
+import { isHeroWorthy, pickHeroIds } from './ListListingCard';
 
 type HeroInput = Parameters<typeof isHeroWorthy>[0];
 const item = (category: string, title: string, photo_url = 'https://images.sbito.it/a.jpg'): HeroInput => ({
@@ -30,5 +30,23 @@ describe('isHeroWorthy', () => {
     expect(isHeroWorthy(item('audio-video', 'TV'))).toBe(false);
     expect(isHeroWorthy(item('libri-riviste', 'Libri vari'))).toBe(false);
     expect(isHeroWorthy(item('animali', 'Gattino', ''))).toBe(false);
+  });
+});
+
+describe('pickHeroIds', () => {
+  const row = (id: string, title: string) => ({ id, photo_url: 'https://x/a.jpg', category: 'arredamento-casalinghi', title });
+
+  it('enlarges the next good item after 8 normal cards, only at a row start', () => {
+    const list = [
+      ...Array.from({ length: 8 }, (_, i) => row(`n${i}`, 'barattoli')),
+      row('bad', 'scatola'), // 9th: not worthy
+      row('good-odd', 'Divano'), // 9 normal cards since: odd, would leave a gap
+      row('good', 'Tavolo'), // 10 normal cards: row start
+    ];
+    expect([...pickHeroIds(list)]).toEqual(['good']);
+  });
+
+  it('enlarges nothing in a short list', () => {
+    expect(pickHeroIds([row('a', 'Divano'), row('b', 'Divano')]).size).toBe(0);
   });
 });
