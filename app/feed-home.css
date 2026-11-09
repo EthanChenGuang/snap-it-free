@@ -1,7 +1,13 @@
 /* Feed home — Stitch document-first with frosted chrome overlays */
 
 .feed-home {
-  background-color: var(--color-background);
+  /* Warm gallery wall behind the white framed cards (Stitch "warm gallery", 2026-11-09). */
+  --feed-bg: #f6f2ec;
+  background-color: var(--feed-bg);
+}
+
+.dark .feed-home {
+  --feed-bg: var(--color-background);
 }
 
 .feed-home ::selection {
@@ -10,7 +16,7 @@
 }
 
 .feed-header-glass {
-  background: color-mix(in srgb, var(--color-background) 72%, transparent);
+  background: color-mix(in srgb, var(--feed-bg, var(--color-background)) 72%, transparent);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   backdrop-filter: blur(24px) saturate(180%);
 }
@@ -57,6 +63,22 @@
 
 .feed-card {
   animation: feed-card-enter 0.65s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+/* The photo sits inset in a white card like a framed print. */
+.feed-card-frame {
+  padding: 6px;
+  border-radius: 20px;
+  background: var(--color-surface-container-lowest);
+  border: 1px solid color-mix(in srgb, var(--color-on-surface) 7%, transparent);
+  box-shadow:
+    0 1px 2px rgba(60, 40, 20, 0.04),
+    0 6px 18px rgba(60, 40, 20, 0.06);
+}
+
+.dark .feed-card-frame {
+  border-color: color-mix(in srgb, var(--color-outline-variant) 30%, transparent);
+  box-shadow: none;
 }
 
 .feed-card-media {

@@ -249,13 +249,15 @@ export function FeedHomeClient({
                 )}
               </p>
 
-              <section className="grid grid-cols-2 gap-x-space-md gap-y-space-lg sm:grid-cols-3 lg:grid-cols-4">
+              <section className="grid grid-flow-row-dense grid-cols-2 gap-x-3 gap-y-3.5 sm:grid-cols-3 lg:grid-cols-4">
                 {visibleListings.map((listing, index) => (
                   <ListListingCard
                     key={listing.id}
                     listing={listing}
                     priority={index < 4}
                     index={index}
+                    // After every 8 cards (4 full rows) comes one full-width card with a larger, full-frame photo.
+                    hero={index % 9 === 8 && Boolean(listing.photo_url)}
                   />
                 ))}
               </section>
