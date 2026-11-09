@@ -70,12 +70,11 @@ describe('onboardingFilterPrefs', () => {
   });
 });
 
-describe('interest chips (Guang, 2026-11-08)', () => {
-  it('puts pets second and furniture fourth, in an even grid', async () => {
+describe('interest chips (Guang, 2026-11-08/09)', () => {
+  it('puts "Everything" first, then pets and furniture in their places, in an even grid', async () => {
     const { ONBOARDING_INTERESTS } = await import('./onboarding-interests');
     const keys = ONBOARDING_INTERESTS.map((interest) => interest.key);
-    expect(keys[1]).toBe('pets');
-    expect(keys[3]).toBe('furniture');
+    expect(keys.slice(0, 5)).toEqual(['everything', 'electronics', 'pets', 'kids', 'furniture']);
     expect(keys.length % 2).toBe(0);
     expect(ONBOARDING_INTERESTS.find((interest) => interest.key === 'kids')?.subitoSlugs).toEqual(['bambini-giocattoli']);
   });

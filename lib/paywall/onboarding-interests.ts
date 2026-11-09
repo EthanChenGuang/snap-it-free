@@ -16,8 +16,9 @@ export type OnboardingInterest = {
 };
 
 export const ONBOARDING_INTERESTS: readonly OnboardingInterest[] = [
-  // Order is display order (Guang, 2026-11-08): pets second, furniture fourth. Garden & DIY dropped to keep
+  // Order is display order (Guang, 2026-11-08/09): "Everything" first, then electronics, pets, kids, furniture. Garden & DIY dropped to keep
   // an even 2-column grid ("Everything" still includes it).
+  { key: 'everything', subitoSlugs: [], keyword: null },
   { key: 'electronics', subitoSlugs: ['informatica', 'telefonia', 'audio-video'], keyword: 'elettronica' },
   { key: 'pets', subitoSlugs: ['animali'], keyword: 'animali' },
   { key: 'kids', subitoSlugs: ['bambini-giocattoli'], keyword: 'giochi' },
@@ -25,7 +26,6 @@ export const ONBOARDING_INTERESTS: readonly OnboardingInterest[] = [
   { key: 'appliances', subitoSlugs: ['elettrodomestici'], keyword: 'elettrodomestico' },
   { key: 'books', subitoSlugs: ['libri-riviste'], keyword: 'libri' },
   { key: 'clothes', subitoSlugs: ['abbigliamento-accessori'], keyword: 'abbigliamento' },
-  { key: 'everything', subitoSlugs: [], keyword: null },
 ];
 
 export const ONBOARDING_INTEREST_KEYS = ONBOARDING_INTERESTS.map((interest) => interest.key);

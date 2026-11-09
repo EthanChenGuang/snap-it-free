@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { pop } from '@/components/onboarding/pop-theme';
 import { SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,16 @@ import { getSupabaseEnv } from '@/lib/supabase/env';
 import { cn } from '@/lib/utils';
 
 type Phase = 'email' | 'sending' | 'code' | 'verifying';
+
+/** Supabase refuses a second email to the same address within this many seconds. */
+const RESEND_COOLDOWN_S = 60;
+
+/** Seconds Supabase asks us to wait, from its 429 message ("...after 52 seconds"). */
+function waitSeconds(error: { status?: number; message?: string }): number | null {
+  if (error.status !== 429) return null;
+  const match = error.message?.match(/(\d+)\s*second/);
+  return match ? Number(match[1]) : RESEND_COOLDOWN_S;
+}
 
 /**
  * Email sign-in that works across browsers: we send the usual magic-link email and also accept the
@@ -35,12 +45,29 @@ export function EmailCodeSignIn({
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
+  // The address the last email went to, and when we may send to it again.
+  const [lastSent, setLastSent] = useState<{ email: string; resendAt: number } | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  const waitLeft = lastSent ? Math.max(0, Math.ceil((lastSent.resendAt - now) / 1000)) : 0;
+
+  useEffect(() => {
+    if (!lastSent || lastSent.resendAt <= Date.now()) return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [lastSent]);
 
   const send = async (event?: React.FormEvent) => {
     event?.preventDefault();
     const trimmed = email.trim();
     if (!trimmed || !getSupabaseEnv()) {
       setError(copy.sendError);
+      return;
+    }
+    const cooling = lastSent !== null && lastSent.resendAt > Date.now();
+    if (cooling && lastSent.email.toLowerCase() === trimmed.toLowerCase()) {
+      // Same address again within the cooldown: the email is already on its way, so just go back to the code.
+      setError(null);
+      setPhase('code');
       return;
     }
     onBeforeSend?.();
@@ -52,9 +79,18 @@ export function EmailCodeSignIn({
         options: { emailRedirectTo },
       });
       if (sendError) {
-        setError(copy.sendError);
-        setPhase('email');
+        const wait = waitSeconds(sendError);
+        if (wait !== null) {
+          setLastSent({ email: trimmed, resendAt: Date.now() + wait * 1000 });
+          setNow(Date.now());
+          setError(copy.waitError(wait));
+        } else {
+          setError(copy.sendError);
+        }
+        setPhase(phase === 'code' ? 'code' : 'email');
       } else {
+        setLastSent({ email: trimmed, resendAt: Date.now() + RESEND_COOLDOWN_S * 1000 });
+        setNow(Date.now());
         setCode('');
         setPhase('code');
       }
@@ -107,8 +143,9 @@ export function EmailCodeSignIn({
           </span>
           <div className="min-w-0">
             <p className="text-body-lg font-bold">{copy.sentTitle}</p>
-            <p className="mt-0.5 text-body-md">
-              {copy.sentTo} <strong className="break-all font-bold">{email.trim()}</strong>
+            <p className="mt-0.5 text-label-md text-[#4A4A5E]">{copy.sentTo}</p>
+            <p className="truncate whitespace-nowrap text-body-md font-bold" title={email.trim()}>
+              {email.trim()}
             </p>
             <p className="mt-space-xs text-label-md text-[#4A4A5E]">{copy.sentHint}</p>
           </div>
@@ -141,8 +178,14 @@ export function EmailCodeSignIn({
           </p>
         )}
         <div className="flex justify-center gap-space-md text-label-sm text-[#4A4A5E]">
-          <button type="button" className="min-h-9 underline-offset-2 hover:underline" onClick={() => void send()}>
-            {copy.resend}
+          <button
+            type="button"
+            className="min-h-9 underline-offset-2 enabled:hover:underline disabled:opacity-60"
+            disabled={waitLeft > 0}
+            onClick={() => void send()}
+            data-testid={`${testIdPrefix}-resend`}
+          >
+            {waitLeft > 0 ? copy.resendIn(waitLeft) : copy.resend}
           </button>
           <span aria-hidden>·</span>
           <button

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { feedLookbackSinceIso, fetchPagedRows } from '@/lib/listings/feed-window';
+import { feedLookbackSinceIso, fetchPagedRowsParallel } from '@/lib/listings/feed-window';
 import type { ListingRow } from '@/lib/listings/types';
 import { buildOnboardingSummary, SUMMARY_COLUMNS } from '@/lib/paywall/onboarding-summary';
 import { createAnonClient } from '@/lib/supabase/anon';
@@ -18,14 +18,24 @@ export async function GET() {
   const supabase = createAnonClient();
   const since = feedLookbackSinceIso();
   type SummaryRow = Pick<ListingRow, 'id' | 'photo_url' | 'photo_urls' | 'lat' | 'lng' | 'zone' | 'city' | 'category' | 'posted_at'>;
-  const { data, error } = await fetchPagedRows<SummaryRow>(async (from, to) =>
-    supabase
-      .from('listings_public')
-      .select(SUMMARY_COLUMNS)
-      .gte('posted_at', since)
-      .order('posted_at', { ascending: false })
-      .order('id', { ascending: false })
-      .range(from, to),
+  // Pages are read concurrently (~2 round trips instead of ~40 one after another).
+  const { data, error } = await fetchPagedRowsParallel<SummaryRow>(
+    async (from, to) =>
+      supabase
+        .from('listings_public')
+        .select(SUMMARY_COLUMNS)
+        .gte('posted_at', since)
+        .order('posted_at', { ascending: false })
+        .order('id', { ascending: false })
+        .range(from, to),
+    async () => {
+      const { count, error: countError } = await supabase
+        .from('listings_public')
+        .select('id', { count: 'exact', head: true })
+        .gte('posted_at', since);
+      return countError ? null : count;
+    },
+    8,
   );
   if (error) {
     console.error('[onboarding/summary] read failed:', error.message);
