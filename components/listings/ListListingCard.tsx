@@ -6,55 +6,9 @@ import { FreeBadge } from '@/components/listings/FreeBadge';
 import { ListingPhoto } from '@/components/listings/ListingPhoto';
 import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { buildCardMetadata } from '@/lib/listings/card-metadata';
-import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
-import { listingConsumerCityLabel } from '@/lib/listings/feed-search';
 import type { ListingRow } from '@/lib/listings/types';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
-
-/**
- * Titles (Italian, as listed) naming objects that look good as a big photo. Subito categories are too loose
- * to rely on ("appliances" holds TV brackets, "furniture" holds jars), so the title decides.
- */
-const HERO_TITLE =
-  /\b(divan\w*|poltron\w*|sedi[ae]\w*|tavol\w*|scrivani\w*|lett[oi]\b|armadi\w*|librer\w*|lamp\w*|comodin\w*|credenz\w*|cassettier\w*|vetrin\w*|specchi\w*|sofa|bici\w*|biciclett\w*|computer|pc|notebook|laptop|macbook|monitor|ipad|iphone|tablet|lavatric\w*|frigorifer\w*|microonde|aspirapolvere|forno|caff[eè]\w*|chitarr\w*|pianofort\w*)\b/i;
-
-/** Parts and accessories look cheap enlarged even when the title also names a nice object. */
-const HERO_EXCLUDE = /\b(materass\w*|dogh\w*|senza|support\w*|staff\w*|cav[oi]|ricamb\w*|pezz[io]|scatol\w*|barattol\w*|rott\w*|guast\w*)\b/i;
-
-/**
- * Whether a listing may get the full-width card. A big photo of a bracket or a box of jars makes the feed
- * look cheaper, so only pets and clearly named desirable objects qualify. (Scraped rows carry one photo, so
- * photo count can't be used as a quality signal.)
- */
-export function isHeroWorthy(listing: Pick<ListingRow, 'photo_url' | 'category' | 'title'>): boolean {
-  if (!listing.photo_url) return false;
-  if (listing.category === 'animali') return true;
-  const title = listing.title ?? '';
-  return HERO_TITLE.test(title) && !HERO_EXCLUDE.test(title);
-}
-
-/**
- * Ids of listings shown as full-width cards: after at least `every` normal cards, the next hero-worthy
- * listing that starts a fresh row (an even number of normal cards since the last hero, so the 2-column grid
- * has no gap) is enlarged. Keeps feed order.
- */
-export function pickHeroIds(
-  listings: readonly Pick<ListingRow, 'id' | 'photo_url' | 'category' | 'title'>[],
-  every = 8,
-): Set<string> {
-  const heroes = new Set<string>();
-  let normalSince = 0;
-  for (const listing of listings) {
-    if (normalSince >= every && normalSince % 2 === 0 && isHeroWorthy(listing)) {
-      heroes.add(listing.id);
-      normalSince = 0;
-    } else {
-      normalSince += 1;
-    }
-  }
-  return heroes;
-}
 
 type ListListingCardProps = {
   listing: ListingRow;
@@ -63,43 +17,37 @@ type ListListingCardProps = {
   /** Stagger entrance animation on the home feed. */
   index?: number;
   onUnfavorite?: (listingId: string) => void;
-  /** Full-width "hero" card with a larger, full-frame photo (every few items on the home feed). */
-  hero?: boolean;
 };
 
 /**
- * Premium feed card — the photo sits inset in a white card like a framed print (Stitch "warm gallery",
- * 2026-11-09), so casual seller photos read as deliberately displayed. `hero` makes a full-width card.
+ * Premium feed card — editorial photo frame, glass overlays, refined type.
  */
 export function ListListingCard({
   listing,
   priority = false,
   index = 0,
   onUnfavorite,
-  hero = false,
 }: ListListingCardProps) {
   const { language, messages, formatRelativeTime } = useMessages();
   const displayTitle = resolveListingTitle(listing, language);
   const isClaimed = listing.status === 'claimed';
   const postedLabel = formatRelativeTime(listing.posted_at);
-  const cityLabel = listingConsumerCityLabel(listing, consumerCityLabelsFromMessages(messages));
   const metadata = buildCardMetadata({
-    postedLabel: cityLabel ? `${cityLabel} · ${postedLabel}` : postedLabel,
+    postedLabel,
     isClaimed,
     reservedLabel: messages.listing.reserved,
   });
 
   return (
     <article
-      className={cn('feed-card feed-card-frame group flex h-full flex-col outline-none', hero && 'col-span-full')}
+      className="feed-card group flex flex-col outline-none"
       style={{ animationDelay: `${Math.min(index, 14) * 45}ms` }}
     >
       <div className="relative">
         <Link href={`/listing/${listing.id}`} prefetch className="block">
           <div
             className={cn(
-              'feed-card-media relative overflow-hidden rounded-[14px] bg-surface-container-high',
-              hero ? 'aspect-[4/3]' : 'aspect-[4/5]',
+              'feed-card-media relative aspect-[4/5] overflow-hidden rounded-2xl bg-surface-container-high',
               isClaimed && 'opacity-90',
             )}
           >
@@ -107,12 +55,12 @@ export function ListListingCard({
               src={listing.photo_url}
               alt={displayTitle}
               priority={priority}
-              variant={hero ? 'default' : 'feed'}
+              variant="feed"
               className={cn(
                 'feed-card-image object-cover',
                 isClaimed && 'saturate-[0.65]',
               )}
-              sizes={hero ? '(max-width: 768px) 100vw, 720px' : '(max-width: 768px) 50vw, 280px'}
+              sizes="(max-width: 768px) 50vw, 280px"
             />
 
             <div
@@ -139,13 +87,8 @@ export function ListListingCard({
         />
       </div>
 
-      <Link href={`/listing/${listing.id}`} prefetch className="feed-card-caption min-w-0 flex-1 px-1.5 pb-1.5 pt-3">
-        <h3
-          className={cn(
-            'line-clamp-2 font-semibold leading-snug tracking-[-0.02em] text-on-surface',
-            hero ? 'text-body-lg' : 'text-body-md',
-          )}
-        >
+      <Link href={`/listing/${listing.id}`} prefetch className="feed-card-caption min-w-0 px-0.5 pt-3.5">
+        <h3 className="line-clamp-2 text-body-md font-semibold leading-snug tracking-[-0.02em] text-on-surface">
           {displayTitle}
         </h3>
         {metadata && (

@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FeedSearching } from '@/components/listings/FeedSearching';
-import { ListListingCard, pickHeroIds } from '@/components/listings/ListListingCard';
+import { ListListingCard } from '@/components/listings/ListListingCard';
 import { RubberbandScroll } from '@/components/ui/RubberbandScroll';
 import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import { useFeedScroll } from '@/components/shell/FeedScrollContext';
@@ -142,7 +142,6 @@ export function FeedHomeClient({
     () => filteredListings.slice(0, renderLimit),
     [filteredListings, renderLimit],
   );
-  const heroIds = useMemo(() => pickHeroIds(visibleListings), [visibleListings]);
 
   const hasSearchQuery = searchQuery.trim().length > 0;
   const hasCategoryFilter = applied.categories.length > 0;
@@ -250,15 +249,13 @@ export function FeedHomeClient({
                 )}
               </p>
 
-              <section className="grid grid-flow-row-dense grid-cols-2 gap-x-3 gap-y-3.5 sm:grid-cols-3 lg:grid-cols-4">
+              <section className="grid grid-cols-2 gap-x-space-md gap-y-space-lg sm:grid-cols-3 lg:grid-cols-4">
                 {visibleListings.map((listing, index) => (
                   <ListListingCard
                     key={listing.id}
                     listing={listing}
                     priority={index < 4}
                     index={index}
-                    // Now and then a full-width card with the full-frame photo, for items that look good large.
-                    hero={heroIds.has(listing.id)}
                   />
                 ))}
               </section>
