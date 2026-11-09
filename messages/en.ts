@@ -203,6 +203,7 @@ export const messages: Messages = {
     checkEmail: 'Check your email and click the link to continue.',
     sendError: 'Could not send. Try again.',
     oauthError: 'Sign-in failed. Try again.',
+    emailLinkFailed: 'The sign-in link in the email didn’t sign you in. Your mail app may have opened it first, or it opened in another browser. Send a new email, or continue with Google.',
   },
   settings: {
     title: 'Settings',

@@ -202,6 +202,7 @@ export const messages: Messages = {
     checkEmail: '请查收邮件并点击链接继续。',
     sendError: '发送失败，请重试。',
     oauthError: '登录失败，请重试。',
+    emailLinkFailed: '邮件里的登录链接没能完成登录。可能是邮箱提前扫描过这个链接，或链接在另一个浏览器里打开了。请重新发送邮件，或用 Google 登录。',
   },
   settings: {
     title: '设置',

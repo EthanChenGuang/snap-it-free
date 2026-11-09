@@ -213,6 +213,7 @@ export const messages = {
     checkEmail: 'Controlla la tua email e clicca il link per continuare.',
     sendError: 'Invio non riuscito. Riprova.',
     oauthError: 'Accesso non riuscito. Riprova.',
+    emailLinkFailed: 'Il link nell’email non ha completato l’accesso. Forse l’app di posta l’ha già aperto, o si è aperto in un altro browser. Invia una nuova email o continua con Google.',
   },
   settings: {
     title: 'Impostazioni',
