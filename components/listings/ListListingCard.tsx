@@ -23,12 +23,12 @@ const HERO_CATEGORIES = new Set([
 ]);
 
 /**
- * Whether a listing may get the full-width card: a photo-friendly category and more than one photo (a
- * sign the seller took care). A big photo of a bracket or a box of jars makes the feed look cheaper.
+ * Whether a listing may get the full-width card: it has a photo and is in a photo-friendly category. A big
+ * photo of a bracket or a box of jars makes the feed look cheaper. (Scraped rows carry one photo, so photo
+ * count can't be used as a quality signal.)
  */
-export function isHeroWorthy(listing: Pick<ListingRow, 'photo_url' | 'photo_urls' | 'category'>): boolean {
-  if (!listing.photo_url || !listing.category || !HERO_CATEGORIES.has(listing.category)) return false;
-  return (listing.photo_urls?.length ?? 0) > 1;
+export function isHeroWorthy(listing: Pick<ListingRow, 'photo_url' | 'category'>): boolean {
+  return Boolean(listing.photo_url && listing.category && HERO_CATEGORIES.has(listing.category));
 }
 
 type ListListingCardProps = {
