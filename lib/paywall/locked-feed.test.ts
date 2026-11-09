@@ -100,8 +100,7 @@ describe('lockedTeaserForFilters', () => {
       searchQuery: '',
     });
     expect(teaser.count).toBe(355);
-    // The sofa is a valuable-looking item, so the feed ranking lifts it ahead of the books.
-    expect(teaser.photoUrls).toEqual(['https://img/sofa.jpg', 'https://img/bookshelf.jpg']);
+    expect(teaser.photoUrls).toEqual(['https://img/bookshelf.jpg', 'https://img/sofa.jpg']);
   });
 
   it('search changes the count and the blurred photos from real rows', () => {

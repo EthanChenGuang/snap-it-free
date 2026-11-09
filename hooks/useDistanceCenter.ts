@@ -1,6 +1,5 @@
 'use client';
 
-import { rankByAppeal } from '@/lib/listings/appeal';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useBrowseCenter } from '@/lib/browse-center/context';
 import type { BrowseCenter } from '@/lib/browse-center/storage';
@@ -79,8 +78,7 @@ export function composeFeedListings({
     rows = rows.filter((listing) => matchesAnySubitoCategories(listing, applied.categories));
   }
 
-  // Newest first (distance breaks ties), then valuable-looking items and pets lifted by about half a day.
-  rows = rankByAppeal(sortByPostedAtDescThenDistance(rows, center));
+  rows = sortByPostedAtDescThenDistance(rows, center);
 
   return { listings: rows };
 }
