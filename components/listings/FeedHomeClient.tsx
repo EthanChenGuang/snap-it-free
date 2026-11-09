@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FeedSearching } from '@/components/listings/FeedSearching';
-import { ListListingCard } from '@/components/listings/ListListingCard';
+import { isHeroWorthy, ListListingCard } from '@/components/listings/ListListingCard';
 import { RubberbandScroll } from '@/components/ui/RubberbandScroll';
 import { useFeedFilter } from '@/components/shell/FeedFilterContext';
 import { useFeedScroll } from '@/components/shell/FeedScrollContext';
@@ -256,8 +256,9 @@ export function FeedHomeClient({
                     listing={listing}
                     priority={index < 4}
                     index={index}
-                    // After every 8 cards (4 full rows) comes one full-width card with a larger, full-frame photo.
-                    hero={index % 9 === 8 && Boolean(listing.photo_url)}
+                    // After every 8 cards (4 full rows), a full-width card with the full-frame photo, but only
+                    // for items that look good large; otherwise it stays a normal card.
+                    hero={index % 9 === 8 && isHeroWorthy(listing)}
                   />
                 ))}
               </section>

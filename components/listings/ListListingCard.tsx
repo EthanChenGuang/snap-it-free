@@ -12,6 +12,25 @@ import type { ListingRow } from '@/lib/listings/types';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
+/** Categories whose items usually look good as a big photo (furniture, pets, tech, appliances, bikes). */
+const HERO_CATEGORIES = new Set([
+  'arredamento-casalinghi',
+  'animali',
+  'informatica',
+  'telefonia',
+  'elettrodomestici',
+  'biciclette',
+]);
+
+/**
+ * Whether a listing may get the full-width card: a photo-friendly category and more than one photo (a
+ * sign the seller took care). A big photo of a bracket or a box of jars makes the feed look cheaper.
+ */
+export function isHeroWorthy(listing: Pick<ListingRow, 'photo_url' | 'photo_urls' | 'category'>): boolean {
+  if (!listing.photo_url || !listing.category || !HERO_CATEGORIES.has(listing.category)) return false;
+  return (listing.photo_urls?.length ?? 0) > 1;
+}
+
 type ListListingCardProps = {
   listing: ListingRow;
   /** Eager-load photo for above-the-fold cards. */
