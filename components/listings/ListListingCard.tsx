@@ -12,23 +12,25 @@ import type { ListingRow } from '@/lib/listings/types';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
-/** Categories whose items usually look good as a big photo (furniture, pets, tech, appliances, bikes). */
-const HERO_CATEGORIES = new Set([
-  'arredamento-casalinghi',
-  'animali',
-  'informatica',
-  'telefonia',
-  'elettrodomestici',
-  'biciclette',
-]);
+/** Categories whose items usually look good as a big photo (pets, tech, appliances, bikes). */
+const HERO_CATEGORIES = new Set(['animali', 'informatica', 'telefonia', 'elettrodomestici', 'biciclette']);
 
 /**
- * Whether a listing may get the full-width card: it has a photo and is in a photo-friendly category. A big
- * photo of a bracket or a box of jars makes the feed look cheaper. (Scraped rows carry one photo, so photo
- * count can't be used as a quality signal.)
+ * Subito's furniture category also holds brackets, jars and boxes, so there the title must name a piece
+ * of furniture (Italian, as listed).
  */
-export function isHeroWorthy(listing: Pick<ListingRow, 'photo_url' | 'category'>): boolean {
-  return Boolean(listing.photo_url && listing.category && HERO_CATEGORIES.has(listing.category));
+const HERO_FURNITURE_TITLE =
+  /\b(divan\w*|poltron\w*|sedi[ae]\w*|tavol\w*|scrivani\w*|lett[oi]\b|armadi\w*|librer\w*|lamp\w*|comodin\w*|credenz\w*|cassettier\w*|madi\w*|vetrin\w*|specchi\w*|sofa)/i;
+
+/**
+ * Whether a listing may get the full-width card. A big photo of a bracket or a box of jars makes the feed
+ * look cheaper, so only photo-friendly items qualify. (Scraped rows carry one photo, so photo count can't be
+ * used as a quality signal.)
+ */
+export function isHeroWorthy(listing: Pick<ListingRow, 'photo_url' | 'category' | 'title'>): boolean {
+  if (!listing.photo_url || !listing.category) return false;
+  if (HERO_CATEGORIES.has(listing.category)) return true;
+  return listing.category === 'arredamento-casalinghi' && HERO_FURNITURE_TITLE.test(listing.title ?? '');
 }
 
 type ListListingCardProps = {
