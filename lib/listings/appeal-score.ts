@@ -1,5 +1,4 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { resolveGeminiModel } from '@/lib/admin/translation-models';
 import { normalizeSubitoThumbnailUrl } from '@/lib/listings/subito-photo-url';
 
 /**
@@ -7,6 +6,13 @@ import { normalizeSubitoThumbnailUrl } from '@/lib/listings/subito-photo-url';
  * items and pets (Guang, 2026-11-09, option 2). Gemini Flash sees the small watermark-free thumbnail (~260
  * image tokens) and the Italian title. Stored in listings.appeal_score (migration 045).
  */
+
+/**
+ * Flash-Lite: tested 2026-11-10 on real listings, ~460 input tokens per item with a low-resolution thumbnail,
+ * sensible scores (TV bracket 2, kitchen 5, cat 5); bigger Flash models were overloaded. Override with
+ * APPEAL_MODEL.
+ */
+export const DEFAULT_APPEAL_MODEL = 'gemini-flash-lite-latest';
 
 export type AppealInput = { title: string; category?: string | null; photoUrl: string };
 
@@ -29,12 +35,19 @@ export function parseAppealScore(raw: string): number | null {
   return match ? Number(match[1]) : null;
 }
 
+/** Image types Gemini accepts inline. Subito serves AVIF (it ignores Accept), so others are converted. */
+const GEMINI_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
 async function imageAsBase64(url: string, fetchFn: typeof fetch): Promise<{ data: string; mimeType: string } | null> {
   const res = await fetchFn(normalizeSubitoThumbnailUrl(url));
   if (!res.ok) return null;
   const mimeType = res.headers.get('content-type')?.split(';')[0] || 'image/jpeg';
   if (!mimeType.startsWith('image/')) return null;
-  return { data: Buffer.from(await res.arrayBuffer()).toString('base64'), mimeType };
+  const bytes = Buffer.from(await res.arrayBuffer());
+  if (GEMINI_IMAGE_TYPES.has(mimeType)) return { data: bytes.toString('base64'), mimeType };
+  const { default: sharp } = await import('sharp');
+  const jpeg = await sharp(bytes).jpeg({ quality: 80 }).toBuffer();
+  return { data: jpeg.toString('base64'), mimeType: 'image/jpeg' };
 }
 
 export async function scoreListingAppeal(
@@ -45,7 +58,7 @@ export async function scoreListingAppeal(
   try {
     const image = await imageAsBase64(input.photoUrl, fetchFn);
     if (!image) return { ok: false, error: 'photo_unavailable' };
-    const model = resolveGeminiModel(options.model);
+    const model = options.model?.trim() || process.env.APPEAL_MODEL?.trim() || DEFAULT_APPEAL_MODEL;
     const res = await fetchFn(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
       // Key in a header (not the URL), so it never lands in request logs.
@@ -60,10 +73,19 @@ export async function scoreListingAppeal(
             ],
           },
         ],
-        generationConfig: { temperature: 0, responseMimeType: 'application/json', maxOutputTokens: 20 },
+        generationConfig: {
+          temperature: 0,
+          responseMimeType: 'application/json',
+          maxOutputTokens: 20,
+          // A ~216 px thumbnail needs no more; the default high resolution costs ~4x the tokens.
+          mediaResolution: 'MEDIA_RESOLUTION_LOW',
+        },
       }),
     });
-    if (!res.ok) return { ok: false, error: `gemini_${res.status}` };
+    if (!res.ok) {
+      const detail = ((await res.json().catch(() => null)) as { error?: { message?: string } } | null)?.error?.message;
+      return { ok: false, error: `gemini_${res.status}${detail ? `: ${detail.slice(0, 160)}` : ''}` };
+    }
     const body = (await res.json()) as {
       candidates?: { content?: { parts?: { text?: string }[] } }[];
       usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
