@@ -17,14 +17,25 @@ const NOT_APPEALING =
 
 export type AppealKind = 'object' | 'pet' | 'other';
 
-export function appealKind(listing: Pick<ListingRow, 'title' | 'category' | 'photo_url' | 'status'>): AppealKind {
+type AppealFields = Pick<ListingRow, 'title' | 'category' | 'photo_url' | 'status' | 'appeal_score'>;
+
+/**
+ * With an AI score (migration 045, lib/listings/appeal-score.ts) the score decides: pets from 3, objects from 4.
+ * Unscored listings fall back to the keyword rules below.
+ */
+export function appealKind(listing: AppealFields): AppealKind {
   if (!listing.photo_url || listing.status === 'claimed') return 'other';
+  const score = listing.appeal_score;
+  if (typeof score === 'number') {
+    if (listing.category === 'animali') return score >= 3 ? 'pet' : 'other';
+    return score >= 4 ? 'object' : 'other';
+  }
   if (listing.category === 'animali') return 'pet';
   const title = listing.title ?? '';
   return APPEALING_TITLE.test(title) && !NOT_APPEALING.test(title) ? 'object' : 'other';
 }
 
-export function isAppealing(listing: Pick<ListingRow, 'title' | 'category' | 'photo_url' | 'status'>): boolean {
+export function isAppealing(listing: AppealFields): boolean {
   return appealKind(listing) !== 'other';
 }
 
@@ -40,7 +51,7 @@ const RHYTHM: readonly AppealKind[] = ['object', 'object', 'pet', 'other'];
  * newest-first order, and a kind that runs out is skipped. Pets and furniture arrive in bursts, so a plain
  * time boost let one kind flood the top; the rhythm keeps the mix steady.
  */
-export function rankByAppeal<T extends Pick<ListingRow, 'title' | 'category' | 'photo_url' | 'status' | 'posted_at'>>(
+export function rankByAppeal<T extends AppealFields & Pick<ListingRow, 'posted_at'>>(
   listings: readonly T[],
 ): T[] {
   const out: T[] = [];
@@ -55,7 +66,7 @@ export function rankByAppeal<T extends Pick<ListingRow, 'title' | 'category' | '
   return out;
 }
 
-function interleave<T extends Pick<ListingRow, 'title' | 'category' | 'photo_url' | 'status'>>(block: T[]): T[] {
+function interleave<T extends AppealFields>(block: T[]): T[] {
   const queues: Record<AppealKind, T[]> = { object: [], pet: [], other: [] };
   for (const listing of block) queues[appealKind(listing)].push(listing);
   const out: T[] = [];

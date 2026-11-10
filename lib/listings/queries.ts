@@ -14,7 +14,7 @@ const BASE_LISTINGS = 'listings';
 export const FEED_SSR_LISTING_LIMIT = 24;
 
 const ACTIVE_LISTING_COLUMNS =
-  'id, source, title, title_en, title_zh, description, description_en, description_zh, photo_url, photo_urls, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status';
+  'id, source, title, title_en, title_zh, description, description_en, description_zh, photo_url, photo_urls, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status, appeal_score';
 
 export type GetActiveListingsOptions = {
   /** When set, caps rows returned (used by feed SSR to avoid oversized RSC payloads). */

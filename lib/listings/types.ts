@@ -15,6 +15,8 @@ export type ListingRow = {
   photo_url: string;
   /** UGC gallery — first entry mirrors photo_url when set. */
   photo_urls?: string[] | null;
+  /** AI appeal score 1-5 (migration 045); null until scored. */
+  appeal_score?: number | null;
   external_url: string;
   lat: number | null;
   lng: number | null;

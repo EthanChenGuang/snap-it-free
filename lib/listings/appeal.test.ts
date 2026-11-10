@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { APPEAL_WINDOW_MS, isAppealing, rankByAppeal } from './appeal';
+import { APPEAL_WINDOW_MS, appealKind, isAppealing, rankByAppeal } from './appeal';
 
 const at = (hoursAgo: number) => new Date(Date.UTC(2026, 10, 9, 12) - hoursAgo * 3600_000).toISOString();
 const row = (id: string, title: string, hoursAgo: number, category = 'arredamento-casalinghi') => ({
@@ -27,6 +27,16 @@ describe('isAppealing', () => {
     expect(isAppealing({ ...row('i', 'Divano', 0), status: 'claimed' })).toBe(false);
     expect(isAppealing(row('j', 'Piastrelle 20x20', 0))).toBe(false);
     expect(isAppealing(row('k', 'Letto matrimoniale bianco [GIÀ PRENOTATO]', 0))).toBe(false);
+  });
+});
+
+describe('appealKind with an AI score', () => {
+  it('lets the score override the keyword rules', () => {
+    expect(appealKind({ ...row('a', 'Piastrelle', 0), appeal_score: 5 })).toBe('object');
+    expect(appealKind({ ...row('b', 'Divano', 0), appeal_score: 2 })).toBe('other');
+    expect(appealKind({ ...row('c', 'Gatto', 0, 'animali'), appeal_score: 3 })).toBe('pet');
+    expect(appealKind({ ...row('d', 'Gatto', 0, 'animali'), appeal_score: 1 })).toBe('other');
+    expect(appealKind({ ...row('e', 'Divano', 0), appeal_score: null })).toBe('object');
   });
 });
 

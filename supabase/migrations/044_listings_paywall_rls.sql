@@ -48,7 +48,7 @@ using (
 );
 
 -- 3. listings_public runs as its owner (security_invoker = false, see 010), so RLS above does not
---    reach it; the same gate goes into its WHERE. Columns and order are unchanged from 036.
+--    reach it; the same gate goes into its WHERE. Columns and order are unchanged from 036 (+ 045's appeal_score).
 --    security_barrier stops caller-supplied filters from being evaluated before the gate.
 create or replace view public.listings_public
 with (security_invoker = false, security_barrier = true)
@@ -75,7 +75,8 @@ select
   category_zh,
   posted_at,
   expires_at,
-  status
+  status,
+  appeal_score -- added by 045; keep it when 044 is applied after 045
 from public.listings
 where (
   (status = 'active' and expires_at > now())
