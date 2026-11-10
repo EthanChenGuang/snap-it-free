@@ -20,15 +20,16 @@ export type AppealKind = 'object' | 'pet' | 'other';
 type AppealFields = Pick<ListingRow, 'title' | 'category' | 'photo_url' | 'status' | 'appeal_score'>;
 
 /**
- * With an AI score (migration 045, lib/listings/appeal-score.ts) the score decides: pets from 3, objects from 4.
+ * With an AI score (migration 045, lib/listings/appeal-score.ts) the score decides: pets from 4, objects only at 5
+ * (on real listings Flash-Lite gives 4 to ordinary bookcases and bed bases, 5 to sofas, beds, kitchens).
  * Unscored listings fall back to the keyword rules below.
  */
 export function appealKind(listing: AppealFields): AppealKind {
   if (!listing.photo_url || listing.status === 'claimed') return 'other';
   const score = listing.appeal_score;
   if (typeof score === 'number') {
-    if (listing.category === 'animali') return score >= 3 ? 'pet' : 'other';
-    return score >= 4 ? 'object' : 'other';
+    if (listing.category === 'animali') return score >= 4 ? 'pet' : 'other';
+    return score >= 5 ? 'object' : 'other';
   }
   if (listing.category === 'animali') return 'pet';
   const title = listing.title ?? '';

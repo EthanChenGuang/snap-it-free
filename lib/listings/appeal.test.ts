@@ -34,7 +34,9 @@ describe('appealKind with an AI score', () => {
   it('lets the score override the keyword rules', () => {
     expect(appealKind({ ...row('a', 'Piastrelle', 0), appeal_score: 5 })).toBe('object');
     expect(appealKind({ ...row('b', 'Divano', 0), appeal_score: 2 })).toBe('other');
-    expect(appealKind({ ...row('c', 'Gatto', 0, 'animali'), appeal_score: 3 })).toBe('pet');
+    expect(appealKind({ ...row('c', 'Gatto', 0, 'animali'), appeal_score: 4 })).toBe('pet');
+    expect(appealKind({ ...row('c2', 'Gatto', 0, 'animali'), appeal_score: 3 })).toBe('other');
+    expect(appealKind({ ...row('c3', 'Libreria', 0), appeal_score: 4 })).toBe('other');
     expect(appealKind({ ...row('d', 'Gatto', 0, 'animali'), appeal_score: 1 })).toBe('other');
     expect(appealKind({ ...row('e', 'Divano', 0), appeal_score: null })).toBe('object');
   });
