@@ -83,3 +83,7 @@ None in `.planning/todos/pending/`.
 Last session: 2026-11-04 (Claude Code)
 Stopped at: ob5 shipped + verified on Preview; waiting on Guang for the webhook-only test and a Supabase access token
 Resume file: `.planning/.continue-here.md` — keep aligned with this file and `HANDOFF.md` (those two are canonical as of 2026-11-03)
+
+### Roadmap Evolution
+
+- Phase 5 added (2026-11-11): Chinese contact assistant. Plan: Fable, build: Sonnet, review: Opus (Guang). `main` now contains everything up to dc529ce (PR #10 merged 2026-11-11 on Guang's word); this phase stays on `preview/recent-changes`.

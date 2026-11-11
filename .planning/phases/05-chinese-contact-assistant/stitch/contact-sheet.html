@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Subito.it - Vetrina in vetro / 玻璃展示柜</title>
+<!-- Google Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-primary": "#68dba9",
+            "tertiary": "#535f58",
+            "on-tertiary-fixed": "#131e19",
+            "surface-dim": "#dcd9dd",
+            "surface-container": "#f0edf1",
+            "surface-container-low": "#f6f2f7",
+            "on-background": "#1b1b1e",
+            "surface-container-lowest": "#ffffff",
+            "primary-fixed-dim": "#68dba9",
+            "tertiary-fixed-dim": "#bdcac1",
+            "background": "#fbf8fc",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed-variant": "#3e4943",
+            "on-surface-variant": "#3d4a42",
+            "outline-variant": "#bccac0",
+            "on-primary": "#ffffff",
+            "on-secondary": "#ffffff",
+            "on-tertiary-container": "#f5fff7",
+            "on-primary-container": "#f5fff7",
+            "tertiary-fixed": "#d9e6dd",
+            "primary-container": "#00855d",
+            "on-secondary-fixed": "#002113",
+            "secondary": "#006c49",
+            "surface-tint": "#006c4a",
+            "on-error-container": "#93000a",
+            "on-surface": "#1b1b1e",
+            "surface": "#fbf8fc",
+            "on-primary-fixed": "#002114",
+            "surface-variant": "#e4e1e6",
+            "on-primary-fixed-variant": "#005137",
+            "on-secondary-container": "#00714d",
+            "surface-container-highest": "#e4e1e6",
+            "inverse-surface": "#303033",
+            "tertiary-container": "#6b7770",
+            "secondary-fixed": "#6ffbbe",
+            "primary-fixed": "#85f8c4",
+            "error-container": "#ffdad6",
+            "secondary-fixed-dim": "#4edea3",
+            "outline": "#6d7a72",
+            "primary": "#006948",
+            "error": "#ba1a1a",
+            "surface-container-high": "#eae7eb",
+            "inverse-on-surface": "#f3f0f4",
+            "surface-bright": "#fbf8fc",
+            "on-secondary-fixed-variant": "#005236",
+            "secondary-container": "#6cf8bb",
+            "on-tertiary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1.5rem",
+            "margin-mobile": "0.75rem",
+            "gutter-sm": "0.75rem",
+            "space-sm": "0.5rem",
+            "margin": "1rem",
+            "space-xs": "0.25rem",
+            "space-xl": "2rem",
+            "margin-tablet": "2rem",
+            "space-md": "1rem",
+            "gutter-lg": "1.5rem",
+            "gutter": "1rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Plus Jakarta Sans", "Noto Sans", "sans-serif"],
+            "headline-md": ["Plus Jakarta Sans", "Noto Sans", "sans-serif"],
+            "label-lg": ["Plus Jakarta Sans", "Noto Sans", "sans-serif"],
+            "price-display": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-xl": ["Plus Jakarta Sans", "sans-serif"],
+            "label-sm": ["Plus Jakarta Sans", "Noto Sans", "sans-serif"],
+            "label-md": ["Plus Jakarta Sans", "Noto Sans", "sans-serif"],
+            "body-md": ["Noto Sans", "sans-serif"],
+            "body-sm": ["Noto Sans", "sans-serif"],
+            "body-lg": ["Noto Sans", "sans-serif"]
+          },
+          "fontSize": {
+            "headline-lg": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "price-display": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.03em", "fontWeight": "800" }],
+            "headline-xl": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "label-md": ["14px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .sheet-shadow {
+      box-shadow: 0 -8px 32px -4px rgba(24, 24, 27, 0.12);
+    }
+    .footer-shadow {
+      box-shadow: 0 -4px 16px -2px rgba(24, 24, 27, 0.04);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased h-full overflow-hidden select-none font-body-md text-body-md">
+<!-- ======================================================== -->
+<!-- BACKGROUND: Realistic Italian Marketplace (Subito style) -->
+<!-- ======================================================== -->
+<div aria-hidden="true" class="fixed inset-0 w-full h-full overflow-y-auto bg-surface-container-low pointer-events-none">
+<!-- Mock Top Bar of Subito App -->
+<div class="w-full bg-surface-container-lowest px-4 py-3 flex items-center justify-between border-b border-surface-variant">
+<div class="flex items-center space-x-3">
+<span class="material-symbols-outlined text-on-surface text-xl">arrow_back</span>
+<span class="font-headline-md text-headline-md text-on-surface font-bold">Subito</span>
+</div>
+<div class="flex items-center space-x-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-xl">share</span>
+<span class="material-symbols-outlined text-xl">favorite</span>
+</div>
+</div>
+<!-- Product Listing Main Canvas -->
+<div class="max-w-md mx-auto pb-32">
+<!-- Image Carousel Mock -->
+<div class="w-full aspect-[4/3] bg-surface-container-highest relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A modern, high-end tempered glass display cabinet with minimalist black metal frame standing against a neutral textured cream concrete wall in a bright airy Italian apartment. Clean natural light floods the minimalist setting, emphasizing glass transparency and subtle reflections with refined interior aesthetics." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwej72gydpGpE8B8RV7VKnjffVQAFyS_rW0hORrTQihyG5_MnDtiQZeEmtn-atPk0b1lUvJTH4GLIVbnxV8NnV1z4oQ28mhkkVUJF_iBk-my7JtmoxuxSrIDQw5M5-bY2a143CcAk2zcUHSGkVh943VnMhlCNTa4dJKI2jmBRgHZMLQJGYhs6HvAC3zYauVUPl9-E1vwGCQ-lonelaPNhvpXk5_-WuleiKuEEZpz_nMYdd8gFwfTnr0Xjx2k-BS2VCuBdxn9POCQ"/>
+<span class="absolute bottom-3 right-3 bg-inverse-surface/75 text-inverse-on-surface text-label-sm font-label-sm px-2 py-0.5 rounded-full">
+          1/5
+        </span>
+</div>
+<!-- Item Meta -->
+<div class="p-4 bg-surface-container-lowest mb-2 border-b border-surface-variant">
+<div class="flex items-center justify-between">
+<span class="text-primary font-headline-xl text-headline-xl font-bold">GRATIS</span>
+<span class="text-label-sm font-label-sm text-tertiary">Oggi, 11:42</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mt-1">Vetrina in vetro / 玻璃展示柜</h1>
+<p class="text-body-sm font-body-sm text-tertiary flex items-center mt-1">
+<span class="material-symbols-outlined text-sm mr-1">location_on</span>
+          Napoli (NA) · Centro Storico
+        </p>
+</div>
+<!-- Seller Info Mock -->
+<div class="p-4 bg-surface-container-lowest flex items-center justify-between border-b border-surface-variant">
+<div class="flex items-center space-x-3">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center font-bold text-primary">
+            GP
+          </div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Gianluigi P.</div>
+<div class="text-body-sm font-body-sm text-tertiary">3 annunci attivi · ★★★★★ (18)</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ======================================================== -->
+<!-- DIMMED BACKDROP OVERLAY (Elevation Tier 0)               -->
+<!-- ======================================================== -->
+<div class="fixed inset-0 z-40 bg-[rgba(24,20,16,0.48)] backdrop-blur-[4px] transition-opacity duration-300"></div>
+<!-- ======================================================== -->
+<!-- BOTTOM SHEET MODAL (Task-Focused: Shared TopBar/NavBar   -->
+<!-- rules mandate suppressed Shells to focus on this Canvas) -->
+<!-- ======================================================== -->
+<div class="fixed inset-x-0 bottom-0 z-50 flex flex-col justify-end max-w-lg mx-auto pointer-events-auto">
+<div class="bg-surface-container-lowest rounded-t-[24px] sheet-shadow border-t border-black/[0.06] flex flex-col max-h-[813px] overflow-hidden animate-in slide-in-from-bottom duration-200">
+<!-- Drag Affordance Area -->
+<div class="w-full h-6 pt-2 pb-1 flex items-center justify-center cursor-grab active:cursor-grabbing flex-shrink-0">
+<div class="w-9 h-1 rounded-full bg-outline-variant/60"></div>
+</div>
+<!-- Header Bar with exact title from Shared Components -->
+<div class="px-margin-mobile sm:px-margin pb-3 pt-1 flex items-center justify-between border-b border-outline-variant/20 flex-shrink-0">
+<div class="flex items-center space-x-2">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface tracking-tight">中文联系助手</h2>
+</div>
+<button aria-label="关闭" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Scrollable Sheet Content -->
+<div class="overflow-y-auto px-margin-mobile sm:px-margin py-space-sm space-y-4">
+<!-- 1. Small Item Row -->
+<div class="flex items-center space-x-3 p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/20">
+<div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-highest border border-black/5">
+<img class="w-full h-full object-cover" data-alt="A clean square thumbnail photograph showing a transparent glass cabinet shelving unit with slim metallic brackets, illuminated by clean studio ambient light on a pristine white minimalist display background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuqCOFycOA0EMdFVQKj3fnNW_TMkgkyiph_elbTKyEb3b8DVUEf6S-ChQvnJCjeCFldBLr5IA2Vr5CvhzD5_rrbR4wFIyUbpsC5WRaBhdb7zNn35e8HH49TnEu5Qjl2TVaSyPBrFxrpOZF4YQiX6_Fnev0M8GvHoDsipBtgxuELvUTjKw6nuOFg7vYHyRkSXnEAjeDeMl4EFSrHXy1PSv5TvjhrGYnoxUMN8bUKye_d08aZ-Yo54cmZQElojgQxjztDvohxofmVg"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="font-label-lg text-label-lg font-bold text-on-surface truncate">玻璃展示柜</div>
+<div class="flex items-center space-x-2 mt-0.5">
+<span class="text-body-sm font-body-sm text-tertiary">那不勒斯</span>
+<span class="text-xs text-outline-variant">•</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-secondary-container/50 text-on-secondary-container font-semibold">
+                免费
+              </span>
+</div>
+</div>
+</div>
+<!-- 2. Segmented Control with Two Tabs -->
+<div class="grid grid-cols-2 p-1 bg-surface-container-high rounded-xl gap-1">
+<button class="py-2 px-3 rounded-lg text-label-md font-label-md font-bold text-primary bg-surface-container-lowest shadow-sm flex items-center justify-center space-x-1.5 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">send</span>
+<span>发消息</span>
+</button>
+<button class="py-2 px-3 rounded-lg text-label-md font-label-md font-medium text-tertiary hover:text-on-surface flex items-center justify-center space-x-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">translate</span>
+<span>翻译回复</span>
+</button>
+</div>
+<!-- 3. Selectable Option Rows -->
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<label class="font-label-sm text-label-sm font-medium text-tertiary tracking-wide">选一条消息发给卖家</label>
+<span class="text-[11px] text-tertiary/80">轻触切换</span>
+</div>
+<div class="space-y-2" role="radiogroup">
+<!-- Row 1 (Active/Selected) -->
+<label class="flex items-center p-3 rounded-xl border-1.5 border-primary bg-primary/5 cursor-pointer active:scale-[0.99] transition-transform">
+<div class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center mr-3 flex-shrink-0">
+<div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+</div>
+<span class="font-label-md text-label-md font-semibold text-on-surface">还在吗？我今天可以来取</span>
+</label>
+<!-- Row 2 (Unchecked) -->
+<label class="flex items-center p-3 rounded-xl border border-outline-variant/30 hover:bg-surface-container-low cursor-pointer active:scale-[0.99] transition-transform">
+<div class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center mr-3 flex-shrink-0"></div>
+<span class="font-body-md text-body-md text-on-surface">还在吗？我明天可以来取</span>
+</label>
+<!-- Row 3 (Unchecked) -->
+<label class="flex items-center p-3 rounded-xl border border-outline-variant/30 hover:bg-surface-container-low cursor-pointer active:scale-[0.99] transition-transform">
+<div class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center mr-3 flex-shrink-0"></div>
+<span class="font-body-md text-body-md text-on-surface">请问取货地址在哪里？</span>
+</label>
+</div>
+</div>
+<!-- 4. Soft Mint Preview Card (Italian Translation) -->
+<div class="rounded-xl p-3.5 bg-surface-container-low border border-primary/20 space-y-2 relative overflow-hidden">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings: 'FILL' 1;">language</span>
+<span class="text-label-sm font-label-sm font-bold text-primary tracking-wide">将发送的意大利语</span>
+</div>
+<span class="text-[11px] font-label-sm font-medium text-tertiary px-2 py-0.5 rounded-full bg-surface-container-lowest border border-outline-variant/30">
+              精准意式地道表达
+            </span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant/15 text-on-surface font-body-md leading-relaxed italic relative">
+<span class="text-tertiary select-none text-base mr-1">“</span>Ciao! È ancora disponibile? Posso venire a ritirarlo oggi. Grazie!<span class="text-tertiary select-none text-base ml-1">”</span>
+</div>
+</div>
+<!-- 5. Compact Numbered 3-Step Guide Flow -->
+<div class="py-1">
+<div class="flex items-center justify-between text-center px-1">
+<div class="flex items-center space-x-1.5 text-on-surface">
+<span class="w-4 h-4 rounded-full bg-primary/10 text-primary font-bold text-[11px] flex items-center justify-center">1</span>
+<span class="font-label-sm text-label-sm font-semibold">复制消息</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-[14px]">arrow_forward</span>
+<div class="flex items-center space-x-1.5 text-on-surface">
+<span class="w-4 h-4 rounded-full bg-primary/10 text-primary font-bold text-[11px] flex items-center justify-center">2</span>
+<span class="font-label-sm text-label-sm font-semibold">点 Contatta</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-[14px]">arrow_forward</span>
+<div class="flex items-center space-x-1.5 text-on-surface">
+<span class="w-4 h-4 rounded-full bg-primary/10 text-primary font-bold text-[11px] flex items-center justify-center">3</span>
+<span class="font-label-sm text-label-sm font-semibold">粘贴发送</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 6. Sticky Action Footer (Preserving safe area insets) -->
+<div class="p-margin-mobile sm:p-margin pt-2 bg-surface-container-lowest border-t border-outline-variant/20 footer-shadow flex-shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+<button class="w-full h-13 py-3.5 px-4 rounded-2xl bg-primary text-on-primary font-label-lg text-label-lg font-bold flex items-center justify-center space-x-2 active:scale-[0.98] hover:bg-primary-container transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">content_copy</span>
+<span>复制消息并打开卖家页面</span>
+</button>
+<!-- 7. Tiny Muted Note Under Button -->
+<p class="text-body-sm font-body-sm text-tertiary/75 text-center mt-2.5">
+          第一次需要在卖家页面注册账号
+        </p>
+</div>
+</div>
+</div>
+</body></html>
