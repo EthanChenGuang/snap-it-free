@@ -46,7 +46,7 @@ export function ListingDetailContent({
     messages,
   });
   const pickupHint = buildPickupHint({ listing, messages });
-  const ctaLabel = detailPrimaryCtaLabel({ source: listing.source, isUgc, messages });
+  const ctaLabel = detailPrimaryCtaLabel({ source: listing.source, isUgc, messages, language });
   const showStickyCta = !lifecycleActions;
 
   return (

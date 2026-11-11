@@ -1,8 +1,10 @@
+import { shouldUseContactAssistant } from '@/lib/contact/templates';
 import { buildCardMetadata } from '@/lib/listings/card-metadata';
 import type { ListingRow } from '@/lib/listings/types';
 import type { Messages } from '@/messages';
 import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
 import { listingConsumerCityLabel } from '@/lib/listings/feed-search';
+import type { AppLanguage } from '@/lib/settings/preferences';
 
 type BuildDetailMetadataInput = {
   listing: ListingRow;
@@ -38,10 +40,13 @@ type DetailCtaLabelInput = {
   source: ListingRow['source'];
   isUgc: boolean;
   messages: Messages;
+  /** When given, zh/en scraped listings get the contact-assistant label. */
+  language?: AppLanguage;
 };
 
-export function detailPrimaryCtaLabel({ source, isUgc, messages }: DetailCtaLabelInput): string {
+export function detailPrimaryCtaLabel({ source, isUgc, messages, language }: DetailCtaLabelInput): string {
   if (isUgc) return messages.detail.messageOwner;
+  if (language && shouldUseContactAssistant({ language, source })) return messages.detail.contactSeller;
   if (source === 'subito') return messages.detail.snagIt;
   if (source === 'vinted') return messages.detail.openOnVinted;
   if (source === 'wallapop') return messages.detail.openOnWallapop;
