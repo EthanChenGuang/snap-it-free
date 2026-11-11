@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const requireAuth = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/supabase/auth', () => ({ requireAuth }));
+const rpc = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/supabase/server', () => ({ createClient: async () => ({ rpc }) }));
 const getSubscriptionActive = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/paywall/server-access', () => ({ getSubscriptionActive }));
 
@@ -23,10 +25,55 @@ beforeEach(() => {
   vi.stubEnv('GEMINI_API_KEY', 'test-key');
   vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', 'false');
   getSubscriptionActive.mockReset();
+  rpc.mockReset();
+  rpc.mockResolvedValue({ data: true, error: null });
 });
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
+});
+
+describe('POST /api/contact/translate daily limit', () => {
+  const ok = { mode: 'compose', text: 'a', language: 'zh' };
+
+  it('429 and no Gemini call when over the limit', async () => {
+    rpc.mockResolvedValue({ data: false, error: null });
+    const fetchMock = gemini('{"italian":"Ciao!"}');
+    vi.stubGlobal('fetch', fetchMock);
+    const res = await post(ok);
+    expect(res.status).toBe(429);
+    expect(await res.json()).toEqual({ error: 'daily_limit' });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(rpc).toHaveBeenCalledWith('bump_contact_translation', { p_limit: 200 });
+  });
+
+  it('fails open and logs when the RPC errors', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    rpc.mockResolvedValue({ data: null, error: { message: 'function does not exist' } });
+    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!"}'));
+    expect((await post(ok)).status).toBe(200);
+    expect(spy).toHaveBeenCalledWith('[contact] usage check failed:', 'function does not exist');
+    spy.mockRestore();
+  });
+
+  it('continues when within the limit', async () => {
+    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!"}'));
+    expect((await post(ok)).status).toBe(200);
+    expect(rpc).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not touch the RPC on 401, 400, 503 or 403', async () => {
+    requireAuth.mockResolvedValueOnce(null);
+    expect((await post(ok)).status).toBe(401);
+    expect((await post({ ...ok, text: '' })).status).toBe(400);
+    vi.stubEnv('GEMINI_API_KEY', '');
+    expect((await post(ok)).status).toBe(503);
+    vi.stubEnv('GEMINI_API_KEY', 'test-key');
+    vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', 'true');
+    getSubscriptionActive.mockResolvedValue(false);
+    expect((await post(ok)).status).toBe(403);
+    expect(rpc).not.toHaveBeenCalled();
+  });
 });
 
 describe('POST /api/contact/translate', () => {

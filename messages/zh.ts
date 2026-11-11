@@ -846,6 +846,7 @@ export const messages: Messages = {
     toItalian: '翻成意大利语',
     unavailable: '翻译暂时不可用，请稍后再试',
     subscriptionRequired: '翻译功能需要订阅后使用',
+    dailyLimit: '今天的翻译次数已用完，明天再来',
     signInAgain: '登录已过期，请重新登录后再试',
   },
   listing: {

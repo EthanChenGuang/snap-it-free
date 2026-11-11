@@ -32,5 +32,11 @@ Changed: `components/detail/ScrapedListingShell.tsx`, `components/detail/Listing
 - Route: logs only the error string; when `isPaywallFlagEnabled()` it requires `getSubscriptionActive()` (403
   `subscription_required`); flag off = signed in is enough. New key `contactAssistant.subscriptionRequired` (zh/en/it).
 - Tab resets to send on close.
-- SKIPPED: per-user daily cap. The existing 429 limits (`app/api/ugc`, `app/api/messages`) count rows in their own
+- (Superseded below: the cap was added once migration 046 existed.) Earlier note: per-user daily cap. The existing 429 limits (`app/api/ugc`, `app/api/messages`) count rows in their own
   tables; a translation cap would need a new table/migration, so none was added. Cost is a fraction of a cent per call.
+
+## Daily cap (owner approved)
+- `CONTACT_TRANSLATE_DAILY_LIMIT = 200` in `lib/contact/translate.ts`. The route calls `bump_contact_translation` (migration
+  `046_contact_translation_usage.sql`) through the user-session client after auth, validation, 503 and subscription checks,
+  before Gemini. `false` -> 429 `daily_limit`; RPC error -> logged and fails OPEN; sheet shows `contactAssistant.dailyLimit`.
+- **The owner must apply migration 046.** Until then the RPC errors and the route fails open (no cap).

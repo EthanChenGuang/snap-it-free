@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { translateContactText } from '@/lib/contact/translate';
+import { CONTACT_TRANSLATE_DAILY_LIMIT, translateContactText } from '@/lib/contact/translate';
 import { isPaywallFlagEnabled } from '@/lib/paywall/gate';
 import { getSubscriptionActive } from '@/lib/paywall/server-access';
 import { requireAuth } from '@/lib/supabase/auth';
+import { createClient } from '@/lib/supabase/server';
 
 export const maxDuration = 30;
 
@@ -38,6 +39,17 @@ export async function POST(request: Request) {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
     return NextResponse.json({ error: 'unavailable' }, { status: 503 });
+  }
+
+  const supabase = await createClient();
+  const { data: withinLimit, error: usageError } = await supabase.rpc('bump_contact_translation', {
+    p_limit: CONTACT_TRANSLATE_DAILY_LIMIT,
+  });
+  if (usageError) {
+    // Fail open: a missing migration must not break the feature; a call costs a fraction of a cent.
+    console.error('[contact] usage check failed:', usageError.message);
+  } else if (withinLimit === false) {
+    return NextResponse.json({ error: 'daily_limit' }, { status: 429 });
   }
 
   const outcome = await translateContactText(parsed.data, { apiKey });

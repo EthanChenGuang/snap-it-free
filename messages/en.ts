@@ -872,6 +872,7 @@ export const messages: Messages = {
     toItalian: 'Translate to Italian',
     unavailable: 'Translation is unavailable right now, please try again later',
     subscriptionRequired: 'Translation is available to subscribers',
+    dailyLimit: 'You\'ve used today\'s translations. Try again tomorrow.',
     signInAgain: 'Your session expired. Sign in again and retry',
   },
   listing: {

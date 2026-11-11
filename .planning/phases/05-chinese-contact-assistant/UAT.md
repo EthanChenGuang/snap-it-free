@@ -35,3 +35,8 @@
 - Android Chrome: same; also check the new tab opens and the toast shows.
 - WeChat in-app browser: same, and whether `window.open` with `_blank` opens at all.
 - Translate tab copy buttons in all three.
+
+## Daily cap
+- Mocked-client tests: 429 with no Gemini call, fail-open with log on RPC error, pass on true, RPC untouched on 401/400/503/403,
+  sheet shows the daily-limit message on 429.
+- NOT verified: the migration and the real RPC (not applied, no DB access); the 200/day boundary against a real database.

@@ -887,6 +887,7 @@ export const messages = {
     toItalian: 'Traduci in italiano',
     unavailable: 'Traduzione non disponibile, riprova più tardi',
     subscriptionRequired: 'La traduzione è riservata agli abbonati',
+    dailyLimit: 'Hai usato le traduzioni di oggi. Riprova domani.',
     signInAgain: 'Sessione scaduta. Accedi di nuovo e riprova',
   },
   listing: {

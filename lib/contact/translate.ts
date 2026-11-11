@@ -11,6 +11,8 @@ export type TranslateOutcome =
 
 export const DEFAULT_CONTACT_MODEL = 'gemini-flash-lite-latest';
 
+export const CONTACT_TRANSLATE_DAILY_LIMIT = 200;
+
 const GEMINI_TIMEOUT_MS = 15_000;
 const MAX_FIELD_CHARS = 2500;
 

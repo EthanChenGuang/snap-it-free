@@ -98,6 +98,10 @@ function useTranslate<T>(mode: TranslateMode) {
         setState({ status: 'error', message: messages.contactAssistant.signInAgain });
         return;
       }
+      if (response.status === 429) {
+        setState({ status: 'error', message: messages.contactAssistant.dailyLimit });
+        return;
+      }
       if (response.status === 403) {
         setState({ status: 'error', message: messages.contactAssistant.subscriptionRequired });
         return;

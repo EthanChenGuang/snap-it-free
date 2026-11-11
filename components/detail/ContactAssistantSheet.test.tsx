@@ -208,6 +208,15 @@ describe('ContactAssistantSheet translate tab', () => {
     expect(document.body.querySelector('[role="alert"]')?.textContent).toBe(copy.subscriptionRequired);
   });
 
+  it('shows the daily-limit message on 429', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(429, { error: 'daily_limit' })));
+    await openTranslate();
+    await typeInto(document.body.querySelectorAll('textarea')[0] as HTMLTextAreaElement, 'Ciao');
+    await click(byText(copy.translate));
+    await flush();
+    expect(document.body.querySelector('[role="alert"]')?.textContent).toBe(copy.dailyLimit);
+  });
+
   it('asks to sign in again on 401', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(401, { error: 'Unauthorized' })));
     await openTranslate();
