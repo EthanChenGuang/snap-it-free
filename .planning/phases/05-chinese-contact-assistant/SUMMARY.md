@@ -39,4 +39,4 @@ Changed: `components/detail/ScrapedListingShell.tsx`, `components/detail/Listing
 - `CONTACT_TRANSLATE_DAILY_LIMIT = 200` in `lib/contact/translate.ts`. The route calls `bump_contact_translation` (migration
   `046_contact_translation_usage.sql`) through the user-session client after auth, validation, 503 and subscription checks,
   before Gemini. `false` -> 429 `daily_limit`; RPC error -> logged and fails OPEN; sheet shows `contactAssistant.dailyLimit`.
-- **The owner must apply migration 046.** Until then the RPC errors and the route fails open (no cap).
+- **Migration 046 applied to the shared DB on 2026-11-11** (Guang's go-ahead; verified: RLS on, no policies, anon cannot execute, limit enforced in a rolled-back test). An RPC error still fails open.
