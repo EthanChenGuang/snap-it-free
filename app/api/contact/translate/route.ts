@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { translateContactText } from '@/lib/contact/translate';
+import { isPaywallFlagEnabled } from '@/lib/paywall/gate';
+import { getSubscriptionActive } from '@/lib/paywall/server-access';
 import { requireAuth } from '@/lib/supabase/auth';
 
 export const maxDuration = 30;
@@ -15,6 +17,10 @@ export async function POST(request: Request) {
   const user = await requireAuth();
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  if (isPaywallFlagEnabled() && !(await getSubscriptionActive())) {
+    return NextResponse.json({ error: 'subscription_required' }, { status: 403 });
   }
 
   let body: unknown;
@@ -36,6 +42,7 @@ export async function POST(request: Request) {
 
   const outcome = await translateContactText(parsed.data, { apiKey });
   if (!outcome.ok) {
+    console.error('[contact] translate failed:', outcome.error);
     return NextResponse.json({ error: 'translation_failed' }, { status: 502 });
   }
   return NextResponse.json(outcome.result);

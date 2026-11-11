@@ -20,8 +20,13 @@ describe('parseTranslateResult', () => {
     expect(parseTranslateResult('compose', 'null')).toBeNull();
   });
 
+  it('accepts a long field (a 1000-char input can translate to ~900+ chars)', () => {
+    const italian = 'a'.repeat(900);
+    expect(parseTranslateResult('compose', JSON.stringify({ italian }))).toEqual({ italian });
+  });
+
   it('rejects fields that are too long', () => {
-    expect(parseTranslateResult('compose', JSON.stringify({ italian: 'a'.repeat(601) }))).toBeNull();
+    expect(parseTranslateResult('compose', JSON.stringify({ italian: 'a'.repeat(2501) }))).toBeNull();
   });
 });
 
@@ -38,5 +43,18 @@ describe('translateContactText', () => {
     const [url, init] = fetchFn.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).not.toContain('secret-key');
     expect((init.headers as Record<string, string>)['x-goog-api-key']).toBe('secret-key');
+  });
+
+  it('returns ok:false when fetch throws (timeout or abort)', async () => {
+    const fetchFn = vi.fn(async () => {
+      throw new DOMException('timed out', 'TimeoutError');
+    });
+    const out = await translateContactText(
+      { mode: 'compose', text: 'x', language: 'zh' },
+      { apiKey: 'k', fetchFn: fetchFn as unknown as typeof fetch },
+    );
+    expect(out.ok).toBe(false);
+    const init = (fetchFn.mock.calls[0] as unknown as [string, RequestInit])[1];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
   });
 });

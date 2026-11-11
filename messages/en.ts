@@ -858,7 +858,7 @@ export const messages: Messages = {
     primary: "Copy and open seller's page",
     firstTimeNote: "The first time, you need an account on the seller's page",
     copiedToast: "Copied. Paste it on the seller's page",
-    copyFailedHint: 'Could not copy automatically. Press and hold the Italian text above to copy it',
+    copyFailedHint: 'Could not copy automatically. Copy the Italian text above by hand',
     replyLabel: "Paste the seller's reply",
     replyPlaceholder: "Paste the seller's Italian reply here",
     translate: 'Translate',
@@ -871,6 +871,7 @@ export const messages: Messages = {
     composePlaceholder: 'For example: I can be there in about an hour',
     toItalian: 'Translate to Italian',
     unavailable: 'Translation is unavailable right now, please try again later',
+    subscriptionRequired: 'Translation is available to subscribers',
     signInAgain: 'Your session expired. Sign in again and retry',
   },
   listing: {

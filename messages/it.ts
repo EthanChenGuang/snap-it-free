@@ -873,7 +873,7 @@ export const messages = {
     primary: 'Copia e apri la pagina del venditore',
     firstTimeNote: 'La prima volta serve un account sulla pagina del venditore',
     copiedToast: 'Copiato. Incollalo sulla pagina del venditore',
-    copyFailedHint: 'Copia non riuscita. Tieni premuto il testo italiano qui sopra per copiarlo',
+    copyFailedHint: 'Copia non riuscita. Copia a mano il testo italiano qui sopra',
     replyLabel: 'Incolla la risposta del venditore',
     replyPlaceholder: 'Incolla qui la risposta del venditore',
     translate: 'Traduci',
@@ -886,6 +886,7 @@ export const messages = {
     composePlaceholder: 'Ad esempio: arrivo tra circa un’ora',
     toItalian: 'Traduci in italiano',
     unavailable: 'Traduzione non disponibile, riprova più tardi',
+    subscriptionRequired: 'La traduzione è riservata agli abbonati',
     signInAgain: 'Sessione scaduta. Accedi di nuovo e riprova',
   },
   listing: {

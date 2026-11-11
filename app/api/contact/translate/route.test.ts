@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const requireAuth = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/supabase/auth', () => ({ requireAuth }));
+const getSubscriptionActive = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/paywall/server-access', () => ({ getSubscriptionActive }));
 
 import { POST } from './route';
 
@@ -19,6 +21,8 @@ const gemini = (text: string, status = 200) =>
 beforeEach(() => {
   requireAuth.mockResolvedValue({ id: 'u1' });
   vi.stubEnv('GEMINI_API_KEY', 'test-key');
+  vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', 'false');
+  getSubscriptionActive.mockReset();
 });
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -26,6 +30,35 @@ afterEach(() => {
 });
 
 describe('POST /api/contact/translate', () => {
+  it('403 without a subscription when the paywall flag is on', async () => {
+    vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', 'true');
+    getSubscriptionActive.mockResolvedValue(false);
+    const res = await post({ mode: 'compose', text: 'a', language: 'zh' });
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({ error: 'subscription_required' });
+  });
+
+  it('allows a subscriber when the flag is on', async () => {
+    vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', 'true');
+    getSubscriptionActive.mockResolvedValue(true);
+    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!"}'));
+    expect((await post({ mode: 'compose', text: 'a', language: 'zh' })).status).toBe(200);
+  });
+
+  it('flag off: signed in is enough and no subscription lookup happens', async () => {
+    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!"}'));
+    expect((await post({ mode: 'compose', text: 'a', language: 'zh' })).status).toBe(200);
+    expect(getSubscriptionActive).not.toHaveBeenCalled();
+  });
+
+  it('502 when fetch throws, logging only the error string', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('timeout'); }));
+    expect((await post({ mode: 'compose', text: 'secret user text', language: 'zh' })).status).toBe(502);
+    expect(spy).toHaveBeenCalledWith('[contact] translate failed:', 'timeout');
+    spy.mockRestore();
+  });
+
   it('401 when signed out', async () => {
     requireAuth.mockResolvedValue(null);
     expect((await post({ mode: 'compose', text: 'a', language: 'zh' })).status).toBe(401);

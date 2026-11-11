@@ -47,4 +47,14 @@ describe('ScrapedListingShell primary action', () => {
     expect(openExternal).toHaveBeenCalledWith(listing.external_url);
     expect(container.ownerDocument.querySelector('[data-testid="sheet"]')).toBeNull();
   });
+
+  it.each(['vinted', 'wallapop', 'facebook'] as const)('opens %s directly even in zh', async (source) => {
+    const container = await render(
+      <ScrapedListingShell listing={{ ...listing, source }} similarListings={[]} />,
+      'zh',
+    );
+    await click(container.querySelector('[data-testid="primary"]'));
+    expect(openExternal).toHaveBeenCalledWith(listing.external_url);
+    expect(container.ownerDocument.querySelector('[data-testid="sheet"]')).toBeNull();
+  });
 });

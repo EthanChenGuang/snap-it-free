@@ -13,7 +13,7 @@ export const CONTACT_TEMPLATES: readonly ContactTemplate[] = [
   { id: 'time', it: 'Ciao! Mi interessa. A che ora posso passare? Grazie!' },
 ];
 
-/** Italian-language users keep opening the seller's page directly; UGC listings have no external seller. */
+/** Only Subito: the guide's "Contatta" step is that site's label. Italian users and other sources open the page directly. */
 export function shouldUseContactAssistant({
   language,
   source,
@@ -21,5 +21,5 @@ export function shouldUseContactAssistant({
   language: AppLanguage;
   source: ListingSource;
 }): boolean {
-  return (language === 'zh' || language === 'en') && source !== 'ugc';
+  return (language === 'zh' || language === 'en') && source === 'subito';
 }

@@ -1,7 +1,7 @@
 # UAT — Phase 5: Chinese contact assistant
 
 ## Checked (ran, passed)
-- `npx vitest run`: 148 files / 925 tests passed (was 142 / 887). `npx tsc --noEmit`: exit 0.
+- `npx vitest run`: 148 files / 939 tests passed (was 142 / 887). `npx tsc --noEmit`: exit 0.
 - Unit: templates + gating table, translate parser (valid / missing field / non-JSON / too long), key sent in
   `x-goog-api-key` header and not the URL, route (401, 400 x5, 503, 200 compose + reply, 502 x2), detail CTA label.
 - Component: default template, switching changes the preview, primary button copies the selected Italian text and
@@ -22,3 +22,16 @@
 - Thumbnail in the screenshots is a broken-image placeholder (sandbox has no network; the URL is a dummy).
 - On an 844px-tall screen the Italian preview card sits partly under the pinned footer and the list scrolls a little.
 - The vaul overlay is transparent (existing `DrawerOverlay`), so the design's dimmed backdrop is not reproduced.
+
+## Review round 2 (copy flow, limits, gating)
+- Re-ran: vitest 148 files / 939 tests passed, tsc exit 0. Screenshots were not retaken: layout is unchanged
+  (only hint/error wording and logic changed).
+- Tests now assert: sync copy happens in the tap inside the `[role="dialog"]` and `openExternalListingUrl` is called
+  with no flush while the async clipboard never resolves; async fallback toasts only after it resolves; all-paths-fail
+  keeps the sheet open with the hint; tab resets to send on close; 403 message; route 403 / flag-off / subscriber / 502 log.
+
+## To test on a real phone (not verifiable here)
+- iPhone Safari: tap the primary button, paste into the seller's message box (copy must work with the page opening).
+- Android Chrome: same; also check the new tab opens and the toast shows.
+- WeChat in-app browser: same, and whether `window.open` with `_blank` opens at all.
+- Translate tab copy buttons in all three.

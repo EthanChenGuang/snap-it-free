@@ -19,6 +19,14 @@ describe('detailPrimaryCtaLabel', () => {
     }
   });
 
+  it('keeps the old labels for other sources in zh/en', () => {
+    for (const language of ['zh', 'en'] as const) {
+      expect(detailPrimaryCtaLabel({ source: 'vinted', isUgc: false, messages, language })).toBe(messages.detail.openOnVinted);
+      expect(detailPrimaryCtaLabel({ source: 'wallapop', isUgc: false, messages, language })).toBe(messages.detail.openOnWallapop);
+      expect(detailPrimaryCtaLabel({ source: 'facebook', isUgc: false, messages, language })).toBe(messages.detail.openOnFacebook);
+    }
+  });
+
   it('leaves Italian and UGC unchanged', () => {
     expect(detailPrimaryCtaLabel({ source: 'subito', isUgc: false, messages, language: 'it' })).toBe(
       messages.detail.snagIt,

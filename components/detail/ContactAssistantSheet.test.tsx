@@ -25,6 +25,7 @@ const listing = {
 } as unknown as ListingRow;
 
 const writeText = vi.fn();
+const execCommand = vi.fn();
 // Icon glyphs are aria-hidden text nodes, so compare the label without them.
 const labelOf = (el: HTMLElement) => {
   const clone = el.cloneNode(true) as HTMLElement;
@@ -54,6 +55,9 @@ beforeEach(() => {
   toast.mockReset();
   writeText.mockReset();
   writeText.mockResolvedValue(undefined);
+  execCommand.mockReset();
+  execCommand.mockReturnValue(true);
+  document.execCommand = execCommand;
   Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
 });
 afterEach(async () => {
@@ -78,26 +82,68 @@ describe('ContactAssistantSheet send tab', () => {
     expect(preview()).toBe(CONTACT_TEMPLATES[2].it);
   });
 
-  it('copies the selected text and opens the seller page', async () => {
+  it('copies synchronously inside the dialog and opens the page in the same tick', async () => {
+    writeText.mockReturnValue(new Promise(() => {}));
     const onOpenChange = await mountSheet();
     await click(document.body.querySelectorAll('input[type="radio"]')[1]);
-    await click(byText(copy.primary));
-    await flush();
-    expect(writeText).toHaveBeenCalledWith(CONTACT_TEMPLATES[1].it);
+    let copiedText = '';
+    let insideDialog = false;
+    execCommand.mockImplementation(() => {
+      const area = document.activeElement as HTMLTextAreaElement;
+      copiedText = area.value;
+      insideDialog = Boolean(area.closest('[role="dialog"]'));
+      return true;
+    });
+    const button = byText(copy.primary)!;
+    act(() => {
+      button.click();
+    });
+    // No flush: the popup must open in the tap, and the async clipboard is not needed.
+    expect(copiedText).toBe(CONTACT_TEMPLATES[1].it);
+    expect(insideDialog).toBe(true);
     expect(openExternal).toHaveBeenCalledWith(listing.external_url);
+    expect(writeText).not.toHaveBeenCalled();
     expect(toast).toHaveBeenCalledWith(copy.copiedToast);
     expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(document.body.querySelectorAll('textarea')).toHaveLength(0);
   });
 
-  it('still opens the page and shows a hint when copying fails', async () => {
+  it('falls back to the async clipboard; toast only after it succeeds', async () => {
+    execCommand.mockReturnValue(false);
+    let resolve!: (v?: unknown) => void;
+    writeText.mockReturnValue(new Promise((r) => (resolve = r)));
+    await mountSheet();
+    act(() => {
+      byText(copy.primary)!.click();
+    });
+    expect(openExternal).toHaveBeenCalledWith(listing.external_url);
+    expect(writeText).toHaveBeenCalledWith(CONTACT_TEMPLATES[0].it);
+    expect(toast).not.toHaveBeenCalled();
+    await act(async () => resolve());
+    expect(toast).toHaveBeenCalledWith(copy.copiedToast);
+  });
+
+  it('keeps the sheet open with a hint when every copy path fails', async () => {
+    execCommand.mockReturnValue(false);
     writeText.mockRejectedValue(new Error('denied'));
-    document.execCommand = vi.fn(() => false);
     const onOpenChange = await mountSheet();
     await click(byText(copy.primary));
     await flush();
     expect(openExternal).toHaveBeenCalledWith(listing.external_url);
+    expect(toast).not.toHaveBeenCalled();
     expect(document.body.textContent).toContain(copy.copyFailedHint);
     expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('returns to the send tab when the sheet closes', async () => {
+    const onOpenChange = await mountSheet();
+    await click(byText(copy.tabTranslate, '[role="tab"]'));
+    expect(document.body.querySelector('textarea')).not.toBeNull();
+    await click(document.body.querySelector(`button[aria-label="${copy.close}"]`));
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+    await click(byText(copy.tabSend, '[role="tab"]'));
+    expect(preview()).toBe(CONTACT_TEMPLATES[0].it);
+    expect(byText(copy.tabSend, '[role="tab"]')!.getAttribute('aria-selected')).toBe('true');
   });
 });
 
@@ -123,8 +169,13 @@ describe('ContactAssistantSheet translate tab', () => {
     expect(document.body.textContent).toContain('Yes, come over');
     expect(document.body.textContent).toContain('Perfetto, arrivo!');
 
+    let copied = '';
+    execCommand.mockImplementation(() => {
+      copied = (document.activeElement as HTMLTextAreaElement).value;
+      return true;
+    });
     await click(document.body.querySelector(`button[aria-label^="${copy.copy}"]`));
-    expect(writeText).toHaveBeenCalledWith('Perfetto, arrivo!');
+    expect(copied).toBe('Perfetto, arrivo!');
   });
 
   it('posts a composed message and renders the Italian', async () => {
@@ -146,6 +197,15 @@ describe('ContactAssistantSheet translate tab', () => {
     await click(byText(copy.translate));
     await flush();
     expect(document.body.querySelector('[role="alert"]')?.textContent).toBe(copy.unavailable);
+  });
+
+  it('shows the subscription message on 403', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(403, { error: 'subscription_required' })));
+    await openTranslate();
+    await typeInto(document.body.querySelectorAll('textarea')[0] as HTMLTextAreaElement, 'Ciao');
+    await click(byText(copy.translate));
+    await flush();
+    expect(document.body.querySelector('[role="alert"]')?.textContent).toBe(copy.subscriptionRequired);
   });
 
   it('asks to sign in again on 401', async () => {

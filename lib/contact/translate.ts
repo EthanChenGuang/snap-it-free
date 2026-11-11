@@ -11,7 +11,8 @@ export type TranslateOutcome =
 
 export const DEFAULT_CONTACT_MODEL = 'gemini-flash-lite-latest';
 
-const MAX_FIELD_CHARS = 600;
+const GEMINI_TIMEOUT_MS = 15_000;
+const MAX_FIELD_CHARS = 2500;
 
 const LANGUAGE_NAME: Record<TranslateLanguage, string> = { zh: 'Simplified Chinese', en: 'English' };
 
@@ -66,6 +67,7 @@ export async function translateContactText(
     const model = options.model?.trim() || process.env.CONTACT_MODEL?.trim() || DEFAULT_CONTACT_MODEL;
     const res = await fetchFn(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
+      signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
       // Key in a header (not the URL), so it never lands in request logs.
       headers: { 'content-type': 'application/json', 'x-goog-api-key': options.apiKey },
       body: JSON.stringify({
@@ -75,7 +77,7 @@ export async function translateContactText(
         generationConfig: {
           temperature: 0.2,
           responseMimeType: 'application/json',
-          maxOutputTokens: 400,
+          maxOutputTokens: 1500,
         },
       }),
     });

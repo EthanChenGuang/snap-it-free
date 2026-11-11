@@ -21,8 +21,9 @@ describe('shouldUseContactAssistant', () => {
   const cases: [AppLanguage, ListingSource, boolean][] = [
     ['zh', 'subito', true],
     ['en', 'subito', true],
-    ['zh', 'vinted', true],
-    ['en', 'facebook', true],
+    ['zh', 'vinted', false],
+    ['en', 'facebook', false],
+    ['zh', 'wallapop', false],
     ['it', 'subito', false],
     ['zh', 'ugc', false],
     ['en', 'ugc', false],

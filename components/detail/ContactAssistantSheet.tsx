@@ -38,14 +38,20 @@ type TranslateState<T> =
 const FIELD_CLASS =
   'w-full resize-none rounded border border-outline-variant bg-surface-container-lowest p-space-sm text-base text-on-surface outline-none transition-colors placeholder:text-on-surface-variant/70 focus:border-on-surface focus:ring-1 focus:ring-outline';
 
-function fallbackCopy(text: string): boolean {
+/**
+ * Synchronous copy, run inside the tap. The textarea goes inside the drawer so the focus trap keeps
+ * its selection; outside it, select() is lost while execCommand still reports success.
+ */
+function copySync(text: string, container: Element): boolean {
   const area = document.createElement('textarea');
   area.value = text;
-  area.setAttribute('readonly', '');
   area.style.position = 'fixed';
+  area.style.top = '0';
   area.style.opacity = '0';
-  document.body.append(area);
+  container.append(area);
+  area.focus();
   area.select();
+  area.setSelectionRange(0, text.length);
   try {
     return document.execCommand('copy');
   } catch {
@@ -55,15 +61,23 @@ function fallbackCopy(text: string): boolean {
   }
 }
 
-/** Starts the copy synchronously (must run inside the tap, or iOS refuses); resolves to whether it worked. */
-function copyToClipboard(text: string): Promise<boolean> {
+function containerOf(target: Element): Element {
+  return target.closest('[role="dialog"]') ?? document.body;
+}
+
+/**
+ * Copies inside the tap. Returns true when the synchronous copy worked, otherwise starts the async
+ * clipboard write and returns its promise (true/false once it settles).
+ */
+function copyFromTap(text: string, target: Element): true | Promise<boolean> {
+  if (copySync(text, containerOf(target))) return true;
   if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
     return navigator.clipboard.writeText(text).then(
       () => true,
-      () => fallbackCopy(text),
+      () => false,
     );
   }
-  return Promise.resolve(fallbackCopy(text));
+  return Promise.resolve(false);
 }
 
 function useTranslate<T>(mode: TranslateMode) {
@@ -84,6 +98,10 @@ function useTranslate<T>(mode: TranslateMode) {
         setState({ status: 'error', message: messages.contactAssistant.signInAgain });
         return;
       }
+      if (response.status === 403) {
+        setState({ status: 'error', message: messages.contactAssistant.subscriptionRequired });
+        return;
+      }
       if (!response.ok) {
         setState({ status: 'error', message: messages.contactAssistant.unavailable });
         return;
@@ -101,12 +119,15 @@ function CopyButton({ text, label }: { text: string; label: string }) {
   const { messages } = useMessages();
   const [copied, setCopied] = useState(false);
 
-  const handleClick = () => {
-    void copyToClipboard(text).then((ok) => {
-      if (!ok) return;
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    });
+  const markCopied = () => {
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const result = copyFromTap(text, event.currentTarget);
+    if (result === true) markCopied();
+    else void result.then((ok) => ok && markCopied());
   };
 
   return (
@@ -137,7 +158,7 @@ function ItalianCard({ label, text }: { label: string; text: string }) {
       <p
         lang="it"
         data-testid="contact-italian-preview"
-        className="mt-space-sm select-text break-words rounded bg-surface-container-lowest p-space-sm text-body-md italic text-on-surface"
+        className="mt-space-sm select-text break-words rounded [user-select:text] bg-surface-container-lowest p-space-sm text-body-md italic text-on-surface"
       >
         {text}
       </p>
@@ -161,18 +182,18 @@ function SendTab({ listing, onDone }: { listing: ListingRow; onDone: () => void 
   const [copyFailed, setCopyFailed] = useState(false);
   const template = CONTACT_TEMPLATES.find((item) => item.id === selected) ?? CONTACT_TEMPLATES[0];
 
-  const handlePrimary = () => {
-    const pending = copyToClipboard(template.it);
+  const handlePrimary = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const copied = copyFromTap(template.it, event.currentTarget);
+    // Same tick as the tap: a popup opened after an await is blocked.
     openExternalListingUrl(listing.external_url);
-    void pending.then((ok) => {
-      if (ok) {
-        setCopyFailed(false);
-        toast(copy.copiedToast);
-        onDone();
-      } else {
-        setCopyFailed(true);
-      }
-    });
+    const finish = (ok: boolean) => {
+      setCopyFailed(!ok);
+      if (!ok) return;
+      toast(copy.copiedToast);
+      onDone();
+    };
+    if (copied === true) finish(true);
+    else void copied.then(finish);
   };
 
   const steps = [copy.step1, copy.step2, copy.step3];
@@ -349,6 +370,11 @@ export function ContactAssistantSheet({ open, onOpenChange, listing }: ContactAs
   const [tab, setTab] = useState<Tab>('send');
   const tabsId = useId();
 
+  const handleOpenChange = (next: boolean) => {
+    if (!next) setTab('send');
+    onOpenChange(next);
+  };
+
   const title = resolveListingTitle(listing, language);
   const city = listingConsumerCityLabel(listing, consumerCityLabelsFromMessages(messages));
   const tabs: { id: Tab; label: string; icon: string }[] = [
@@ -357,7 +383,7 @@ export function ContactAssistantSheet({ open, onOpenChange, listing }: ContactAs
   ];
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+    <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerContent className="bottom-0 h-[90dvh] max-h-[90dvh] pb-0">
         <DrawerHeader className="shrink-0 flex-row items-center justify-between border-b border-outline-variant pb-space-sm">
           <DrawerTitle className="text-h3 font-semibold">{copy.title}</DrawerTitle>
@@ -431,7 +457,7 @@ export function ContactAssistantSheet({ open, onOpenChange, listing }: ContactAs
           className="flex min-h-0 flex-1 flex-col"
         >
           {tab === 'send' ? (
-            <SendTab listing={listing} onDone={() => onOpenChange(false)} />
+            <SendTab listing={listing} onDone={() => handleOpenChange(false)} />
           ) : (
             <TranslateTab />
           )}
