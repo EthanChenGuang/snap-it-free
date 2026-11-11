@@ -1,5 +1,7 @@
 export function isIOS(): boolean {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent)) return true;
+  // iPadOS 13+ reports a desktop Mac user agent; a touch screen gives it away.
+  return /Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
 }
 
 export function isStandalonePwa(): boolean {
@@ -46,6 +48,15 @@ export function canRequestPushPermission(isLoggedIn: boolean): boolean {
     return isStandalonePwa() || isIosPushDismissed();
   }
   return true;
+}
+
+/**
+ * Whether "Turn on alerts" can actually work in this tab. iOS browsers only get web push once the app is
+ * opened from the Home Screen; other browsers need the Push API. Onboarding skips its alerts step when false.
+ */
+export function canUsePushHere(): boolean {
+  if (isIOS() && !isStandalonePwa()) return false;
+  return canOfferPush();
 }
 
 export function needsIosInstallGuide(): boolean {

@@ -40,6 +40,7 @@
     "scraper",
     "scraper-admin",
     "src",
-    ".cursor"
+    ".cursor",
+    ".claude"
   ]
 }

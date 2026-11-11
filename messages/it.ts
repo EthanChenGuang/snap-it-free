@@ -2,6 +2,9 @@ import type { ListingCategory } from '@/lib/listings/categories';
 import type { VeniceZone } from '@/lib/listings/types';
 import { subitoCategoriesIt } from './subito-category-labels';
 
+/** "a Milano", but "in tutta Italia" for the every-city choice. */
+const aCitta = (city: string) => (city === 'tutta Italia' ? `in ${city}` : `a ${city}`);
+
 export const messages = {
   app: {
     title: 'ZeroEuro',
@@ -49,6 +52,8 @@ export const messages = {
     refreshing: 'Aggiornamento…',
   },
   feed: {
+    searching: 'Ricerca di oggetti gratis…',
+    searchingIn: (city: string) => `Ricerca di oggetti gratis a ${city}…`,
     searchPlaceholder: 'Cerca oggetti…',
     openFilters: 'Filtri',
     openSelectLocation: 'Scegli posizione di navigazione',
@@ -208,6 +213,7 @@ export const messages = {
     checkEmail: 'Controlla la tua email e clicca il link per continuare.',
     sendError: 'Invio non riuscito. Riprova.',
     oauthError: 'Accesso non riuscito. Riprova.',
+    emailLinkFailed: 'Il link nell’email non ha completato l’accesso. Forse l’app di posta l’ha già aperto, o si è aperto in un altro browser. Invia una nuova email o continua con Google.',
   },
   settings: {
     title: 'Impostazioni',
@@ -357,6 +363,7 @@ export const messages = {
   privacy: {
     title: 'Informativa sulla privacy',
     lastUpdated: 'Ultimo aggiornamento: 7 settembre 2025',
+    lastUpdatedPaid: 'Ultimo aggiornamento: 25 ottobre 2026',
     intro:
       'ZeroDollar («noi») aiuta le persone a trovare e condividere oggetti gratis a Venezia. Questa informativa descrive quali dati personali raccogliamo e come li usiamo.',
     collectTitle: 'Informazioni che raccogliamo',
@@ -371,9 +378,16 @@ export const messages = {
     sharingTitle: 'Fornitori di servizi',
     sharingBody:
       'Usiamo Supabase per autenticazione e archiviazione dati e Vercel per l\'hosting. Non vendiamo i tuoi dati personali a terzi.',
+    sharingBodyPaid:
+      'Usiamo Supabase per autenticazione e archiviazione dati, Vercel per l\'hosting e Stripe per i pagamenti degli abbonamenti. Non vendiamo i tuoi dati personali a terzi.',
     retentionTitle: 'Le tue scelte',
     retentionBody:
       'Puoi eliminare il tuo account in qualsiasi momento in Impostazioni. L\'eliminazione rimuove annunci, messaggi, preferiti e altri dati dell\'account che conserviamo.',
+    retentionBodyPaid:
+      'Puoi eliminare il tuo account in qualsiasi momento in Impostazioni. L\'eliminazione annulla prima un abbonamento attivo, poi rimuove annunci, messaggi, preferiti, dati dell\'abbonamento e altri dati dell\'account che conserviamo. Stripe conserva i propri registri dei pagamenti passati secondo la sua informativa sulla privacy.',
+    paymentsTitle: 'Pagamenti e abbonamenti',
+    paymentsBody:
+      'Se ti abboni, il pagamento è elaborato da Stripe (Stripe Payments Europe, Limited). Inserisci i dati della carta e di pagamento sulle pagine di Stripe, che li tratta secondo la propria informativa sulla privacy. Noi non li vediamo né li conserviamo. Conserviamo gli identificativi cliente e abbonamento di Stripe, il piano, lo stato dell’abbonamento e la fine del periodo in corso, insieme all’indirizzo email del tuo account, per sbloccare gli annunci.',
     contactTitle: 'Contatti',
     contactBody:
       'Per domande sulla privacy, usa il link Contatti nel footer dell\'app o il tuo canale di supporto abituale per ZeroDollar.',
@@ -382,6 +396,7 @@ export const messages = {
   terms: {
     title: 'Termini di servizio',
     lastUpdated: 'Ultimo aggiornamento: 8 settembre 2025',
+    lastUpdatedPaid: 'Ultimo aggiornamento: 25 ottobre 2026',
     intro:
       'Questi termini regolano l\'uso di ZeroDollar, un marketplace comunitario per oggetti gratis. Accedendo o usando il servizio, accetti questi termini.',
     serviceTitle: 'Il servizio',
@@ -396,21 +411,280 @@ export const messages = {
     liabilityTitle: 'Esclusione di responsabilità',
     liabilityBody:
       'ZeroDollar è fornito così com\'è. Ritiro e consegna avvengono direttamente tra utenti. Non siamo responsabili per dispute, danni o perdite derivanti da scambi di persona.',
+    subscriptionTitle: 'Abbonamenti',
+    subscriptionBody:
+      'Per vedere gli annunci serve un abbonamento ZeroEuro Plus. I piani costano 1,99 € a settimana, 4,99 € al mese o 19,99 € all’anno. Prezzo e periodo di fatturazione sono indicati prima del pagamento. L’abbonamento si rinnova automaticamente alla fine di ogni periodo e viene addebitato sul tuo metodo di pagamento finché non lo annulli.',
+    cancelTitle: 'Annullamento',
+    cancelBody:
+      'Puoi annullare in qualsiasi momento da Impostazioni → Gestisci abbonamento, che apre il portale clienti di Stripe. L’annullamento interrompe i rinnovi futuri. Mantieni l’accesso fino alla fine del periodo già pagato. L’annullamento non rimborsa quel periodo.',
+    paymentsTitle: 'Pagamenti',
+    paymentsBody:
+      'I pagamenti sono elaborati da Stripe (Stripe Payments Europe, Limited). Se un pagamento di rinnovo non va a buon fine, mantieni l’accesso fino a 3 giorni mentre Stripe ritenta il pagamento. Dopo, gli annunci restano bloccati finché il pagamento non riesce o non ti abboni di nuovo.',
     contactTitle: 'Contatti',
     contactBody:
       'Per domande su questi termini, usa il link Contatti nel footer dell\'app o il tuo canale di supporto abituale per ZeroDollar.',
     backHome: 'Torna alla home',
+  },
+  onboarding: {
+    dialogLabel: 'Benvenuto su ZeroEuro',
+    progress: (current: number, total: number) => `Passo ${current} di ${total}`,
+    skip: 'Salta',
+    back: 'Indietro',
+    continue: 'Continua',
+    regionLabel: 'Veneto',
+    hook: {
+      title: 'Cose gratis vicino a te, ogni giorno',
+      emphasis: 'gratis',
+      body: 'Computer, libri, mobili e tanto altro, regalati da persone vicino a te. Ogni giorno ne arrivano di nuovi.',
+      liveLine: (count: number) =>
+        count === 1
+          ? '1 oggetto gratis disponibile in Veneto in questo momento'
+          : `${count.toLocaleString('it-IT')} oggetti gratis disponibili in Veneto in questo momento`,
+    },
+    how: {
+      title: 'Oggetti gratis, trovarli è facile',
+      emphasis: 'facile',
+      rows: [
+        'Regali appena pubblicati, dai più recenti',
+        'Città e ora di pubblicazione su ogni scheda',
+        'Mappa e preferiti quando servono',
+      ],
+    },
+    weekly: {
+      title: 'Cose gratis nuove ogni giorno',
+      emphasis: 'ogni',
+      body: 'Numeri reali dal feed, non stime.',
+      statCaption: (count: number): string =>
+        count === 1 ? 'nuovo oggetto gratis in Veneto negli ultimi 7 giorni' : 'nuovi oggetti gratis in Veneto negli ultimi 7 giorni',
+      chartTitle: 'Aggiunti al giorno',
+      perDay: (count: number) => `≈ ${count.toLocaleString('it-IT')} al giorno`,
+      newest: (when: string) => `Il più recente ${when}`,
+      cities: (count: number) => (count === 1 ? '1 città' : `${count} città`),
+      unavailable: 'Stiamo caricando i numeri. Puoi continuare.',
+    },
+    map: {
+      title: 'Scopri dove sono le cose gratis',
+      emphasis: 'cose gratis',
+      body: 'Tutte le città che copriamo, in base a quanti oggetti gratis ci sono adesso.',
+      pinsLine: (count: number, cities: number) =>
+        `${count.toLocaleString('it-IT')} ${count === 1 ? 'oggetto gratis' : 'oggetti gratis'} in ${cities === 1 ? '1 città' : `${cities} città`} adesso`,
+      rows: ['Vedi quali città ne hanno di più', 'Filtra il feed per città con un tocco', 'Tocca un gruppo sulla mappa per vedere le foto'],
+    },
+    favorites: {
+      examples: { bike: 'Mountain bike', lamp: 'Lampada da scrivania', guitar: 'Chitarra elettrica' },
+      title: 'Salva i tuoi preferiti per dopo',
+      emphasis: 'preferiti',
+      body: 'Tocca il cuore su un oggetto per ritrovarlo dopo.',
+      toast: 'Aggiunto ai preferiti',
+      tabTitle: 'Li ritrovi sempre nella scheda ♥ Preferiti',
+    },
+    trust: {
+      title: 'Perché puoi fidarti',
+      emphasis: 'fidarti',
+      body: 'Niente recensioni finte, niente numeri inventati. Ecco cosa ti promettiamo.',
+      rows: [
+        { title: 'Solo annunci reali', line: 'Ogni oggetto è un annuncio vero, con il link a dove è stato pubblicato.' },
+        { title: 'Numeri dal vivo', line: 'Ogni numero che vedi viene dal feed in questo momento.' },
+        { title: 'Prezzo chiaro, disdici quando vuoi', line: 'Prezzo e rinnovo automatico sono indicati prima di pagare.' },
+        { title: 'Pagamenti con Stripe', line: 'Non vediamo né salviamo mai la tua carta.' },
+      ],
+      liveLine: (count: number) => `${count.toLocaleString('it-IT')} ${count === 1 ? 'oggetto gratis' : 'oggetti gratis'} online adesso`,
+    },
+    interests: {
+      title: 'Cosa stai cercando?',
+      emphasis: 'cercando',
+      hint: 'Scegline quante vuoi. Le useremo per il tuo feed e gli avvisi.',
+      selected: (count: number) => (count === 1 ? '1 selezionato' : `${count} selezionati`),
+      chips: {
+        electronics: 'Elettronica',
+        pets: 'Animali',
+        kids: 'Bambini e giochi',
+        furniture: 'Mobili',
+        appliances: 'Elettrodomestici',
+        books: 'Libri',
+        clothes: 'Abbigliamento',
+        everything: 'Tutto',
+      },
+    },
+    mobility: {
+      title: 'Come ti muovi?',
+      emphasis: 'muovi',
+      hint: 'Imposta la distanza di ricerca predefinita. Puoi cambiarla quando vuoi.',
+      options: {
+        foot: 'A piedi (~1 km)',
+        bike: 'Bici o vaporetto (~5 km)',
+        car: 'Auto (~15 km)',
+      },
+    },
+    city: {
+      title: 'Dove cerchiamo?',
+      emphasis: 'cerchiamo',
+      body: 'Il feed partirà da qui. Puoi cambiarla quando vuoi dai filtri.',
+      other: 'Tutta Italia',
+      /** Label for the "Other" (every city) choice in counts and the paywall title. */
+      allLabel: 'tutta Italia',
+      notCovered: (count: number, cities: number) =>
+        `Tutti i ${count.toLocaleString('it-IT')} oggetti gratis nelle ${cities} città che copriamo. Il ritiro è di persona: scegli quelli vicini a te.`,
+    },
+    preview: {
+      title: 'Il tuo feed è pronto',
+      emphasis: 'pronto',
+      building: 'Stiamo preparando il tuo feed…',
+      checkCity: (city: string) => `Città · ${city}`,
+      checkInterests: 'I tuoi interessi',
+      checkRadius: (km: number) => `Entro ${km} km`,
+      result: (count: number, city: string) =>
+        count === 1
+          ? `1 oggetto gratis ${aCitta(city)} in questo momento`
+          : `${count.toLocaleString('it-IT')} oggetti gratis ${aCitta(city)} in questo momento`,
+      lowSupply: (count: number, city: string) =>
+        `Per ora solo ${count} ${aCitta(city)}. Prova un raggio più ampio o un’altra città.`,
+      cta: 'Salva il mio feed',
+      seePlans: 'Vedi i piani',
+      unavailable: 'Non siamo riusciti a caricare il tuo feed ora. Puoi continuare lo stesso.',
+    },
+    account: {
+      title: 'Salva feed e avvisi',
+      emphasis: 'Salva',
+      body: 'Un account gratuito conserva città, interessi e avvisi su tutti i dispositivi.',
+      google: 'Continua con Google',
+      email: 'Inviami un link di accesso',
+      emailSending: 'Invio…',
+      emailSent: 'Controlla la tua email per il link di accesso, poi torna qui.',
+      emailPlaceholder: 'tu@email.com',
+      emailError: 'Impossibile inviare il link. Controlla l’indirizzo e riprova.',
+      optIn: 'Inviami email occasionali sul servizio (facoltativo)',
+      signedIn: 'Hai effettuato l’accesso. Continua per completare la configurazione.',
+      signedInAs: (email: string) => `Accesso come ${email}.`,
+      switchAccount: 'Non sei tu? Usa un altro account',
+      switchingAccount: 'Disconnessione…',
+      payingAs: (email: string) => `Paghi come ${email}`,
+    },
+    alerts: {
+      title: 'Arriva prima sulle novità',
+      emphasis: 'prima',
+      body: 'Ti avvisiamo quando compare un oggetto gratis corrispondente.',
+      mockLabel: 'Esempio',
+      mockLine: 'Libreria in regalo · Cannaregio',
+      mockLine2: (city: string) => `Nuovo oggetto gratis ${aCitta(city)}`,
+      enable: 'Attiva gli avvisi',
+      enabling: 'Attivazione…',
+      notNow: 'Non ora',
+      enabled: 'Avvisi attivi. Ne abbiamo creato uno dai tuoi interessi — gestiscilo in Impostazioni.',
+      notLoggedIn: 'Gli avvisi richiedono un account. Puoi accedere e attivarli quando vuoi da Impostazioni.',
+      iosNotReady: 'Su iPhone aggiungi prima ZeroEuro alla schermata Home. Ti mostriamo come alla fine.',
+      unsupported: 'Questo browser non supporta le notifiche.',
+      permissionDenied: 'Le notifiche sono bloccate nelle impostazioni del browser.',
+      failed: 'Impossibile attivare le notifiche ora. Riprova più tardi da Impostazioni.',
+    },
+  },
+  emailCode: {
+    send: 'Inviami un codice di accesso',
+    sending: 'Invio…',
+    sentTitle: 'Controlla la tua email',
+    sentTo: 'Inviata a',
+    sentHint: 'Inserisci qui sotto il codice dell’email, oppure tocca il link nell’email.',
+    codeLabel: 'Codice dell’email',
+    verify: 'Accedi',
+    verifying: 'Accesso…',
+    sendError: 'Impossibile inviare l’email. Controlla l’indirizzo e riprova.',
+    codeError: 'Codice non valido. Controllalo o richiedine uno nuovo.',
+    changeEmail: 'Usa un’altra email',
+    resend: 'Invia una nuova email',
+    resendIn: (seconds: number) => `Invia di nuovo tra ${seconds}s`,
+    waitError: (seconds: number) => `Ti abbiamo appena inviato un’email: controlla la posta. Puoi inviarne un’altra tra ${seconds}s.`,
+    inAppBrowser:
+      'Sei nel browser interno di un’app, dove l’accesso con Google potrebbe non funzionare. Usa il link via email o apri la pagina in Safari o Chrome.',
+  },
+  paywall: {
+    close: 'Chiudi',
+    title: 'ZeroEuro Plus',
+    subtitle: 'Abbonati per vedere tutti gli annunci gratis vicino a te.',
+    titlePersonalized: (count: number, city: string) =>
+      count === 1 ? `Sblocca 1 oggetto gratis ${aCitta(city)}` : `Sblocca ${count.toLocaleString('it-IT')} oggetti gratis ${aCitta(city)}`,
+    titleFallback: 'Vedi tutti gli oggetti gratis vicino a te',
+    titleAllCities: (cities: number) => `Vedi tutti gli oggetti gratis nelle nostre ${cities} città`,
+    pickupNote: 'Gli oggetti si ritirano di persona: controlla che siano vicino a te.',
+    proofLine: (count: number) =>
+      count === 1
+        ? '1 nuovo oggetto gratis in Veneto negli ultimi 7 giorni'
+        : `${count.toLocaleString('it-IT')} nuovi oggetti gratis in Veneto negli ultimi 7 giorni`,
+    savingsVsMonthly: (pct: number) => `Risparmi il ${pct}%`,
+    billed: (price: string) => `Addebito di ${price} all’anno`,
+    freeNote: 'Gli oggetti sono gratis; l’abbonamento paga il servizio che li raccoglie in un unico posto.',
+    benefitListings: 'Tutti gli annunci gratis attivi vicino a te',
+    benefitMap: 'Feed completo, mappa e filtri',
+    benefitAlerts: 'Avvisi per le tue parole chiave',
+    benefitSupport: 'Sostieni un progetto indipendente',
+    plansLabel: 'Scegli un piano',
+    planWeekly: 'Settimanale',
+    planMonthly: 'Mensile',
+    planYearly: 'Annuale',
+    periodWeekly: 'settimana',
+    periodMonthly: 'mese',
+    periodYearly: 'anno',
+    bestValue: 'Più conveniente',
+    perWeek: (price: string) => `${price} / sett.`,
+    cta: 'Sblocca il mio feed',
+    renewal: (price: string, period: string) =>
+      `${price} ogni ${period}. Si rinnova automaticamente finché non annulli. Puoi annullare quando vuoi.`,
+    restore: 'Ripristina acquisti',
+    restoreNothing: 'Niente da ripristinare: non è ancora stato effettuato alcun acquisto.',
+    terms: 'Termini',
+    privacy: 'Privacy',
+    comingSoonTitle: 'I pagamenti non sono ancora attivi',
+    comingSoonBody: 'Non ti è stato addebitato nulla. Gli abbonamenti apriranno a breve.',
+    comingSoonContinue: 'Chiudi',
+    pending: 'Apertura del pagamento…',
+    checkoutError: 'Impossibile avviare il pagamento. Riprova.',
+    signInTitle: 'Accedi per abbonarti',
+    signInBody: 'L’abbonamento è legato al tuo account, così puoi usarlo su ogni dispositivo. Accedi qui sotto e ti portiamo subito al pagamento.',
+    goToSettings: 'Vai a Impostazioni',
+    restoreSignIn: 'Accedi prima per ripristinare un abbonamento.',
+  },
+  locked: {
+    title: 'Abbonati per vedere gli annunci',
+    body: (count: number) =>
+      count > 0
+        ? `${count.toLocaleString('it-IT')} annunci gratis sono attivi ora in tutte le città. Abbonati per vederli tutti, con foto, dettagli e mappa.`
+        : 'Abbonati per vedere tutti gli annunci gratis, con foto, dettagli e mappa.',
+    bodyFiltered: (count: number) =>
+      count > 0
+        ? `${count.toLocaleString('it-IT')} annunci gratis corrispondono a ricerca e filtri. Abbonati per vederli tutti, con foto, dettagli e mappa.`
+        : 'Nessun annuncio gratis corrisponde a ricerca e filtri. Abbonati per vedere tutti gli annunci, con foto, dettagli e mappa.',
+    previewLabel: 'Anteprima sfocata degli annunci attuali',
+    seePlans: 'Vedi i piani',
+    signInHint: 'Sei già abbonato?',
+    signIn: 'Accedi',
+    refreshStatus: 'Aggiorna stato',
+    refreshNothing: 'Ancora nessun abbonamento attivo su questo account. Se hai appena pagato, riprova tra un minuto.',
+    detailTitle: 'Questo annuncio è per gli abbonati',
+    detailBody: 'Abbonati per vedere foto, dettagli e come ritirarlo.',
+    favoritesTitle: 'I preferiti sono per gli abbonati',
+    favoritesBody: 'Abbonati per vedere gli annunci che hai salvato.',
+    backHome: 'Torna alla home',
+    checkoutPending: 'Pagamento effettuato? L’attivazione può richiedere un minuto. Ricarica la pagina tra poco.',
+  },
+  subscription: {
+    sectionTitle: 'Abbonamento',
+    manage: 'Gestisci abbonamento',
+    active: (plan: string) => `Piano attivo: ${plan}`,
+    inactive: 'Nessun abbonamento attivo',
+    endsAtPeriodEnd: 'Si annulla alla fine del periodo in corso',
+    portalError: 'Impossibile aprire il portale di fatturazione. Riprova.',
   },
   pwa: {
     install: {
       title: 'Aggiungi alla Home Screen',
       description:
         'Su iPhone le notifiche push funzionano solo se apri l\'app dall\'icona sulla Home Screen.',
-      step1: 'Tocca il pulsante Condividi in Safari (icona in basso).',
+      step1: 'Tocca il pulsante Condividi del browser (in Safari è in basso).',
       step2: 'Scorri e seleziona «Aggiungi a Home».',
       step3: 'Apri l\'app dall\'icona sulla Home Screen, poi attiva le notifiche push.',
       confirmInstalled: 'Ho aggiunto alla Home',
       continueWithoutPush: 'Continua senza push',
+      stillInBrowser:
+        'Sei ancora nel browser. Chiudi questa scheda e apri ZeroDollar dalla nuova icona nella schermata Home per attivare le notifiche.',
     },
   },
   sheet: {

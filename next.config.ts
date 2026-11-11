@@ -7,6 +7,12 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
+  // Bake Vercel's build-time VERCEL_ENV into a NEXT_PUBLIC_ literal so client code can tell
+  // production from Preview/dev at build time. Used to disable the QA account-skip stub in
+  // production (lib/paywall/gate.ts isAccountSkipStubAllowed). Empty string on a local build.
+  env: {
+    NEXT_PUBLIC_VERCEL_ENV: process.env.VERCEL_ENV ?? '',
+  },
   // Hide the floating "N" dev-tools badge — it overlaps the bottom nav on mobile.
   devIndicators: false,
   serverExternalPackages: ['pg'],

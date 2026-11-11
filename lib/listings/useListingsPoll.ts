@@ -30,6 +30,8 @@ export function useListingsPoll(
   const [listings, setListings] = useState(initialListings);
   const [totalCount, setTotalCount] = useState<number | null>(initialTotalCount);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  /** False until the first client fetch of the full feed settles (the SSR batch is only the newest rows). */
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const refresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -44,6 +46,7 @@ export function useListingsPoll(
       // Keep last good snapshot on transient fetch errors
     } finally {
       setIsRefreshing(false);
+      setHasLoaded(true);
     }
   }, []);
 
@@ -71,5 +74,5 @@ export function useListingsPoll(
     return () => window.clearInterval(timer);
   }, [intervalMs, refresh]);
 
-  return { listings, totalCount, refresh, isRefreshing };
+  return { listings, totalCount, refresh, isRefreshing, hasLoaded };
 }

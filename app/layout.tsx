@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { InlineScript } from '@/components/InlineScript';
 import { getMessages } from '@/messages';
+import { getSiteUrl } from '@/lib/listings/listing-metadata';
 import { BrowseCenterProvider } from '@/lib/browse-center/context';
 import { AppThemeProvider } from '@/components/providers/AppThemeProvider';
 import { AppSerwistProvider } from '@/components/providers/SerwistProvider';
@@ -10,6 +11,7 @@ import { PwaOnboardingProvider } from '@/components/providers/PwaOnboardingProvi
 import { AppChrome } from '@/components/shell/AppChrome';
 import { DocumentLang } from '@/components/shell/DocumentLang';
 import { AuthErrorFromUrl } from '@/components/auth/AuthErrorFromUrl';
+import { CheckoutReturnFromUrl } from '@/components/onboarding/CheckoutReturnFromUrl';
 import { Toaster } from '@/components/ui/toaster';
 import { APPEARANCE_INIT_SCRIPT } from '@/lib/settings/resolve-appearance';
 import { SUPPRESS_REACT_DEVTOOLS_SUSPENSE_WARNING_SCRIPT } from '@/lib/dev/suppress-react-devtools-suspense-warning-script';
@@ -27,6 +29,7 @@ const inter = Inter({
 const defaultMessages = getMessages('zh');
 
 export const metadata: Metadata = {
+  metadataBase: getSiteUrl(),
   title: defaultMessages.app.title,
   description: defaultMessages.app.description,
 };
@@ -68,6 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     {children}
                   </AppChrome>
                   <AuthErrorFromUrl />
+                  <CheckoutReturnFromUrl />
                   <Toaster />
                 </PwaOnboardingProvider>
               </FavoritesMergeProvider>

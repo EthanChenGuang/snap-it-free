@@ -18,7 +18,7 @@ web
 
 零元 (ZeroDollar / ZeroEuro), branded **Venice Free Finds**, aggregates real free-item listings for the Veneto region. It scrapes Subito.it *regalo* listings via a database-configurable URL matrix, supplements thin supply with user-generated "street dump" posts, and presents everything in a feed-first mobile experience with search, radius/zone filters, and a secondary map view.
 
-Success is measured by supply flow-through (listings found → claimed or acted on) and user activity (MAU, retention), not revenue. The product stays free unless explicitly opted into monetization later.
+Success is measured by supply flow-through (listings found → claimed or acted on), user activity (MAU, retention), and, once the paywall is enabled, paid subscriptions. Monetization was opted into on 2026-10-25 (see Monetization).
 
 ## Positioning
 
@@ -67,12 +67,24 @@ Hyperlocal free-item discovery for Venice and Padova that combines automated Sub
 
 ### Explicitly out of scope (v2.0)
 
-- Subscription / Restore Purchase / instant-alert paywall
 - Snag red theme or floating capsule nav verbatim clone
 - FB Marketplace scraper (v3+ backlog)
 - Native App Store / Play Store packages (PWA-first continues)
 - In-app DM for scraped listings (deep-link to source retained)
 - Favorites folder organization (deferred v3+)
+
+### Monetization (decided 2026-10-25 by Guang)
+
+- **Model:** hard paywall. Without an active subscription a user cannot see real listings; a blurred preview of real photos and the real active count are allowed. Pre-browse onboarding (value prop, how it works, city pick, alerts) precedes the paywall.
+- **Prices:** €1.99 / week, €4.99 / month, €19.99 / year (yearly highlighted). Source of truth: `lib/paywall/plans.ts`.
+- **Payments:** Stripe on the web (Checkout + Customer Portal), built in Stripe test mode first. App Store / Google Play billing deferred while there is no native app.
+- **Entitlement:** a `subscriptions` table written only by Stripe webhooks (service role); users can read their own row.
+- **Rollout:** behind `NEXT_PUBLIC_PAYWALL_ENABLED` (off by default); production eventually, after Stripe test-mode verification.
+- **Data-level gate (decided 2026-10-25 23:14 Rome, "1–6 按推荐做"):** migration `044_listings_paywall_rls.sql` makes `listings_public` and `listings` unreadable to the anon key and to signed-in non-subscribers (authors still read their own listings; the service role is unaffected). The locked teaser comes from `listings_paywall_teaser()` (count + up to 6 photo URLs only). 044 is applied only at go-live, together with `NEXT_PUBLIC_PAYWALL_ENABLED=true`. Until then the gate is UI and server rendering only.
+- **Grace period (same decision):** `past_due` keeps access for 3 days from when the subscription entered past_due (`subscriptions.past_due_since`, migration 043), not from `current_period_end`, because Stripe advances the period on the renewal attempt.
+- **Legal copy (agreed 2026-10-25 23:14, "同意7"):** Terms and Privacy carry subscription, cancellation, Stripe and stored-data sections on paywall-enabled builds only. They need Guang's legal review before production.
+- **Live keys (agreed 2026-10-25 23:14, "同意8"):** `lib/stripe/config.ts` refuses `sk_live_` / `rk_live_` keys by design. Going live requires a dedicated code change to accept them, plus live prices and webhooks.
+- **Ownership:** Stripe test prices, Vercel Preview env and webhook/Portal setup (items 1–3) are handled by other bots; migration 042 was applied to production by the operator (item 4).
 
 ### Technical constraints
 
@@ -93,7 +105,7 @@ Hyperlocal free-item discovery for Venice and Padova that combines automated Sub
 - **Product name:** 零元 — also referenced as ZeroDollar / ZeroEuro; public subtitle **Venice Free Finds**.
 - **Voice:** Practical, local, community-oriented; trilingual with Chinese as default locale.
 - **Visual authority:** Google Stitch design system only — documented at `.planning/google-stitch-ui-design/DESIGN.md`. Snag-style reference screenshots inform interaction patterns, not visual cloning.
-- **Free principle:** Product remains free; no monetization unless explicitly opted in later.
+- **Monetization:** Hard paywall decided by Guang on 2026-10-25 (see Monetization). Browsing real listings needs an active subscription once the flag is on.
 - **Monochrome document-first aesthetic:** Thin borders, Inter typography, Material Symbols Outlined — enforced in workspace UI rules.
 
 ## Evidence on Hand
@@ -111,7 +123,7 @@ Hyperlocal free-item discovery for Venice and Padova that combines automated Sub
 1. **Real supply first** — Show actual free listings from Subito and verified UGC; never invent inventory or social proof.
 2. **Register-first growth** — Guests browse the feed and filters without an account; login is required for full listing detail, favorites, posting, messaging, alerts, and other actions that build the registered user base (see `.planning/AUTH-GATE-SPEC.md`).
 3. **Local beats generic** — Distance, zone, and city filters reflect how people actually move through Venice and Padova.
-4. **Stay free** — Validate through usage and retention before any paywall or subscription.
+4. **Honest paywall** — Subscription-gated since 2026-10-25, but only with real counts and real previews, prices and auto-renewal terms next to the CTA, and a close button that is always visible.
 5. **Operator-maintained pipeline** — Scraping, translation, and moderation are first-class admin workflows, not afterthoughts.
 
 ## Accessibility & Inclusion

@@ -4,6 +4,8 @@ import { selectEnabledAlerts } from '@/lib/alerts/db';
 import { alertMatchesListing } from './matcher';
 import type { VeniceZone } from '@/lib/listings/types';
 import { fanOutMatchPush } from '@/lib/notifications/web-push';
+import { isPaywallFlagEnabled } from '@/lib/paywall/gate';
+import { entitledUserIds } from '@/lib/subscriptions/store';
 import { isQuietHoursActive, loadUserQuietHours } from '@/lib/user/notification-prefs';
 import { buildMatchPushContent, loadUserLocales } from '@/lib/user/locale';
 import type { AppLanguage } from '@/lib/settings/preferences';
@@ -87,7 +89,10 @@ async function processOneEvent(
       return false;
     }
 
-    const userIds = [...new Set(matches.map((alert) => alert.user_id))];
+    const matchedUserIds = [...new Set(matches.map((alert) => alert.user_id))];
+    const entitled = isPaywallFlagEnabled() ? await entitledUserIds(supabase, matchedUserIds) : null;
+    // Hard paywall: a push carries the listing title, so only subscribers get one. Matches are still stored.
+    const userIds = entitled ? matchedUserIds.filter((id) => entitled.has(id)) : matchedUserIds;
     const localeByUser = await loadUserLocales(supabase, userIds);
     const quietHoursByUser = await loadUserQuietHours(supabase, userIds);
 

@@ -4,6 +4,8 @@ import { getSupabaseEnv } from '@/lib/supabase/env';
 import { feedLookbackSinceIso, fetchPagedRows } from './feed-window';
 import { getOwnerListingFromDb, getOwnerListingsFromDb } from './owner-db';
 import type { ListingRow, OwnerListingRow } from './types';
+import { isPaywallFlagEnabled } from '@/lib/paywall/gate';
+import { fetchPaywallTeaser, teaserFromListings, type PaywallTeaser } from '@/lib/paywall/locked-preview';
 
 const PUBLIC_LISTINGS = 'listings_public';
 const BASE_LISTINGS = 'listings';
@@ -12,12 +14,20 @@ const BASE_LISTINGS = 'listings';
 export const FEED_SSR_LISTING_LIMIT = 24;
 
 const ACTIVE_LISTING_COLUMNS =
-  'id, source, title, title_en, title_zh, description, description_en, description_zh, photo_url, photo_urls, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status';
+  'id, source, title, title_en, title_zh, description, description_en, description_zh, photo_url, photo_urls, external_url, lat, lng, zone, city, region, category, category_en, category_zh, posted_at, expires_at, status, appeal_score';
 
 export type GetActiveListingsOptions = {
   /** When set, caps rows returned (used by feed SSR to avoid oversized RSC payloads). */
   limit?: number;
 };
+
+/**
+ * With the paywall on, listing reads carry the user's session so the RLS gate (044) sees the subscriber.
+ * With it off they stay session-free, exactly as before.
+ */
+async function listingsReadClient() {
+  return isPaywallFlagEnabled() ? createClient() : createAnonClient();
+}
 
 const OWNER_LISTING_COLUMNS =
   'id, source, title, photo_url, photo_urls, external_url, lat, lng, zone, posted_at, expires_at, status, owner_user_id, hidden_reason, description';
@@ -29,7 +39,7 @@ export async function getActiveListings(
     return [];
   }
 
-  const supabase = createAnonClient();
+  const supabase = await listingsReadClient();
   const since = feedLookbackSinceIso();
 
   if (options.limit != null) {
@@ -71,7 +81,7 @@ export async function getActiveListingsCount(): Promise<number | null> {
     return null;
   }
 
-  const supabase = createAnonClient();
+  const supabase = await listingsReadClient();
   const { count, error } = await supabase
     .from(PUBLIC_LISTINGS)
     .select('id', { count: 'exact', head: true })
@@ -89,7 +99,7 @@ export async function getListingsByIds(ids: string[]): Promise<ListingRow[]> {
     return [];
   }
 
-  const supabase = createAnonClient();
+  const supabase = await listingsReadClient();
   const { data, error } = await supabase
     .from(PUBLIC_LISTINGS)
     .select(ACTIVE_LISTING_COLUMNS)
@@ -108,7 +118,7 @@ export async function getListingById(id: string): Promise<ListingRow | null> {
     return null;
   }
 
-  const supabase = createAnonClient();
+  const supabase = await listingsReadClient();
   const { data, error } = await supabase
     .from(PUBLIC_LISTINGS)
     .select(ACTIVE_LISTING_COLUMNS)
@@ -187,7 +197,7 @@ export async function getSimilarListings(
     return [];
   }
 
-  const supabase = createAnonClient();
+  const supabase = await listingsReadClient();
   const baseQuery = () =>
     supabase
       .from(PUBLIC_LISTINGS)
@@ -248,4 +258,17 @@ export async function getListingForDetail(
   }
 
   return null;
+}
+
+/** Locked home teaser: the definer function when 044 is applied, otherwise the pre-044 rows (flag-off preview). */
+export async function getLockedTeaser(): Promise<PaywallTeaser> {
+  if (getSupabaseEnv()) {
+    const teaser = await fetchPaywallTeaser(createAnonClient(), { since: feedLookbackSinceIso() });
+    if (teaser) return teaser;
+  }
+  const [listings, count] = await Promise.all([
+    getActiveListings({ limit: FEED_SSR_LISTING_LIMIT }),
+    getActiveListingsCount(),
+  ]);
+  return teaserFromListings(listings, count);
 }

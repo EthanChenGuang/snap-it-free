@@ -16,8 +16,8 @@ describe('AUTH-08 feed open regression', () => {
     expect(source).not.toMatch(/useAuthSession/);
   });
 
-  it('app/page.tsx does not add auth gate to home feed', () => {
-    const source = readSource('app/page.tsx');
+  it('app/(feed)/page.tsx does not add auth gate to home feed', () => {
+    const source = readSource('app/(feed)/page.tsx');
     expect(source).not.toMatch(/AuthPromptModal/);
     expect(source).not.toMatch(/authGate/);
     expect(source).not.toMatch(/useAuthSession/);

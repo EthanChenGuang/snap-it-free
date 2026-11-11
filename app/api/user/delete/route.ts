@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { deleteAccountData } from '@/lib/account/delete-account';
+import { getStripe } from '@/lib/stripe/server';
+import { stopBillingBeforeDeletion } from '@/lib/subscriptions/account-deletion';
+import { getSubscriptionForUser } from '@/lib/subscriptions/store';
 import { requireAuth } from '@/lib/supabase/auth';
 import { restErrorResponse } from '@/lib/supabase/rest-error';
 import { withRestRetry } from '@/lib/supabase/rest-retry';
@@ -31,6 +34,18 @@ export async function POST() {
   const user = await requireAuth();
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const stripe = getStripe();
+  const billingStopped = await stopBillingBeforeDeletion(
+    user.id,
+    stripe && {
+      getSubscription: getSubscriptionForUser,
+      cancelSubscription: (id) => stripe.stripe.subscriptions.cancel(id),
+    },
+  );
+  if (!billingStopped) {
+    return NextResponse.json({ error: 'subscription_cancel_failed' }, { status: 502 });
   }
 
   const serviceClient = createServiceClient();

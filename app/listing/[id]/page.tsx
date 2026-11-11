@@ -1,10 +1,20 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { ListingDetailSkeleton } from '@/components/detail/ListingDetailSkeleton';
 import { z } from 'zod';
 import { ScrapedListingShell } from '@/components/detail/ScrapedListingShell';
 import { UgcListingShell } from '@/components/detail/UgcListingShell';
-import { getListingForDetail, getSimilarListings } from '@/lib/listings/queries';
+import { LockedPanel } from '@/components/onboarding/LockedViews';
+import { buildListingMetadata } from '@/lib/listings/listing-metadata';
+import {
+  getListingById,
+  getListingForDetail,
+  getOwnerListingById,
+  getSimilarListings,
+} from '@/lib/listings/queries';
+import { getListingAccess } from '@/lib/paywall/server-access';
+import { getMessages } from '@/messages';
 
 const listingIdSchema = z.string().uuid();
 
@@ -28,6 +38,21 @@ function serializeSearchParams(
   return sp.toString();
 }
 
+/** Public OG/Twitter tags for share previews — anon read only, no auth (D-19 #13). */
+export async function generateMetadata({
+  params,
+}: Pick<ListingPageProps, 'params'>): Promise<Metadata> {
+  const { id } = await params;
+  const parsed = listingIdSchema.safeParse(id);
+  if (!parsed.success) return {};
+
+  const listing = await getListingById(parsed.data);
+  if (!listing) return {};
+
+  const { app } = getMessages('zh');
+  return buildListingMetadata(listing, { name: app.title, description: app.description });
+}
+
 export default async function ListingPage({ params, searchParams }: ListingPageProps) {
   const [{ id }, resolvedSearchParams] = await Promise.all([params, searchParams]);
   const searchParamsString = serializeSearchParams(resolvedSearchParams);
@@ -37,7 +62,17 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
     notFound();
   }
 
-  const result = await getListingForDetail(parsed.data);
+  // Locked: only the author's own listing renders. Under the 044 RLS gate a non-subscriber cannot read
+  // other rows at all, so asking first shows the lock instead of a 404 and never fetches the listing.
+  const locked = (await getListingAccess(resolvedSearchParams)) === 'locked';
+  const ownListing = locked ? await getOwnerListingById(parsed.data) : null;
+  if (locked && !ownListing) {
+    return <LockedPanel variant="detail" />;
+  }
+
+  const result = ownListing
+    ? { listing: ownListing, isOwnerView: true }
+    : await getListingForDetail(parsed.data);
   if (!result) {
     notFound();
   }
