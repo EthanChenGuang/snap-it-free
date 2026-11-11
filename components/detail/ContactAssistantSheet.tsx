@@ -189,7 +189,7 @@ function SendTab({ listing, onDone }: { listing: ListingRow; onDone: () => void 
               <label
                 key={item.id}
                 className={cn(
-                  'flex min-h-12 cursor-pointer items-center gap-space-sm rounded-lg border px-space-md py-space-sm text-body-md font-medium text-on-surface',
+                  'flex min-h-11 cursor-pointer items-center gap-space-sm rounded-lg border px-space-md py-space-xs text-body-md font-medium text-on-surface',
                   selected === item.id
                     ? 'border-transparent bg-surface-container'
                     : 'border-outline-variant bg-surface-container-lowest',
@@ -209,32 +209,31 @@ function SendTab({ listing, onDone }: { listing: ListingRow; onDone: () => void 
           </div>
 
           <ItalianCard label={copy.italianLabel} text={template.it} />
-
-          <ol className="flex items-start justify-between gap-space-xs">
-            {steps.map((step, index) => (
-              <li key={step} className="flex min-w-0 flex-1 items-start gap-space-xs">
-                <span
-                  className="flex size-5 shrink-0 items-center justify-center rounded-full bg-secondary-container text-label-sm font-semibold text-on-secondary-container"
-                  aria-hidden
-                >
-                  {index + 1}
-                </span>
-                <span className="min-w-0 text-label-sm font-semibold text-on-surface">{step}</span>
-                {index < steps.length - 1 && (
-                  <span
-                    className="material-symbols-outlined ml-auto shrink-0 text-[16px] text-on-surface-variant"
-                    aria-hidden
-                  >
-                    arrow_forward
-                  </span>
-                )}
-              </li>
-            ))}
-          </ol>
         </div>
       </div>
 
       <div className="shrink-0 border-t border-outline-variant bg-surface px-gutter py-space-md pb-[max(env(safe-area-inset-bottom,0px),var(--spacing-space-md))]">
+        <ol className="mb-space-md flex items-start justify-between gap-space-xs">
+          {steps.map((step, index) => (
+            <li key={step} className="flex min-w-0 flex-1 items-start gap-space-xs">
+              <span
+                className="flex size-5 shrink-0 items-center justify-center rounded-full bg-secondary-container text-label-sm font-semibold text-on-secondary-container"
+                aria-hidden
+              >
+                {index + 1}
+              </span>
+              <span className="min-w-0 text-label-sm font-semibold text-on-surface">{step}</span>
+              {index < steps.length - 1 && (
+                <span
+                  className="material-symbols-outlined ml-auto shrink-0 text-[16px] text-on-surface-variant"
+                  aria-hidden
+                >
+                  arrow_forward
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
         {copyFailed && <p className="mb-space-sm text-label-sm text-error" role="alert">{copy.copyFailedHint}</p>}
         <Button
           type="button"

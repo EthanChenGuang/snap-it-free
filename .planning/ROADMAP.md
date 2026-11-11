@@ -22,6 +22,6 @@ Open (not phases here): webhook-only unlock test (new test account, Guang's OK);
 **Plans:** 1 plan
 
 Plans:
-- [ ] `phases/05-chinese-contact-assistant/PLAN.md`
+- [x] `phases/05-chinese-contact-assistant/PLAN.md`
 
 (Numbered 5 because 4 is the deferred "Server-side marketing opt-in" in the table above.)
