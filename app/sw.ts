@@ -23,7 +23,7 @@ serwist.addEventListeners();
 
 self.addEventListener('push', (event) => {
   const data = event.data?.json() as { title?: string; body?: string; url?: string } | undefined;
-  const title = data?.title ?? '零元';
+  const title = data?.title ?? '零元购';
   const body = data?.body ?? '';
   const url = data?.url ?? '/';
 
