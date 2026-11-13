@@ -33,6 +33,7 @@ export function EmailCodeSignIn({
   onSignedIn,
   testIdPrefix = 'email-code',
   tone = 'pop',
+  emailInputId,
 }: {
   /** Where the emailed link lands if the user taps it instead of typing the code. */
   emailRedirectTo: string;
@@ -41,6 +42,8 @@ export function EmailCodeSignIn({
   testIdPrefix?: string;
   /** 'plain' = the neutral black/zinc look of the guest auth cards; onboarding keeps 'pop'. */
   tone?: 'pop' | 'plain';
+  /** DOM id for the email input (the guest card's heart button focuses it). */
+  emailInputId?: string;
 }) {
   const { messages } = useMessages();
   const copy = messages.emailCode;
@@ -105,7 +108,7 @@ export function EmailCodeSignIn({
 
   const verify = async (event: React.FormEvent) => {
     event.preventDefault();
-    const token = code.replace(/\s+/g, '');
+    const token = code.replace(/\D/g, '');
     if (!/^\d{6,10}$/.test(token)) {
       setError(copy.codeError);
       return;
@@ -119,7 +122,8 @@ export function EmailCodeSignIn({
         type: 'email',
       });
       if (verifyError || !data.session) {
-        setError(copy.codeError);
+        const wait = verifyError ? waitSeconds(verifyError) : null;
+        setError(wait !== null ? copy.waitError(wait) : copy.codeError);
         setPhase('code');
         return;
       }
@@ -170,11 +174,9 @@ export function EmailCodeSignIn({
           type="text"
           inputMode="numeric"
           autoComplete="one-time-code"
-          pattern="[0-9 ]*"
-          maxLength={12}
           autoFocus
           value={code}
-          onChange={(event) => setCode(event.target.value)}
+          onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 10))}
           placeholder="12345678"
           aria-label={copy.codeLabel}
           className={cn(inputClass, 'text-center font-bold tracking-[0.4em]', plain ? 'text-xl' : 'text-[22px]')}
@@ -193,7 +195,7 @@ export function EmailCodeSignIn({
             {error}
           </p>
         )}
-        <div className={cn('flex items-center justify-center gap-space-md text-label-sm', mutedClass)}>
+        <div className={cn('flex justify-center gap-space-md text-label-sm', plain && 'items-center', mutedClass)}>
           <button
             type="button"
             className={cn(linkClass, 'enabled:hover:underline disabled:opacity-60')}
@@ -228,8 +230,9 @@ export function EmailCodeSignIn({
         required
         value={email}
         onChange={(event) => setEmail(event.target.value)}
+        id={emailInputId}
         placeholder={messages.onboarding.account.emailPlaceholder}
-        aria-label={messages.onboarding.account.emailPlaceholder}
+        aria-label={messages.auth.emailLabel}
         className={inputClass}
         data-testid={`${testIdPrefix}-email`}
       />

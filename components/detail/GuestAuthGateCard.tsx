@@ -122,6 +122,7 @@ export function GuestAuthGateCard({ redirectTo, id, onClose, className }: GuestA
           <EmailCodeSignIn
             emailRedirectTo={buildOAuthCallbackUrl(redirectTo, window.location.origin)}
             onSignedIn={handleSignedIn}
+            emailInputId="guest-gate-email"
             testIdPrefix="guest-gate"
             tone="plain"
           />
