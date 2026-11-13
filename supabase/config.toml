@@ -4,7 +4,7 @@
 project_id = "snap-it-free"
 
 [auth]
-site_url = "https://zerodollar-blond.vercel.app"
+site_url = "https://zero.laoxiang.app"
 
 [auth.email]
 # Matches production: 8-digit code, valid for one hour. EmailCodeSignIn accepts 6-10 digits.

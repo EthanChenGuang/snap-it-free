@@ -40,6 +40,7 @@ No remote migration, no production deploy, no `main` push from this work.
 3b. ~~Snag gap screen "why you can trust it"~~ **Done 2026-11-05** (quick 261105-ob6, Stitch screen `857017fd…`). Every Snag onboarding screen now has a counterpart; the testimonial wall and pre-use rating prompt stay out on purpose. Stitch works in cloud sessions via env `STITCH_API_KEY` → `https://stitch.googleapis.com/mcp` with header `X-Goog-Api-Key`.
 4. **Deferred until after launch (recommendation accepted 2026-11-05):** phase 1 (consent-gated onboarding analytics), phase 4 (server-side marketing opt-in), teaser **migration 045**, 7-day trial A/B (post-launch only).
 4b. **Phase 5 contact assistant: migration 046 (`contact_translation_usage` + `bump_contact_translation`) is APPLIED to the shared DB (2026-11-11, on Guang's explicit go-ahead).** Checked: RLS on with no policies, `anon` cannot execute, `authenticated` can; with limit 3, five calls gave true/true/true/false/false (in a rolled-back transaction). `/api/contact/translate` caps at 200 calls per user per UTC day (429 `daily_limit`); an RPC error still fails open and logs `[contact] usage check failed`. Additive only; `main` does not use it.
+4c. **Production domain is `zero.laoxiang.app` (2026-11-13, Guang's request).** Added to the Vercel project (domain on Vercel DNS, verified), Vercel production `APP_URL` updated and `main` (fc18530) redeployed, Supabase auth `site_url` switched and `https://zero.laoxiang.app/auth/callback` + `/**` added to the redirect allow list (old entries kept). Not done: redirecting the old `zerodollar-blond.vercel.app` host (installed PWAs and push subscriptions are bound to that origin). `main`'s `supabase/config.toml` still has the old `site_url` until this branch is merged.
 5. **Landing PR #10** (draft, `preview/recent-changes` → `main`, opened 2026-11-05 on Guang's go-ahead to follow the recommendation). Its body is the launch checklist. Stays draft; **do not merge or mark ready** until the checklist is done and Guang says go. Merging deploys production.
 6. **Go-live (Guang only):** migration **044** and `NEXT_PUBLIC_PAYWALL_ENABLED=true` ship **together**. Then operator scripts with the service role. Never apply 044 or flip the flag from an agent session.
 
@@ -77,7 +78,7 @@ Then `/gsd-verify-work` for phases 2 and 3 so `UAT.md` exists. Preview is Vercel
 - **No sign-ups on the Preview.** It shares the Supabase DB with production. Use the QA stub, or a throwaway account only after Guang's explicit OK.
 - No fake reviews, counts, scarcity or discounts. Every number shown must come from real data or real prices.
 - Never commit secrets or share tokens. Pass `VERCEL_SHARE_TOKEN` and any bypass secret via env only; never print them.
-- Don't touch or test production (https://zerodollar-blond.vercel.app).
+- Don't touch or test production (https://zero.laoxiang.app; old host https://zerodollar-blond.vercel.app still serves the same deployment).
 - Keep all new work on `preview/recent-changes` unless Guang names another branch.
 - Remove `HANDOFF.md` in the last commit before a landing PR is marked ready.
 - Don't write the EU 14-day withdrawal clause in the Terms (Guang's decision).
