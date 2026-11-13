@@ -12,9 +12,9 @@ otp_length = 8
 otp_expiry = 3600
 
 [auth.email.template.confirmation]
-subject = "零元 ZeroDollar · Codice / Code / 验证码: {{ .Token }}"
+subject = "零元购 ZeroDollar · Codice / Code / 验证码: {{ .Token }}"
 content_path = "./supabase/templates/confirmation.html"
 
 [auth.email.template.magic_link]
-subject = "零元 ZeroDollar · Codice / Code / 验证码: {{ .Token }}"
+subject = "零元购 ZeroDollar · Codice / Code / 验证码: {{ .Token }}"
 content_path = "./supabase/templates/magic_link.html"

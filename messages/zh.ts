@@ -3,7 +3,7 @@ import { subitoCategoriesZh } from './subito-category-labels';
 
 export const messages: Messages = {
   app: {
-    title: '零元',
+    title: '零元购',
     description: '威尼斯免费物品地图',
   },
   nav: {
@@ -392,7 +392,7 @@ export const messages: Messages = {
       'ZeroDollar 按「现状」提供。取件与交接在用户之间直接进行。我们不对线下交换产生的纠纷、伤害或损失负责。',
     subscriptionTitle: '订阅',
     subscriptionBody:
-      '查看信息需要零元 Plus 订阅。方案价格为每周 €1.99、每月 €4.99 或每年 €19.99。付款前会显示价格和计费周期。订阅在每个周期结束时自动续订，并从你的付款方式扣款，直到你取消为止。',
+      '查看信息需要零元购 Plus 订阅。方案价格为每周 €1.99、每月 €4.99 或每年 €19.99。付款前会显示价格和计费周期。订阅在每个周期结束时自动续订，并从你的付款方式扣款，直到你取消为止。',
     cancelTitle: '取消订阅',
     cancelBody:
       '你可以随时在“设置 → 管理订阅”中取消，该入口会打开 Stripe 客户门户。取消后不再续订，已付款的周期结束前仍可继续使用。取消不会退还该周期的费用。',
@@ -404,7 +404,7 @@ export const messages: Messages = {
     backHome: '返回首页',
   },
   onboarding: {
-    dialogLabel: '欢迎来到零元',
+    dialogLabel: '欢迎来到零元购',
     progress: (current: number, total: number) => `第 ${current} 步，共 ${total} 步`,
     skip: '跳过',
     back: '返回',
@@ -541,7 +541,7 @@ export const messages: Messages = {
       notNow: '暂不开启',
       enabled: '提醒已开启。我们已根据你的兴趣创建了一条提醒——可在设置中管理。',
       notLoggedIn: '提醒需要账号。登录后可随时在设置中开启。',
-      iosNotReady: '在 iPhone 上需要先把零元添加到主屏幕。完成引导后我们会告诉你怎么做。',
+      iosNotReady: '在 iPhone 上需要先把零元购添加到主屏幕。完成引导后我们会告诉你怎么做。',
       unsupported: '此浏览器不支持通知。',
       permissionDenied: '通知已在浏览器设置中被屏蔽。',
       failed: '暂时无法开启通知，请稍后在设置中重试。',
@@ -566,7 +566,7 @@ export const messages: Messages = {
   },
   paywall: {
     close: '关闭',
-    title: '零元 Plus',
+    title: '零元购 Plus',
     subtitle: '订阅后即可查看身边所有免费信息。',
     titlePersonalized: (count: number, city: string) => `解锁${city}的 ${count.toLocaleString('zh-CN')} 件免费物品`,
     titleFallback: '查看你身边的所有免费物品',
@@ -646,7 +646,7 @@ export const messages: Messages = {
       step3: '从主屏幕图标打开应用，然后开启推送通知。',
       confirmInstalled: '我已添加到主屏幕',
       continueWithoutPush: '暂不开启推送',
-      stillInBrowser: '你现在还在浏览器里。请关掉这个页面，从主屏幕上新添加的图标打开零元，再开启推送。',
+      stillInBrowser: '你现在还在浏览器里。请关掉这个页面，从主屏幕上新添加的图标打开零元购，再开启推送。',
     },
   },
   sheet: {
