@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
+import { EmailCodeSignIn } from '@/components/onboarding/EmailCodeSignIn';
 import { buildOAuthCallbackUrl } from '@/lib/auth/build-oauth-callback-url';
 import { useOAuthSignIn } from '@/lib/auth/use-oauth-sign-in';
 import { useMessages } from '@/lib/i18n/useMessages';
@@ -46,23 +46,14 @@ export function GuestAuthGateCard({ redirectTo, id, onClose, className }: GuestA
   const { messages } = useMessages();
   const { signIn, status: oauthStatus, isBusy: oauthBusy } = useOAuthSignIn(redirectTo);
 
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
-  const isAuthBusy = oauthBusy || status === 'sending';
+  const router = useRouter();
+  const isAuthBusy = oauthBusy;
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!email.trim()) return;
-
-    setStatus('sending');
-    const supabase = createClient();
-    const redirectToUrl = buildOAuthCallbackUrl(redirectTo, window.location.origin);
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: { emailRedirectTo: redirectToUrl },
-    });
-
-    setStatus(error ? 'error' : 'sent');
+  // useAuthSession picks the new session up from onAuthStateChange; this also refreshes server data
+  // and moves to redirectTo when it is a different page than the one shown.
+  const handleSignedIn = () => {
+    if (redirectTo !== window.location.pathname + window.location.search) router.replace(redirectTo);
+    else router.refresh();
   };
 
   const primaryButtonClass =
@@ -90,10 +81,7 @@ export function GuestAuthGateCard({ redirectTo, id, onClose, className }: GuestA
         </span>
       </button>
 
-      {status === 'sent' ? (
-        <p className="pt-2 text-body-md text-zinc-900">{messages.auth.checkEmail}</p>
-      ) : (
-        <>
+      <>
           <div className="pr-8">
             <h2
               id="guest-auth-gate-title"
@@ -131,39 +119,13 @@ export function GuestAuthGateCard({ redirectTo, id, onClose, className }: GuestA
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="relative flex w-full items-center">
-            <label htmlFor="guest-gate-email" className="sr-only">
-              {messages.auth.emailLabel}
-            </label>
-            <input
-              id="guest-gate-email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder={messages.auth.emailPlaceholder}
-              disabled={isAuthBusy}
-              autoComplete="email"
-              inputMode="email"
-              className="h-11 w-full rounded-xl border border-zinc-200/80 bg-zinc-100/80 py-0 pl-3.5 pr-11 text-body-md text-zinc-900 transition-all placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-black/10 disabled:opacity-50"
-              required
-            />
-            <button
-              type="submit"
-              disabled={isAuthBusy}
-              aria-label={messages.auth.sendLink}
-              className="absolute right-1.5 flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
-            >
-              <span className="material-symbols-outlined text-label-md leading-none" aria-hidden="true">
-                arrow_forward
-              </span>
-            </button>
-          </form>
-
-          {status === 'error' && (
-            <p className="mt-2 text-label-sm text-error">{messages.auth.sendError}</p>
-          )}
-        </>
-      )}
+          <EmailCodeSignIn
+            emailRedirectTo={buildOAuthCallbackUrl(redirectTo, window.location.origin)}
+            onSignedIn={handleSignedIn}
+            testIdPrefix="guest-gate"
+            tone="plain"
+          />
+      </>
     </div>
   );
 }
