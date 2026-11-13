@@ -18,6 +18,8 @@ type AuthPromptFormProps = {
   prominentHeading?: boolean;
   /** Tighter spacing for one-screen guest preview layouts. */
   compact?: boolean;
+  /** Called after a successful sign-in, once the page has been refreshed or redirected. */
+  onSignedIn?: () => void;
 };
 
 function GoogleIcon() {
@@ -51,6 +53,7 @@ export function AuthPromptForm({
   headingId,
   prominentHeading = false,
   compact = false,
+  onSignedIn,
 }: AuthPromptFormProps) {
   const { messages } = useMessages();
   const { signIn, status: oauthStatus, isBusy: oauthBusy } = useOAuthSignIn(redirectTo);
@@ -63,6 +66,7 @@ export function AuthPromptForm({
   const handleSignedIn = () => {
     if (redirectTo !== window.location.pathname + window.location.search) router.replace(redirectTo);
     else router.refresh();
+    onSignedIn?.();
   };
 
   return (

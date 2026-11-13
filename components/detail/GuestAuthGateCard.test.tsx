@@ -78,4 +78,38 @@ describe('GuestAuthGateCard email code flow', () => {
     await click(google);
     expect(signIn).toHaveBeenCalledWith('google');
   });
+
+  it('exposes #guest-gate-email with the email label as its accessible name', async () => {
+    await render(<GuestAuthGateCard redirectTo="/" onClose={() => {}} />);
+    const input = document.body.querySelector<HTMLInputElement>('#guest-gate-email')!;
+    expect(input).not.toBeNull();
+    expect(input.getAttribute('aria-label')).toBe(messages.auth.emailLabel);
+  });
+
+  it.each(['1234-5678', 'Code: 12345678', '1234 5678'])('verifies a pasted code %j as 12345678', async (pasted) => {
+    await sendEmail('/');
+    await typeInto(q('code')!, pasted);
+    await click(q('verify'));
+    await flush();
+    expect(verifyOtp).toHaveBeenCalledWith({ email: 'a@b.it', token: '12345678', type: 'email' });
+  });
+
+  it('shows the code error and keeps the code input after a wrong code', async () => {
+    verifyOtp.mockResolvedValue({ data: { session: null }, error: { status: 403, message: 'Token has expired or is invalid' } });
+    await sendEmail('/');
+    await typeInto(q('code')!, '00000000');
+    await click(q('verify'));
+    await flush();
+    expect(q('code')).not.toBeNull();
+    expect(document.body.querySelector('[role="alert"]')?.textContent).toBe(messages.emailCode.codeError);
+  });
+
+  it('shows the wait message when verify is rate limited', async () => {
+    verifyOtp.mockResolvedValue({ data: { session: null }, error: { status: 429, message: 'try again after 30 seconds' } });
+    await sendEmail('/');
+    await typeInto(q('code')!, '00000000');
+    await click(q('verify'));
+    await flush();
+    expect(document.body.querySelector('[role="alert"]')?.textContent).toBe(messages.emailCode.waitError(30));
+  });
 });
