@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { EmailCodeSignIn } from '@/components/onboarding/EmailCodeSignIn';
 import { Button } from '@/components/ui/button';
-import { createClient } from '@/lib/supabase/client';
 import { buildOAuthCallbackUrl } from '@/lib/auth/build-oauth-callback-url';
 import { useOAuthSignIn } from '@/lib/auth/use-oauth-sign-in';
 import { useMessages } from '@/lib/i18n/useMessages';
@@ -18,6 +18,8 @@ type AuthPromptFormProps = {
   prominentHeading?: boolean;
   /** Tighter spacing for one-screen guest preview layouts. */
   compact?: boolean;
+  /** Called after a successful sign-in, once the page has been refreshed or redirected. */
+  onSignedIn?: () => void;
 };
 
 function GoogleIcon() {
@@ -51,27 +53,20 @@ export function AuthPromptForm({
   headingId,
   prominentHeading = false,
   compact = false,
+  onSignedIn,
 }: AuthPromptFormProps) {
   const { messages } = useMessages();
   const { signIn, status: oauthStatus, isBusy: oauthBusy } = useOAuthSignIn(redirectTo);
 
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
-  const isAuthBusy = oauthBusy || status === 'sending';
+  const router = useRouter();
+  const isAuthBusy = oauthBusy;
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!email.trim()) return;
-
-    setStatus('sending');
-    const supabase = createClient();
-    const redirectToUrl = buildOAuthCallbackUrl(redirectTo, window.location.origin);
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: { emailRedirectTo: redirectToUrl },
-    });
-
-    setStatus(error ? 'error' : 'sent');
+  // useAuthSession picks the new session up from onAuthStateChange; this also refreshes server data
+  // and moves to redirectTo when it is a different page than the one shown.
+  const handleSignedIn = () => {
+    if (redirectTo !== window.location.pathname + window.location.search) router.replace(redirectTo);
+    else router.refresh();
+    onSignedIn?.();
   };
 
   return (
@@ -105,10 +100,7 @@ export function AuthPromptForm({
         </div>
       ) : null}
 
-      {status === 'sent' ? (
-        <p className="text-body-md text-on-surface">{messages.auth.checkEmail}</p>
-      ) : (
-        <>
+      <>
           {compact ? (
             <div className="overflow-hidden rounded-lg border border-outline-variant">
               <Button
@@ -148,38 +140,13 @@ export function AuthPromptForm({
             <span className="h-px flex-1 bg-outline-variant" aria-hidden="true" />
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className={cn('flex flex-col', compact ? 'gap-space-sm' : 'gap-space-md')}
-          >
-            <label className="flex flex-col gap-space-xs">
-              <span className="text-label-sm font-medium text-on-surface-variant">
-                {messages.auth.emailLabel}
-              </span>
-              <input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder={messages.auth.emailPlaceholder}
-                disabled={isAuthBusy}
-                autoComplete="email"
-                inputMode="email"
-                className={cn(
-                  'rounded-lg border border-outline-variant bg-surface-container-low px-space-md text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant/70 focus:border-on-surface focus:ring-1 focus:ring-outline disabled:opacity-50',
-                  compact ? 'min-h-11 py-2.5' : 'min-h-11',
-                )}
-                required
-              />
-            </label>
-            {status === 'error' && (
-              <p className="text-label-sm text-error">{messages.auth.sendError}</p>
-            )}
-            <Button type="submit" disabled={isAuthBusy} className="min-h-11 w-full rounded-lg">
-              {status === 'sending' ? messages.auth.sending : messages.auth.sendLink}
-            </Button>
-          </form>
-        </>
-      )}
+          <EmailCodeSignIn
+            emailRedirectTo={buildOAuthCallbackUrl(redirectTo, window.location.origin)}
+            onSignedIn={handleSignedIn}
+            testIdPrefix="auth-prompt"
+            tone="plain"
+          />
+      </>
     </div>
   );
 }

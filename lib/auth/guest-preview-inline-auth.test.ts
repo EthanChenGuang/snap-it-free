@@ -26,14 +26,14 @@ describe('D-19-02 guest listing preview with floating auth gate', () => {
     expect(source).toMatch(/verifiedFree/);
   });
 
-  it('GuestAuthGateCard implements Google-primary OAuth and inline magic-link email', () => {
+  it('GuestAuthGateCard implements Google-primary OAuth and inline email-code sign-in', () => {
     const card = readSource('components/detail/GuestAuthGateCard.tsx');
     expect(card).toMatch(/useOAuthSignIn/);
-    expect(card).toMatch(/signInWithOtp/);
+    expect(card).toMatch(/EmailCodeSignIn/);
+    expect(card).not.toMatch(/signInWithOtp|auth\.checkEmail/);
     expect(card).toMatch(/guestGateTitle/);
     expect(card).toMatch(/guestGateSubtitle/);
     expect(card).not.toMatch(/dark:/);
-    expect(card).toMatch(/arrow_forward/);
     expect(card).not.toMatch(/isFacebookOAuthEnabled/);
     expect(card).not.toMatch(/facebookSignIn/);
   });
@@ -57,12 +57,12 @@ describe('D-19-02 guest listing preview with floating auth gate', () => {
     expect(modal).toMatch(/AuthPromptForm/);
     const form = readSource('components/ugc/AuthPromptForm.tsx');
     expect(form).toMatch(/useOAuthSignIn/);
-    expect(form).toMatch(/signInWithOtp/);
+    expect(form).toMatch(/EmailCodeSignIn/);
+    expect(form).not.toMatch(/signInWithOtp/);
     expect(form).not.toMatch(/facebookSignIn/);
     expect(form).not.toMatch(/isFacebookOAuthEnabled/);
     expect(form).toMatch(/buildOAuthCallbackUrl/);
-    expect(form).toMatch(/messages\.auth\.checkEmail/);
-    expect(form).toMatch(/messages\.auth\.sendError/);
+    expect(form).not.toMatch(/messages\.auth\.checkEmail/);
     expect(form).toMatch(/messages\.auth\.oauthError/);
     expect(form).toMatch(/isAuthBusy/);
   });

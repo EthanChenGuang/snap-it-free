@@ -32,12 +32,18 @@ export function EmailCodeSignIn({
   onBeforeSend,
   onSignedIn,
   testIdPrefix = 'email-code',
+  tone = 'pop',
+  emailInputId,
 }: {
   /** Where the emailed link lands if the user taps it instead of typing the code. */
   emailRedirectTo: string;
   onBeforeSend?: () => void;
   onSignedIn: () => void;
   testIdPrefix?: string;
+  /** 'plain' = the neutral black/zinc look of the guest auth cards; onboarding keeps 'pop'. */
+  tone?: 'pop' | 'plain';
+  /** DOM id for the email input (the guest card's heart button focuses it). */
+  emailInputId?: string;
 }) {
   const { messages } = useMessages();
   const copy = messages.emailCode;
@@ -102,7 +108,7 @@ export function EmailCodeSignIn({
 
   const verify = async (event: React.FormEvent) => {
     event.preventDefault();
-    const token = code.replace(/\s+/g, '');
+    const token = code.replace(/\D/g, '');
     if (!/^\d{6,10}$/.test(token)) {
       setError(copy.codeError);
       return;
@@ -116,7 +122,8 @@ export function EmailCodeSignIn({
         type: 'email',
       });
       if (verifyError || !data.session) {
-        setError(copy.codeError);
+        const wait = verifyError ? waitSeconds(verifyError) : null;
+        setError(wait !== null ? copy.waitError(wait) : copy.codeError);
         setPhase('code');
         return;
       }
@@ -127,46 +134,57 @@ export function EmailCodeSignIn({
     }
   };
 
-  const inputClass =
-    'h-12 w-full rounded-full border-2 border-[#1A1A2E] bg-white px-space-lg text-body-md text-[#1A1A2E] outline-none placeholder:text-[#4A4A5E]/70 focus-visible:ring-2 focus-visible:ring-[#00A6A6]';
+  const plain = tone === 'plain';
+  const inputClass = plain
+    ? 'h-11 w-full rounded-xl border border-zinc-200/80 bg-zinc-100/80 px-3.5 text-body-md text-zinc-900 outline-none transition-all placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-2 focus:ring-black/10'
+    : 'h-12 w-full rounded-full border-2 border-[#1A1A2E] bg-white px-space-lg text-body-md text-[#1A1A2E] outline-none placeholder:text-[#4A4A5E]/70 focus-visible:ring-2 focus-visible:ring-[#00A6A6]';
+  const buttonClass = plain
+    ? 'h-11 w-full rounded-xl bg-black text-label-md font-semibold text-white hover:opacity-90 disabled:opacity-50'
+    : cn(pop.primaryButton, 'h-12 text-label-md');
+  const mutedClass = plain ? 'text-zinc-500' : 'text-[#4A4A5E]';
+  const linkClass = cn('underline-offset-2', plain ? 'min-h-11 px-1' : 'min-h-9');
 
   if (phase === 'code' || phase === 'verifying') {
     return (
       <form onSubmit={verify} className="flex flex-col gap-space-sm" data-testid={`${testIdPrefix}-verify-form`}>
         <div
           role="status"
-          className={cn('mb-space-xs flex items-start gap-space-sm p-space-md text-[#1A1A2E]', pop.card, 'rounded-2xl bg-[#D6F5E6]')}
+          className={
+            plain
+              ? 'flex items-start gap-space-sm rounded-xl bg-zinc-100/80 p-space-sm text-zinc-900'
+              : cn('mb-space-xs flex items-start gap-space-sm p-space-md text-[#1A1A2E]', pop.card, 'rounded-2xl bg-[#D6F5E6]')
+          }
           data-testid={`${testIdPrefix}-sent`}
         >
-          <span className={cn('flex h-10 w-10 shrink-0 -rotate-3 items-center justify-center rounded-xl bg-[#FFC83D]', pop.outline)}>
-            <SymbolIcon name="mark_email_unread" className="text-[22px]" />
-          </span>
+          {!plain && (
+            <span className={cn('flex h-10 w-10 shrink-0 -rotate-3 items-center justify-center rounded-xl bg-[#FFC83D]', pop.outline)}>
+              <SymbolIcon name="mark_email_unread" className="text-[22px]" />
+            </span>
+          )}
           <div className="min-w-0">
-            <p className="text-body-lg font-bold">{copy.sentTitle}</p>
-            <p className="mt-0.5 text-label-md text-[#4A4A5E]">{copy.sentTo}</p>
+            <p className={plain ? 'text-body-md font-bold' : 'text-body-lg font-bold'}>{copy.sentTitle}</p>
+            <p className={cn('mt-0.5 text-label-md', mutedClass)}>{copy.sentTo}</p>
             <p className="truncate whitespace-nowrap text-body-md font-bold" title={email.trim()}>
               {email.trim()}
             </p>
-            <p className="mt-space-xs text-label-md text-[#4A4A5E]">{copy.sentHint}</p>
+            <p className={cn('mt-space-xs text-label-md', mutedClass)}>{copy.sentHint}</p>
           </div>
         </div>
         <input
           type="text"
           inputMode="numeric"
           autoComplete="one-time-code"
-          pattern="[0-9 ]*"
-          maxLength={12}
           autoFocus
           value={code}
-          onChange={(event) => setCode(event.target.value)}
+          onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 10))}
           placeholder="12345678"
           aria-label={copy.codeLabel}
-          className={cn(inputClass, 'text-center text-[22px] font-bold tracking-[0.4em]')}
+          className={cn(inputClass, 'text-center font-bold tracking-[0.4em]', plain ? 'text-xl' : 'text-[22px]')}
           data-testid={`${testIdPrefix}-code`}
         />
         <Button
           type="submit"
-          className={cn(pop.primaryButton, 'h-12 text-label-md')}
+          className={buttonClass}
           disabled={phase === 'verifying'}
           data-testid={`${testIdPrefix}-verify`}
         >
@@ -177,10 +195,10 @@ export function EmailCodeSignIn({
             {error}
           </p>
         )}
-        <div className="flex justify-center gap-space-md text-label-sm text-[#4A4A5E]">
+        <div className={cn('flex justify-center gap-space-md text-label-sm', plain && 'items-center', mutedClass)}>
           <button
             type="button"
-            className="min-h-9 underline-offset-2 enabled:hover:underline disabled:opacity-60"
+            className={cn(linkClass, 'enabled:hover:underline disabled:opacity-60')}
             disabled={waitLeft > 0}
             onClick={() => void send()}
             data-testid={`${testIdPrefix}-resend`}
@@ -190,7 +208,7 @@ export function EmailCodeSignIn({
           <span aria-hidden>·</span>
           <button
             type="button"
-            className="min-h-9 underline-offset-2 hover:underline"
+            className={cn(linkClass, 'hover:underline')}
             onClick={() => {
               setPhase('email');
               setError(null);
@@ -212,14 +230,15 @@ export function EmailCodeSignIn({
         required
         value={email}
         onChange={(event) => setEmail(event.target.value)}
+        id={emailInputId}
         placeholder={messages.onboarding.account.emailPlaceholder}
-        aria-label={messages.onboarding.account.emailPlaceholder}
+        aria-label={messages.auth.emailLabel}
         className={inputClass}
         data-testid={`${testIdPrefix}-email`}
       />
       <Button
         type="submit"
-        className={cn(pop.primaryButton, 'h-12 text-label-md')}
+        className={buttonClass}
         disabled={phase === 'sending'}
         data-testid={`${testIdPrefix}-send`}
       >

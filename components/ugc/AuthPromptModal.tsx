@@ -45,7 +45,7 @@ export function AuthPromptModal({
           <DialogTitle>{modalTitle ?? messages.auth.modalTitle}</DialogTitle>
           <DialogDescription>{messages.auth.modalDescription}</DialogDescription>
         </DialogHeader>
-        <AuthPromptForm redirectTo={redirectTo} />
+        <AuthPromptForm redirectTo={redirectTo} onSignedIn={() => onOpenChange(false)} />
       </DialogContent>
     </Dialog>
   );
