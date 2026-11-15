@@ -16,11 +16,14 @@ export function AlertsMock({
   lines,
   appName,
   photos = [],
+  badge = '0€',
 }: {
   label: string;
   lines: string[];
   appName: string;
   photos?: string[];
+  /** Text on the app-icon tile; free onboarding passes a plain "Free" instead of a price. */
+  badge?: string;
 }) {
   const reduceMotion = useReducedMotion();
   return (
@@ -45,7 +48,7 @@ export function AlertsMock({
               transition={{ duration: 0.35, delay: reduceMotion ? 0 : 0.15 + index * 0.18, ease: [0.16, 1, 0.3, 1] }}
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F2512D] text-[13px] font-black text-white">
-                0€
+                {badge}
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[11px] font-semibold uppercase tracking-wide text-[#4A4A5E]">{appName}</span>

@@ -29,7 +29,7 @@ export const HOOK_PHOTOS = [
   { key: 'camera', url: '/images/onboarding/hook/camera.webp' },
 ] as const;
 
-export function PhotoCollage({ freeLabel }: { freeLabel: string }) {
+export function PhotoCollage({ freeLabel, showPriceSticker = true }: { freeLabel: string; showPriceSticker?: boolean }) {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -73,18 +73,20 @@ export function PhotoCollage({ freeLabel }: { freeLabel: string }) {
       >
         ★ {freeLabel}
       </motion.span>
-      <motion.span
-        className={cn(
-          'absolute bottom-[4%] right-[30%] z-10 rounded-full bg-[#00A6A6] px-3 py-1 text-[16px] font-black text-white',
-          pop.outline,
-          pop.shadowSm,
-        )}
-        initial={reduceMotion ? false : { opacity: 0, scale: 0.4 }}
-        animate={{ opacity: 1, scale: 1, rotate: 8 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 14, delay: reduceMotion ? 0 : 0.7 }}
-      >
-        €0
-      </motion.span>
+      {showPriceSticker && (
+        <motion.span
+          className={cn(
+            'absolute bottom-[4%] right-[30%] z-10 rounded-full bg-[#00A6A6] px-3 py-1 text-[16px] font-black text-white',
+            pop.outline,
+            pop.shadowSm,
+          )}
+          initial={reduceMotion ? false : { opacity: 0, scale: 0.4 }}
+          animate={{ opacity: 1, scale: 1, rotate: 8 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 14, delay: reduceMotion ? 0 : 0.7 }}
+        >
+          €0
+        </motion.span>
+      )}
       <Sparkle className="left-[60%] top-[34%] h-6 w-6 text-[#00A6A6]" />
       <Sparkle className="left-[90%] top-[42%] h-4 w-4 text-[#F2512D]" />
       <Sparkle className="left-[2%] top-[88%] h-5 w-5 text-[#FFC83D]" />

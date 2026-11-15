@@ -472,6 +472,13 @@ export const messages: Messages = {
         { title: 'Clear price, cancel any time', line: 'Price and auto-renewal are shown before you pay.' },
         { title: 'Payments by Stripe', line: 'We never see or store your card.' },
       ],
+      /** Free onboarding (no paid product): the first two rows plus honest free-mode rows. */
+      freeRows: [
+        { title: 'Real listings only', line: 'Every item is a real post, linked to where it was published.' },
+        { title: 'Live numbers', line: 'Every count you see comes from the feed right now.' },
+        { title: 'Free to browse', line: 'Looking through items is free.' },
+        { title: 'Pickup is up to you', line: 'We help you find items; you agree the time and place directly with the person giving it away.' },
+      ],
       liveLine: (count: number) => `${count.toLocaleString('en-US')} free ${count === 1 ? 'item' : 'items'} live right now`,
     },
     interests: {

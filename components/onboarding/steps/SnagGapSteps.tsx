@@ -196,14 +196,21 @@ const TRUST_BADGES = ['bg-[#D6F5E6]', 'bg-[#DDF0FF]', 'bg-[#EAE2FF]', 'bg-[#FFE3
  * Honest stand-in for Snag's testimonial wall (quick 261105-ob6, Stitch screen 857017fd…): four
  * promises we keep, plus the live item count. No reviews, ratings or people, since we have none to show.
  */
-export function TrustPromises({ liveCount }: { liveCount: number | null }) {
+export function TrustPromises({
+  liveCount,
+  rows,
+}: {
+  liveCount: number | null;
+  /** Defaults to the paid-mode rows; free onboarding passes its own. */
+  rows?: readonly { title: string; line: string }[];
+}) {
   const { messages } = useMessages();
   const copy = messages.onboarding.trust;
   const reduceMotion = useReducedMotion();
   return (
     <div data-testid="onboarding-trust">
       <ul className="mt-space-lg flex flex-col gap-space-sm">
-        {copy.rows.map((row, index) => (
+        {(rows ?? copy.rows).map((row, index) => (
           <motion.li
             key={row.title}
             className={cn('flex items-center gap-space-md p-space-md', pop.card, 'rounded-[20px]')}
