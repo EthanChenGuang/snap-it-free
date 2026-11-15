@@ -475,6 +475,7 @@ export const messages = {
       toast: 'Aggiunto ai preferiti',
       tabTitle: 'Li ritrovi sempre nella scheda ♥ Preferiti',
     },
+    // Key parity only: the contact step is never shown in Italian.
     contact: {
       title: 'Non parli italiano?\nPuoi scrivere al venditore',
       emphasis: 'Puoi',

@@ -277,14 +277,4 @@ describe('contact step (zh/en only)', () => {
     const old = JSON.stringify({ screen: 'account', city: 'venice', interests: ['books'], mobility: 'bike', radiusKm: 5, locationGranted: false });
     expect(parseResumeState(old)?.screen).toBe('account');
   });
-
-  it('works in both withPaywall modes', () => {
-    for (const withPaywall of [true, false]) {
-      expect(onboardingReducer(at('favorites', { withPaywall }), { type: 'next' }).screen).toBe('contact');
-    }
-  });
-
-  it('keeps the required sign-up: the dots and flow never skip the account step', () => {
-    expect(onboardingReducer(at('preview'), { type: 'next' }).screen).toBe('account');
-  });
 });

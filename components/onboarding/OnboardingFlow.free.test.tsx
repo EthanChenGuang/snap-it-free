@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act } from 'react';
 import { cleanup, click, flush, render } from '@/components/test/render';
+import { writeAppPreferences } from '@/lib/settings/preferences';
 import { FILTER_PREFS_STORAGE_KEY } from '@/lib/filter-prefs/storage';
 import { ONBOARDING_COMPLETED_STORAGE_KEY } from '@/lib/paywall/gate';
 import { ONBOARDING_RESUME_STORAGE_KEY } from '@/lib/paywall/onboarding-flow';
@@ -215,5 +217,26 @@ describe('free onboarding', () => {
     for (let i = 0; i < 5; i += 1) await click(byTestId('onboarding-continue'));
     expect(screen()).toBe('trust');
     expect(byTestId('contact-rows')).toBeNull();
+  });
+
+  it('follows the language chip: dots drop by one and the contact step moves on to trust; Back skips it', async () => {
+    const dots = () => document.body.querySelectorAll('header div[aria-hidden="true"] > span').length;
+    await render(<OnboardingFlow onFinish={() => {}} />, 'zh');
+    await flush();
+    const withContact = dots();
+    for (let i = 0; i < 5; i += 1) await click(byTestId('onboarding-continue'));
+    expect(screen()).toBe('contact');
+    await act(async () => {
+      writeAppPreferences({ language: 'it' });
+    });
+    await flush();
+    expect(screen()).toBe('trust');
+    expect(dots()).toBe(withContact - 1);
+    await click(document.body.querySelector('button[aria-label]') as HTMLElement); // Back
+    expect(screen()).toBe('favorites');
+    await cleanup();
+    await render(<OnboardingFlow onFinish={() => {}} />, 'en');
+    await flush();
+    expect(dots()).toBe(withContact);
   });
 });

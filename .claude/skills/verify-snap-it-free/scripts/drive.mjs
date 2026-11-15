@@ -76,12 +76,13 @@ async function newPage(browser, viewport = PHONE, language = lang, { stubAuth = 
   return { context, page };
 }
 
-/** Walk the five value-prop steps to the personal preview. Picks `city` on the city step. */
+/** Walk the value-prop steps to the personal preview (the contact step exists for zh/en only). Picks `city` on the city step. */
 async function walkToPreview(page, city = 'Milan') {
   await page.getByTestId('onboarding-continue').click(); // hook → how
   await settle(page, 400);
-  for (let i = 0; i < 5; i += 1) {
-    await page.getByTestId('onboarding-continue').click(); // how → weekly → map → favorites → trust → interests
+  const toInterests = lang === 'it' ? 5 : 6;
+  for (let i = 0; i < toInterests; i += 1) {
+    await page.getByTestId('onboarding-continue').click(); // how → weekly → map → favorites → (contact) → trust → interests
     await settle(page, 400);
   }
   await page.getByRole('checkbox', { name: 'Books' }).click();
@@ -210,11 +211,19 @@ async function onboarding(browser) {
   await shot(page, '02d-favorites');
   await page.getByTestId('onboarding-continue').click();
   await settle(page, 1200);
+  if (lang !== 'it') {
+    check(await screenIs(page, 'contact'), 'step 5b contact assistant intro (zh/en)');
+    check((await page.getByTestId('contact-rows').locator('li').count()) === 3, 'contact step shows its three rows');
+    check(!SOURCE_NAMES.test(await overlay(page).innerText()), 'contact step names no listing source');
+    await shot(page, '02e-contact');
+    await page.getByTestId('onboarding-continue').click();
+    await settle(page, 1200);
+  }
   check(await screenIs(page, 'trust'), 'step 6 trust promises');
   check((await page.getByTestId('onboarding-trust').count()) === 1, 'trust screen renders its promises');
   check(!/★|⭐/.test(await overlay(page).innerText()), 'trust screen shows no star ratings');
   check(!SOURCE_NAMES.test(await overlay(page).innerText()), 'trust screen names no listing source');
-  await shot(page, '02e-trust');
+  await shot(page, '02f-trust');
 
   // 6 · Interests (quiz, gated)
   await page.getByTestId('onboarding-continue').click();

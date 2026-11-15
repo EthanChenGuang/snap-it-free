@@ -7,7 +7,7 @@ import { useMessages } from '@/lib/i18n/useMessages';
 import { cn } from '@/lib/utils';
 
 const ROW_DOTS = ['bg-[#FFC83D]', 'bg-[#2FD3C4]', 'bg-[#F2512D]'] as const;
-const ROW_TEXT = ['text-[#1A1A2E]', 'text-[#1A1A2E]', 'text-white'] as const;
+const ROW_TEXT = ['text-[#1A1A2E]', 'text-[#1A1A2E]', 'text-[#1A1A2E]'] as const;
 
 /** Visual and steps of the "contact the seller without Italian" onboarding page (the title is rendered by the flow). */
 export function ContactBubbles() {
@@ -48,7 +48,7 @@ export function ContactBubbles() {
 export function ContactRows() {
   const copy = useMessages().messages.onboarding.contact;
   return (
-    <ol className="mt-space-lg flex flex-col gap-space-sm" data-testid="contact-rows">
+    <ol role="list" className="mt-space-lg flex flex-col gap-space-sm" data-testid="contact-rows">
       {copy.rows.map((row, index) => (
         <li
           key={row}

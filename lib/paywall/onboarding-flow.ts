@@ -171,13 +171,18 @@ export function onboardingReducer(state: OnboardingState, action: OnboardingActi
         ...state,
         contactAvailable: action.available,
         // Language switched to one without the assistant while on its step: carry on to the next one.
-        screen: !action.available && state.screen === 'contact' ? 'trust' : state.screen,
+        screen:
+          !action.available && state.screen === 'contact'
+            ? shift('contact', 1, shiftOptions({ ...state, contactAvailable: false }))
+            : state.screen,
       };
     case 'resume':
       // Device capability belongs to this tab, not to the saved answers.
       {
         const saved =
-          action.state.screen === 'contact' && state.contactAvailable === false ? 'trust' : action.state.screen;
+          action.state.screen === 'contact' && state.contactAvailable === false
+            ? shift('contact', 1, shiftOptions(state))
+            : action.state.screen;
         const screen = saved === 'alerts' && state.alertsAvailable === false ? 'paywall' : saved;
         return {
           ...action.state,
