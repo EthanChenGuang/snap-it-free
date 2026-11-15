@@ -563,6 +563,8 @@ export const messages = {
       switchAccount: 'Non sei tu? Usa un altro account',
       switchingAccount: 'Disconnessione…',
       payingAs: (email: string) => `Paghi come ${email}`,
+      /** Free onboarding only: the account step can be skipped. */
+      notNow: 'Non ora',
     },
     alerts: {
       title: 'Arriva prima sulle novità',
