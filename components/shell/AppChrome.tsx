@@ -66,6 +66,8 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
                 ? messages.inbox.pageTitle
                 : messages.app.title
           }
+          backHref={showSettingsTitle ? '/' : undefined}
+          backLabel={messages.detail.back}
         />
       )}
       <div
