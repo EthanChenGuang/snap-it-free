@@ -54,6 +54,7 @@ export const SCREEN_TINT: Record<string, string> = {
   weekly: 'bg-[#FFF8DD]',
   map: 'bg-[#E8F4FB]',
   favorites: 'bg-[#FFEFF3]',
+  contact: 'bg-[#FFF1E6]',
   interests: 'bg-[#F3EEFF]',
   mobility: 'bg-[#E8F4FB]',
   city: 'bg-[#FFF8DD]',

@@ -15,6 +15,7 @@ export const INTRO_STEPS = [
   'weekly',
   'map',
   'favorites',
+  'contact',
   'trust',
   'interests',
   'mobility',
@@ -54,6 +55,11 @@ export type OnboardingState = {
   alertsAvailable?: boolean;
   /** False in free onboarding: the flow ends after the last intro step and never reaches the paywall. Default true. */
   withPaywall?: boolean;
+  /**
+   * False when the app language is not one the contact assistant serves (it): the `contact` step is skipped in
+   * both directions, like `alerts` without push. Follows the language chip; optional, default true.
+   */
+  contactAvailable?: boolean;
 };
 
 export type OnboardingAction =
@@ -65,6 +71,7 @@ export type OnboardingAction =
   | { type: 'selectMobility'; mobility: MobilityKey }
   | { type: 'grantLocation' }
   | { type: 'goTo'; screen: OnboardingScreen }
+  | { type: 'setContactAvailable'; available: boolean }
   | { type: 'resume'; state: OnboardingState }
   | { type: 'finish' };
 
@@ -112,11 +119,25 @@ export function canAdvance(state: OnboardingState): boolean {
   }
 }
 
-function shift(screen: OnboardingScreen, delta: 1 | -1, alertsAvailable = true, withPaywall = true): OnboardingScreen {
+type ShiftOptions = { alertsAvailable?: boolean; contactAvailable?: boolean; withPaywall?: boolean };
+
+function isSkipped(screen: OnboardingScreen, { alertsAvailable = true, contactAvailable = true }: ShiftOptions) {
+  return (screen === 'alerts' && !alertsAvailable) || (screen === 'contact' && !contactAvailable);
+}
+
+function shift(screen: OnboardingScreen, delta: 1 | -1, options: ShiftOptions = {}): OnboardingScreen {
   const index = SCREEN_ORDER.indexOf(screen);
   const next = SCREEN_ORDER[Math.min(Math.max(index + delta, 0), SCREEN_ORDER.length - 1)];
-  if (next === 'paywall' && !withPaywall) return 'done';
-  return next === 'alerts' && !alertsAvailable ? shift(next, delta, alertsAvailable, withPaywall) : next;
+  if (next === 'paywall' && options.withPaywall === false) return 'done';
+  return isSkipped(next, options) ? shift(next, delta, options) : next;
+}
+
+function shiftOptions(state: OnboardingState): ShiftOptions {
+  return {
+    alertsAvailable: state.alertsAvailable !== false,
+    contactAvailable: state.contactAvailable !== false,
+    withPaywall: state.withPaywall !== false,
+  };
 }
 
 export function onboardingReducer(state: OnboardingState, action: OnboardingAction): OnboardingState {
@@ -125,10 +146,10 @@ export function onboardingReducer(state: OnboardingState, action: OnboardingActi
   switch (action.type) {
     case 'next':
       if (state.screen === 'paywall' || !canAdvance(state)) return state;
-      return { ...state, screen: shift(state.screen, 1, state.alertsAvailable !== false, state.withPaywall !== false) };
+      return { ...state, screen: shift(state.screen, 1, shiftOptions(state)) };
     case 'back':
       if (!canGoBack(state.screen)) return state;
-      return { ...state, screen: shift(state.screen, -1, state.alertsAvailable !== false) };
+      return { ...state, screen: shift(state.screen, -1, shiftOptions(state)) };
     case 'skip':
       if (!isSkippable(state.screen)) return state;
       return { ...state, screen: SKIP_TARGET };
@@ -145,15 +166,24 @@ export function onboardingReducer(state: OnboardingState, action: OnboardingActi
       return { ...state, mobility: action.mobility, radiusKm: MOBILITY_RADIUS_KM[action.mobility] };
     case 'grantLocation':
       return { ...state, locationGranted: true };
+    case 'setContactAvailable':
+      return {
+        ...state,
+        contactAvailable: action.available,
+        // Language switched to one without the assistant while on its step: carry on to the next one.
+        screen: !action.available && state.screen === 'contact' ? 'trust' : state.screen,
+      };
     case 'resume':
       // Device capability belongs to this tab, not to the saved answers.
       {
-        const screen =
-          action.state.screen === 'alerts' && state.alertsAvailable === false ? 'paywall' : action.state.screen;
+        const saved =
+          action.state.screen === 'contact' && state.contactAvailable === false ? 'trust' : action.state.screen;
+        const screen = saved === 'alerts' && state.alertsAvailable === false ? 'paywall' : saved;
         return {
           ...action.state,
           alertsAvailable: state.alertsAvailable,
           withPaywall: state.withPaywall,
+          contactAvailable: state.contactAvailable,
           screen: screen === 'paywall' && state.withPaywall === false ? 'done' : screen,
         };
       }

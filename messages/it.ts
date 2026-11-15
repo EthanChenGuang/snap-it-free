@@ -475,6 +475,16 @@ export const messages = {
       toast: 'Aggiunto ai preferiti',
       tabTitle: 'Li ritrovi sempre nella scheda ♥ Preferiti',
     },
+    contact: {
+      title: 'Non parli italiano?\nPuoi scrivere al venditore',
+      emphasis: 'Puoi',
+      body: 'I venditori parlano italiano. Ti aiutiamo a scrivere il messaggio e a capire la risposta.',
+      rows: ['Scegli un messaggio italiano già pronto', 'Copialo con un tocco e incollalo sulla pagina del venditore', 'Incolla la risposta e vedi subito cosa significa'],
+      italianLabel: 'ITALIANO',
+      italianBubble: 'Ciao! È ancora disponibile?',
+      userLabel: 'ITALIANO',
+      userBubble: 'Ciao! È ancora disponibile?',
+    },
     trust: {
       title: 'Perché puoi fidarti',
       emphasis: 'fidarti',

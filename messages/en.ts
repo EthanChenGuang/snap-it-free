@@ -462,6 +462,16 @@ export const messages: Messages = {
       toast: 'Added to favourites',
       tabTitle: 'Find them anytime in the ♥ Favorites tab',
     },
+    contact: {
+      title: 'No Italian?\nYou can still message the seller',
+      emphasis: 'still',
+      body: 'Sellers speak Italian. We help you write the message and understand the reply.',
+      rows: ['Pick a ready-made Italian message', "Copy it in one tap, paste it on the seller's page", 'Paste the reply back and see what it means'],
+      italianLabel: 'ITALIANO',
+      italianBubble: 'Ciao! È ancora disponibile?',
+      userLabel: 'ENGLISH',
+      userBubble: 'Hi! Is it still available?',
+    },
     trust: {
       title: 'Why you can trust it',
       emphasis: 'trust',

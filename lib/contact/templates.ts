@@ -13,6 +13,11 @@ export const CONTACT_TEMPLATES: readonly ContactTemplate[] = [
   { id: 'time', it: 'Ciao! Mi interessa. A che ora posso passare? Grazie!' },
 ];
 
+/** The languages the contact assistant is offered in (also gates its onboarding step). */
+export function isContactAssistantLanguage(language: AppLanguage): boolean {
+  return language === 'zh' || language === 'en';
+}
+
 /** Only Subito: the guide's "Contatta" step is that site's label. Italian users and other sources open the page directly. */
 export function shouldUseContactAssistant({
   language,
@@ -21,5 +26,5 @@ export function shouldUseContactAssistant({
   language: AppLanguage;
   source: ListingSource;
 }): boolean {
-  return (language === 'zh' || language === 'en') && source === 'subito';
+  return isContactAssistantLanguage(language) && source === 'subito';
 }

@@ -72,7 +72,8 @@ async function walkToAccount(language: 'zh' | 'en' | 'it', onFinish = vi.fn(), f
     if (free) expectNoPaidWording(`${language}/${expected}`);
   };
   await visit('hook');
-  for (const step of ['how', 'weekly', 'map', 'favorites', 'trust', 'interests']) {
+  const withContact = language !== 'it';
+  for (const step of ['how', 'weekly', 'map', 'favorites', ...(withContact ? ['contact'] : []), 'trust', 'interests']) {
     await click(byTestId('onboarding-continue'));
     await visit(step);
   }
@@ -106,7 +107,10 @@ afterEach(async () => {
 describe('free onboarding', () => {
   it.each(['zh', 'en', 'it'] as const)('shows no paid wording on any step up to the account step (%s)', async (language) => {
     const { seen } = await walkToAccount(language);
-    expect(seen).toEqual(['hook', 'how', 'weekly', 'map', 'favorites', 'trust', 'interests', 'mobility', 'city', 'preview', 'account']);
+    expect(seen).toEqual([
+      'hook', 'how', 'weekly', 'map', 'favorites', ...(language === 'it' ? [] : ['contact']),
+      'trust', 'interests', 'mobility', 'city', 'preview', 'account',
+    ]);
     // Signed out: sign-up is still required, no way past it.
     expect(byTestId('account-continue')).toBeNull();
     expect(byTestId('account-google')).not.toBeNull();
@@ -116,7 +120,7 @@ describe('free onboarding', () => {
   it('trust step uses the free rows', async () => {
     await render(<OnboardingFlow onFinish={() => {}} />, 'zh');
     await flush();
-    for (let i = 0; i < 5; i += 1) await click(byTestId('onboarding-continue'));
+    for (let i = 0; i < 6; i += 1) await click(byTestId('onboarding-continue'));
     expect(screen()).toBe('trust');
     expect(text()).not.toContain('Stripe');
     expect(text()).toContain('浏览免费');
@@ -192,5 +196,24 @@ describe('free onboarding', () => {
     await click(byTestId('account-continue'));
     expect(screen()).toBe('alerts');
     window.history.replaceState(null, '', '/');
+  });
+
+  it('shows the contact step with its three rows for zh and en, and never for it', async () => {
+    for (const [language, row] of [['zh', '选一条现成的意大利语消息'], ['en', 'Pick a ready-made Italian message']] as const) {
+      await render(<OnboardingFlow onFinish={() => {}} />, language);
+      await flush();
+      for (let i = 0; i < 5; i += 1) await click(byTestId('onboarding-continue'));
+      expect(screen()).toBe('contact');
+      expect(byTestId('contact-rows')!.querySelectorAll('li')).toHaveLength(3);
+      expect(text()).toContain(row);
+      expect(text()).toContain('Ciao! È ancora disponibile?');
+      expectNoPaidWording(`${language}/contact`);
+      await cleanup();
+    }
+    await render(<OnboardingFlow onFinish={() => {}} />, 'it');
+    await flush();
+    for (let i = 0; i < 5; i += 1) await click(byTestId('onboarding-continue'));
+    expect(screen()).toBe('trust');
+    expect(byTestId('contact-rows')).toBeNull();
   });
 });

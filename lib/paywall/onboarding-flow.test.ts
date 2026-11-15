@@ -29,7 +29,8 @@ describe('onboardingReducer', () => {
       { type: 'next' }, // how → weekly
       { type: 'next' }, // weekly → map
       { type: 'next' }, // map → favorites
-      { type: 'next' }, // favorites → trust
+      { type: 'next' }, // favorites → contact
+      { type: 'next' }, // contact → trust
       { type: 'next' }, // trust → interests
       { type: 'toggleInterest', interest: 'books' },
       { type: 'next' }, // interests → mobility
@@ -50,6 +51,7 @@ describe('onboardingReducer', () => {
       'weekly',
       'map',
       'favorites',
+      'contact',
       'trust',
       'interests',
       'interests',
@@ -120,12 +122,12 @@ describe('onboardingReducer', () => {
 });
 
 describe('introStepIndex', () => {
-  it('numbers the twelve intro steps and excludes the paywall', () => {
+  it('numbers the thirteen intro steps and excludes the paywall', () => {
     expect(
-      ['hook', 'how', 'weekly', 'map', 'favorites', 'trust', 'interests', 'mobility', 'city', 'preview', 'account', 'alerts', 'paywall'].map((s) =>
+      ['hook', 'how', 'weekly', 'map', 'favorites', 'contact', 'trust', 'interests', 'mobility', 'city', 'preview', 'account', 'alerts', 'paywall'].map((s) =>
         introStepIndex(s as never),
       ),
-    ).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, -1]);
+    ).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, -1]);
   });
 });
 
@@ -228,5 +230,61 @@ describe('free onboarding (withPaywall: false)', () => {
     expect(onboardingReducer({ ...INITIAL_ONBOARDING_STATE, screen: 'alerts' }, { type: 'next' }).screen).toBe('paywall');
     expect(onboardingReducer({ ...INITIAL_ONBOARDING_STATE, screen: 'preview' }, { type: 'goTo', screen: 'paywall' }).screen).toBe('paywall');
     expect(onboardingReducer({ ...INITIAL_ONBOARDING_STATE, withPaywall: true, screen: 'alerts' }, { type: 'next' }).screen).toBe('paywall');
+  });
+});
+
+describe('contact step (zh/en only)', () => {
+  const at = (screen: OnboardingState['screen'], extra: Partial<OnboardingState> = {}): OnboardingState => ({
+    ...INITIAL_ONBOARDING_STATE,
+    screen,
+    ...extra,
+  });
+
+  it('sits between favorites and trust', () => {
+    expect(onboardingReducer(at('favorites'), { type: 'next' }).screen).toBe('contact');
+    expect(onboardingReducer(at('contact'), { type: 'next' }).screen).toBe('trust');
+    expect(onboardingReducer(at('trust'), { type: 'back' }).screen).toBe('contact');
+    expect(onboardingReducer(at('contact'), { type: 'back' }).screen).toBe('favorites');
+  });
+
+  it('is skipped in both directions when the language has no assistant', () => {
+    const it = { contactAvailable: false };
+    expect(onboardingReducer(at('favorites', it), { type: 'next' }).screen).toBe('trust');
+    expect(onboardingReducer(at('trust', it), { type: 'back' }).screen).toBe('favorites');
+  });
+
+  it('skip from the contact step lands on the preview, and it is skippable', () => {
+    expect(isSkippable('contact')).toBe(true);
+    expect(onboardingReducer(at('contact'), { type: 'skip' }).screen).toBe('preview');
+  });
+
+  it('switching to an unsupported language on the step moves on; switching back keeps the flag', () => {
+    const moved = onboardingReducer(at('contact'), { type: 'setContactAvailable', available: false });
+    expect(moved.screen).toBe('trust');
+    expect(moved.contactAvailable).toBe(false);
+    expect(onboardingReducer(at('map'), { type: 'setContactAvailable', available: false }).screen).toBe('map');
+    expect(onboardingReducer(moved, { type: 'setContactAvailable', available: true }).contactAvailable).toBe(true);
+  });
+
+  it('resume onto the contact step lands on trust when unavailable, and keeps this language state', () => {
+    const resumed = onboardingReducer(at('hook', { contactAvailable: false }), { type: 'resume', state: at('contact') });
+    expect(resumed.screen).toBe('trust');
+    expect(resumed.contactAvailable).toBe(false);
+    expect(onboardingReducer(at('hook'), { type: 'resume', state: at('contact') }).screen).toBe('contact');
+  });
+
+  it('a resume state saved before this step existed still parses', () => {
+    const old = JSON.stringify({ screen: 'account', city: 'venice', interests: ['books'], mobility: 'bike', radiusKm: 5, locationGranted: false });
+    expect(parseResumeState(old)?.screen).toBe('account');
+  });
+
+  it('works in both withPaywall modes', () => {
+    for (const withPaywall of [true, false]) {
+      expect(onboardingReducer(at('favorites', { withPaywall }), { type: 'next' }).screen).toBe('contact');
+    }
+  });
+
+  it('keeps the required sign-up: the dots and flow never skip the account step', () => {
+    expect(onboardingReducer(at('preview'), { type: 'next' }).screen).toBe('account');
   });
 });

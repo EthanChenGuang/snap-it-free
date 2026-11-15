@@ -448,6 +448,16 @@ export const messages: Messages = {
       toast: '已加入收藏',
       tabTitle: '随时在 ♥ 收藏 页找到它们',
     },
+    contact: {
+      title: '不会意大利语？\n也能联系卖家',
+      emphasis: '也能',
+      body: '卖家都说意大利语。我们帮你写消息、看懂回复。',
+      rows: ['选一条现成的意大利语消息', '一键复制，到卖家页面粘贴发送', '把回复贴回来，马上看到中文意思'],
+      italianLabel: 'ITALIANO',
+      italianBubble: 'Ciao! È ancora disponibile?',
+      userLabel: '中文',
+      userBubble: '你好！还在吗？',
+    },
     trust: {
       title: '为什么你可以信任我们',
       emphasis: '信任',

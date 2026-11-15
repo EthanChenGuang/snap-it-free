@@ -10,6 +10,7 @@ import { AccountStep } from '@/components/onboarding/steps/AccountStep';
 import { AlertsMock } from '@/components/onboarding/steps/AlertsMock';
 import { BuildingFeed } from '@/components/onboarding/steps/BuildingFeed';
 import { PhotoCard } from '@/components/onboarding/steps/PhotoCard';
+import { ContactBubbles, ContactRows } from '@/components/onboarding/steps/ContactIntro';
 import { CityMapView, FavoritesDemo, TrustPromises, WeeklyVolume } from '@/components/onboarding/steps/SnagGapSteps';
 import { FeedSearching } from '@/components/listings/FeedSearching';
 import { PhotoCollage, Sparkle } from '@/components/onboarding/steps/PhotoCollage';
@@ -18,6 +19,7 @@ import { usePwaOnboarding } from '@/components/providers/PwaOnboardingProvider';
 import { CompactLocaleChip } from '@/components/shell/CompactLocaleChip';
 import { ArrowRight, SymbolIcon } from '@/components/onboarding/SymbolIcon';
 import { Button } from '@/components/ui/button';
+import { isContactAssistantLanguage } from '@/lib/contact/templates';
 import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { ONBOARDING_CITY_ORDER } from '@/lib/listings/filters';
@@ -75,9 +77,9 @@ function EmphasisTitle({ title, emphasis }: { title: string; emphasis: string })
   );
 }
 
-function StepTitle({ title, emphasis }: { title: string; emphasis: string }) {
+function StepTitle({ title, emphasis, className }: { title: string; emphasis: string; className?: string }) {
   return (
-    <h1 id={TITLE_ID} tabIndex={-1} className={cn(pop.display, 'text-[32px] leading-[1.2] outline-none')}>
+    <h1 id={TITLE_ID} tabIndex={-1} className={cn(pop.display, 'text-[32px] leading-[1.2] outline-none', className)}>
       <EmphasisTitle title={title} emphasis={emphasis} />
     </h1>
   );
@@ -134,8 +136,10 @@ function IntroHeader({
   messages: Messages;
 }) {
   // Skipped alerts step (no push in this tab) gets no dot.
-  const steps: readonly IntroStep[] =
-    state.alertsAvailable === false ? INTRO_STEPS.filter((step) => step !== 'alerts') : INTRO_STEPS;
+  const steps: readonly IntroStep[] = INTRO_STEPS.filter(
+    (step) =>
+      !(step === 'alerts' && state.alertsAvailable === false) && !(step === 'contact' && state.contactAvailable === false),
+  );
   const index = steps.indexOf(state.screen as IntroStep);
   return (
     <header className="flex h-16 shrink-0 items-center gap-space-md px-space-md">
@@ -196,10 +200,17 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
     ...initial,
     alertsAvailable: canUsePushHere(),
     withPaywall: !freeMode,
+    contactAvailable: isContactAssistantLanguage(language),
   }));
   const [push, setPush] = useState<PushState>({ status: 'idle' });
   const copy = messages.onboarding;
   const cityLabels = consumerCityLabelsFromMessages(messages);
+
+  // The language chip can change mid-flow; the contact step follows it.
+  const contactLanguage = isContactAssistantLanguage(language);
+  useEffect(() => {
+    dispatch({ type: 'setContactAvailable', available: contactLanguage });
+  }, [contactLanguage]);
 
   // Resume after the account step's auth redirect (?onboarding=resume) or any stored in-flight state.
   useEffect(() => {
@@ -477,6 +488,17 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                       <StepTitle title={copy.favorites.title} emphasis={copy.favorites.emphasis} />
                       <p className="mt-space-sm text-body-md text-[#4A4A5E]">{copy.favorites.body}</p>
                       <FavoritesDemo />
+                    </>
+                  )}
+
+                  {state.screen === 'contact' && (
+                    <>
+                      <ContactBubbles />
+                      <div className="mt-space-md text-center">
+                        <StepTitle title={copy.contact.title} emphasis={copy.contact.emphasis} className="whitespace-pre-line" />
+                        <p className="mt-space-sm text-body-md text-[#4A4A5E]">{copy.contact.body}</p>
+                      </div>
+                      <ContactRows />
                     </>
                   )}
 
