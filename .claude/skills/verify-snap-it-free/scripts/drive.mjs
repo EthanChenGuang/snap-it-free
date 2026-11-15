@@ -491,7 +491,7 @@ async function onboarding(browser) {
   await zh.page.getByTestId('preview-see-plans').click();
   await settle(zh.page);
   check(await screenIs(zh.page, 'paywall'), 'zh: See plans reaches the paywall');
-  check((await zh.page.getByText('零元 Plus').count()) === 1, 'paywall brand localised in zh (零元 Plus)');
+  check((await zh.page.getByText('零元购 Plus').count()) === 1, 'paywall brand localised in zh (零元购 Plus)');
   check(
     (await zh.page.getByTestId('paywall-cta').innerText()).trim() === '解锁我的推荐',
     'zh: paywall CTA reads 解锁我的推荐',
