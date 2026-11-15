@@ -532,6 +532,8 @@ export const messages: Messages = {
       switchAccount: '不是你？换一个账号',
       switchingAccount: '正在退出…',
       payingAs: (email: string) => `付款账号：${email}`,
+      /** Free onboarding only: the account step can be skipped. */
+      notNow: '稍后再说',
     },
     alerts: {
       title: '第一时间知道新好物',

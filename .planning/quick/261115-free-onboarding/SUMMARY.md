@@ -44,3 +44,18 @@ flow whatever the onboarding flag says; both off = no onboarding.
 - The preview-step photos are blank in screenshots because the sandbox cannot reach the image CDN.
 - Trust step icons (receipt, lock) are fixed per row index and now sit on the free rows; cosmetic only.
 - `launch.sh` of the verify skill cannot pass the onboarding flag; the builds were run by hand with the env set.
+
+## Update: skippable account step (owner decision, free mode only)
+- `AccountStep` takes an optional `onSkip`; `OnboardingFlow` passes it only in free mode. A signed-out visitor sees a text-style
+  ghost button below the sign-in options (zh `稍后再说`, en `Not now`, it `Non ora`; new key `onboarding.account.notNow`; 44px high).
+  Signed-in visitors see Continue and no skip; paid mode never gets the control (sign-up stays required there).
+- Alerts for a signed-out visitor: `requestPushPermissionAndSubscribe()` returns `not_logged_in` without a session (and `/api/push/subscribe`
+  needs auth), so enabling alerts cannot work. "Not now" therefore finishes the flow directly instead of showing an alerts step that fails.
+  The finish effect applies city/interests/radius, writes the completed flag and clears resume state as before.
+- Copy: the account heading/subtitle say "free account … saves your preferences", nothing says it is mandatory; unchanged.
+- Verified in a production-style build (onboarding flag only, Playwright 390x844 zh): first-time visit shows the flow; at the account step
+  the skip button is 44px high and there is no horizontal overflow; tapping it closes the flow onto the open feed with the chosen city
+  (帕多瓦) applied and the completed flag set; reload shows no flow; a browser with `shoumanwu_filter_prefs` set gets no flow and the flag
+  is written. Screenshots `11-account.png` (with the control) and `20-feed-after.png` retaken.
+- Not verified: a real sign-in after skipping (later sign-in from Settings); the picked interest chip did not produce a category filter in that
+  run (`categories: []`, existing mapping behaviour, not touched here).

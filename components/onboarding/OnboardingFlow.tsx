@@ -373,6 +373,8 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
               summary={answerChips}
               onBeforeRedirect={persistForRedirect}
               onContinue={() => dispatch({ type: 'next' })}
+              // Alerts need an account (push subscribe returns not_logged_in), so skipping also skips that step.
+              onSkip={freeMode ? () => dispatch({ type: 'finish' }) : undefined}
             />
           ) : (
             <>

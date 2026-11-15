@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, click, flush, render } from '@/components/test/render';
+import { FILTER_PREFS_STORAGE_KEY } from '@/lib/filter-prefs/storage';
 import { ONBOARDING_COMPLETED_STORAGE_KEY } from '@/lib/paywall/gate';
+import { ONBOARDING_RESUME_STORAGE_KEY } from '@/lib/paywall/onboarding-flow';
 import { OnboardingFlow } from './OnboardingFlow';
 
 const auth = vi.hoisted(() => ({ user: null as null | { id: string }, email: null as null | string }));
@@ -60,14 +62,14 @@ function expectNoPaidWording(where: string) {
   for (const word of PAID_WORDS) expect(content.includes(word.toLowerCase()), `${where}: found "${word}"`).toBe(false);
 }
 
-async function walkToAccount(language: 'zh' | 'en' | 'it', onFinish = vi.fn()) {
+async function walkToAccount(language: 'zh' | 'en' | 'it', onFinish = vi.fn(), free = true) {
   await render(<OnboardingFlow onFinish={onFinish} />, language);
   await flush();
   const seen: string[] = [];
   const visit = async (expected: string) => {
     expect(screen()).toBe(expected);
     seen.push(expected);
-    expectNoPaidWording(`${language}/${expected}`);
+    if (free) expectNoPaidWording(`${language}/${expected}`);
   };
   await visit('hook');
   for (const step of ['how', 'weekly', 'map', 'favorites', 'trust', 'interests']) {
@@ -83,7 +85,7 @@ async function walkToAccount(language: 'zh' | 'en' | 'it', onFinish = vi.fn()) {
   await click(document.body.querySelector('[role="radio"]'));
   await click(byTestId('onboarding-continue'));
   await visit('preview');
-  expect(byTestId('preview-see-plans')).toBeNull();
+  if (free) expect(byTestId('preview-see-plans')).toBeNull();
   await click(byTestId('preview-save'));
   await visit('account');
   return { seen, onFinish };
@@ -108,6 +110,7 @@ describe('free onboarding', () => {
     // Signed out: sign-up is still required, no way past it.
     expect(byTestId('account-continue')).toBeNull();
     expect(byTestId('account-google')).not.toBeNull();
+    expect(byTestId('account-skip')).not.toBeNull();
   });
 
   it('trust step uses the free rows', async () => {
@@ -139,5 +142,55 @@ describe('free onboarding', () => {
     expect(onFinish).toHaveBeenCalled();
     expect(localStorage.getItem(ONBOARDING_COMPLETED_STORAGE_KEY)).toBe('1');
     expect(document.body.querySelector('[data-testid^="paywall"]')).toBeNull();
+  });
+
+  it('a signed-out visitor can skip the account step: finishes, applies the answers, feed stays open', async () => {
+    const { onFinish } = await walkToAccount('zh');
+    const skip = byTestId('account-skip')!;
+    expect(skip.textContent).toBe('稍后再说');
+    expect(skip.className).toContain('h-11');
+    await click(skip);
+    await flush();
+    expect(onFinish).toHaveBeenCalled();
+    expect(localStorage.getItem(ONBOARDING_COMPLETED_STORAGE_KEY)).toBe('1');
+    const prefs = JSON.parse(localStorage.getItem(FILTER_PREFS_STORAGE_KEY)!);
+    expect(prefs.radiusKm).toBe(1);
+    expect(prefs.city).not.toBe('all');
+    expect(Object.keys(prefs)).toEqual(expect.arrayContaining(['city', 'categories', 'radiusKm']));
+    // No alerts step (it needs an account), no paywall, nothing locked.
+    expect(document.body.querySelector('[data-testid="onboarding-overlay"]')).toBeNull();
+    expect(document.body.querySelector('[data-testid^="paywall"], [data-testid*="locked"]')).toBeNull();
+  });
+
+  it('a signed-in visitor sees Continue and no skip control', async () => {
+    auth.user = { id: 'u1' };
+    auth.email = 'a@b.it';
+    await walkToAccount('en');
+    expect(byTestId('account-continue')).not.toBeNull();
+    expect(byTestId('account-skip')).toBeNull();
+  });
+
+  it('paid mode keeps the required sign-up: no skip control', async () => {
+    vi.stubEnv('NEXT_PUBLIC_ONBOARDING_ENABLED', '');
+    vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', 'true');
+    await walkToAccount('en', vi.fn(), false);
+    expect(byTestId('account-skip')).toBeNull();
+    expect(byTestId('account-continue')).toBeNull();
+  });
+
+  it('resume after the OAuth redirect still lands on the account step in free mode', async () => {
+    window.history.replaceState(null, '', '/?onboarding=resume');
+    sessionStorage.setItem(
+      ONBOARDING_RESUME_STORAGE_KEY,
+      JSON.stringify({ screen: 'account', city: 'venice', interests: ['books'], mobility: 'bike', radiusKm: 5, locationGranted: false }),
+    );
+    auth.user = { id: 'u1' };
+    auth.email = 'a@b.it';
+    await render(<OnboardingFlow onFinish={() => {}} />, 'zh');
+    await flush();
+    expect(screen()).toBe('account');
+    await click(byTestId('account-continue'));
+    expect(screen()).toBe('alerts');
+    window.history.replaceState(null, '', '/');
   });
 });

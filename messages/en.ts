@@ -550,6 +550,8 @@ export const messages: Messages = {
       switchAccount: 'Not you? Use another account',
       switchingAccount: 'Signing out…',
       payingAs: (email: string) => `Paying as ${email}`,
+      /** Free onboarding only: the account step can be skipped. */
+      notNow: 'Not now',
     },
     alerts: {
       title: 'Be first to new finds',
