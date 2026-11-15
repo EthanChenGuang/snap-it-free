@@ -190,6 +190,8 @@ export function CityMapView({ map, cityLabels }: { map: CityMap; cityLabels: Rec
 }
 
 const TRUST_ICONS = ['verified', 'bar_chart', 'receipt_long', 'lock'] as const;
+/** Free onboarding rows: honest icons (the paid ones are a receipt and a lock). */
+const TRUST_ICONS_FREE = ['verified', 'bar_chart', 'sell', 'handshake'] as const;
 const TRUST_BADGES = ['bg-[#D6F5E6]', 'bg-[#DDF0FF]', 'bg-[#EAE2FF]', 'bg-[#FFE3D3]'] as const;
 
 /**
@@ -199,10 +201,12 @@ const TRUST_BADGES = ['bg-[#D6F5E6]', 'bg-[#DDF0FF]', 'bg-[#EAE2FF]', 'bg-[#FFE3
 export function TrustPromises({
   liveCount,
   rows,
+  free = false,
 }: {
   liveCount: number | null;
   /** Defaults to the paid-mode rows; free onboarding passes its own. */
   rows?: readonly { title: string; line: string }[];
+  free?: boolean;
 }) {
   const { messages } = useMessages();
   const copy = messages.onboarding.trust;
@@ -225,7 +229,7 @@ export function TrustPromises({
               )}
               aria-hidden
             >
-              <SymbolIcon name={TRUST_ICONS[index % TRUST_ICONS.length]} className="text-[24px]" />
+              <SymbolIcon name={(free ? TRUST_ICONS_FREE : TRUST_ICONS)[index % TRUST_ICONS.length]} className="text-[24px]" />
             </span>
             <span className="min-w-0">
               <span className="block text-body-md font-black text-[#1A1A2E]">{row.title}</span>

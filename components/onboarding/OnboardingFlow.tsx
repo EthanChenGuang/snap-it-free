@@ -24,7 +24,6 @@ import { ONBOARDING_CITY_ORDER } from '@/lib/listings/filters';
 import {
   isFreeOnboarding,
   isOnboardingResumeParam,
-  isPaywallFlagEnabled,
   markOnboardingCompleted,
   urlWithoutForceParam,
 } from '@/lib/paywall/gate';
@@ -486,6 +485,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                       <TrustPromises
                         liveCount={region.status === 'ready' ? (region.map?.total ?? null) : null}
                         rows={freeMode ? copy.trust.freeRows : copy.trust.rows}
+                        free={freeMode}
                       />
                     </>
                   )}

@@ -117,6 +117,10 @@ describe('free onboarding', () => {
     expect(screen()).toBe('trust');
     expect(text()).not.toContain('Stripe');
     expect(text()).toContain('浏览免费');
+    // Free rows have their own icons: no receipt or lock.
+    expect(text()).not.toContain('lock');
+    expect(text()).not.toContain('receipt_long');
+    expect(text()).toContain('handshake');
   });
 
   it('a signed-in visitor sees the account step as done and finishes without a paywall', async () => {
