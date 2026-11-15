@@ -191,3 +191,42 @@ describe('city step "Other" (every city)', () => {
     expect(onboardingReducer(state, { type: 'next' }).screen).toBe('preview');
   });
 });
+
+describe('free onboarding (withPaywall: false)', () => {
+  const free: OnboardingState = { ...INITIAL_ONBOARDING_STATE, withPaywall: false };
+  const at = (screen: OnboardingState['screen'], extra: Partial<OnboardingState> = {}): OnboardingState => ({
+    ...free,
+    screen,
+    ...extra,
+  });
+
+  it('finishes after the alerts step instead of reaching the paywall', () => {
+    expect(onboardingReducer(at('alerts'), { type: 'next' }).screen).toBe('done');
+    expect(onboardingReducer(at('account', { alertsAvailable: true }), { type: 'next' }).screen).toBe('alerts');
+  });
+
+  it('finishes straight after the account step when alerts are unavailable', () => {
+    expect(onboardingReducer(at('account', { alertsAvailable: false }), { type: 'next' }).screen).toBe('done');
+  });
+
+  it('goTo paywall leads to done; other targets are unchanged', () => {
+    expect(onboardingReducer(at('preview'), { type: 'goTo', screen: 'paywall' }).screen).toBe('done');
+    expect(onboardingReducer(at('preview'), { type: 'goTo', screen: 'account' }).screen).toBe('account');
+  });
+
+  it('a resume state that points at the paywall (or alerts without push) ends the flow', () => {
+    const saved = at('paywall', { withPaywall: undefined });
+    expect(onboardingReducer(free, { type: 'resume', state: saved }).screen).toBe('done');
+    const alerts = { ...INITIAL_ONBOARDING_STATE, screen: 'alerts' as const };
+    const noPush = { ...free, alertsAvailable: false };
+    expect(onboardingReducer(noPush, { type: 'resume', state: alerts }).screen).toBe('done');
+    expect(onboardingReducer(free, { type: 'resume', state: at('account') }).screen).toBe('account');
+    expect(onboardingReducer(free, { type: 'resume', state: at('account') }).withPaywall).toBe(false);
+  });
+
+  it('paid mode (default) is unchanged', () => {
+    expect(onboardingReducer({ ...INITIAL_ONBOARDING_STATE, screen: 'alerts' }, { type: 'next' }).screen).toBe('paywall');
+    expect(onboardingReducer({ ...INITIAL_ONBOARDING_STATE, screen: 'preview' }, { type: 'goTo', screen: 'paywall' }).screen).toBe('paywall');
+    expect(onboardingReducer({ ...INITIAL_ONBOARDING_STATE, withPaywall: true, screen: 'alerts' }, { type: 'next' }).screen).toBe('paywall');
+  });
+});

@@ -45,6 +45,21 @@ export function isPaywallFlagEnabled(
   return value === 'true';
 }
 
+// Read as a literal so Next.js inlines it at build time.
+export function isOnboardingFlagEnabled(
+  value: string | undefined = process.env.NEXT_PUBLIC_ONBOARDING_ENABLED,
+): boolean {
+  return value === 'true';
+}
+
+/** Onboarding on, paywall off: the intro flow runs, nothing is charged and the feed stays open. */
+export function isFreeOnboarding(
+  onboardingEnabled: boolean = isOnboardingFlagEnabled(),
+  paywallEnabled: boolean = isPaywallFlagEnabled(),
+): boolean {
+  return onboardingEnabled && !paywallEnabled;
+}
+
 /** `?onboarding=1` forces the flow for QA; `?onboarding=resume` is our own return URL after the
  * account step's auth redirect, so the flow re-opens to finish. Both re-open onboarding. */
 export function hasOnboardingForceParam(search: string): boolean {
@@ -86,7 +101,7 @@ export function hasCheckoutReturnParam(search: string): boolean {
  * passed by the server only for a locked (non-subscriber) feed on a non-production build.
  */
 export function resolveOnboardingGate(
-  flagEnabled: boolean = isPaywallFlagEnabled(),
+  flagEnabled: boolean = isPaywallFlagEnabled() || isOnboardingFlagEnabled(),
   everyVisit = false,
 ): boolean {
   if (typeof window === 'undefined') return false;

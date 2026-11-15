@@ -52,6 +52,8 @@ export type OnboardingState = {
    * older saved resume states still parse.
    */
   alertsAvailable?: boolean;
+  /** False in free onboarding: the flow ends after the last intro step and never reaches the paywall. Default true. */
+  withPaywall?: boolean;
 };
 
 export type OnboardingAction =
@@ -110,10 +112,11 @@ export function canAdvance(state: OnboardingState): boolean {
   }
 }
 
-function shift(screen: OnboardingScreen, delta: 1 | -1, alertsAvailable = true): OnboardingScreen {
+function shift(screen: OnboardingScreen, delta: 1 | -1, alertsAvailable = true, withPaywall = true): OnboardingScreen {
   const index = SCREEN_ORDER.indexOf(screen);
   const next = SCREEN_ORDER[Math.min(Math.max(index + delta, 0), SCREEN_ORDER.length - 1)];
-  return next === 'alerts' && !alertsAvailable ? shift(next, delta, alertsAvailable) : next;
+  if (next === 'paywall' && !withPaywall) return 'done';
+  return next === 'alerts' && !alertsAvailable ? shift(next, delta, alertsAvailable, withPaywall) : next;
 }
 
 export function onboardingReducer(state: OnboardingState, action: OnboardingAction): OnboardingState {
@@ -122,7 +125,7 @@ export function onboardingReducer(state: OnboardingState, action: OnboardingActi
   switch (action.type) {
     case 'next':
       if (state.screen === 'paywall' || !canAdvance(state)) return state;
-      return { ...state, screen: shift(state.screen, 1, state.alertsAvailable !== false) };
+      return { ...state, screen: shift(state.screen, 1, state.alertsAvailable !== false, state.withPaywall !== false) };
     case 'back':
       if (!canGoBack(state.screen)) return state;
       return { ...state, screen: shift(state.screen, -1, state.alertsAvailable !== false) };
@@ -130,7 +133,7 @@ export function onboardingReducer(state: OnboardingState, action: OnboardingActi
       if (!isSkippable(state.screen)) return state;
       return { ...state, screen: SKIP_TARGET };
     case 'goTo':
-      return { ...state, screen: action.screen };
+      return { ...state, screen: action.screen === 'paywall' && state.withPaywall === false ? 'done' : action.screen };
     case 'selectCity':
       if (state.screen !== 'city') return state;
       return { ...state, city: action.city };
@@ -144,11 +147,16 @@ export function onboardingReducer(state: OnboardingState, action: OnboardingActi
       return { ...state, locationGranted: true };
     case 'resume':
       // Device capability belongs to this tab, not to the saved answers.
-      return {
-        ...action.state,
-        alertsAvailable: state.alertsAvailable,
-        screen: action.state.screen === 'alerts' && state.alertsAvailable === false ? 'paywall' : action.state.screen,
-      };
+      {
+        const screen =
+          action.state.screen === 'alerts' && state.alertsAvailable === false ? 'paywall' : action.state.screen;
+        return {
+          ...action.state,
+          alertsAvailable: state.alertsAvailable,
+          withPaywall: state.withPaywall,
+          screen: screen === 'paywall' && state.withPaywall === false ? 'done' : screen,
+        };
+      }
     case 'finish':
       return { ...state, screen: 'done' };
   }
