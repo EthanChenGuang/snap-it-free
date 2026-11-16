@@ -19,17 +19,31 @@ describe('parseTranslateResult', () => {
     });
   });
 
-  it('requires 1 to 3 replies', () => {
+  it('needs at least one valid reply and keeps the first three', () => {
     expect(parseTranslateResult('reply', JSON.stringify(reply(0)))).toBeNull();
-    expect(parseTranslateResult('reply', JSON.stringify(reply(4)))).toBeNull();
+    const four = parseTranslateResult('reply', JSON.stringify(reply(4))) as { replies: unknown[] };
+    expect(four.replies).toHaveLength(3);
+    expect(four.replies[2]).toEqual({ italian: 'r2', meaning: 'rm2' });
   });
 
-  it('rejects a reply with a missing, empty or too long field', () => {
+  it('drops an invalid alternative instead of failing the call', () => {
+    const raw = JSON.stringify({
+      meaning: 'm',
+      replies: [
+        { italian: ' ', meaning: 'x' },
+        { italian: 'ok', meaning: 'fine' },
+        { italian: 'a'.repeat(401), meaning: 'x' },
+        { italian: 'no meaning' },
+        'junk',
+      ],
+    });
+    expect(parseTranslateResult('reply', raw)).toEqual({ meaning: 'm', replies: [{ italian: 'ok', meaning: 'fine' }] });
+  });
+
+  it('rejects a reply result with no valid alternative or no meaning', () => {
     expect(parseTranslateResult('reply', '{"meaning":"m"}')).toBeNull();
     expect(parseTranslateResult('reply', '{"meaning":"m","replies":[{"italian":"r"}]}')).toBeNull();
-    expect(parseTranslateResult('reply', '{"meaning":"m","replies":[{"italian":" ","meaning":"x"}]}')).toBeNull();
-    const long = JSON.stringify({ meaning: 'm', replies: [{ italian: 'a'.repeat(401), meaning: 'x' }] });
-    expect(parseTranslateResult('reply', long)).toBeNull();
+    expect(parseTranslateResult('reply', '{"replies":[{"italian":"r","meaning":"x"}]}')).toBeNull();
   });
 
   it('parses a valid compose result', () => {
@@ -73,6 +87,7 @@ describe('translateContactText', () => {
     const config = JSON.parse(init.body as string).generationConfig;
     expect(config.responseMimeType).toBe('application/json');
     expect(config.responseSchema.required).toEqual(['italian', 'unclear']);
+    expect(config.responseSchema.propertyOrdering).toEqual(['unclear', 'italian']);
     expect(url).not.toContain('secret-key');
     expect((init.headers as Record<string, string>)['x-goog-api-key']).toBe('secret-key');
   });

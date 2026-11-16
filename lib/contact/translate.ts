@@ -72,6 +72,7 @@ function buildResponseSchema(mode: TranslateMode) {
   return {
     type: 'OBJECT',
     properties: { italian: STRING, unclear: { type: 'BOOLEAN' } },
+    propertyOrdering: ['unclear', 'italian'],
     required: ['italian', 'unclear'],
   };
 }
@@ -100,16 +101,17 @@ export function parseTranslateResult(mode: TranslateMode, raw: string): Translat
   }
   const meaning = capped(record.meaning);
   if (!meaning || !Array.isArray(record.replies)) return null;
-  if (record.replies.length < 1 || record.replies.length > MAX_REPLIES) return null;
+  // An invalid alternative is dropped, not fatal; more than MAX_REPLIES keeps the first valid ones.
   const replies: ReplyOption[] = [];
   for (const item of record.replies) {
-    if (!item || typeof item !== 'object') return null;
+    if (replies.length >= MAX_REPLIES) break;
+    if (!item || typeof item !== 'object') continue;
     const italian = capped((item as Record<string, unknown>).italian, MAX_REPLY_CHARS);
     const replyMeaning = capped((item as Record<string, unknown>).meaning, MAX_REPLY_CHARS);
-    if (!italian || !replyMeaning) return null;
+    if (!italian || !replyMeaning) continue;
     replies.push({ italian, meaning: replyMeaning });
   }
-  return { meaning, replies };
+  return replies.length > 0 ? { meaning, replies } : null;
 }
 
 export async function translateContactText(
