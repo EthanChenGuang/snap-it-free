@@ -148,7 +148,7 @@ export function FavoritesPageClient() {
             )}
             <Link
               href="/"
-              className="mt-space-md inline-block rounded border border-primary bg-primary px-space-md py-space-sm text-label-md font-medium text-on-primary hover:bg-primary-container"
+              className="mt-space-md inline-block rounded border border-primary bg-primary px-space-md py-space-sm text-label-md font-medium text-on-primary hover:opacity-90"
             >
               {messages.feed.browseFeed}
             </Link>
