@@ -1,7 +1,7 @@
 # VERIFICATION — Phase 5: Chinese contact assistant
 
 Journey: `node .claude/skills/verify-snap-it-free/scripts/drive.mjs contact` (recipe: `.claude/skills/verify-snap-it-free/features/contact-assistant.md`).
-Final run on the build of commit `15b938d`: **`RESULT contact: 263/263 checks passed`**. Screenshots: `verification/` (c01-c10 send/translate states, d-* layout/dark/zoom/keyboard, f-* onboarding).
+Final run (round 2) on a fresh build of commit `a0ad900`: **`RESULT contact: 285/285 checks passed`** (round 1: 263/263 on `15b938d`). Screenshots: `verification/` (c01-c10 send/translate states, d-* layout/dark/zoom/keyboard, f-* onboarding).
 Build: `NEXT_PUBLIC_ONBOARDING_ENABLED=true launch.sh --build --flag off`, Node 22, Chromium from `/opt/pw-browsers`.
 
 ## What this proves, and what it does not
@@ -46,17 +46,39 @@ Not a defect: the 401 console error seen in the harness comes from other app req
 
 ## Unfixed / owner decisions
 
-1. **Copy added (please review, new meaning-bearing text):** `sentNext`, `goTranslate`, `limitReached`, `pickReply`, `composeUnclear` in zh/en/it. The `it` strings are unreviewed by a native speaker (the sheet is never shown in `it`).
-2. **zh tab label "翻译回复"** also hosts "write your own message -> Italian", which the label does not suggest; `翻译` (as in en "Translate") would fit. Left as is because `sentNext` quotes it; change both together.
+1. **Copy added (please review):** `sentNext`, `goTranslate`, `limitReached`, `pickReply`, `composeUnclear`, `replyHint`, `aiNote` in zh/en/it. The `it` strings are unreviewed by a native speaker (the sheet is never shown in `it`).
+2. (Resolved in round 2, U3: zh tab is now "翻译".)
 3. **Step 2 "点 Contatta"** and the "first time you need an account" note are unverified against the real seller page (needs a real phone).
-4. **No AI disclosure:** nothing tells the user that the translation is machine-made and may be wrong, or that the pasted text goes to Google's API (privacy wording).
-5. **Shared `Button` default hover in dark mode** (`components/ui/button.tsx`) is unreadable app-wide (1.9:1) on mouse devices; fixed only inside this sheet to avoid changing other screens. Owner call whether to fix the token pairing globally.
-6. **Steps guide is below the fold at 390x844** (previously pinned above the button); it scrolls into view above the pinned button. Trade-off for D2; say if the guide must be always visible.
-7. Where the user finds the seller's reply (email/app notifications of the seller's site) is not explained on the Translate tab.
-8. A stale translation result stays visible after the pasted text is edited (cosmetic, not changed).
+4. (AI honesty note added in round 2, U5.) Still open: the pasted text goes to Google's API; privacy wording is the owner's call.
+5. (Resolved in round 2, U6: fixed in the shared Button.)
+6. (Resolved in round 2, U7: steps are in the pinned footer.)
+7. (Resolved in round 2, U4.)
+8. (Resolved in round 2, R1.)
 9. Not verifiable here: real phones, iOS/WeChat clipboard and `window.open` (a blocked popup would still show "copied"; the next-step text deliberately does not claim the page opened), real Gemini, the real 200/day cap (RPC) and the subscription 403 against the server.
 10. No eslint config in the repo, so nothing was linted.
 
 ## Test suites
 
-`npx vitest run`: `Test Files  155 passed (155)` / `Tests  1019 passed (1019)`. `npx tsc --noEmit`: exit 0.
+`npx vitest run`: see the final hand-back (`Test Files  155 passed (155)`, `Tests  1028 passed (1028)`; `npx tsc --noEmit` exit 0). `npx tsc --noEmit`: exit 0.
+
+## Round 2 (review fixes and UX polish)
+
+Commits: `98e2e96` (R4, R7), `bf232c0` (U6), `a0ad900` (R1-R3, R5, R6, U1-U5, U7), then the journey/recipe/VERIFICATION commit. The prompt change `18fcba5` was kept untouched.
+
+| Item | What changed | Evidence |
+| --- | --- | --- |
+| R1 | A result, error or spinner is stored with the trimmed text it was requested for and shown only while it still equals the field; a newer request supersedes an older one (late responses ignored); editing during a request frees the button. Reply and compose. | vitest (3 tests, fail without the fix); journey C: edit hides meaning + copy buttons, restoring the text brings it back, in-flight edit |
+| R2 | "Go to Translate" focuses the Translate tab; every tab change scrolls the shared container to the top | vitest; journey B (focus on `-translate` tab, scrollTop 0 after scrolling to 60) |
+| R3 | `copySync` restores `document.activeElement` (`preventScroll`) synchronously in `finally` | vitest; journey B (focus on `contact-primary` after copy) |
+| R4 | Invalid or too-long alternatives are dropped; first three kept; fails only with none left | `translate.test.ts` |
+| R5 | `LimitedField`: counter `role=status` always mounted directly under the textarea, above the button; "rest was not kept" only after an over-long paste (paste handler), otherwise neutral `1000/1000` | vitest; journey C with a real Ctrl+V of 1500 chars (1000 kept) |
+| R6 | it: `«Traduci»`, `Il testo in più è stato tagliato`, `Apri Traduci`; drawer comment corrected (the sheet is dragged by its whole surface) | messages |
+| R7 | `propertyOrdering: ['unclear', 'italian']` | `translate.test.ts` |
+| U1 | Toast and `copiedToast` key removed. The next-step notice sits at the top of the scroll area (always-mounted status region), so the footer height is unchanged after sending (131 px -> 131 px) and its button is fully visible and uncovered | journey B |
+| U2 | The Italian text is shown inside the selected row under its meaning (italic, selectable); the preview card is gone; unselected rows show the meaning only | journey D: at 390x844 the four rows + Italian + steps fit with no scroll (zh, en); at 320x568 it scrolls and every row is reachable |
+| U3 | zh tab "翻译" (en "Translate", it "Traduci"); `sentNext` quotes it as 「翻译」, `goTranslate` "去翻译"; the onboarding step does not name the tab | messages, journey |
+| U4 / U5 | Hint under the paste label and a muted AI-honesty note under every reply and compose result (zh/en/it) | journey C |
+| U6 | One-line fix in `components/ui/button.tsx`: default hover `hover:bg-primary-container` -> `hover:opacity-90` (light: black at 90% over white is #1a1a1a vs #1c1b1b before, visually the same); same one-liner in `FavoritesPageClient.tsx`. The sheet-only override was removed. Hovered contrast: dark 12.3:1 (was 1.9:1), light 17.5:1 on the detail CTA, /settings ("退出") and /favorites ("浏览首页"); hover screenshots `d-hover-*`. The feed has no default primary button, so it has no hover screenshot | journey D |
+| U7 | Compact one-line 3-step guide in the pinned footer; it is visible without scrolling at 390x844 (journey D) |
+
+Still not verified: real phones/WebKit, real Gemini output with the new prompt and schema, and the real server gate. axe-core: 0 violations on both tabs (zh), re-run in round 2.

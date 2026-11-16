@@ -16,10 +16,11 @@ const TEMPLATES = [
 
 const COPY = {
   zh: {
-    cta: '联系卖家', title: '中文联系助手', primary: '复制消息并打开卖家页面', tabSend: '发消息', tabTranslate: '翻译回复',
+    cta: '联系卖家', title: '中文联系助手', primary: '复制消息并打开卖家页面', tabSend: '发消息', tabTranslate: '翻译',
     close: '关闭', pick: '选一条消息发给卖家', copied: '已复制', copy: '复制', translate: '翻译', translating: '翻译中…',
     toItalian: '翻成意大利语', pickReply: '选一条回复', claimed: '已领取',
-    copiedToast: '已复制，去卖家页面粘贴', copyFailedHint: '没能自动复制，请长按上面的意大利语手动复制',
+    sentFrag: '翻译', goTranslate: '去翻译', replyHint: '在卖家页面的聊天里长按对方的消息 → 复制，再粘贴到这里',
+    aiNote: 'AI 翻译，可能有误。地址、时间和电话请以原文为准。', limitReached: '最多 1000 字，超出的部分没有保留', copyFailedHint: '没能自动复制，请长按上面的意大利语手动复制',
     unavailable: '翻译暂时不可用，请稍后再试', subscriptionRequired: '翻译功能需要订阅后使用',
     dailyLimit: '今天的翻译次数已用完，明天再来', signInAgain: '登录已过期，请重新登录后再试',
     composeUnclear: '这句话我们没看懂，请换个说法再试',
@@ -28,7 +29,8 @@ const COPY = {
     cta: 'Contact the seller', title: 'Contact helper', primary: "Copy and open seller's page", tabSend: 'Send a message', tabTranslate: 'Translate',
     close: 'Close', pick: 'Pick a message to send the seller', copied: 'Copied', copy: 'Copy', translate: 'Translate', translating: 'Translating…',
     toItalian: 'Translate to Italian', pickReply: 'Pick a reply', claimed: 'Claimed',
-    copiedToast: "Copied. Paste it on the seller's page", copyFailedHint: 'Could not copy automatically. Copy the Italian text above by hand',
+    sentFrag: 'Translate', goTranslate: 'Go to Translate', replyHint: "In the chat on the seller's page, long-press their message → Copy, then paste it here",
+    aiNote: 'AI translation — it can be wrong. Trust the original for addresses, times and phone numbers.', limitReached: 'The limit is 1,000 characters. Anything beyond that was not kept', copyFailedHint: 'Could not copy automatically. Copy the Italian text above by hand',
     unavailable: 'Translation is unavailable right now, please try again later', subscriptionRequired: 'Translation is available to subscribers',
     dailyLimit: "You've used today's translations. Try again tomorrow.", signInAgain: 'Your session expired. Sign in again and retry',
     composeUnclear: 'We could not understand that. Please try rephrasing',
@@ -187,6 +189,7 @@ export async function contactJourney({ browser, url, out, check, shot, rows = 'A
       if (i > 0) await openSheet(s);
       else await openSheet(s);
       await dialog(s.page).getByText(t.zh, { exact: true }).click();
+      const footerBefore = await s.page.getByTestId('contact-footer').evaluate((el) => el.getBoundingClientRect().height);
       const popupP = s.context.waitForEvent('page', { timeout: 5000 }).catch(() => null);
       await dialog(s.page).getByTestId('contact-primary').click();
       const popup = await popupP;
@@ -195,16 +198,31 @@ export async function contactJourney({ browser, url, out, check, shot, rows = 'A
       check(clipText === t.it, `B [zh] "${t.id}": clipboard holds exactly the Italian text`);
       check(popup && popup.url().startsWith(externalUrl.slice(0, 40)) && s.sellerHits.includes(externalUrl), `B [zh] "${t.id}": new tab opens the listing's seller URL`);
       if (i === 0) {
-        const toast = await s.page.getByText(COPY.zh.copiedToast).first().isVisible().catch(() => false);
-        check(toast, 'B [zh] success toast "已复制，去卖家页面粘贴" is shown');
+        check((await s.page.getByText('已复制，去卖家页面粘贴').count()) === 0, 'B [zh] U1 no toast: the in-sheet notice is the only "copied" message (nothing overlaps)');
+        check(await s.page.evaluate(() => document.activeElement?.dataset.testid === 'contact-primary'), 'B [zh] R3 focus is back on the pressed primary button after copy (sheet stays open)');
+        const u1 = await s.page.evaluate(() => {
+          const btn = document.querySelector('[data-testid=contact-sent] button');
+          const sc = document.querySelector('[data-testid=contact-scroll]');
+          const foot = document.querySelector('[data-testid=contact-footer]').getBoundingClientRect();
+          const b = btn.getBoundingClientRect();
+          const r = sc.getBoundingClientRect();
+          const covered = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2) === btn;
+          return { visible: b.top >= r.top - 1 && b.bottom <= r.bottom + 1 && b.bottom <= innerHeight, covered, footerH: foot.height, scrollTop: sc.scrollTop };
+        });
+        check(u1.visible && u1.covered, 'B [zh] U1 the "去翻译" button in the notice is fully visible and not covered by anything');
+        check(Math.abs(u1.footerH - footerBefore) < 1, `B [zh] U1 the footer does not grow after sending (${Math.round(footerBefore)}px -> ${Math.round(u1.footerH)}px)`);
         await shot(s.page, 'c03-after-send-original-tab');
         const sheetOpen = (await dialog(s.page).count()) > 0;
         console.log(`INFO B after a successful send the sheet is ${sheetOpen ? 'still open' : 'closed'}`);
         s.afterSendOpen = sheetOpen;
         const sent = await dialog(s.page).getByTestId('contact-sent').innerText().catch(() => '');
-        check(sent.includes('翻译回复'), `B [zh] after sending, the sheet tells the user the next step: "${sent.split('\n')[0].slice(0, 40)}…"`);
-        await dialog(s.page).getByRole('button', { name: '去翻译回复' }).click();
-        check((await tabBtn(s.page, COPY.zh.tabTranslate).getAttribute('aria-selected')) === 'true', 'B [zh] the "去翻译回复" button takes the user straight to the Translate tab');
+        check(sent.includes(COPY.zh.sentFrag), `B [zh] after sending, the sheet tells the user the next step: "${sent.split('\n')[0].slice(0, 40)}…"`);
+        await s.page.getByTestId('contact-scroll').evaluate((el) => { el.scrollTop = 60; });
+        await dialog(s.page).getByRole('button', { name: COPY.zh.goTranslate }).click();
+        await sleep(s.page, 200);
+        check((await tabBtn(s.page, COPY.zh.tabTranslate).getAttribute('aria-selected')) === 'true', 'B [zh] the "去翻译" button takes the user straight to the Translate tab');
+        const r2 = await s.page.evaluate(() => ({ role: document.activeElement?.getAttribute('role'), id: document.activeElement?.id ?? '', top: document.querySelector('[data-testid=contact-scroll]').scrollTop }));
+        check(r2.role === 'tab' && r2.id.endsWith('-translate') && r2.top === 0, `B [zh] R2 focus lands on the Translate tab and the content is scrolled to the top (${r2.role}, scrollTop ${r2.top})`);
         await tabBtn(s.page, COPY.zh.tabSend).click();
       }
       if (popup) await popup.close();
@@ -218,7 +236,7 @@ export async function contactJourney({ browser, url, out, check, shot, rows = 'A
     // Returning to the original tab: what does the user see / what is the next step?
     await sleep(s.page, 500);
     const bodyText = await s.page.locator('body').innerText();
-    const hint = /翻译回复|粘贴卖家的回复|收到回复/.test(bodyText);
+    const hint = /翻译|粘贴卖家的回复|收到回复/.test(bodyText);
     check(hint || s.afterSendOpen, 'B [zh] back on the original tab the next step (translate the reply) is visible or reachable without guessing (sheet stays open with instructions)');
     await shot(s.page, 'c04-return-to-tab');
     await s.close();
@@ -235,7 +253,7 @@ export async function contactJourney({ browser, url, out, check, shot, rows = 'A
     await s.page.bringToFront();
     check((await dialog(s.page).count()) === 1, 'B [zh] copy failure: the sheet stays open');
     check(await dialog(s.page).getByText(COPY.zh.copyFailedHint).isVisible(), 'B [zh] copy failure: the "copy by hand" hint is shown');
-    check((await s.page.getByText(COPY.zh.copiedToast).count()) === 0, 'B [zh] copy failure: no false success toast');
+    check((await s.page.getByTestId('contact-sent').innerText()) === '', 'B [zh] copy failure: no false success notice');
     const sel = await s.page.evaluate(() => {
       const el = document.querySelector('[data-testid=contact-italian-preview]');
       const r = document.createRange();
@@ -299,6 +317,15 @@ export async function contactJourney({ browser, url, out, check, shot, rows = 'A
         const got = await clip(s.page);
         check(got === REPLY.replies[i].italian, `C [zh] copy button ${i + 1} copies exactly "${REPLY.replies[i].italian}"`);
       }
+      check(body.includes(COPY.zh.replyHint), 'C [zh] U4 hint under the paste label says where to find the seller reply');
+      check((await dialog(s.page).getByTestId('contact-ai-note').count()) === 1 && body.includes(COPY.zh.aiNote), 'C [zh] U5 honesty note under the reply result');
+      const original = 'Sì, è disponibile. Quando vuoi passare? Via Garibaldi 15';
+      await fill(s.page, 0, original + ' domani?');
+      await sleep(s.page, 200);
+      check((await copyBtns.count()) === 0 && !(await dialog(s.page).innerText()).includes(REPLY.meaning), 'C [zh] R1 editing the pasted text hides the previous meaning and its copy buttons');
+      await fill(s.page, 0, original);
+      await sleep(s.page, 200);
+      check((await copyBtns.count()) === 3, 'C [zh] R1 restoring the exact text shows its result again');
       // compose success, emoji + mixed text
       const mixed = '你好 😀 Ciao! 我 arrivo tra 10 minuti 👍🏽 谢谢 grazie';
       s.ctl.translate = respond(200, { italian: 'Ciao! Arrivo tra 10 minuti. Grazie! 😀', unclear: false });
@@ -306,6 +333,7 @@ export async function contactJourney({ browser, url, out, check, shot, rows = 'A
       await composeBtn.click();
       await sleep(s.page, 700);
       check(s.ctl.translateCalls.at(-1)?.text === mixed && s.ctl.translateCalls.at(-1)?.mode === 'compose', 'C [zh] emoji and mixed zh/it text is sent unchanged');
+      check((await dialog(s.page).getByTestId('contact-ai-note').count()) === 2, 'C [zh] U5 honesty note under the compose result too');
       const composeCopy = dialog(s.page).getByRole('button', { name: /^复制: 将发送的意大利语/ });
       await composeCopy.click();
       await sleep(s.page, 250);
@@ -336,6 +364,26 @@ export async function contactJourney({ browser, url, out, check, shot, rows = 'A
     check((await dialog(s.page).getByRole('alert').filter({ hasText: c.unavailable }).count()) === 0, `C [${lang}] a successful retry clears the error`);
     await s.close();
   }
+  if (on('C')) {
+    // R1: an edit while a request is in flight
+    const s = await session_({ lang: 'zh' });
+    await openSheet(s);
+    await tabBtn(s.page, COPY.zh.tabTranslate).click();
+    s.ctl.translate = async (route) => {
+      await new Promise((r) => setTimeout(r, 2500));
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(REPLY) }).catch(() => {});
+    };
+    await fill(s.page, 0, 'primo testo');
+    const trBtn = dialog(s.page).getByRole('button', { name: COPY.zh.translate, exact: true });
+    await trBtn.click();
+    await fill(s.page, 0, 'secondo testo');
+    await sleep(s.page, 300);
+    check(await trBtn.isEnabled(), 'C [zh] R1 editing while a request is in flight frees the button (no stuck spinner)');
+    await sleep(s.page, 3000);
+    check(!(await dialog(s.page).innerText()).includes(REPLY.meaning), 'C [zh] R1 the late response for the old text is not shown against the new text');
+    await s.close();
+  }
+
   {
     // 12-second slow response
     const s = await session_({ lang: 'zh' });
@@ -373,7 +421,15 @@ export async function contactJourney({ browser, url, out, check, shot, rows = 'A
     const len = await textarea(s.page, 0).evaluate((el) => el.value.length);
     const bodyText = await dialog(s.page).innerText();
     check(len === 1000, `C [en] input is capped at 1000 characters (typed 1001, kept ${len})`);
-    check(/1000|1,000|limit|too long|characters/i.test(bodyText.replace(/a{20,}/, '')), 'C [en] user is told that the text was cut at the limit / sees a counter');
+    const counter = await textarea(s.page, 0).evaluate((el) => { const n = el.nextElementSibling; return { role: n.getAttribute('role'), text: n.textContent, below: n.getBoundingClientRect().top >= el.getBoundingClientRect().bottom - 1, aboveBtn: n.getBoundingClientRect().bottom <= el.parentElement.nextElementSibling.getBoundingClientRect().top + 1 }; });
+    check(counter.role === 'status' && counter.text === '1000/1000' && counter.below && counter.aboveBtn, `C [en] R5 typed to the limit: neutral "${counter.text}" in a role=status directly under the textarea, above the button`);
+    await textarea(s.page, 0).fill('');
+    await s.page.evaluate((t) => navigator.clipboard.writeText(t), 'b'.repeat(1500));
+    await textarea(s.page, 0).focus();
+    await s.page.keyboard.press('Control+V');
+    await sleep(s.page, 200);
+    const pasted = await textarea(s.page, 0).evaluate((el) => ({ len: el.value.length, note: el.nextElementSibling.textContent }));
+    check(pasted.len === 1000 && pasted.note === COPY.en.limitReached, `C [en] R5 pasting 1500 characters keeps 1000 and says "${pasted.note}"`);
     await shot(s.page, 'c09-length-limit');
     const long = 'Parola '.repeat(285).trim(); // ~2000 chars
     s.ctl.translate = respond(200, { italian: long, unclear: false });
@@ -455,7 +511,10 @@ export async function contactJourney({ browser, url, out, check, shot, rows = 'A
       prev.scrollIntoView({ block: 'nearest' });
       const previewAtBottom = within(prev, body);
       const p = primary.getBoundingClientRect();
+      const stepsRect = footer.querySelector('ol').getBoundingClientRect();
       return {
+        fits: body.scrollHeight <= body.clientHeight + 1,
+        stepsVisible: stepsRect.top >= 0 && stepsRect.bottom <= innerHeight,
         bodyH: Math.round(body.clientHeight),
         footerH: Math.round(footer.getBoundingClientRect().height),
         radioAtTop,
@@ -499,6 +558,8 @@ export async function contactJourney({ browser, url, out, check, shot, rows = 'A
           check(m.pageOverflow <= 0 && m.outside.length === 0, `${tag} send tab: no horizontal overflow, nothing outside the sheet (${m.outside.join(',') || 'ok'})`);
           check(sm.primaryVisible, `${tag} send tab: primary button visible without scrolling`);
           check(sm.radioAtTop && sm.previewAtBottom && sm.bodyH >= 120, `${tag} send tab: the selected template and the Italian preview can each be scrolled fully into view (body ${sm.bodyH}px, footer ${sm.footerH}px, radio ${sm.radioAtTop}, preview ${sm.previewAtBottom})`);
+          if (vname === 'plain' && w === 390 && h === 844) check(sm.fits && sm.stepsVisible, `${tag} U2/U7 four template rows with the selected Italian text, and the three-step guide, fit without scrolling`);
+          if (vname === 'plain' && w === 320) check(!sm.fits && sm.radioAtTop && sm.previewAtBottom, `${tag} U2 still scrollable on a small screen and every row reachable`);
           if (vname === 'plain' && [[320, 568], [390, 844], [844, 390]].some(([a, b]) => a === w && b === h)) await shot(s.page, `d-send-${lang}-${w}x${h}`);
           await tabBtn(s.page, COPY[lang].tabTranslate).click();
           s.ctl.translate = respond(200, REPLY_RESULT);
@@ -621,6 +682,43 @@ export async function contactJourney({ browser, url, out, check, shot, rows = 'A
         await s.close();
       }
     }
+    // U6: hover state of the shared default Button / primary links, dark and light, on real pages
+    const hoverContrast = (el) => {
+      const cv = document.createElement('canvas');
+      cv.width = cv.height = 1;
+      const cx = cv.getContext('2d', { willReadFrequently: true });
+      const rgba = (css) => { cx.clearRect(0, 0, 1, 1); cx.fillStyle = '#000'; cx.fillStyle = css; cx.fillRect(0, 0, 1, 1); const [r, g, b, a] = cx.getImageData(0, 0, 1, 1).data; return [r, g, b, a / 255]; };
+      const lum = ([r, g, b]) => { const f = (v) => ((v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4); return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+      let page = [255, 255, 255];
+      for (let n = el.parentElement; n; n = n.parentElement) { const c = rgba(getComputedStyle(n).backgroundColor); if (c[3] >= 1) { page = c.slice(0, 3); break; } }
+      const cs = getComputedStyle(el);
+      const o = Number(cs.opacity);
+      const mix = (c, base) => c.slice(0, 3).map((v, i) => v * c[3] * o + base[i] * (1 - c[3] * o));
+      const bg = mix(rgba(cs.backgroundColor), page);
+      const fg = mix(rgba(cs.color), page);
+      const l1 = lum(fg); const l2 = lum(bg);
+      return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    };
+    for (const appearance of ['dark', 'light']) {
+      const s = await session_({ lang: 'zh', appearance });
+      for (const route of [detailPath, '/', '/settings', '/favorites']) {
+        if (route !== detailPath) await s.page.goto(`${proxy.url}${route}`, { waitUntil: 'load' });
+        await sleep(s.page, 1500);
+        const targets = s.page.locator('button.bg-primary:visible, a.bg-primary:visible');
+        const n = Math.min(await targets.count(), 3);
+        if (n === 0) { console.log(`INFO D U6 [${appearance}] ${route}: no default primary button on this page`); continue; }
+        for (let i = 0; i < n; i += 1) {
+          const t = targets.nth(i);
+          await t.scrollIntoViewIfNeeded();
+          await t.hover();
+          await sleep(s.page, 400);
+          const ratio = await t.evaluate(hoverContrast);
+          check(ratio >= 4.5, `D U6 [${appearance}] ${route}: hovered primary button "${(await t.innerText()).trim().slice(0, 14)}" contrast ${ratio.toFixed(1)}:1`);
+          if (i === 0) await shot(s.page, `d-hover-${appearance}-${route === '/' ? 'feed' : route.replace(/\W+/g, '-').replace(/^-/, '').slice(0, 14)}`);
+        }
+      }
+      await s.close();
+    }
     // 200% text zoom (root font size doubled, as the browser text-size setting does)
     for (const [w, h] of [[390, 844], [320, 568]]) {
       for (const lang of ['zh', 'en']) {
@@ -704,8 +802,8 @@ export async function contactJourney({ browser, url, out, check, shot, rows = 'A
       // toast / live region on copy success
       await dialog(page).getByTestId('contact-primary').click();
       await sleep(page, 700);
-      const live = await page.evaluate((msg) => [...document.querySelectorAll('[role=status],[role=alert],[aria-live]:not([aria-live=off])')].some((n) => (n.textContent || '').includes(msg)), c.copiedToast);
-      check(live, `E [${lang}] copy success is announced through a live region ("${c.copiedToast}")`);
+      const live = await page.evaluate((msg) => [...document.querySelectorAll('[role=status],[role=alert],[aria-live]:not([aria-live=off])')].some((n) => (n.textContent || '').includes(msg)), c.sentFrag);
+      check(live, `E [${lang}] copy success is announced through the always-mounted status region (next-step notice)`);
       await s.close();
     }
     {
