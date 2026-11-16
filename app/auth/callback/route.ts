@@ -3,11 +3,13 @@ import { safeNextPath } from '@/lib/auth/safe-next-path';
 import { createClient } from '@/lib/supabase/server';
 
 function authErrorRedirect(origin: string, next: string, providerError?: string | null) {
-  const params = new URLSearchParams({ auth: 'error' });
+  // `next` may already carry a query (e.g. /?onboarding=resume), so set params on a parsed URL.
+  const url = new URL(next, origin);
+  url.searchParams.set('auth', 'error');
   if (providerError) {
-    params.set('provider', providerError);
+    url.searchParams.set('provider', providerError);
   }
-  return NextResponse.redirect(`${origin}${next}?${params.toString()}`);
+  return NextResponse.redirect(url);
 }
 
 export async function GET(request: Request) {

@@ -1,7 +1,7 @@
 import { requireAuth } from '@/lib/supabase/auth';
 import { isEntitled } from '@/lib/subscriptions/entitlement';
 import { getSubscriptionForUser } from '@/lib/subscriptions/store';
-import { isForceParamValue, isPaywallFlagEnabled, resolveListingAccess, type ListingAccess } from './gate';
+import { isForceParamValue, isFreeOnboarding, isPaywallFlagEnabled, resolveListingAccess, type ListingAccess } from './gate';
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -20,7 +20,8 @@ export async function getSubscriptionActive(): Promise<boolean> {
 /** Flag off and no preview returns before any I/O, so the ungated path is unchanged. */
 export async function getListingAccess(searchParams: SearchParams = {}): Promise<ListingAccess> {
   const flagEnabled = isPaywallFlagEnabled();
-  const preview = isForceParamValue(searchParams.onboarding);
+  // Free onboarding never charges, so its `?onboarding=1` re-run must not lock the feed.
+  const preview = isForceParamValue(searchParams.onboarding) && !isFreeOnboarding();
   if (!flagEnabled && !preview) return 'open';
   return resolveListingAccess({ flagEnabled, preview, subscribed: await getSubscriptionActive() });
 }

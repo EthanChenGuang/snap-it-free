@@ -22,8 +22,8 @@ import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
 import { useMessages } from '@/lib/i18n/useMessages';
 import { ONBOARDING_CITY_ORDER } from '@/lib/listings/filters';
 import {
+  isFreeOnboarding,
   isOnboardingResumeParam,
-  isPaywallFlagEnabled,
   markOnboardingCompleted,
   urlWithoutForceParam,
 } from '@/lib/paywall/gate';
@@ -190,9 +190,12 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
   const { messages, language } = useMessages();
   const { openInstallGuide } = usePwaOnboarding();
   const reduceMotion = useReducedMotion();
+  // Free onboarding: same intro, no paywall screen, no paid wording; finishing applies the answers.
+  const freeMode = isFreeOnboarding();
   const [state, dispatch] = useReducer(onboardingReducer, INITIAL_ONBOARDING_STATE, (initial) => ({
     ...initial,
     alertsAvailable: canUsePushHere(),
+    withPaywall: !freeMode,
   }));
   const [push, setPush] = useState<PushState>({ status: 'idle' });
   const copy = messages.onboarding;
@@ -370,6 +373,8 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
               summary={answerChips}
               onBeforeRedirect={persistForRedirect}
               onContinue={() => dispatch({ type: 'next' })}
+              // Alerts need an account (push subscribe returns not_logged_in), so skipping also skips that step.
+              onSkip={freeMode ? () => dispatch({ type: 'finish' }) : undefined}
             />
           ) : (
             <>
@@ -381,7 +386,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                 >
                   {state.screen === 'hook' && (
                     <>
-                      <PhotoCollage freeLabel={messages.listing.free} />
+                      <PhotoCollage freeLabel={messages.listing.free} showPriceSticker={!freeMode} />
                       <div className="mt-space-md text-center">
                         <StepTitle title={copy.hook.title} emphasis={copy.hook.emphasis} />
                         <p className="mt-space-sm text-body-lg text-[#4A4A5E]">{copy.hook.body}</p>
@@ -479,7 +484,11 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                     <>
                       <StepTitle title={copy.trust.title} emphasis={copy.trust.emphasis} />
                       <p className="mt-space-sm text-body-md text-[#4A4A5E]">{copy.trust.body}</p>
-                      <TrustPromises liveCount={region.status === 'ready' ? (region.map?.total ?? null) : null} />
+                      <TrustPromises
+                        liveCount={region.status === 'ready' ? (region.map?.total ?? null) : null}
+                        rows={freeMode ? copy.trust.freeRows : copy.trust.rows}
+                        free={freeMode}
+                      />
                     </>
                   )}
 
@@ -702,15 +711,17 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                                   index % 2 === 0 ? '-rotate-1' : 'rotate-1',
                                 )}
                               >
-                                <div className="absolute inset-0 scale-110 blur-[12px]">
+                                <div className={cn('absolute inset-0', !freeMode && 'scale-110 blur-[12px]')}>
                                   <ListingPhoto src={photo.url} alt="" variant="thumbnail" sizes="180px" />
                                 </div>
                                 <span className="absolute left-2 top-2 rounded-full border-2 border-[#1A1A2E] bg-[#7FE0B0] px-2 py-0.5 text-[11px] font-black uppercase text-[#1A1A2E]">
-                                  €0
+                                  {freeMode ? messages.listing.free : '€0'}
                                 </span>
-                                <span className="absolute inset-0 m-auto flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#1A1A2E] bg-white">
-                                  <SymbolIcon name="lock" className="text-[20px] text-[#1A1A2E]" />
-                                </span>
+                                {!freeMode && (
+                                  <span className="absolute inset-0 m-auto flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#1A1A2E] bg-white">
+                                    <SymbolIcon name="lock" className="text-[20px] text-[#1A1A2E]" />
+                                  </span>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -728,6 +739,7 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                       <AlertsMock
                         label={copy.alerts.mockLabel}
                         appName={messages.app.title}
+                        badge={freeMode ? messages.listing.free : undefined}
                         photos={['/images/onboarding/alerts/bookshelf.webp', '/images/onboarding/alerts/espresso.webp']}
                         lines={[copy.alerts.mockLine, copy.alerts.mockLine2(cityOrRegion)]}
                       />
@@ -753,15 +765,17 @@ export function OnboardingFlow({ onFinish }: { onFinish: () => void }) {
                     <ArrowRight />
                   </Button>
                   {/* Escape to pricing without being forced to sign up; the account step itself keeps no "Not now". */}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className={pop.ghostButton}
-                    onClick={() => dispatch({ type: 'goTo', screen: 'paywall' })}
-                    data-testid="preview-see-plans"
-                  >
-                    {copy.preview.seePlans}
-                  </Button>
+                  {!freeMode && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className={pop.ghostButton}
+                      onClick={() => dispatch({ type: 'goTo', screen: 'paywall' })}
+                      data-testid="preview-see-plans"
+                    >
+                      {copy.preview.seePlans}
+                    </Button>
+                  )}
                 </footer>
               ) : state.screen === 'alerts' ? (
                 <footer className="flex shrink-0 flex-col gap-space-xs px-gutter pb-space-md pt-space-sm">

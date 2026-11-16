@@ -166,3 +166,42 @@ describe('isForceParamValue', () => {
     expect(isForceParamValue('yes')).toBe(false);
   });
 });
+
+describe('free onboarding flags', async () => {
+  const { isOnboardingFlagEnabled, isFreeOnboarding } = await import('./gate');
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    localStorage.clear();
+  });
+
+  it('reads NEXT_PUBLIC_ONBOARDING_ENABLED only when exactly "true"', () => {
+    expect(isOnboardingFlagEnabled('true')).toBe(true);
+    for (const value of [undefined, '', 'false', '1', 'TRUE']) expect(isOnboardingFlagEnabled(value)).toBe(false);
+  });
+
+  it('is free onboarding only with onboarding on and the paywall off', () => {
+    expect(isFreeOnboarding(true, false)).toBe(true);
+    expect(isFreeOnboarding(true, true)).toBe(false);
+    expect(isFreeOnboarding(false, false)).toBe(false);
+    expect(isFreeOnboarding(false, true)).toBe(false);
+  });
+
+  it('shows the gate when either flag is on and neither forced nor completed', () => {
+    vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', '');
+    vi.stubEnv('NEXT_PUBLIC_ONBOARDING_ENABLED', '');
+    expect(resolveOnboardingGate()).toBe(false);
+    vi.stubEnv('NEXT_PUBLIC_ONBOARDING_ENABLED', 'true');
+    expect(resolveOnboardingGate()).toBe(true);
+    vi.stubEnv('NEXT_PUBLIC_ONBOARDING_ENABLED', '');
+    vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', 'true');
+    expect(resolveOnboardingGate()).toBe(true);
+  });
+
+  it('once per browser in free mode', () => {
+    vi.stubEnv('NEXT_PUBLIC_ONBOARDING_ENABLED', 'true');
+    vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', '');
+    expect(resolveOnboardingGate()).toBe(true);
+    markOnboardingCompleted(window.localStorage);
+    expect(resolveOnboardingGate()).toBe(false);
+  });
+});

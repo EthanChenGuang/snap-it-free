@@ -39,6 +39,8 @@ type AccountStepProps = {
   onBeforeRedirect: () => void;
   /** Called when the user is authenticated and chooses to continue. */
   onContinue: () => void;
+  /** Free onboarding only: lets a signed-out visitor leave without an account. Paid mode never passes it. */
+  onSkip?: () => void;
 };
 
 /**
@@ -46,7 +48,7 @@ type AccountStepProps = {
  * reason to sign up is to keep the feed/alerts the user just built. Real Google + email code/link
  * auth (the code works when the emailed link opens in another browser). Signed-in users (or the QA stub) see a confirmation and Continue.
  */
-export function AccountStep({ copy, summary = [], onBeforeRedirect, onContinue }: AccountStepProps) {
+export function AccountStep({ copy, summary = [], onBeforeRedirect, onContinue, onSkip }: AccountStepProps) {
   const { messages } = useMessages();
   const { user, email, loading } = useAuthSession();
   const { signIn, isBusy } = useOAuthSignIn('/?onboarding=resume');
@@ -194,6 +196,17 @@ export function AccountStep({ copy, summary = [], onBeforeRedirect, onContinue }
               />
               <span>{copy.optIn}</span>
             </label>
+            {onSkip && (
+              <Button
+                type="button"
+                variant="ghost"
+                className={pop.ghostButton}
+                onClick={onSkip}
+                data-testid="account-skip"
+              >
+                {copy.notNow}
+              </Button>
+            )}
             {loading && <span className="sr-only">{messages.onboarding.account.body}</span>}
           </>
         )}

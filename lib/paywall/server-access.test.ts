@@ -50,4 +50,25 @@ describe('getListingAccess', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(await getListingAccess({})).toBe('locked');
   });
+
+  it('free onboarding (onboarding on, paywall off): ?onboarding=1 does not lock the feed', async () => {
+    vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', '');
+    vi.stubEnv('NEXT_PUBLIC_ONBOARDING_ENABLED', 'true');
+    expect(await getListingAccess({ onboarding: '1' })).toBe('open');
+    expect(requireAuth.mock.calls.length).toBe(0);
+  });
+
+  it('paid mode still locks a guest even when the onboarding flag is also on', async () => {
+    requireAuth.mockResolvedValue(null);
+    vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', 'true');
+    vi.stubEnv('NEXT_PUBLIC_ONBOARDING_ENABLED', 'true');
+    expect(await getListingAccess({})).toBe('locked');
+  });
+
+  it('both flags off: ?onboarding=1 still previews the hard gate (unchanged)', async () => {
+    requireAuth.mockResolvedValue(null);
+    vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', '');
+    vi.stubEnv('NEXT_PUBLIC_ONBOARDING_ENABLED', '');
+    expect(await getListingAccess({ onboarding: '1' })).toBe('locked');
+  });
 });
