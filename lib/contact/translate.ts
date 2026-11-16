@@ -22,6 +22,11 @@ const MAX_REPLIES = 3;
 
 const LANGUAGE_NAME: Record<TranslateLanguage, string> = { zh: 'Simplified Chinese', en: 'English' };
 
+const PROPER_NOUN_EXAMPLE: Record<TranslateLanguage, string> = {
+  zh: 'Example: "Via Roma 3, Mestre, citofono Verdi, sabato" → "Via Roma 3，Mestre，按 Verdi 的门铃，周六" (not 罗马街, not 梅斯特雷, not 威尔第).',
+  en: 'Example: "Via Roma 3, Mestre, citofono Verdi, sabato" → "Via Roma 3, Mestre, ring the Verdi doorbell, Saturday" (not "Rome Street").',
+};
+
 function buildPrompt(mode: TranslateMode, language: TranslateLanguage): string {
   const lang = LANGUAGE_NAME[language];
   const guard =
@@ -29,18 +34,20 @@ function buildPrompt(mode: TranslateMode, language: TranslateLanguage): string {
   if (mode === 'reply') {
     return `You help a ${lang} speaker arrange to pick up a free item from an Italian seller. ${guard}
 The user text is the seller's reply. Answer ONLY JSON:
-{"meaning": "<what the seller said, in ${lang}>", "replies": [{"italian": "<short polite Italian answer>", "meaning": "<that answer in ${lang}>"}]}
+{"meaning": "<full ${lang} translation of what the seller said>", "replies": [{"italian": "<short polite Italian answer>", "meaning": "<that answer in ${lang}>"}]}
 Rules:
-- Keep personal names, street names, house numbers, phone numbers and times exactly as written (Latin script) inside "meaning"; never transliterate them.
+- "meaning" is always a complete translation into ${lang}, never a copy of the original: translate every ordinary word (weekdays, "doorbell", "floor", "phone number").
+- Proper nouns are the one exception. Personal names, street names, town names, house numbers and phone numbers are copied letter for letter in Latin script, never translated and never transliterated, because the user must match them to a sign or a doorbell. ${PROPER_NOUN_EXAMPLE[language]}
 - "replies" has 2 or 3 genuinely different answers the user might want (for example yes / no / a question back; for "when can you come?": today / tomorrow / "what time suits you?").
-- NEVER invent specific times, dates, vehicles, household facts, experience or promises the user has not stated. When the seller asks something only the user knows, offer the opposite answers as separate options.
+- NEVER invent a clock time, date, vehicle, household fact, experience or promise the user has not stated. Times may only repeat what the seller wrote. When the seller asks something only the user knows, offer the opposite answers as separate options.
 - Each Italian answer is under 120 characters, polite, informal "tu" unless the seller used "Lei".
 - If the seller's text is not Italian or has no clear meaning, still give a faithful "meaning" and one neutral reply.`;
   }
   return `You help a ${lang} speaker write to an Italian seller about picking up a free item. ${guard}
 The user text is what they want to say, in ${lang}. Answer ONLY JSON:
 {"italian": "<the same message as a short, polite Italian message>", "unclear": false}
-If the text cannot be turned into a sensible message, answer {"italian": "", "unclear": true}. Keep names, addresses and numbers as written.`;
+Keep the user's meaning, including complaints or a refusal, but phrase it civilly without insults. Keep names, addresses and numbers as written.
+Only when the text is gibberish or has no meaning at all, answer {"italian": "", "unclear": true}.`;
 }
 
 const STRING = { type: 'STRING' } as const;
