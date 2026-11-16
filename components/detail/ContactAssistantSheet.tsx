@@ -318,16 +318,21 @@ function TranslateTab() {
                 <p className="text-label-sm font-semibold text-on-surface-variant">{copy.meaning}</p>
                 <p className="mt-space-xs break-words text-body-md text-on-surface">{reply.state.result.meaning}</p>
               </div>
-              <div>
-                <p className="text-label-sm font-semibold text-on-surface-variant">{copy.suggestedReply}</p>
-                <p lang="it" className="mt-space-xs select-text break-words text-body-md italic text-on-surface">
-                  {reply.state.result.suggestedReply}
-                </p>
-                <p className="mt-space-xs break-words text-label-md text-on-surface-variant">
-                  {reply.state.result.suggestedReplyMeaning}
-                </p>
-              </div>
-              <CopyButton text={reply.state.result.suggestedReply} label={`${copy.copy}: ${copy.suggestedReply}`} />
+              <p className="text-label-md font-semibold text-on-surface">{copy.pickReply}</p>
+              <ul className="flex flex-col gap-space-sm">
+                {reply.state.result.replies.map((option, index) => (
+                  <li
+                    key={`${index}-${option.italian}`}
+                    className="flex flex-col gap-space-xs rounded-lg border border-outline-variant bg-surface-container-lowest p-space-sm"
+                  >
+                    <p lang="it" className="select-text break-words text-body-md italic text-on-surface">
+                      {option.italian}
+                    </p>
+                    <p className="break-words text-label-md text-on-surface-variant">{option.meaning}</p>
+                    <CopyButton text={option.italian} label={`${copy.copy}: ${option.italian}`} />
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </section>
@@ -354,7 +359,10 @@ function TranslateTab() {
             {compose.state.status === 'loading' ? copy.translating : copy.toItalian}
           </Button>
           {compose.state.status === 'error' && <ErrorLine message={compose.state.message} />}
-          {compose.state.status === 'done' && (
+          {compose.state.status === 'done' && compose.state.result.unclear && (
+            <ErrorLine message={copy.composeUnclear} />
+          )}
+          {compose.state.status === 'done' && !compose.state.result.unclear && (
             <div className="flex flex-col gap-space-sm rounded-lg border border-outline-variant bg-surface-container-low p-space-md">
               <p lang="it" className="select-text break-words text-body-md italic text-on-surface">
                 {compose.state.result.italian}

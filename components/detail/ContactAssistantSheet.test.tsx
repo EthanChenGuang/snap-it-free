@@ -155,7 +155,14 @@ describe('ContactAssistantSheet translate tab', () => {
 
   it('posts the pasted reply and renders the result', async () => {
     const fetchMock = vi.fn(async () =>
-      jsonResponse(200, { meaning: 'Yes, come over', suggestedReply: 'Perfetto, arrivo!', suggestedReplyMeaning: 'Great, coming!' }),
+      jsonResponse(200, {
+        meaning: 'Yes, come over',
+        replies: [
+          { italian: 'Perfetto, arrivo!', meaning: 'Great, coming!' },
+          { italian: 'Mi dispiace, non riesco.', meaning: 'Sorry, I cannot.' },
+          { italian: 'A che ora va bene?', meaning: 'What time suits you?' },
+        ],
+      }),
     );
     vi.stubGlobal('fetch', fetchMock);
     await openTranslate();
@@ -169,17 +176,43 @@ describe('ContactAssistantSheet translate tab', () => {
     expect(document.body.textContent).toContain('Yes, come over');
     expect(document.body.textContent).toContain('Perfetto, arrivo!');
 
+    expect(document.body.textContent).toContain(copy.pickReply);
+    expect(document.body.textContent).toContain('Sorry, I cannot.');
+    const buttons = document.body.querySelectorAll(`button[aria-label^="${copy.copy}"]`);
+    expect(buttons).toHaveLength(3);
+
     let copied = '';
     execCommand.mockImplementation(() => {
       copied = (document.activeElement as HTMLTextAreaElement).value;
       return true;
     });
-    await click(document.body.querySelector(`button[aria-label^="${copy.copy}"]`));
+    await click(buttons[0]);
     expect(copied).toBe('Perfetto, arrivo!');
+    await click(buttons[2]);
+    expect(copied).toBe('A che ora va bene?');
+  });
+
+  it('renders a single alternative with one copy button', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(200, { meaning: 'Hello', replies: [{ italian: 'Ciao!', meaning: 'Hi!' }] })));
+    await openTranslate();
+    await typeInto(document.body.querySelectorAll('textarea')[0] as HTMLTextAreaElement, 'Salve');
+    await click(byText(copy.translate));
+    await flush();
+    expect(document.body.querySelectorAll(`button[aria-label^="${copy.copy}"]`)).toHaveLength(1);
+  });
+
+  it('tells the user when the composed text could not be understood (not "unavailable")', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(200, { italian: '', unclear: true })));
+    await openTranslate();
+    await typeInto(document.body.querySelectorAll('textarea')[1] as HTMLTextAreaElement, 'asdfghjkl');
+    await click(byText(copy.toItalian));
+    await flush();
+    expect(document.body.querySelector('[role="alert"]')?.textContent).toBe(copy.composeUnclear);
+    expect(document.body.querySelector(`button[aria-label^="${copy.copy}"]`)).toBeNull();
   });
 
   it('posts a composed message and renders the Italian', async () => {
-    const fetchMock = vi.fn(async () => jsonResponse(200, { italian: 'Arrivo tra un’ora.' }));
+    const fetchMock = vi.fn(async () => jsonResponse(200, { italian: 'Arrivo tra un’ora.', unclear: false }));
     vi.stubGlobal('fetch', fetchMock);
     await openTranslate();
     await typeInto(document.body.querySelectorAll('textarea')[1] as HTMLTextAreaElement, 'I arrive in an hour');

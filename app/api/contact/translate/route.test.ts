@@ -50,14 +50,14 @@ describe('POST /api/contact/translate daily limit', () => {
   it('fails open and logs when the RPC errors', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     rpc.mockResolvedValue({ data: null, error: { message: 'function does not exist' } });
-    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!"}'));
+    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!","unclear":false}'));
     expect((await post(ok)).status).toBe(200);
     expect(spy).toHaveBeenCalledWith('[contact] usage check failed:', 'function does not exist');
     spy.mockRestore();
   });
 
   it('continues when within the limit', async () => {
-    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!"}'));
+    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!","unclear":false}'));
     expect((await post(ok)).status).toBe(200);
     expect(rpc).toHaveBeenCalledTimes(1);
   });
@@ -88,12 +88,12 @@ describe('POST /api/contact/translate', () => {
   it('allows a subscriber when the flag is on', async () => {
     vi.stubEnv('NEXT_PUBLIC_PAYWALL_ENABLED', 'true');
     getSubscriptionActive.mockResolvedValue(true);
-    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!"}'));
+    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!","unclear":false}'));
     expect((await post({ mode: 'compose', text: 'a', language: 'zh' })).status).toBe(200);
   });
 
   it('flag off: signed in is enough and no subscription lookup happens', async () => {
-    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!"}'));
+    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!","unclear":false}'));
     expect((await post({ mode: 'compose', text: 'a', language: 'zh' })).status).toBe(200);
     expect(getSubscriptionActive).not.toHaveBeenCalled();
   });
@@ -127,17 +127,24 @@ describe('POST /api/contact/translate', () => {
   });
 
   it('200 for compose', async () => {
-    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!"}'));
+    vi.stubGlobal('fetch', gemini('{"italian":"Ciao!","unclear":false}'));
     const res = await post({ mode: 'compose', text: '你好', language: 'zh' });
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ italian: 'Ciao!' });
+    expect(await res.json()).toEqual({ italian: 'Ciao!', unclear: false });
   });
 
   it('200 for reply', async () => {
-    vi.stubGlobal('fetch', gemini('{"meaning":"m","suggestedReply":"r","suggestedReplyMeaning":"rm"}'));
+    vi.stubGlobal('fetch', gemini('{"meaning":"m","replies":[{"italian":"r","meaning":"rm"},{"italian":"r2","meaning":"rm2"}],"x":1}'));
     const res = await post({ mode: 'reply', text: 'Sì, passa pure', language: 'en' });
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ meaning: 'm', suggestedReply: 'r', suggestedReplyMeaning: 'rm' });
+    expect(await res.json()).toEqual({ meaning: 'm', replies: [{ italian: 'r', meaning: 'rm' }, { italian: 'r2', meaning: 'rm2' }] });
+  });
+
+  it('200 with unclear for a compose input the model cannot understand (not a 502)', async () => {
+    vi.stubGlobal('fetch', gemini('{"italian":"","unclear":true}'));
+    const res = await post({ mode: 'compose', text: 'asdfghjkl', language: 'en' });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ italian: '', unclear: true });
   });
 
   it('502 on a Gemini error or unparsable output', async () => {
