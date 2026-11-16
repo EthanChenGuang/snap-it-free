@@ -103,7 +103,6 @@ describe('ContactAssistantSheet send tab', () => {
     expect(insideDialog).toBe(true);
     expect(openExternal).toHaveBeenCalledWith(listing.external_url);
     expect(writeText).not.toHaveBeenCalled();
-    expect(toast).toHaveBeenCalledWith(copy.copiedToast);
     // The sheet stays open: the user is told what to do next, and the helper textarea is gone.
     expect(onOpenChange).not.toHaveBeenCalled();
     expect(document.body.querySelectorAll('textarea')).toHaveLength(2); // the two (hidden) Translate fields only
@@ -121,6 +120,37 @@ describe('ContactAssistantSheet send tab', () => {
     expect(status().textContent).toContain(copy.sentNext);
     await click(document.body.querySelectorAll('input[type="radio"]')[1]);
     expect(status().textContent).toBe('');
+  });
+
+  it('shows the Italian text inside the selected row only, with no separate preview card', async () => {
+    await mountSheet();
+    const rows = () => [...document.body.querySelectorAll('input[type="radio"]')].map((r) => r.closest('div')!);
+    expect(document.body.querySelectorAll('[data-testid="contact-italian-preview"]')).toHaveLength(1);
+    expect(rows()[0].querySelector('[data-testid="contact-italian-preview"]')).not.toBeNull();
+    await click(document.body.querySelectorAll('input[type="radio"]')[2]);
+    expect(rows()[0].querySelector('[data-testid="contact-italian-preview"]')).toBeNull();
+    expect(rows()[2].querySelector('[data-testid="contact-italian-preview"]')?.textContent).toBe(CONTACT_TEMPLATES[2].it);
+    expect(document.body.textContent).not.toContain(copy.italianLabel + ' ' ); // no card heading
+  });
+
+  it('restores focus to the pressed button after copying (the sheet stays open)', async () => {
+    await mountSheet();
+    const button = byText(copy.primary)!;
+    await act(async () => {
+      button.focus();
+      button.click();
+    });
+    expect(document.activeElement).toBe(button);
+  });
+
+  it('"Go to Translate" focuses the Translate tab and scrolls the shared container to the top', async () => {
+    await mountSheet();
+    await click(byText(copy.primary));
+    const scroller = document.body.querySelector<HTMLElement>('[data-testid="contact-scroll"]')!;
+    scroller.scrollTop = 120;
+    await click(byText(copy.goTranslate));
+    expect(document.activeElement).toBe(byText(copy.tabTranslate, '[role="tab"]'));
+    expect(scroller.scrollTop).toBe(0);
   });
 
   it('has no unnamed button (the drawer grabber is decorative)', async () => {
@@ -146,7 +176,7 @@ describe('ContactAssistantSheet send tab', () => {
     expect(tabs().map((t) => t.getAttribute('aria-selected'))).toEqual(['true', 'false']);
   });
 
-  it('falls back to the async clipboard; toast only after it succeeds', async () => {
+  it('falls back to the async clipboard; the next-step notice only after it succeeds', async () => {
     execCommand.mockReturnValue(false);
     let resolve!: (v?: unknown) => void;
     writeText.mockReturnValue(new Promise((r) => (resolve = r)));
@@ -156,9 +186,11 @@ describe('ContactAssistantSheet send tab', () => {
     });
     expect(openExternal).toHaveBeenCalledWith(listing.external_url);
     expect(writeText).toHaveBeenCalledWith(CONTACT_TEMPLATES[0].it);
-    expect(toast).not.toHaveBeenCalled();
+    const notice = () => document.body.querySelector('[data-testid="contact-sent"]')!.textContent;
+    expect(notice()).toBe('');
     await act(async () => resolve());
-    expect(toast).toHaveBeenCalledWith(copy.copiedToast);
+    expect(notice()).toContain(copy.sentNext);
+    expect(toast).not.toHaveBeenCalled(); // the in-sheet notice replaces the toast
   });
 
   it('keeps the sheet open with a hint when every copy path fails', async () => {
@@ -168,7 +200,6 @@ describe('ContactAssistantSheet send tab', () => {
     await click(byText(copy.primary));
     await flush();
     expect(openExternal).toHaveBeenCalledWith(listing.external_url);
-    expect(toast).not.toHaveBeenCalled();
     expect(document.body.textContent).toContain(copy.copyFailedHint);
     expect(onOpenChange).not.toHaveBeenCalled();
   });
@@ -279,6 +310,78 @@ describe('ContactAssistantSheet translate tab', () => {
     expect(document.body.querySelector(`button[aria-label^="${copy.copy}"]`)).toBeNull();
   });
 
+  it('hides a result as soon as the text is edited (replies cannot be copied against the wrong message)', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(200, { meaning: 'Yes', replies: [{ italian: 'Ok', meaning: 'Ok!' }] })));
+    await openTranslate();
+    const field = () => document.body.querySelectorAll('textarea')[0] as HTMLTextAreaElement;
+    await typeInto(field(), 'Ciao');
+    await click(byText(copy.translate));
+    await flush();
+    expect(document.body.textContent).toContain('Ok!');
+    expect(document.body.textContent).toContain(copy.aiNote);
+    await typeInto(field(), 'Ciao, domani?');
+    expect(document.body.textContent).not.toContain('Ok!');
+    expect(document.body.querySelector(`button[aria-label^="${copy.copy}"]`)).toBeNull();
+    await typeInto(field(), 'Ciao');
+    expect(document.body.textContent).toContain('Ok!'); // same text again: the result belongs to it
+  });
+
+  it('ignores a response that arrives after the text was edited, and a superseded request', async () => {
+    const pending: Array<(r: Response) => void> = [];
+    vi.stubGlobal('fetch', vi.fn(() => new Promise<Response>((resolve) => pending.push(resolve))));
+    await openTranslate();
+    const field = () => document.body.querySelectorAll('textarea')[0] as HTMLTextAreaElement;
+    await typeInto(field(), 'primo');
+    await click(byText(copy.translate));
+    await typeInto(field(), 'secondo'); // edit while in flight
+    expect(byText(copy.translate)).not.toBeNull(); // not stuck on "translating"
+    await click(byText(copy.translate));
+    await act(async () => pending[0](jsonResponse(200, { meaning: 'FIRST', replies: [{ italian: 'a', meaning: 'a' }] })));
+    expect(document.body.textContent).not.toContain('FIRST');
+    await act(async () => pending[1](jsonResponse(200, { meaning: 'SECOND', replies: [{ italian: 'b', meaning: 'b' }] })));
+    expect(document.body.textContent).toContain('SECOND');
+    // an old response for text that is no longer in the field is never shown
+    await typeInto(field(), 'terzo');
+    expect(document.body.textContent).not.toContain('SECOND');
+  });
+
+  it('does the same for the composed text', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(200, { italian: 'Ciao ciao', unclear: false })));
+    await openTranslate();
+    const field = () => document.body.querySelectorAll('textarea')[1] as HTMLTextAreaElement;
+    await typeInto(field(), 'hello');
+    await click(byText(copy.toItalian));
+    await flush();
+    expect(document.body.textContent).toContain('Ciao ciao');
+    expect(document.body.textContent).toContain(copy.aiNote);
+    await typeInto(field(), 'hello there');
+    expect(document.body.textContent).not.toContain('Ciao ciao');
+  });
+
+  it('explains where the seller reply is found', async () => {
+    await openTranslate();
+    expect(document.body.textContent).toContain(copy.replyHint);
+  });
+
+  it('counter: neutral n/1000 when typed, "rest was cut" only after an over-long paste; wrapper always mounted', async () => {
+    await openTranslate();
+    const field = () => document.body.querySelectorAll('textarea')[0] as HTMLTextAreaElement;
+    const status = () => field().nextElementSibling as HTMLElement;
+    expect(status().getAttribute('role')).toBe('status');
+    expect(status().textContent).toBe('');
+    await typeInto(field(), 'a'.repeat(1000));
+    expect(status().textContent).toBe('1000/1000');
+    expect(document.body.textContent).not.toContain(copy.limitReached);
+    await typeInto(field(), '');
+    await act(async () => {
+      const event = new Event('paste', { bubbles: true });
+      Object.defineProperty(event, 'clipboardData', { value: { getData: () => 'b'.repeat(1500) } });
+      field().dispatchEvent(event);
+    });
+    await typeInto(field(), 'b'.repeat(1000)); // what the browser keeps
+    expect(status().textContent).toBe(copy.limitReached);
+  });
+
   it('keeps typed text when switching to Send and back, and tells the user at the 1000-character limit', async () => {
     await openTranslate();
     const field = () => document.body.querySelectorAll('textarea')[0] as HTMLTextAreaElement;
@@ -286,9 +389,6 @@ describe('ContactAssistantSheet translate tab', () => {
     await click(byText(copy.tabSend, '[role="tab"]'));
     await click(byText(copy.tabTranslate, '[role="tab"]'));
     expect(field().value).toBe('Testo da tenere');
-    expect(document.body.textContent).not.toContain(copy.limitReached);
-    await typeInto(field(), 'a'.repeat(1000));
-    expect(document.body.textContent).toContain(copy.limitReached);
     await typeInto(field(), 'a'.repeat(900));
     expect(document.body.textContent).toContain('900/1000');
   });

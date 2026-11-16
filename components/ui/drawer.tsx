@@ -65,7 +65,7 @@ const DrawerContent = React.forwardRef<
             )}
           />
         ) : (
-          // Decorative grabber: vaul handles the drag itself, so it must not be an unnamed tab stop.
+          // Decorative grabber: the sheet is dragged by its whole surface (vaul), so this must not be an unnamed tab stop.
           <div
             aria-hidden
             className={cn(

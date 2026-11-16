@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Drawer,
@@ -9,7 +9,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
-import { toast } from '@/components/ui/toaster';
 import { consumerCityLabelsFromMessages } from '@/lib/i18n/city-labels';
 import { resolveListingTitle } from '@/lib/i18n/listing-fields';
 import { useMessages } from '@/lib/i18n/useMessages';
@@ -29,14 +28,13 @@ type ContactAssistantSheetProps = {
 
 type Tab = 'send' | 'translate';
 
+/** `forText` is the trimmed input the request was made for; a state is only shown while it still matches. */
 type TranslateState<T> =
   | { status: 'idle' }
-  | { status: 'loading' }
-  | { status: 'error'; message: string }
-  | { status: 'done'; result: T };
+  | { status: 'loading'; forText: string }
+  | { status: 'error'; forText: string; message: string }
+  | { status: 'done'; forText: string; result: T };
 
-/** Default Button hover is bg-primary-container with on-primary text, unreadable in dark mode (1.9:1). */
-const PRIMARY_HOVER = 'hover:bg-primary hover:opacity-90';
 const INPUT_LIMIT = 1000;
 
 const FIELD_CLASS =
@@ -47,6 +45,7 @@ const FIELD_CLASS =
  * its selection; outside it, select() is lost while execCommand still reports success.
  */
 function copySync(text: string, container: Element): boolean {
+  const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const area = document.createElement('textarea');
   area.value = text;
   area.style.position = 'fixed';
@@ -62,6 +61,8 @@ function copySync(text: string, container: Element): boolean {
     return false;
   } finally {
     area.remove();
+    // The sheet stays open, so focus must go back to what was pressed (still inside the tap).
+    previous?.focus({ preventScroll: true });
   }
 }
 
@@ -84,43 +85,41 @@ function copyFromTap(text: string, target: Element): true | Promise<boolean> {
   return Promise.resolve(false);
 }
 
-function useTranslate<T>(mode: TranslateMode) {
+function useTranslate<T>(mode: TranslateMode, currentText: string) {
   const { language, messages } = useMessages();
   const [state, setState] = useState<TranslateState<T>>({ status: 'idle' });
+  const latest = useRef(0);
+  const trimmedNow = currentText.trim();
+  // A result, error or spinner belongs to the text it was requested for: editing the text hides it.
+  const view: TranslateState<T> =
+    state.status !== 'idle' && state.forText === trimmedNow ? state : { status: 'idle' };
 
   const run = async (text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-    setState({ status: 'loading' });
+    const forText = text.trim();
+    if (!forText) return;
+    const id = ++latest.current;
+    const settle = (next: TranslateState<T>) => {
+      if (id === latest.current) setState(next); // a newer request supersedes this one
+    };
+    setState({ status: 'loading', forText });
     try {
       const response = await fetch('/api/contact/translate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode, text: trimmed, language: language === 'en' ? 'en' : 'zh' }),
+        body: JSON.stringify({ mode, text: forText, language: language === 'en' ? 'en' : 'zh' }),
       });
-      if (response.status === 401) {
-        setState({ status: 'error', message: messages.contactAssistant.signInAgain });
-        return;
-      }
-      if (response.status === 429) {
-        setState({ status: 'error', message: messages.contactAssistant.dailyLimit });
-        return;
-      }
-      if (response.status === 403) {
-        setState({ status: 'error', message: messages.contactAssistant.subscriptionRequired });
-        return;
-      }
-      if (!response.ok) {
-        setState({ status: 'error', message: messages.contactAssistant.unavailable });
-        return;
-      }
-      setState({ status: 'done', result: (await response.json()) as T });
+      const failure = (message: string) => settle({ status: 'error', forText, message });
+      if (response.status === 401) return failure(messages.contactAssistant.signInAgain);
+      if (response.status === 429) return failure(messages.contactAssistant.dailyLimit);
+      if (response.status === 403) return failure(messages.contactAssistant.subscriptionRequired);
+      if (!response.ok) return failure(messages.contactAssistant.unavailable);
+      settle({ status: 'done', forText, result: (await response.json()) as T });
     } catch {
-      setState({ status: 'error', message: messages.contactAssistant.unavailable });
+      settle({ status: 'error', forText, message: messages.contactAssistant.unavailable });
     }
   };
 
-  return { state, run };
+  return { state: view, run };
 }
 
 function CopyButton({ text, label }: { text: string; label: string }) {
@@ -160,26 +159,6 @@ function CopyButton({ text, label }: { text: string; label: string }) {
   );
 }
 
-function ItalianCard({ label, text }: { label: string; text: string }) {
-  return (
-    <div className="rounded-lg border border-outline-variant bg-surface-container-low p-space-md">
-      <p className="flex items-center gap-space-xs text-label-md font-semibold text-on-surface">
-        <span className="material-symbols-outlined text-[18px]" aria-hidden>
-          language
-        </span>
-        {label}
-      </p>
-      <p
-        lang="it"
-        data-testid="contact-italian-preview"
-        className="mt-space-sm select-text break-words rounded [user-select:text] bg-surface-container-lowest p-space-sm text-body-md italic text-on-surface"
-      >
-        {text}
-      </p>
-    </div>
-  );
-}
-
 function ErrorLine({ message }: { message: string }) {
   return (
     <p className="text-label-sm text-error" role="alert">
@@ -188,17 +167,67 @@ function ErrorLine({ message }: { message: string }) {
   );
 }
 
-function CharCount({ length }: { length: number }) {
+/** Textarea with a counter right under it. The status wrapper is always mounted so changes are announced. */
+function LimitedField({
+  id,
+  lang,
+  rows,
+  value,
+  onChange,
+  placeholder,
+  describedBy,
+}: {
+  id: string;
+  lang?: string;
+  rows: number;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  describedBy?: string;
+}) {
   const { messages } = useMessages();
-  if (length < INPUT_LIMIT - 200) return null;
-  const full = length >= INPUT_LIMIT;
+  const [truncated, setTruncated] = useState(false);
+  const length = value.length;
+  // The browser cuts a longer paste silently; only that case says "the rest was not kept".
+  const note =
+    truncated && length >= INPUT_LIMIT
+      ? messages.contactAssistant.limitReached
+      : length >= INPUT_LIMIT - 200
+        ? `${length}/${INPUT_LIMIT}`
+        : '';
+
   return (
-    <p
-      role={full ? 'status' : undefined}
-      className={cn('text-label-sm', full ? 'text-error' : 'text-right text-on-surface-variant')}
-    >
-      {full ? messages.contactAssistant.limitReached : `${length}/${INPUT_LIMIT}`}
-    </p>
+    <div>
+      <textarea
+        id={id}
+        lang={lang}
+        rows={rows}
+        maxLength={INPUT_LIMIT}
+        value={value}
+        aria-describedby={describedBy}
+        onChange={(event) => {
+          onChange(event.target.value);
+          if (event.target.value.length < INPUT_LIMIT) setTruncated(false);
+        }}
+        onPaste={(event) => {
+          const el = event.currentTarget;
+          const pasted = event.clipboardData?.getData('text') ?? '';
+          if (el.value.length - (el.selectionEnd - el.selectionStart) + pasted.length > INPUT_LIMIT) setTruncated(true);
+        }}
+        placeholder={placeholder}
+        className={FIELD_CLASS}
+      />
+      <p
+        role="status"
+        className={cn(
+          'text-label-sm',
+          note && 'mt-space-xs',
+          truncated && length >= INPUT_LIMIT ? 'text-error' : 'text-right text-on-surface-variant',
+        )}
+      >
+        {note}
+      </p>
+    </div>
   );
 }
 
@@ -214,53 +243,66 @@ function SendBody({
   const { messages } = useMessages();
   const copy = messages.contactAssistant;
   const groupId = useId();
-  const template = CONTACT_TEMPLATES.find((item) => item.id === selected) ?? CONTACT_TEMPLATES[0];
-  const steps = [copy.step1, copy.step2, copy.step3];
 
   return (
-    <div className="flex flex-col gap-space-md">
-      <div role="radiogroup" aria-labelledby={`${groupId}-title`} className="flex flex-col gap-space-sm">
-        <p id={`${groupId}-title`} className="text-label-md text-on-surface-variant">
-          {copy.pickTitle}
-        </p>
-        {CONTACT_TEMPLATES.map((item) => (
-          <label
+    <div role="radiogroup" aria-labelledby={`${groupId}-title`} className="flex flex-col gap-space-sm">
+      <p id={`${groupId}-title`} className="text-label-md text-on-surface-variant">
+        {copy.pickTitle}
+      </p>
+      {CONTACT_TEMPLATES.map((item) => {
+        const isSelected = selected === item.id;
+        return (
+          <div
             key={item.id}
             className={cn(
-              'flex min-h-11 cursor-pointer items-center gap-space-sm rounded-lg border px-space-md py-space-xs text-body-md font-medium text-on-surface',
-              selected === item.id
-                ? 'border-transparent bg-surface-container'
-                : 'border-outline-variant bg-surface-container-lowest',
+              'rounded-lg border',
+              isSelected ? 'border-transparent bg-surface-container' : 'border-outline-variant bg-surface-container-lowest',
             )}
           >
-            <input
-              type="radio"
-              name={`${groupId}-template`}
-              value={item.id}
-              checked={selected === item.id}
-              onChange={() => onSelect(item.id)}
-              className="size-5 shrink-0 accent-primary"
-            />
-            <span className="min-w-0">{copy.templates[item.id]}</span>
-          </label>
-        ))}
-      </div>
+            <label className="flex min-h-11 cursor-pointer items-center gap-space-sm px-space-md py-space-xs text-body-md font-medium text-on-surface">
+              <input
+                type="radio"
+                name={`${groupId}-template`}
+                value={item.id}
+                checked={isSelected}
+                onChange={() => onSelect(item.id)}
+                className="size-5 shrink-0 accent-primary"
+              />
+              <span className="min-w-0">{copy.templates[item.id]}</span>
+            </label>
+            {isSelected && (
+              <p className="pb-space-sm pl-[calc(var(--spacing-space-md)+1.75rem)] pr-space-md text-body-md text-on-surface">
+                <span className="sr-only">{copy.italianLabel}: </span>
+                <span
+                  lang="it"
+                  data-testid="contact-italian-preview"
+                  className="select-text break-words [user-select:text] italic"
+                >
+                  {item.it}
+                </span>
+              </p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
-      <ItalianCard label={copy.italianLabel} text={template.it} />
-
-      <ol className="flex flex-col gap-space-sm">
-        {steps.map((step, index) => (
-          <li key={step} className="flex min-w-0 items-center gap-space-sm">
-            <span
-              className="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary-container text-label-sm font-semibold text-on-secondary-container"
-              aria-hidden
-            >
-              {index + 1}
-            </span>
-            <span className="min-w-0 text-label-md font-semibold text-on-surface">{step}</span>
-          </li>
-        ))}
-      </ol>
+/** Next step after sending. Always mounted (live region); lives at the top of the scroll area, not in the footer. */
+function SentNotice({ visible, onGoTranslate }: { visible: boolean; onGoTranslate: () => void }) {
+  const { messages } = useMessages();
+  const copy = messages.contactAssistant;
+  return (
+    <div role="status" data-testid="contact-sent">
+      {visible && (
+        <div className="mb-space-md flex flex-col gap-space-sm rounded-lg bg-surface-container p-space-sm">
+          <p className="text-label-md text-on-surface">{copy.sentNext}</p>
+          <Button type="button" variant="secondary" className="min-h-11 w-full" onClick={onGoTranslate}>
+            {copy.goTranslate}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -270,28 +312,23 @@ function SendFooter({
   selected,
   state,
   onState,
-  onGoTranslate,
 }: {
   listing: ListingRow;
   selected: ContactTemplateId;
   state: SendState;
   onState: (state: SendState) => void;
-  onGoTranslate: () => void;
 }) {
   const { messages } = useMessages();
   const copy = messages.contactAssistant;
   const template = CONTACT_TEMPLATES.find((item) => item.id === selected) ?? CONTACT_TEMPLATES[0];
+  const steps = [copy.step1, copy.step2, copy.step3];
 
   const handlePrimary = (event: React.MouseEvent<HTMLButtonElement>) => {
     const copied = copyFromTap(template.it, event.currentTarget);
     // Same tick as the tap: a popup opened after an await is blocked.
     openExternalListingUrl(listing.external_url);
-    const finish = (ok: boolean) => {
-      onState(ok ? 'sent' : 'copyFailed');
-      if (ok) toast(copy.copiedToast);
-    };
-    if (copied === true) finish(true);
-    else void copied.then(finish);
+    if (copied === true) onState('sent');
+    else void copied.then((ok) => onState(ok ? 'sent' : 'copyFailed'));
   };
 
   return (
@@ -299,17 +336,19 @@ function SendFooter({
       data-testid="contact-footer"
       className="shrink-0 border-t border-outline-variant bg-surface px-gutter py-space-md pb-[max(env(safe-area-inset-bottom,0px),var(--spacing-space-md))]"
     >
-      {/* Always mounted so the message is announced when it appears. */}
-      <div role="status" data-testid="contact-sent">
-        {state === 'sent' && (
-          <div className="mb-space-sm flex flex-col gap-space-sm rounded-lg bg-surface-container p-space-sm">
-            <p className="text-label-sm text-on-surface">{copy.sentNext}</p>
-            <Button type="button" variant="secondary" className="min-h-11 w-full" onClick={onGoTranslate}>
-              {copy.goTranslate}
-            </Button>
-          </div>
-        )}
-      </div>
+      <ol className="mb-space-sm flex flex-wrap items-center justify-center gap-x-space-md gap-y-space-xs">
+        {steps.map((step, index) => (
+          <li key={step} className="flex items-center gap-space-xs">
+            <span
+              className="flex size-5 shrink-0 items-center justify-center rounded-full bg-secondary-container text-label-sm font-semibold text-on-secondary-container"
+              aria-hidden
+            >
+              {index + 1}
+            </span>
+            <span className="text-label-sm font-semibold text-on-surface">{step}</span>
+          </li>
+        ))}
+      </ol>
       {state === 'copyFailed' && (
         <p className="mb-space-sm text-label-sm text-error" role="alert">
           {copy.copyFailedHint}
@@ -318,7 +357,7 @@ function SendFooter({
       <Button
         type="button"
         data-testid="contact-primary"
-        className={cn('flex min-h-12 w-full items-center justify-center gap-space-sm text-label-md font-semibold', PRIMARY_HOVER)}
+        className="flex min-h-12 w-full items-center justify-center gap-space-sm text-label-md font-semibold"
         onClick={handlePrimary}
       >
         <span className="material-symbols-outlined text-[20px]" aria-hidden>
@@ -338,34 +377,37 @@ function TranslateTab() {
   const composeId = useId();
   const [replyText, setReplyText] = useState('');
   const [composeText, setComposeText] = useState('');
-  const reply = useTranslate<ReplyResult>('reply');
-  const compose = useTranslate<ComposeResult>('compose');
+  const reply = useTranslate<ReplyResult>('reply', replyText);
+  const compose = useTranslate<ComposeResult>('compose', composeText);
 
   return (
     <div className="flex flex-col gap-space-lg pb-space-md">
       <section className="flex flex-col gap-space-sm">
-        <label htmlFor={replyId} className="text-label-md font-medium text-on-surface-variant">
-          {copy.replyLabel}
-        </label>
-        <textarea
+        <div>
+          <label htmlFor={replyId} className="text-label-md font-medium text-on-surface-variant">
+            {copy.replyLabel}
+          </label>
+          <p id={`${replyId}-hint`} className="mt-space-xs text-label-sm text-on-surface-variant">
+            {copy.replyHint}
+          </p>
+        </div>
+        <LimitedField
           id={replyId}
           lang="it"
           rows={4}
-          maxLength={INPUT_LIMIT}
           value={replyText}
-          onChange={(event) => setReplyText(event.target.value)}
+          onChange={setReplyText}
           placeholder={copy.replyPlaceholder}
-          className={FIELD_CLASS}
+          describedBy={`${replyId}-hint`}
         />
         <Button
           type="button"
-          className={cn('min-h-11 w-full', PRIMARY_HOVER)}
+          className="min-h-11 w-full"
           disabled={!replyText.trim() || reply.state.status === 'loading'}
           onClick={() => void reply.run(replyText)}
         >
           {reply.state.status === 'loading' ? copy.translating : copy.translate}
         </Button>
-        <CharCount length={replyText.length} />
         <span role="status" className="sr-only">
           {reply.state.status === 'loading' ? copy.translating : ''}
           {reply.state.status === 'done' ? `${copy.meaning}: ${reply.state.result.meaning}` : ''}
@@ -392,6 +434,9 @@ function TranslateTab() {
                 </li>
               ))}
             </ul>
+            <p className="text-label-sm text-on-surface-variant" data-testid="contact-ai-note">
+              {copy.aiNote}
+            </p>
           </div>
         )}
       </section>
@@ -400,24 +445,21 @@ function TranslateTab() {
         <label htmlFor={composeId} className="text-label-md font-medium text-on-surface-variant">
           {copy.composeLabel}
         </label>
-        <textarea
+        <LimitedField
           id={composeId}
           rows={3}
-          maxLength={INPUT_LIMIT}
           value={composeText}
-          onChange={(event) => setComposeText(event.target.value)}
+          onChange={setComposeText}
           placeholder={copy.composePlaceholder}
-          className={FIELD_CLASS}
         />
         <Button
           type="button"
-          className={cn('min-h-11 w-full', PRIMARY_HOVER)}
+          className="min-h-11 w-full"
           disabled={!composeText.trim() || compose.state.status === 'loading'}
           onClick={() => void compose.run(composeText)}
         >
           {compose.state.status === 'loading' ? copy.translating : copy.toItalian}
         </Button>
-        <CharCount length={composeText.length} />
         <span role="status" className="sr-only">
           {compose.state.status === 'loading' ? copy.translating : ''}
           {compose.state.status === 'done' && !compose.state.result.unclear ? compose.state.result.italian : ''}
@@ -430,6 +472,9 @@ function TranslateTab() {
               {compose.state.result.italian}
             </p>
             <CopyButton text={compose.state.result.italian} label={`${copy.copy}: ${copy.italianLabel}`} />
+            <p className="text-label-sm text-on-surface-variant" data-testid="contact-ai-note">
+              {copy.aiNote}
+            </p>
           </div>
         )}
       </section>
@@ -449,11 +494,27 @@ export function ContactAssistantSheet({ open, onOpenChange, listing }: ContactAs
   const [selected, setSelected] = useState<ContactTemplateId>(CONTACT_TEMPLATES[0].id);
   const [sendState, setSendState] = useState<SendState>('idle');
   const tabsId = useId();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const focusTabNext = useRef(false);
   // Focus goes back to the button that opened the sheet (vaul/Radix would otherwise drop it on <body>).
   const returnFocusTo = useRef<HTMLElement | null>(null);
   useLayoutEffect(() => {
     if (open) returnFocusTo.current = document.activeElement as HTMLElement | null;
   }, [open]);
+
+  // The scroll container is shared by both tabs: every tab change starts at the top. "Go to Translate"
+  // also moves focus to the Translate tab, because the button that was pressed unmounts.
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    if (focusTabNext.current) {
+      focusTabNext.current = false;
+      document.getElementById(`${tabsId}-${tab}`)?.focus();
+    }
+  }, [tab, tabsId]);
+  // The next-step notice sits at the top of the scroll area: bring it into view.
+  useEffect(() => {
+    if (sendState === 'sent' && scrollRef.current) scrollRef.current.scrollTop = 0;
+  }, [sendState]);
 
   const handleOpenChange = (next: boolean) => {
     if (!next) {
@@ -510,6 +571,7 @@ export function ContactAssistantSheet({ open, onOpenChange, listing }: ContactAs
         <div className="flex min-h-0 flex-1 flex-col">
           {/* Everything between the header and the pinned footer scrolls, so short screens never collapse it. */}
           <div
+            ref={scrollRef}
             data-testid="contact-scroll"
             className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-gutter py-space-md"
           >
@@ -571,6 +633,13 @@ export function ContactAssistantSheet({ open, onOpenChange, listing }: ContactAs
               hidden={tab !== 'send'}
               className="mt-space-md"
             >
+              <SentNotice
+                visible={sendState === 'sent'}
+                onGoTranslate={() => {
+                  focusTabNext.current = true;
+                  setTab('translate');
+                }}
+              />
               <SendBody
                 selected={selected}
                 onSelect={(id) => {
@@ -596,7 +665,6 @@ export function ContactAssistantSheet({ open, onOpenChange, listing }: ContactAs
               selected={selected}
               state={sendState}
               onState={setSendState}
-              onGoTranslate={() => setTab('translate')}
             />
           )}
         </div>
