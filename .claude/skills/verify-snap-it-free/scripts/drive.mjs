@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 // Usage: node drive.mjs <journey> --url http://127.0.0.1:PORT --out DIR [--base URL] [--lang en|zh|it]
-// Journeys: flag-off | onboarding | desktop-paywall | persist | compare
+// Journeys: flag-off | onboarding | desktop-paywall | persist | compare | iphone | contact
 // Needs playwright-core resolvable via PLAYWRIGHT_CORE (default /tmp/verify-tools/node_modules/playwright-core).
 import { createRequire } from 'node:module';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { contactJourney } from './contact-journey.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_CORE ?? '/tmp/verify-tools/node_modules/playwright-core');
@@ -628,7 +629,15 @@ async function iphone(browser) {
   await context.close();
 }
 
-const journeys = { 'flag-off': flagOff, onboarding, 'desktop-paywall': desktopPaywall, persist, compare, iphone };
+const journeys = {
+  'flag-off': flagOff,
+  onboarding,
+  'desktop-paywall': desktopPaywall,
+  persist,
+  compare,
+  iphone,
+  contact: (browser) => contactJourney({ browser, url, out, check, shot: async (page, name) => shot(page, name), rows: opt('rows', 'ABCDEFG') }),
+};
 if (!journeys[journey] || !url) {
   console.error('usage: node drive.mjs <flag-off|onboarding|desktop-paywall|persist|compare> --url URL [--out DIR] [--base URL]');
   process.exit(2);

@@ -6,6 +6,7 @@ Baseline: a build launched by `scripts/launch.sh`, healthy per `scripts/doctor.s
 | --- | --- | --- |
 | Pre-browse onboarding | [onboarding.md](onboarding.md) | `onboarding`, `persist` |
 | Hard paywall and locked views | [paywall.md](paywall.md) | `onboarding`, `desktop-paywall`, `persist` |
+| Chinese contact assistant | [contact-assistant.md](contact-assistant.md) | `contact` |
 | Feed home (flag off) | [feed-home.md](feed-home.md) | `flag-off`, `compare` |
 
 Report an unreachable path with the command and the unmet precondition. Do not count a skipped entry point as verified through another one.

@@ -38,6 +38,7 @@ The surface is the mobile-first web PWA served by `next start`. All helpers live
 | `desktop-paywall` | off | 1280x800 centered paywall card (`14`) |
 | `compare` | off, twice | home DOM identical to the `--base` server once scripts are dropped |
 | `iphone` | on (Preview) | iPhone user agent, signed out: full onboarding walk, honest alerts reason, paywall closes to a usable locked feed, no blocking dialog (`i1`–`i3`) |
+| `contact` | off (+ `NEXT_PUBLIC_ONBOARDING_ENABLED=true`) | Chinese contact assistant with mocked auth (no account): entry points, send/translate tabs with scripted API, layout matrix, accessibility + axe, free-mode onboarding step, copy (`c01`+, `d-*`, `f-*`; see `features/contact-assistant.md`) |
 | `persist` | on | shows without a param, not again after completion + reload, locked feed/favorites, no listing payload in HTML, subscription Terms/Privacy, real city teaser (`15`–`20`) |
 
 ## Vercel Preview access
