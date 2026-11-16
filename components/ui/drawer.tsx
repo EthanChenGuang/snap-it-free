@@ -53,17 +53,28 @@ const DrawerContent = React.forwardRef<
         )}
         {...props}
       >
-        <button
-          type="button"
-          aria-label={handleAriaLabel}
-          onClick={onHandleClick}
-          className={cn(
-            'mx-auto my-space-sm h-1.5 w-12 shrink-0 rounded-full bg-outline',
-            nonModal && 'pointer-events-auto',
-            onHandleClick && 'cursor-pointer',
-            handleHintActive && 'animate-pulse',
-          )}
-        />
+        {onHandleClick ? (
+          <button
+            type="button"
+            aria-label={handleAriaLabel}
+            onClick={onHandleClick}
+            className={cn(
+              'mx-auto my-space-sm h-1.5 w-12 shrink-0 cursor-pointer rounded-full bg-outline',
+              nonModal && 'pointer-events-auto',
+              handleHintActive && 'animate-pulse',
+            )}
+          />
+        ) : (
+          // Decorative grabber: vaul handles the drag itself, so it must not be an unnamed tab stop.
+          <div
+            aria-hidden
+            className={cn(
+              'mx-auto my-space-sm h-1.5 w-12 shrink-0 rounded-full bg-outline',
+              nonModal && 'pointer-events-auto',
+              handleHintActive && 'animate-pulse',
+            )}
+          />
+        )}
         <div className={cn('flex h-full min-h-0 flex-1 flex-col overflow-hidden', nonModal && 'pointer-events-auto')}>
           {children}
         </div>

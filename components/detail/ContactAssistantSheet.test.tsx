@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act } from 'react';
+import { act, useState } from 'react';
 import { cleanup, click, flush, jsonResponse, render } from '@/components/test/render';
 import { CONTACT_TEMPLATES } from '@/lib/contact/templates';
 import type { ListingRow } from '@/lib/listings/types';
@@ -104,8 +104,46 @@ describe('ContactAssistantSheet send tab', () => {
     expect(openExternal).toHaveBeenCalledWith(listing.external_url);
     expect(writeText).not.toHaveBeenCalled();
     expect(toast).toHaveBeenCalledWith(copy.copiedToast);
-    expect(onOpenChange).toHaveBeenCalledWith(false);
-    expect(document.body.querySelectorAll('textarea')).toHaveLength(0);
+    // The sheet stays open: the user is told what to do next, and the helper textarea is gone.
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(document.body.querySelectorAll('textarea')).toHaveLength(2); // the two (hidden) Translate fields only
+    expect(document.body.querySelector('[data-testid="contact-sent"]')?.textContent).toContain(copy.sentNext);
+  });
+
+  it('after a send, the next step is a button that opens Translate; picking another template clears it', async () => {
+    await mountSheet();
+    await click(byText(copy.primary));
+    const status = () => document.body.querySelector('[data-testid="contact-sent"]')!;
+    expect(status().getAttribute('role')).toBe('status');
+    await click(byText(copy.goTranslate));
+    expect(byText(copy.tabTranslate, '[role="tab"]')!.getAttribute('aria-selected')).toBe('true');
+    await click(byText(copy.tabSend, '[role="tab"]'));
+    expect(status().textContent).toContain(copy.sentNext);
+    await click(document.body.querySelectorAll('input[type="radio"]')[1]);
+    expect(status().textContent).toBe('');
+  });
+
+  it('has no unnamed button (the drawer grabber is decorative)', async () => {
+    await mountSheet();
+    const unnamed = [...document.body.querySelectorAll<HTMLElement>('[role="dialog"] button')].filter(
+      (el) => !el.getAttribute('aria-label') && !labelOf(el),
+    );
+    expect(unnamed).toHaveLength(0);
+  });
+
+  it('moves between tabs with the arrow keys and keeps only the selected tab in the tab order', async () => {
+    await mountSheet();
+    const tabs = () => [...document.body.querySelectorAll<HTMLElement>('[role="tab"]')];
+    expect(tabs().map((t) => t.tabIndex)).toEqual([0, -1]);
+    await act(async () => {
+      tabs()[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    });
+    expect(tabs().map((t) => t.getAttribute('aria-selected'))).toEqual(['false', 'true']);
+    expect(document.activeElement).toBe(tabs()[1]);
+    await act(async () => {
+      tabs()[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    });
+    expect(tabs().map((t) => t.getAttribute('aria-selected'))).toEqual(['true', 'false']);
   });
 
   it('falls back to the async clipboard; toast only after it succeeds', async () => {
@@ -144,6 +182,36 @@ describe('ContactAssistantSheet send tab', () => {
     await click(byText(copy.tabSend, '[role="tab"]'));
     expect(preview()).toBe(CONTACT_TEMPLATES[0].it);
     expect(byText(copy.tabSend, '[role="tab"]')!.getAttribute('aria-selected')).toBe('true');
+  });
+});
+
+describe('ContactAssistantSheet focus', () => {
+  function Harness() {
+    const [open, setOpen] = useState(false);
+    return (
+      <>
+        <button type="button" data-testid="trigger" onClick={() => setOpen(true)}>
+          open
+        </button>
+        <ContactAssistantSheet open={open} onOpenChange={setOpen} listing={listing} />
+      </>
+    );
+  }
+
+  it('moves focus into the sheet on open and back to the trigger on close', async () => {
+    await render(<Harness />);
+    await flush();
+    const trigger = document.body.querySelector<HTMLElement>('[data-testid="trigger"]')!;
+    await act(async () => {
+      trigger.focus();
+      trigger.click();
+    });
+    await flush();
+    const dialog = document.body.querySelector('[role="dialog"]')!;
+    expect(dialog.contains(document.activeElement)).toBe(true);
+    await click(document.body.querySelector(`button[aria-label="${copy.close}"]`));
+    await flush();
+    expect(document.activeElement).toBe(trigger);
   });
 });
 
@@ -209,6 +277,30 @@ describe('ContactAssistantSheet translate tab', () => {
     await flush();
     expect(document.body.querySelector('[role="alert"]')?.textContent).toBe(copy.composeUnclear);
     expect(document.body.querySelector(`button[aria-label^="${copy.copy}"]`)).toBeNull();
+  });
+
+  it('keeps typed text when switching to Send and back, and tells the user at the 1000-character limit', async () => {
+    await openTranslate();
+    const field = () => document.body.querySelectorAll('textarea')[0] as HTMLTextAreaElement;
+    await typeInto(field(), 'Testo da tenere');
+    await click(byText(copy.tabSend, '[role="tab"]'));
+    await click(byText(copy.tabTranslate, '[role="tab"]'));
+    expect(field().value).toBe('Testo da tenere');
+    expect(document.body.textContent).not.toContain(copy.limitReached);
+    await typeInto(field(), 'a'.repeat(1000));
+    expect(document.body.textContent).toContain(copy.limitReached);
+    await typeInto(field(), 'a'.repeat(900));
+    expect(document.body.textContent).toContain('900/1000');
+  });
+
+  it('announces results in a live region', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(200, { meaning: 'Yes', replies: [{ italian: 'Ok', meaning: 'Ok!' }] })));
+    await openTranslate();
+    await typeInto(document.body.querySelectorAll('textarea')[0] as HTMLTextAreaElement, 'Ciao');
+    await click(byText(copy.translate));
+    await flush();
+    const live = [...document.body.querySelectorAll('[role="status"]')].map((n) => n.textContent);
+    expect(live.some((t) => t?.includes(`${copy.meaning}: Yes`))).toBe(true);
   });
 
   it('posts a composed message and renders the Italian', async () => {
